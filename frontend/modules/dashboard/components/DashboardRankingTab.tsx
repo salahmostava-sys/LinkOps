@@ -1,4 +1,4 @@
-﻿import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import type { PerformanceDashboardResponse, PerformanceRankingEntry } from '@services/performanceService';
 
 const MEDALS = ['🥇', '🥈', '🥉'];
@@ -22,7 +22,7 @@ function RankingColumn(props: Readonly<{
   const { title, rows, accentClass } = props;
 
   return (
-    <div className="bg-card rounded-2xl p-5 shadow-card">
+    <div className="bg-card rounded-2xl p-5 shadow-sm border border-border">
       <h3 className="text-sm font-bold text-foreground mb-4">{title}</h3>
       {rows.length === 0 ? (
         <p className="text-sm text-muted-foreground text-center py-8">لا توجد بيانات كافية</p>
@@ -73,7 +73,7 @@ export function DashboardRankingTab(props: Readonly<{
     return (
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         {Array.from({ length: 4 }, (_, index) => (
-          <div key={index} className="bg-card rounded-2xl h-96 animate-pulse shadow-card" />
+          <div key={index} className="bg-card rounded-2xl h-96 animate-pulse shadow-sm border border-border" />
         ))}
       </div>
     );

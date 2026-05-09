@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
 
 @tailwind base;
@@ -8,56 +9,56 @@
 @layer base {
   :root {
     /* Typography tokens (shared across app) */
-    --font-sans: 'Segoe UI', Tahoma, 'Noto Sans Arabic', 'Droid Arabic Kufi', sans-serif;
-    --font-ar: 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, sans-serif;
+    --font-sans: 'Cairo', 'Segoe UI', Tahoma, 'Noto Sans Arabic', 'Droid Arabic Kufi', sans-serif;
+    --font-ar: 'Cairo', 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, sans-serif;
 
     /* ─── High-End Editorial Dashboard — Light Palette ─────────── */
 
     /* Page canvas */
-    --background: 240 14% 97%;        /* #f9f9fb surface */
-    --foreground: 210 6% 11%;         /* #1a1c1d on-surface */
+    --background: 213 33% 96%;        /* #f0f4f9 surface */
+    --foreground: 217 31% 15%;        /* #1a2332 on-surface */
 
     /* Cards / popups — pure white */
     --card: 0 0% 100%;
-    --card-foreground: 210 6% 11%;
+    --card-foreground: 217 31% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 210 6% 11%;
+    --popover-foreground: 217 31% 15%;
 
-    /* Primary: #2642e6 → HSL 232 77% 52% */
-    --primary: 220 83% 53%;
+    /* Primary / Accent: #1565c0 → HSL 212 80% 42% */
+    --primary: 212 80% 42%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary: #3549db */
-    --secondary: 215 28% 17%;
-    --secondary-foreground: 0 0% 100%;
+    /* Secondary */
+    --secondary: 213 43% 97%;         /* #f5f8fc surface2 */
+    --secondary-foreground: 212 28% 33%; /* #3d5068 text2 */
 
-    --muted: 240 7% 94%;              /* surface-container #edeef0 */
-    --muted-foreground: 237 18% 32%;  /* on-surface-variant #444656 */
+    --muted: 215 39% 90%;             /* #dde5f0 */
+    --muted-foreground: 211 26% 57%;  /* #7a91aa muted text */
 
-    --accent: 232 100% 95%;           /* very light blue tint */
-    --accent-foreground: 232 77% 52%;
+    --accent: 214 82% 96%;            /* #e8f0fe accent-light */
+    --accent-foreground: 212 80% 42%;
 
-    --destructive: 0 72% 41%;         /* error #ba1a1a */
+    --destructive: 5 71% 46%;         /* #c0392b red */
     --destructive-foreground: 0 0% 100%;
 
-    --success: 151 65% 36%;
+    --success: 158 66% 30%;           /* #1a7f5a green */
     --success-foreground: 0 0% 100%;
 
-    --warning: 38 92% 50%;
+    --warning: 32 91% 36%;            /* #b45309 amber */
     --warning-foreground: 0 0% 100%;
 
-    --info: 199 89% 48%;
+    --info: 212 80% 42%;              /* #1565c0 */
     --info-foreground: 0 0% 100%;
 
-    --border: 240 14% 83%;            /* outline-variant #c5c5d8 */
-    --input: 240 14% 83%;
-    --ring: 232 77% 52%;
+    --border: 215 39% 90%;            /* #dde5f0 */
+    --input: 215 39% 90%;
+    --ring: 212 80% 42%;
 
-    --radius: 0.75rem;                /* 12px base */
+    --radius: 0.875rem;               /* 14px base for cards */
 
     /* ── Sidebar tokens ───────────────────────────────────────── */
-    --sidebar-background: 240 7% 95%;     /* surface-container-low #f3f3f5 */
+    --sidebar-background: 0 0% 100%;     /* pure white */
     --sidebar-foreground: 237 18% 32%;    /* on-surface-variant */
     --sidebar-primary: 232 77% 52%;       /* #2642e6 */
     --sidebar-primary-foreground: 0 0% 100%;

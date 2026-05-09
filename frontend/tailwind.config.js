@@ -19,8 +19,9 @@ const config = {
     },
     extend: {
       fontFamily: {
-        sans: ['"IBM Plex Sans Arabic"', 'sans-serif'],
-        arabic: ['"IBM Plex Sans Arabic"', 'sans-serif'],
+        sans: ['"Cairo"', '"Segoe UI"', 'sans-serif'],
+        arabic: ['"Cairo"', '"IBM Plex Sans Arabic"', 'sans-serif'],
+        mono: ['"IBM Plex Mono"', 'monospace'],
       },
       colors: {
         border: "hsl(var(--border))",

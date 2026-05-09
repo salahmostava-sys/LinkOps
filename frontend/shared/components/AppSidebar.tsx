@@ -124,8 +124,8 @@ function setHoverStylesIf(
   enter: boolean
 ) {
   if (!shouldApply) return;
-  el.style.background = enter ? 'var(--ds-surface-container)' : 'transparent';
-  el.style.color = enter ? 'var(--ds-on-surface)' : 'var(--ds-on-surface-variant)';
+  el.style.background = enter ? 'hsl(var(--accent))' : 'transparent';
+  el.style.color = enter ? 'hsl(var(--primary))' : 'hsl(var(--sidebar-foreground))';
 }
 
 type SidebarNavItemData = {
@@ -159,12 +159,11 @@ const SidebarNavLink = memo(function SidebarNavLink({
       style={
         active
           ? {
-              background: 'linear-gradient(135deg, #2642e6 0%, #465fff 100%)',
-              color: '#ffffff',
-              fontWeight: 600,
-              boxShadow: '0 4px 14px rgba(38,66,230,0.25)',
+              background: 'hsl(var(--accent))',
+              color: 'hsl(var(--primary))',
+              fontWeight: 700,
             }
-          : { color: 'var(--ds-on-surface-variant)', fontWeight: 400 }
+          : { color: 'hsl(var(--sidebar-foreground))', fontWeight: 500 }
       }
       onMouseEnter={(e) => {
         setHoverStylesIf(e.currentTarget, !active, true);
@@ -176,8 +175,8 @@ const SidebarNavLink = memo(function SidebarNavLink({
     >
       {active && !collapsed && (
         <span
-          className="absolute top-1/2 -translate-y-1/2 w-1 h-5 rounded-full bg-white/60"
-          style={{ [isRTL ? 'right' : 'left']: '-2px' }}
+          className="absolute top-[20%] bottom-[20%] w-1 rounded-full bg-primary"
+          style={{ [isRTL ? 'right' : 'left']: '0' }}
         />
       )}
       <Icon size={16} className="flex-shrink-0" />
