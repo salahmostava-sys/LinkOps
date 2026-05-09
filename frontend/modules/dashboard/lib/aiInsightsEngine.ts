@@ -50,7 +50,6 @@ export interface AIRecommendation {
   icon: string;
 }
 
-type PerformanceTrend = 'improving' | 'declining' | 'stable';
 
 export interface RiderAIAnalysis {
   performanceTrend: PerformanceTrend;
