@@ -1,4 +1,4 @@
-import { Calendar, LayoutGrid, Medal, TrendingUp } from 'lucide-react';
+import { Calendar, LayoutDashboard, LayoutGrid, Medal, TrendingUp } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 
@@ -53,9 +53,12 @@ export function DashboardPerformanceHeader({
               onTouchStart={tab === 'overview' ? undefined : onPrefetchIntent}
               className={cn(
                 'px-4 py-1.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-1.5 whitespace-nowrap',
-                activeTab === tab ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground/75',
+                activeTab === tab
+                  ? 'bg-card text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground/75',
               )}
             >
+              {tab === 'overview' ? <LayoutDashboard size={13} /> : null}
               {tab === 'analytics' ? <TrendingUp size={13} /> : null}
               {tab === 'ranking' ? <Medal size={13} /> : null}
               {tab === 'platforms' ? <LayoutGrid size={13} /> : null}
