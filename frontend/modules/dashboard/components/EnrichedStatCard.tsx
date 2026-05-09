@@ -9,7 +9,6 @@ import {
   tierColorClass,
   tierBgClass,
 } from '@modules/dashboard/lib/performanceEngine';
-import { cn } from '@shared/lib/utils';
 
 interface EnrichedStatCardProps {
   label: string;
@@ -20,11 +19,11 @@ interface EnrichedStatCardProps {
   tier?: PerformanceTier | null;
 }
 
-const tierDecorationBg: Record<PerformanceTier, string> = {
-  excellent: 'rgba(16, 185, 129, 0.08)',
-  good: 'rgba(59, 130, 246, 0.08)',
-  average: 'rgba(245, 158, 11, 0.08)',
-  weak: 'rgba(239, 68, 68, 0.08)',
+const tierBorderColor: Record<PerformanceTier, string> = {
+  excellent: '#10b981',
+  good: '#3b82f6',
+  average: '#f59e0b',
+  weak: '#ef4444',
 };
 
 export function EnrichedStatCard({
@@ -37,46 +36,37 @@ export function EnrichedStatCard({
 }: Readonly<EnrichedStatCardProps>) {
   const iconBg = tier ? tierBgClass(tier) : 'bg-muted/40';
   const iconColor = tier ? tierColorClass(tier) : 'text-foreground';
-  const decorationBg = tier ? tierDecorationBg[tier] : 'rgba(21, 101, 192, 0.06)';
 
   let deltaClass = 'text-muted-foreground';
   if (delta?.direction === '↑') deltaClass = 'text-emerald-600';
   else if (delta?.direction === '↓') deltaClass = 'text-rose-500';
 
+  const borderAccent = tier ? tierBorderColor[tier] : undefined;
+
   return (
     <div
-      className="bg-card border border-border rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-200 cursor-default relative overflow-hidden group hover:-translate-y-0.5"
+      className="bg-card rounded-2xl p-4 shadow-card hover:shadow-card-hover transition-all duration-300 relative overflow-hidden group"
+      style={borderAccent ? { borderBottom: `3px solid ${borderAccent}` } : undefined}
     >
-      {/* Decorative background circle */}
-      <div 
-        className="absolute bottom-0 right-0 w-24 h-24 rounded-full translate-x-6 translate-y-6 pointer-events-none transition-transform duration-300 group-hover:scale-110"
-        style={{ background: decorationBg }}
-      />
+      {/* Subtle background shimmer on hover */}
+      <div className="absolute inset-0 bg-gradient-to-br from-transparent via-primary/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl" />
 
-      <div className="flex items-center justify-between mb-4 relative z-10">
-        <div className="text-xs font-semibold text-muted-foreground">{label}</div>
+      <div className="flex items-start justify-between gap-2">
         <div
-          className={cn(
-            'w-10 h-10 rounded-xl flex items-center justify-center transition-transform duration-200 group-hover:scale-105 shadow-sm',
-            iconBg,
-            iconColor
-          )}
+          className={`w-10 h-10 rounded-xl flex items-center justify-center ${iconBg} ${iconColor} transition-transform duration-200 group-hover:scale-110`}
         >
           <Icon size={18} />
         </div>
+        {delta && (
+          <span className={`text-[11px] font-bold ${deltaClass} whitespace-nowrap bg-muted/50 px-1.5 py-0.5 rounded-lg`}>
+            {delta.formattedDelta}
+          </span>
+        )}
       </div>
-
-      <div className="relative z-10">
-        <p className={cn('text-3xl font-extrabold leading-none mb-2.5', iconColor)}>{value}</p>
-        
-        {delta ? (
-          <div className={cn('text-[11px] font-bold flex items-center gap-1.5', deltaClass)}>
-            <span>{delta.formattedDelta}</span>
-            <span className="opacity-70 font-medium">مقارنة بالشهر الماضي</span>
-          </div>
-        ) : sub ? (
-          <div className="text-[11px] text-muted-foreground font-medium">{sub}</div>
-        ) : null}
+      <div className="mt-3">
+        <p className="text-xl font-black text-foreground leading-tight">{value}</p>
+        <p className="text-xs font-semibold text-foreground/75 mt-2">{label}</p>
+        {sub && <p className="text-[11px] text-muted-foreground mt-1">{sub}</p>}
       </div>
     </div>
   );

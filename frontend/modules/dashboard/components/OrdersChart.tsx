@@ -1,4 +1,4 @@
-type OrdersByAppRow = {
+﻿type OrdersByAppRow = {
   app: string;
   orders: number;
   target: number;
@@ -31,7 +31,7 @@ export function OrdersChart(props: Readonly<{
             {ordersByApp.map((a) => {
               const pct = a.target > 0 ? Math.min(Math.round((a.orders / a.target) * 100), 100) : 0;
               return (
-                <div key={a.app} className="bg-card rounded-2xl p-4 shadow-sm border border-border">
+                <div key={a.app} className="bg-card rounded-2xl p-4 shadow-card">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-bold px-2.5 py-1 rounded-lg" style={{ backgroundColor: a.brandColor, color: a.textColor }}>{a.app}</span>
                     <span className="text-xs font-bold">{pct}%</span>
@@ -44,7 +44,7 @@ export function OrdersChart(props: Readonly<{
           </div>
         )}
       </div>
-      <div className="bg-card rounded-2xl shadow-sm border border-border p-5">
+      <div className="bg-card rounded-2xl shadow-card p-5">
         <h3 className="text-sm font-bold mb-2">الطلبات حسب المنطقة</h3>
         <p className="text-xs text-muted-foreground mb-3">إجمالي: {totalOrders.toLocaleString('en-US')} طلب</p>
         <div className="grid grid-cols-2 gap-4">

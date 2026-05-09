@@ -28,16 +28,21 @@ export function DashboardPerformanceHeader({
   const { selectedMonth } = useTemporalContext();
 
   return (
-    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-surface border-b border-border px-6 py-4 sticky top-0 z-10 shadow-sm -mx-4 lg:-mx-6 -mt-4 lg:-mt-6 mb-6">
-      <div>
-        <div className="text-lg font-extrabold text-foreground">{TAB_LABELS[activeTab]}</div>
-        <div className="text-xs text-muted-foreground mt-0.5">
-          {format(new Date(), 'EEEE، d MMMM yyyy', { locale: ar })}
+    <div className="space-y-3">
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <nav className="flex items-center gap-1 text-xs text-muted-foreground/80 mb-1">
+            <span>الرئيسية</span>
+            <span>/</span>
+            <span className="text-muted-foreground font-medium">لوحة التحكم</span>
+          </nav>
+          <h1 className="text-xl font-black text-foreground">لوحة التحكم</h1>
+          <p className="text-xs text-muted-foreground/80 mt-0.5">
+            {format(new Date(), 'EEEE، d MMMM yyyy', { locale: ar })}
+          </p>
         </div>
-      </div>
 
-      <div className="flex-1 flex items-center justify-center">
-        <div className="flex items-center bg-secondary rounded-xl p-1 gap-1 border border-border">
+        <div className="flex items-center bg-muted rounded-xl p-1 gap-1 overflow-x-auto">
           {(['overview', 'analytics', 'ranking', 'platforms'] as const).map((tab) => (
             <button
               key={tab}
@@ -49,25 +54,30 @@ export function DashboardPerformanceHeader({
               className={cn(
                 'px-4 py-1.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-1.5 whitespace-nowrap',
                 activeTab === tab
-                  ? 'bg-card text-primary shadow-sm ring-1 ring-border'
-                  : 'text-muted-foreground hover:text-foreground',
+                  ? 'bg-card text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground/75',
               )}
             >
-              {tab === 'overview' ? <LayoutDashboard size={14} /> : null}
-              {tab === 'analytics' ? <TrendingUp size={14} /> : null}
-              {tab === 'ranking' ? <Medal size={14} /> : null}
-              {tab === 'platforms' ? <LayoutGrid size={14} /> : null}
+              {tab === 'overview' ? <LayoutDashboard size={13} /> : null}
+              {tab === 'analytics' ? <TrendingUp size={13} /> : null}
+              {tab === 'ranking' ? <Medal size={13} /> : null}
+              {tab === 'platforms' ? <LayoutGrid size={13} /> : null}
               {TAB_LABELS[tab]}
             </button>
           ))}
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2 bg-secondary border border-border rounded-lg px-4 py-1.5 text-sm font-bold text-foreground cursor-pointer hover:border-primary transition-colors">
-          <Calendar size={14} className="text-muted-foreground" />
-          {format(new Date(`${selectedMonth}-01`), 'MMMM yyyy', { locale: ar })}
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+        <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground bg-muted/30 px-3 py-1.5 rounded-lg border border-border/50">
+          <Calendar size={14} className="text-primary/70" />
+          <span>بيانات شهر:</span>
+          <span className="text-foreground font-bold">
+            {format(new Date(`${selectedMonth}-01`), 'MMMM yyyy', { locale: ar })}
+          </span>
         </div>
+
+
       </div>
     </div>
   );
