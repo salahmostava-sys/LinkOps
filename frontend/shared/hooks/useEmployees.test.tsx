@@ -1,0 +1,68 @@
+import { renderHook, waitFor } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { useEmployees } from './useEmployees';
+import { employeeService } from '@services/employeeService';
+import { createQueryClientWrapper } from '@shared/test/authedQuerySetup';
+
+vi.mock('@services/employeeService', () => ({
+  employeeService: {
+    getAll: vi.fn(),
+  },
+}));
+
+
+describe('useEmployees', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('returns employees when service succeeds', async () => {
+    vi.mocked(employeeService.getAll).mockResolvedValue([
+      { id: 'e1', name: 'Ahmed' },
+    ] as unknown as Awaited<ReturnType<typeof employeeService.getAll>>);
+
+    const { result } = renderHook(() => useEmployees(), { wrapper: createQueryClientWrapper({ queries: { retryDelay: 1 } }) });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data).toEqual([{ id: 'e1', name: 'Ahmed' }]);
+  });
+
+  it('returns error when service fails', async () => {
+    vi.mocked(employeeService.getAll).mockRejectedValue(new Error('db down'));
+
+    const { result } = renderHook(() => useEmployees(), { wrapper: createQueryClientWrapper({ queries: { retryDelay: 1 } }) });
+
+    await waitFor(() => expect(result.current.isError).toBe(true), { timeout: 4000 });
+    expect(result.current.error?.message).toContain('db down');
+  });
+
+  it('returns empty list when service returns no rows', async () => {
+    vi.mocked(employeeService.getAll).mockResolvedValue(
+      [] as unknown as Awaited<ReturnType<typeof employeeService.getAll>>,
+    );
+
+    const { result } = renderHook(() => useEmployees(), { wrapper: createQueryClientWrapper({ queries: { retryDelay: 1 } }) });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data).toEqual([]);
+  });
+
+  it('returns loading state initially', () => {
+    vi.mocked(employeeService.getAll).mockReturnValue(new Promise(() => {}));
+
+    const { result } = renderHook(() => useEmployees(), { wrapper: createQueryClientWrapper({ queries: { retryDelay: 1 } }) });
+    expect(result.current.isLoading).toBe(true);
+    expect(result.current.data).toBeUndefined();
+  });
+
+  it('fetches when session exists (calls getAll)', async () => {
+    vi.mocked(employeeService.getAll).mockResolvedValue([
+      { id: 'e1', name: 'Test' },
+    ] as unknown as Awaited<ReturnType<typeof employeeService.getAll>>);
+
+    const { result } = renderHook(() => useEmployees(), { wrapper: createQueryClientWrapper({ queries: { retryDelay: 1 } }) });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(employeeService.getAll).toHaveBeenCalledTimes(1);
+  });
+});

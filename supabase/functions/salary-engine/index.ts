@@ -1,0 +1,195 @@
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
+import { getCorsHeaders, handleCorsPreflight } from '../_shared/cors.ts';
+
+type SalaryEngineRequest =
+  | {
+      mode: 'employee';
+      employee_id: string;
+      month_year: string;
+      payment_method?: string;
+      manual_deduction?: number;
+      manual_deduction_note?: string | null;
+    }
+  | {
+      mode: 'month';
+      month_year: string;
+      payment_method?: string;
+    }
+  | {
+      mode: 'month_preview';
+      month_year: string;
+    };
+
+const isValidMonth = (value: string) => /^\d{4}-(0[1-9]|1[0-2])$/.test(value);
+const isUuid = (value: string) =>
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+
+const logInfo = (message: string, meta: Record<string, unknown> = {}) => {
+  console.log(JSON.stringify({ level: 'info', message, ...meta, ts: new Date().toISOString() }));
+};
+
+const logError = (message: string, meta: Record<string, unknown> = {}) => {
+  console.error(JSON.stringify({ level: 'error', message, ...meta, ts: new Date().toISOString() }));
+};
+
+function getEnvVar(key: string): string {
+  const val = Deno.env.get(key);
+  if (!val) {
+    throw new Error(`Environment variable ${key} is not set`);
+  }
+  return val;
+}
+
+async function authorizeCaller(req: Request) {
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader) throw new Error('No authorization header');
+
+  const callerClient = createClient(
+    getEnvVar('SUPABASE_URL'),
+    getEnvVar('SUPABASE_ANON_KEY'),
+    { global: { headers: { Authorization: authHeader } } }
+  );
+
+  const { data: { user: callerUser } } = await callerClient.auth.getUser();
+  if (!callerUser) throw new Error('Not authenticated');
+
+  const { data: roleRows, error: roleError } = await callerClient
+    .from('user_roles').select('role').eq('user_id', callerUser.id);
+  if (roleError) throw new Error(roleError.message || JSON.stringify(roleError));
+
+  const roles = new Set((roleRows || []).map((row: { role: string }) => row.role));
+  if (!roles.has('admin') && !roles.has('finance')) {
+    throw new Error('Only admin/finance can run salary engine');
+  }
+
+  return callerUser;
+}
+
+async function enforceRateLimit(adminClient: any, callerUser: any, payload: SalaryEngineRequest, req: Request, requestId: string) {
+  const mode = payload.mode;
+  const rateLimitKey = `salary-engine:${callerUser.id}:${mode}`;
+  const { data: rateLimitRows, error: rateLimitError } = await adminClient.rpc('enforce_rate_limit', {
+    p_key: rateLimitKey, p_limit: 30, p_window_seconds: 60,
+  } as Record<string, unknown>);
+  if (rateLimitError) throw new Error(rateLimitError.message || JSON.stringify(rateLimitError));
+
+  const rate = Array.isArray(rateLimitRows)
+    ? (rateLimitRows[0] as { allowed?: boolean; remaining?: number; reset_at?: string } | undefined)
+    : undefined;
+
+  if (!rate?.allowed) {
+    logError('Rate limit exceeded', { request_id: requestId, user_id: callerUser.id, mode, month_year: payload.month_year });
+    const rateLimitOrigin = req.headers.get('origin');
+    return new Response(JSON.stringify({ error: 'Too many requests. Please retry shortly.' }), {
+      headers: { ...getCorsHeaders(rateLimitOrigin), 'Content-Type': 'application/json' },
+      status: 429,
+    });
+  }
+
+  logInfo('Salary engine request accepted', {
+    request_id: requestId, user_id: callerUser.id, mode, month_year: payload.month_year, remaining: rate.remaining ?? null,
+  });
+  return null;
+}
+
+async function processSalaryEngineMode(adminClient: any, payload: SalaryEngineRequest, req: Request) {
+  const origin = req.headers.get('origin');
+  
+  if (payload.mode === 'employee') {
+    if (!isUuid(payload.employee_id)) throw new Error('Invalid employee_id');
+    const { data, error } = await adminClient.rpc('calculate_salary_for_employee_month', {
+      p_employee_id: payload.employee_id,
+      p_month_year: payload.month_year,
+      p_payment_method: payload.payment_method || 'cash',
+      p_manual_deduction: Number(payload.manual_deduction || 0),
+      p_manual_deduction_note: payload.manual_deduction_note ?? null,
+    } as Record<string, unknown>);
+    if (error) throw new Error(error.message || JSON.stringify(error));
+    return new Response(JSON.stringify({ data }), { headers: { ...getCorsHeaders(origin), 'Content-Type': 'application/json' }, status: 200 });
+  }
+
+  if (payload.mode === 'month') {
+    const { data, error } = await adminClient.rpc('calculate_salary_for_month', {
+      p_month_year: payload.month_year,
+      p_payment_method: payload.payment_method || 'cash',
+    } as Record<string, unknown>);
+    if (error) throw new Error(error.message || JSON.stringify(error));
+    return new Response(JSON.stringify({ data }), { headers: { ...getCorsHeaders(origin), 'Content-Type': 'application/json' }, status: 200 });
+  }
+
+  if (payload.mode === 'month_preview') {
+    const { data, error } = await adminClient.rpc('preview_salary_for_month', {
+      p_month_year: payload.month_year,
+    } as Record<string, unknown>);
+    if (error) throw new Error(error.message || JSON.stringify(error));
+    return new Response(JSON.stringify({ data }), { headers: { ...getCorsHeaders(origin), 'Content-Type': 'application/json' }, status: 200 });
+  }
+
+  throw new Error('Invalid mode. Use "employee", "month", or "month_preview"');
+}
+
+function extractErrorMessage(err: unknown): string {
+  if (err instanceof Error) return err.message;
+  if (typeof err === 'object' && err !== null && 'message' in err) {
+    return String((err as { message: unknown }).message);
+  }
+  if (typeof err === 'string') return err;
+  try {
+    return JSON.stringify(err);
+  } catch {
+    return 'Unknown error';
+  }
+}
+
+function resolveSalaryEngineStatus(message: string): number {
+  const clientErrorPhrases = [
+    'Invalid month_year', 'Invalid employee_id', 'Invalid mode',
+    'No authorization header', 'Not authenticated', 'Method not allowed',
+    'Only admin/finance',
+  ];
+  const isClientError = clientErrorPhrases.some((phrase) => message.includes(phrase));
+  const isAuthzError = message.includes('Only admin/finance');
+  if (isAuthzError) return 403;
+  if (isClientError) return 400;
+  return 500;
+}
+
+Deno.serve(async (req) => {
+  const requestId = crypto.randomUUID();
+
+  if (req.method === 'OPTIONS') {
+    return handleCorsPreflight(req.headers.get('origin'));
+  }
+
+  try {
+    if (req.method !== 'POST') throw new Error('Method not allowed');
+
+    const callerUser = await authorizeCaller(req);
+    const payload = (await req.json()) as SalaryEngineRequest;
+
+    if (!payload?.month_year || !isValidMonth(payload.month_year)) {
+      throw new Error('Invalid month_year format. Expected YYYY-MM');
+    }
+
+    const adminClient = createClient(getEnvVar('SUPABASE_URL'), getEnvVar('SUPABASE_SERVICE_ROLE_KEY'));
+
+    const rateLimitResponse = await enforceRateLimit(adminClient, callerUser, payload, req, requestId);
+    if (rateLimitResponse) return rateLimitResponse;
+
+    return await processSalaryEngineMode(adminClient, payload, req);
+  } catch (err: unknown) {
+    const message = extractErrorMessage(err);
+    logError('Salary engine request failed', {
+      request_id: requestId,
+      error: message,
+      raw_error: (typeof err === 'object' && err !== null) ? extractErrorMessage(err) : String(err || 'Unknown error'),
+    });
+
+    const statusCode = resolveSalaryEngineStatus(message);
+    const origin = req.headers.get('origin');
+    return new Response(JSON.stringify({ error: message }), {
+      headers: { ...getCorsHeaders(origin), 'Content-Type': 'application/json' },
+      status: statusCode,
+    });
+  }
+});
