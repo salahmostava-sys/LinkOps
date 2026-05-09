@@ -21,13 +21,33 @@ export const REALTIME_TABLES_ALERTS_WIDGET = ['employees', 'vehicles'] as const;
 export function useRealtimePostgresChanges(
   channelName: string,
   tables: readonly string[],
-  onEvent: () => void
+  onEvent: () => void,
+  debounceMs: number = 2000
 ): void {
   const onEventRef = useRef(onEvent);
   onEventRef.current = onEvent;
 
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   useEffect(() => {
     if (tables.length === 0) return;
-    return realtimeService.subscribeToTables(channelName, tables, () => onEventRef.current());
-  }, [channelName, tables]);
+
+    const debouncedEvent = () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      timeoutRef.current = setTimeout(() => {
+        onEventRef.current();
+      }, debounceMs);
+    };
+
+    const unsubscribe = realtimeService.subscribeToTables(channelName, tables, debouncedEvent);
+
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      unsubscribe();
+    };
+  }, [channelName, tables, debounceMs]);
 }

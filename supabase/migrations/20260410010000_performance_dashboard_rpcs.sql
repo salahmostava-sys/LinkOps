@@ -1,4 +1,4 @@
-﻿BEGIN;
+BEGIN;
 
 CREATE INDEX IF NOT EXISTS idx_daily_orders_perf_date_employee
   ON public.daily_orders(date, employee_id, app_id)
@@ -54,12 +54,12 @@ BEGIN
   v_prev_week_start := (v_prev_week_end - INTERVAL '6 day')::DATE;
 
   RETURN (
-    WITH current_month AS (
+    WITH current_month AS MATERIALIZED (
       SELECT *
       FROM public.v_rider_monthly_performance
       WHERE month_year = p_month_year
     ),
-    prev_month AS (
+    prev_month AS MATERIALIZED (
       SELECT *
       FROM public.v_rider_monthly_performance
       WHERE month_year = v_prev_month
@@ -101,7 +101,7 @@ BEGIN
       LEFT JOIN prev_month AS pm
         ON pm.employee_id = cm.employee_id
     ),
-    leaderboard_date AS (
+    leaderboard_date AS MATERIALIZED (
       SELECT MAX(date) AS date
       FROM public.v_rider_daily_performance
       WHERE date BETWEEN v_start AND v_effective_end
@@ -702,14 +702,14 @@ BEGIN
       WHERE ea.employee_id = p_employee_id
       ORDER BY a.name
     ),
-    current_month AS (
+    current_month AS MATERIALIZED (
       SELECT *
       FROM public.v_rider_monthly_performance
       WHERE employee_id = p_employee_id
         AND month_year = p_month_year
       LIMIT 1
     ),
-    prev_month AS (
+    prev_month AS MATERIALIZED (
       SELECT *
       FROM public.v_rider_monthly_performance
       WHERE employee_id = p_employee_id
