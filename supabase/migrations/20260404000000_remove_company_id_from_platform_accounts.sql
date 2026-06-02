@@ -7,10 +7,10 @@ DROP TRIGGER IF EXISTS trg_sync_platform_accounts_company_id ON public.platform_
 DROP TRIGGER IF EXISTS trg_sync_account_assignments_company_id ON public.account_assignments;
 
 -- Drop functions
-DROP FUNCTION IF EXISTS public.sync_platform_accounts_company_id();
-DROP FUNCTION IF EXISTS public.sync_account_assignments_company_id();
-DROP FUNCTION IF EXISTS public.platform_account_in_my_company(uuid);
-DROP FUNCTION IF EXISTS public.assignment_in_my_company(uuid);
+DROP FUNCTION IF EXISTS public.sync_platform_accounts_company_id() CASCADE;
+DROP FUNCTION IF EXISTS public.sync_account_assignments_company_id() CASCADE;
+DROP FUNCTION IF EXISTS public.platform_account_in_my_company(uuid) CASCADE;
+DROP FUNCTION IF EXISTS public.assignment_in_my_company(uuid) CASCADE;
 
 -- Drop old RLS policies
 DROP POLICY IF EXISTS "Platform accounts: select own company" ON public.platform_accounts;
@@ -32,6 +32,7 @@ ALTER TABLE public.platform_accounts DROP COLUMN IF EXISTS company_id;
 ALTER TABLE public.account_assignments DROP COLUMN IF EXISTS company_id;
 
 -- Recreate simple RLS policies without company_id
+DROP POLICY IF EXISTS "platform_accounts_select" ON public.platform_accounts;
 CREATE POLICY "platform_accounts_select"
   ON public.platform_accounts FOR SELECT
   USING (
@@ -43,6 +44,7 @@ CREATE POLICY "platform_accounts_select"
     )
   );
 
+DROP POLICY IF EXISTS "platform_accounts_manage" ON public.platform_accounts;
 CREATE POLICY "platform_accounts_manage"
   ON public.platform_accounts FOR ALL
   USING (
@@ -58,6 +60,7 @@ CREATE POLICY "platform_accounts_manage"
     )
   );
 
+DROP POLICY IF EXISTS "account_assignments_select" ON public.account_assignments;
 CREATE POLICY "account_assignments_select"
   ON public.account_assignments FOR SELECT
   USING (
@@ -69,6 +72,7 @@ CREATE POLICY "account_assignments_select"
     )
   );
 
+DROP POLICY IF EXISTS "account_assignments_insert_update" ON public.account_assignments;
 CREATE POLICY "account_assignments_insert_update"
   ON public.account_assignments FOR INSERT
   WITH CHECK (
@@ -78,6 +82,7 @@ CREATE POLICY "account_assignments_insert_update"
     )
   );
 
+DROP POLICY IF EXISTS "account_assignments_update_only" ON public.account_assignments;
 CREATE POLICY "account_assignments_update_only"
   ON public.account_assignments FOR UPDATE
   USING (

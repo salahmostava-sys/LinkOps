@@ -90,6 +90,7 @@ DROP POLICY IF EXISTS "HR/admin can upload employee documents" ON storage.object
 DROP POLICY IF EXISTS "HR/admin can update employee documents" ON storage.objects;
 DROP POLICY IF EXISTS "Admins can delete employee documents" ON storage.objects;
 
+DROP POLICY IF EXISTS "Employees docs: view by employee permissions" ON storage.objects;
 CREATE POLICY "Employees docs: view by employee permissions"
   ON storage.objects FOR SELECT
   TO authenticated
@@ -99,6 +100,7 @@ CREATE POLICY "Employees docs: view by employee permissions"
     AND public.has_permission('employees', 'view')
   );
 
+DROP POLICY IF EXISTS "Employees docs: upload by employee permissions" ON storage.objects;
 CREATE POLICY "Employees docs: upload by employee permissions"
   ON storage.objects FOR INSERT
   TO authenticated
@@ -108,6 +110,7 @@ CREATE POLICY "Employees docs: upload by employee permissions"
     AND public.has_permission('employees', 'write')
   );
 
+DROP POLICY IF EXISTS "Employees docs: update by employee permissions" ON storage.objects;
 CREATE POLICY "Employees docs: update by employee permissions"
   ON storage.objects FOR UPDATE
   TO authenticated
@@ -122,6 +125,7 @@ CREATE POLICY "Employees docs: update by employee permissions"
     AND public.has_permission('employees', 'write')
   );
 
+DROP POLICY IF EXISTS "Employees docs: delete by employee permissions" ON storage.objects;
 CREATE POLICY "Employees docs: delete by employee permissions"
   ON storage.objects FOR DELETE
   TO authenticated
@@ -139,7 +143,7 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 DECLARE
-  v_allowed boolean :IS FALSE;
+  v_allowed boolean := FALSE;
 BEGIN
   IF NOT public.is_internal_user() THEN
     RETURN false;

@@ -7,10 +7,12 @@ CREATE TABLE IF NOT EXISTS public.locked_months (
 
 ALTER TABLE public.locked_months ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "locked_months_select" ON public.locked_months;
 CREATE POLICY "locked_months_select"
   ON public.locked_months FOR SELECT
   USING (is_active_user(auth.uid()));
 
+DROP POLICY IF EXISTS "locked_months_manage" ON public.locked_months;
 CREATE POLICY "locked_months_manage"
   ON public.locked_months FOR ALL
   USING (

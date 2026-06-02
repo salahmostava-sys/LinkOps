@@ -43,7 +43,8 @@ BEGIN
   END IF;
 
   IF v_updated_definition = v_definition THEN
-    RAISE EXCEPTION 'Hotfix pattern was not found in public.performance_dashboard_rpc(text, date)';
+    RAISE NOTICE 'Hotfix pattern was not found in public.performance_dashboard_rpc(text, date). It may have already been applied.';
+    RETURN;
   END IF;
 
   EXECUTE v_updated_definition;

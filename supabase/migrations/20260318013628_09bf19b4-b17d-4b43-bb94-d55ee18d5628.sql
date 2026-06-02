@@ -13,11 +13,13 @@ CREATE TABLE IF NOT EXISTS public.app_targets (
 ALTER TABLE public.app_targets ENABLE ROW LEVEL SECURITY;
 
 -- Anyone active can view targets
+DROP POLICY IF EXISTS "Active users can view app_targets" ON public.app_targets;
 CREATE POLICY "Active users can view app_targets"
   ON public.app_targets FOR SELECT
   USING (is_active_user(auth.uid()));
 
 -- Admin/operations/finance can manage targets
+DROP POLICY IF EXISTS "Admin/operations can manage app_targets" ON public.app_targets;
 CREATE POLICY "Admin/operations can manage app_targets"
   ON public.app_targets FOR ALL
   USING (is_active_user(auth.uid()) AND (

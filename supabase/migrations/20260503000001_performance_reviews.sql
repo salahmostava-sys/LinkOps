@@ -20,16 +20,20 @@ CREATE TABLE IF NOT EXISTS public.hr_performance_reviews (
 ALTER TABLE public.hr_performance_reviews ENABLE ROW LEVEL SECURITY;
 
 -- SELECT: all authenticated users can read (intentional for HR visibility)
+DROP POLICY IF EXISTS "hr_reviews_select" ON public.hr_performance_reviews;
 CREATE POLICY "hr_reviews_select" ON public.hr_performance_reviews
   FOR SELECT USING (true);
 
 -- INSERT/UPDATE/DELETE: require authenticated session
+DROP POLICY IF EXISTS "hr_reviews_insert" ON public.hr_performance_reviews;
 CREATE POLICY "hr_reviews_insert" ON public.hr_performance_reviews
   FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
 
+DROP POLICY IF EXISTS "hr_reviews_update" ON public.hr_performance_reviews;
 CREATE POLICY "hr_reviews_update" ON public.hr_performance_reviews
   FOR UPDATE USING (auth.uid() IS NOT NULL) WITH CHECK (auth.uid() IS NOT NULL);
 
+DROP POLICY IF EXISTS "hr_reviews_delete" ON public.hr_performance_reviews;
 CREATE POLICY "hr_reviews_delete" ON public.hr_performance_reviews
   FOR DELETE USING (auth.uid() IS NOT NULL);
 

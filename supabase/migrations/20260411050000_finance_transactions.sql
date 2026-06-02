@@ -25,16 +25,19 @@ CREATE INDEX IF NOT EXISTS idx_finance_transactions_date ON public.finance_trans
 -- RLS
 ALTER TABLE public.finance_transactions ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Authenticated users can view finance_transactions" ON public.finance_transactions;
 CREATE POLICY "Authenticated users can view finance_transactions"
   ON public.finance_transactions FOR SELECT
   USING (auth.role() = 'authenticated');
 
+DROP POLICY IF EXISTS "Finance/admin can manage finance_transactions" ON public.finance_transactions;
 CREATE POLICY "Finance/admin can manage finance_transactions"
   ON public.finance_transactions FOR ALL
   USING (auth.role() = 'authenticated')
   WITH CHECK (auth.role() = 'authenticated');
 
 -- Updated_at trigger
+DROP TRIGGER IF EXISTS finance_transactions_updated_at ON public.finance_transactions;
 CREATE TRIGGER finance_transactions_updated_at
   BEFORE UPDATE ON public.finance_transactions
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();

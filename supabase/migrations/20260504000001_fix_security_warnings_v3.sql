@@ -29,6 +29,7 @@ CREATE POLICY "hr_reviews_update" ON public.hr_performance_reviews
   FOR UPDATE USING (is_admin_or_hr(auth.uid()))
   WITH CHECK (is_admin_or_hr(auth.uid()));
 
+DROP POLICY IF EXISTS "hr_reviews_delete" ON public.hr_performance_reviews;
 CREATE POLICY "hr_reviews_delete" ON public.hr_performance_reviews
   FOR DELETE USING (is_admin_or_hr(auth.uid()));
 
@@ -44,6 +45,7 @@ CREATE POLICY "leave_requests_update" ON public.leave_requests
   FOR UPDATE USING (is_admin_or_hr(auth.uid()))
   WITH CHECK (is_admin_or_hr(auth.uid()));
 
+DROP POLICY IF EXISTS "leave_requests_delete" ON public.leave_requests;
 CREATE POLICY "leave_requests_delete" ON public.leave_requests
   FOR DELETE USING (is_admin_or_hr(auth.uid()));
 

@@ -18,11 +18,13 @@ CREATE TABLE IF NOT EXISTS public.spare_parts (
 
 ALTER TABLE public.spare_parts ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Active users can view spare_parts" ON public.spare_parts;
 CREATE POLICY "Active users can view spare_parts"
   ON public.spare_parts FOR SELECT
   TO authenticated
   USING (is_active_user(auth.uid()));
 
+DROP POLICY IF EXISTS "Admin/operations can manage spare_parts" ON public.spare_parts;
 CREATE POLICY "Admin/operations can manage spare_parts"
   ON public.spare_parts FOR ALL
   TO authenticated

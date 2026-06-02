@@ -17,6 +17,7 @@ ALTER TABLE public.app_monthly_activations ENABLE ROW LEVEL SECURITY;
 
 -- Assuming there is a standard policy for apps, we replicate it here.
 -- Based on previous context, we use a simple "Authenticated users can read" or similar.
+DROP POLICY IF EXISTS "Authenticated users can manage app activations" ON public.app_monthly_activations;
 CREATE POLICY "Authenticated users can manage app activations"
 ON public.app_monthly_activations
 FOR ALL

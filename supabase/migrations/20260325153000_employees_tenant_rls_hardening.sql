@@ -44,6 +44,7 @@ DROP POLICY IF EXISTS "Employees: update" ON public.employees;
 DROP POLICY IF EXISTS "Employees: delete" ON public.employees;
 
 -- SELECT: active + role + tenant isolation.
+DROP POLICY IF EXISTS "Employees: select own company" ON public.employees;
 CREATE POLICY "Employees: select own company"
 ON public.employees
 FOR SELECT
@@ -60,6 +61,7 @@ USING (
 );
 
 -- INSERT: active + role + enforce tenant on inserted rows.
+DROP POLICY IF EXISTS "Employees: insert" ON public.employees;
 CREATE POLICY "Employees: insert"
 ON public.employees
 FOR INSERT
@@ -74,6 +76,7 @@ WITH CHECK (
 );
 
 -- UPDATE: active + role + tenant isolation (old and new row).
+DROP POLICY IF EXISTS "Employees: update" ON public.employees;
 CREATE POLICY "Employees: update"
 ON public.employees
 FOR UPDATE
@@ -96,6 +99,7 @@ WITH CHECK (
 );
 
 -- DELETE: active + role + tenant isolation.
+DROP POLICY IF EXISTS "Employees: delete" ON public.employees;
 CREATE POLICY "Employees: delete"
 ON public.employees
 FOR DELETE

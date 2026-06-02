@@ -37,6 +37,7 @@ CREATE POLICY "Active users can view pricing_rules"
   ON public.pricing_rules FOR SELECT
   USING (is_active_user(auth.uid()));
 
+DROP POLICY IF EXISTS "Finance/admin can manage pricing_rules" ON public.pricing_rules;
 CREATE POLICY "Finance/admin can manage pricing_rules"
   ON public.pricing_rules FOR ALL
   USING (

@@ -17,14 +17,17 @@ DROP POLICY IF EXISTS leave_requests_update ON public.leave_requests;
 DROP POLICY IF EXISTS leave_requests_delete ON public.leave_requests;
 
 -- يشترط أن يكون المستخدم مسجلاً (authenticated) لأي عملية كتابة
+DROP POLICY IF EXISTS "leave_requests_insert" ON public.leave_requests;
 CREATE POLICY "leave_requests_insert" ON public.leave_requests
   FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
 
+DROP POLICY IF EXISTS "leave_requests_update" ON public.leave_requests;
 CREATE POLICY "leave_requests_update" ON public.leave_requests
   FOR UPDATE
   USING (auth.uid() IS NOT NULL)
   WITH CHECK (auth.uid() IS NOT NULL);
 
+DROP POLICY IF EXISTS "leave_requests_delete" ON public.leave_requests;
 CREATE POLICY "leave_requests_delete" ON public.leave_requests
   FOR DELETE USING (auth.uid() IS NOT NULL);
 
@@ -36,14 +39,17 @@ DROP POLICY IF EXISTS hr_reviews_insert ON public.hr_performance_reviews;
 DROP POLICY IF EXISTS hr_reviews_update ON public.hr_performance_reviews;
 DROP POLICY IF EXISTS hr_reviews_delete ON public.hr_performance_reviews;
 
+DROP POLICY IF EXISTS "hr_reviews_insert" ON public.hr_performance_reviews;
 CREATE POLICY "hr_reviews_insert" ON public.hr_performance_reviews
   FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
 
+DROP POLICY IF EXISTS "hr_reviews_update" ON public.hr_performance_reviews;
 CREATE POLICY "hr_reviews_update" ON public.hr_performance_reviews
   FOR UPDATE
   USING (auth.uid() IS NOT NULL)
   WITH CHECK (auth.uid() IS NOT NULL);
 
+DROP POLICY IF EXISTS "hr_reviews_delete" ON public.hr_performance_reviews;
 CREATE POLICY "hr_reviews_delete" ON public.hr_performance_reviews
   FOR DELETE USING (auth.uid() IS NOT NULL);
 

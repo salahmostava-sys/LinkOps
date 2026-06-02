@@ -14,6 +14,8 @@ ALTER TABLE public.employees
   ADD CONSTRAINT employees_preferred_language_check
   CHECK (preferred_language IN ('ar', 'en'));
 
+DROP VIEW IF EXISTS public.v_rider_daily_platform_orders CASCADE;
+
 ALTER TABLE public.employees
   ALTER COLUMN city TYPE text
   USING city::text;

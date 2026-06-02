@@ -57,6 +57,7 @@ DROP POLICY IF EXISTS "platform_accounts_manage" ON public.platform_accounts;
 DROP POLICY IF EXISTS "Active users can view platform_accounts" ON public.platform_accounts;
 DROP POLICY IF EXISTS "Admin/operations can manage platform_accounts" ON public.platform_accounts;
 
+DROP POLICY IF EXISTS "Platform accounts: select own company" ON public.platform_accounts;
 CREATE POLICY "Platform accounts: select own company"
 ON public.platform_accounts
 FOR SELECT
@@ -71,6 +72,7 @@ USING (
   )
 );
 
+DROP POLICY IF EXISTS "Platform accounts: manage own company" ON public.platform_accounts;
 CREATE POLICY "Platform accounts: manage own company"
 ON public.platform_accounts
 FOR ALL
@@ -102,6 +104,7 @@ DROP POLICY IF EXISTS "account_assignments_update_only" ON public.account_assign
 DROP POLICY IF EXISTS "Active users can view account_assignments" ON public.account_assignments;
 DROP POLICY IF EXISTS "Admin/operations can manage account_assignments" ON public.account_assignments;
 
+DROP POLICY IF EXISTS "Account assignments: select own company" ON public.account_assignments;
 CREATE POLICY "Account assignments: select own company"
 ON public.account_assignments
 FOR SELECT
@@ -116,6 +119,7 @@ USING (
   )
 );
 
+DROP POLICY IF EXISTS "Account assignments: insert own company" ON public.account_assignments;
 CREATE POLICY "Account assignments: insert own company"
 ON public.account_assignments
 FOR INSERT
@@ -130,6 +134,7 @@ WITH CHECK (
   )
 );
 
+DROP POLICY IF EXISTS "Account assignments: update own company" ON public.account_assignments;
 CREATE POLICY "Account assignments: update own company"
 ON public.account_assignments
 FOR UPDATE

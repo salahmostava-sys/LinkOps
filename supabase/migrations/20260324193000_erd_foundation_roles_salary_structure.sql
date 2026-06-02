@@ -148,6 +148,7 @@ DROP POLICY IF EXISTS "Admin or HR can manage employee_roles" ON public.employee
 CREATE POLICY "Active users can view employee_roles"
   ON public.employee_roles FOR SELECT
   USING (is_active_user(auth.uid()));
+DROP POLICY IF EXISTS "Admin or HR can manage employee_roles" ON public.employee_roles;
 CREATE POLICY "Admin or HR can manage employee_roles"
   ON public.employee_roles FOR ALL
   USING (
@@ -164,6 +165,7 @@ DROP POLICY IF EXISTS "Finance admin can manage salary_tiers" ON public.salary_t
 CREATE POLICY "Active users can view salary_tiers"
   ON public.salary_tiers FOR SELECT
   USING (is_active_user(auth.uid()));
+DROP POLICY IF EXISTS "Finance admin can manage salary_tiers" ON public.salary_tiers;
 CREATE POLICY "Finance admin can manage salary_tiers"
   ON public.salary_tiers FOR ALL
   USING (

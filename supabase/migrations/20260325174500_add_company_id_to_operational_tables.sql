@@ -308,6 +308,7 @@ DROP POLICY IF EXISTS "Attendance: insert own company" ON public.attendance;
 DROP POLICY IF EXISTS "Attendance: update own company" ON public.attendance;
 DROP POLICY IF EXISTS "Attendance: delete own company" ON public.attendance;
 
+DROP POLICY IF EXISTS "Attendance: select own company" ON public.attendance;
 CREATE POLICY "Attendance: select own company"
 ON public.attendance
 FOR SELECT TO authenticated
@@ -322,6 +323,7 @@ USING (
   )
 );
 
+DROP POLICY IF EXISTS "Attendance: insert own company" ON public.attendance;
 CREATE POLICY "Attendance: insert own company"
 ON public.attendance
 FOR INSERT TO authenticated
@@ -334,6 +336,7 @@ WITH CHECK (
   )
 );
 
+DROP POLICY IF EXISTS "Attendance: update own company" ON public.attendance;
 CREATE POLICY "Attendance: update own company"
 ON public.attendance
 FOR UPDATE TO authenticated
@@ -354,6 +357,7 @@ WITH CHECK (
   )
 );
 
+DROP POLICY IF EXISTS "Attendance: delete own company" ON public.attendance;
 CREATE POLICY "Attendance: delete own company"
 ON public.attendance
 FOR DELETE TO authenticated
@@ -383,6 +387,7 @@ USING (
   )
 );
 
+DROP POLICY IF EXISTS "Daily orders: manage own company" ON public.daily_orders;
 CREATE POLICY "Daily orders: manage own company"
 ON public.daily_orders
 FOR ALL TO authenticated
@@ -421,6 +426,7 @@ USING (
   )
 );
 
+DROP POLICY IF EXISTS "Advances: manage own company" ON public.advances;
 CREATE POLICY "Advances: manage own company"
 ON public.advances
 FOR ALL TO authenticated
@@ -457,6 +463,7 @@ USING (
   )
 );
 
+DROP POLICY IF EXISTS "Advance installments: manage own company" ON public.advance_installments;
 CREATE POLICY "Advance installments: manage own company"
 ON public.advance_installments
 FOR ALL TO authenticated
@@ -492,6 +499,7 @@ USING (
   )
 );
 
+DROP POLICY IF EXISTS "Salary records: manage own company" ON public.salary_records;
 CREATE POLICY "Salary records: manage own company"
 ON public.salary_records
 FOR ALL TO authenticated
@@ -527,6 +535,7 @@ USING (
   )
 );
 
+DROP POLICY IF EXISTS "External deductions: manage own company" ON public.external_deductions;
 CREATE POLICY "External deductions: manage own company"
 ON public.external_deductions
 FOR ALL TO authenticated

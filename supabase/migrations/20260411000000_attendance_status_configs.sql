@@ -7,10 +7,12 @@ CREATE TABLE IF NOT EXISTS public.attendance_status_configs (
 
 ALTER TABLE public.attendance_status_configs ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "authenticated users can read configs" ON public.attendance_status_configs;
 CREATE POLICY "authenticated users can read configs"
   ON public.attendance_status_configs FOR SELECT
   TO authenticated USING (true);
 
+DROP POLICY IF EXISTS "admin can manage configs" ON public.attendance_status_configs;
 CREATE POLICY "admin can manage configs"
   ON public.attendance_status_configs FOR ALL
   TO authenticated USING (

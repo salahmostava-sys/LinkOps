@@ -7,11 +7,13 @@ VALUES ('avatars', 'avatars', true, 2097152, ARRAY['image/jpeg','image/png','ima
 ON CONFLICT (id) DO NOTHING;
 
 -- RLS: anyone can read avatars (public bucket)
+DROP POLICY IF EXISTS "Public can view avatars" ON storage.objects;
 CREATE POLICY "Public can view avatars"
   ON storage.objects FOR SELECT
   USING (bucket_id = 'avatars');
 
 -- RLS: authenticated users can upload their own avatar
+DROP POLICY IF EXISTS "Users can upload own avatar" ON storage.objects;
 CREATE POLICY "Users can upload own avatar"
   ON storage.objects FOR INSERT
   TO authenticated
@@ -21,6 +23,7 @@ CREATE POLICY "Users can upload own avatar"
   );
 
 -- RLS: authenticated users can update their own avatar
+DROP POLICY IF EXISTS "Users can update own avatar" ON storage.objects;
 CREATE POLICY "Users can update own avatar"
   ON storage.objects FOR UPDATE
   TO authenticated
@@ -30,6 +33,7 @@ CREATE POLICY "Users can update own avatar"
   );
 
 -- RLS: authenticated users can delete their own avatar
+DROP POLICY IF EXISTS "Users can delete own avatar" ON storage.objects;
 CREATE POLICY "Users can delete own avatar"
   ON storage.objects FOR DELETE
   TO authenticated

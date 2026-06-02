@@ -207,6 +207,7 @@ DROP POLICY IF EXISTS "Active users can view employee_apps" ON public.employee_a
 DROP POLICY IF EXISTS "HR/admin/ops can view employee_apps" ON public.employee_apps;
 DROP POLICY IF EXISTS "HR/admin can manage employee_apps" ON public.employee_apps;
 
+DROP POLICY IF EXISTS "Employee apps: select own company" ON public.employee_apps;
 CREATE POLICY "Employee apps: select own company"
 ON public.employee_apps
 FOR SELECT
@@ -221,6 +222,7 @@ USING (
   )
 );
 
+DROP POLICY IF EXISTS "Employee apps: manage own company" ON public.employee_apps;
 CREATE POLICY "Employee apps: manage own company"
 ON public.employee_apps
 FOR ALL
@@ -248,6 +250,7 @@ DROP POLICY IF EXISTS "Active users can view employee_scheme" ON public.employee
 DROP POLICY IF EXISTS "HR/admin/finance can view employee_scheme" ON public.employee_scheme;
 DROP POLICY IF EXISTS "HR/admin can manage employee_scheme" ON public.employee_scheme;
 
+DROP POLICY IF EXISTS "Employee scheme: select own company" ON public.employee_scheme;
 CREATE POLICY "Employee scheme: select own company"
 ON public.employee_scheme
 FOR SELECT
@@ -262,6 +265,7 @@ USING (
   )
 );
 
+DROP POLICY IF EXISTS "Employee scheme: manage own company" ON public.employee_scheme;
 CREATE POLICY "Employee scheme: manage own company"
 ON public.employee_scheme
 FOR ALL
@@ -289,6 +293,7 @@ DROP POLICY IF EXISTS "platform_accounts_manage" ON public.platform_accounts;
 DROP POLICY IF EXISTS "Active users can view platform_accounts" ON public.platform_accounts;
 DROP POLICY IF EXISTS "Admin/operations can manage platform_accounts" ON public.platform_accounts;
 
+DROP POLICY IF EXISTS "Platform accounts: select own company" ON public.platform_accounts;
 CREATE POLICY "Platform accounts: select own company"
 ON public.platform_accounts
 FOR SELECT
@@ -304,6 +309,7 @@ USING (
   )
 );
 
+DROP POLICY IF EXISTS "Platform accounts: manage own company" ON public.platform_accounts;
 CREATE POLICY "Platform accounts: manage own company"
 ON public.platform_accounts
 FOR ALL
@@ -332,6 +338,7 @@ DROP POLICY IF EXISTS "account_assignments_update_only" ON public.account_assign
 DROP POLICY IF EXISTS "Active users can view account_assignments" ON public.account_assignments;
 DROP POLICY IF EXISTS "Admin/operations can manage account_assignments" ON public.account_assignments;
 
+DROP POLICY IF EXISTS "Account assignments: select own company" ON public.account_assignments;
 CREATE POLICY "Account assignments: select own company"
 ON public.account_assignments
 FOR SELECT
@@ -347,6 +354,7 @@ USING (
   )
 );
 
+DROP POLICY IF EXISTS "Account assignments: insert own company" ON public.account_assignments;
 CREATE POLICY "Account assignments: insert own company"
 ON public.account_assignments
 FOR INSERT
@@ -362,6 +370,7 @@ WITH CHECK (
   )
 );
 
+DROP POLICY IF EXISTS "Account assignments: update own company" ON public.account_assignments;
 CREATE POLICY "Account assignments: update own company"
 ON public.account_assignments
 FOR UPDATE

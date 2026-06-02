@@ -7,6 +7,7 @@ DROP POLICY IF EXISTS "HR/admin/finance can view employee documents" ON storage.
 DROP POLICY IF EXISTS "HR/admin can upload employee documents" ON storage.objects;
 DROP POLICY IF EXISTS "Admins can delete employee documents" ON storage.objects;
 
+DROP POLICY IF EXISTS "HR/admin/finance can view employee documents" ON storage.objects;
 CREATE POLICY "HR/admin/finance can view employee documents"
   ON storage.objects FOR SELECT
   USING (
@@ -19,6 +20,7 @@ CREATE POLICY "HR/admin/finance can view employee documents"
     )
   );
 
+DROP POLICY IF EXISTS "HR/admin can upload employee documents" ON storage.objects;
 CREATE POLICY "HR/admin can upload employee documents"
   ON storage.objects FOR INSERT
   WITH CHECK (
@@ -30,6 +32,7 @@ CREATE POLICY "HR/admin can upload employee documents"
     )
   );
 
+DROP POLICY IF EXISTS "HR/admin can update employee documents" ON storage.objects;
 CREATE POLICY "HR/admin can update employee documents"
   ON storage.objects FOR UPDATE
   USING (
@@ -41,6 +44,7 @@ CREATE POLICY "HR/admin can update employee documents"
     )
   );
 
+DROP POLICY IF EXISTS "Admins can delete employee documents" ON storage.objects;
 CREATE POLICY "Admins can delete employee documents"
   ON storage.objects FOR DELETE
   USING (

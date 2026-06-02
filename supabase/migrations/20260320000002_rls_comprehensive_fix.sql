@@ -24,20 +24,24 @@ CREATE POLICY "Active users can view profiles"
   USING (is_active_user(auth.uid()) OR auth.uid() = id);
 
 -- Each user can update their own; admins can update any
+DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
 CREATE POLICY "Users can update own profile"
   ON public.profiles FOR UPDATE
   USING (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Admins can update all profiles" ON public.profiles;
 CREATE POLICY "Admins can update all profiles"
   ON public.profiles FOR UPDATE
   USING (is_active_user(auth.uid()) AND has_role(auth.uid(), 'admin'::app_role));
 
 -- Only admins can insert profiles (outside of the new-user trigger)
+DROP POLICY IF EXISTS "Admins can insert profiles" ON public.profiles;
 CREATE POLICY "Admins can insert profiles"
   ON public.profiles FOR INSERT
   WITH CHECK (has_role(auth.uid(), 'admin'::app_role));
 
 -- Only admins can delete profiles
+DROP POLICY IF EXISTS "Admins can delete profiles" ON public.profiles;
 CREATE POLICY "Admins can delete profiles"
   ON public.profiles FOR DELETE
   USING (is_active_user(auth.uid()) AND has_role(auth.uid(), 'admin'::app_role));
@@ -50,18 +54,22 @@ CREATE POLICY "Users can view own roles"
   ON public.user_roles FOR SELECT
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Admins can view all roles" ON public.user_roles;
 CREATE POLICY "Admins can view all roles"
   ON public.user_roles FOR SELECT
   USING (is_active_user(auth.uid()) AND has_role(auth.uid(), 'admin'::app_role));
 
+DROP POLICY IF EXISTS "Admins can insert roles" ON public.user_roles;
 CREATE POLICY "Admins can insert roles"
   ON public.user_roles FOR INSERT
   WITH CHECK (is_active_user(auth.uid()) AND has_role(auth.uid(), 'admin'::app_role));
 
+DROP POLICY IF EXISTS "Admins can update roles" ON public.user_roles;
 CREATE POLICY "Admins can update roles"
   ON public.user_roles FOR UPDATE
   USING (is_active_user(auth.uid()) AND has_role(auth.uid(), 'admin'::app_role));
 
+DROP POLICY IF EXISTS "Admins can delete roles" ON public.user_roles;
 CREATE POLICY "Admins can delete roles"
   ON public.user_roles FOR DELETE
   USING (is_active_user(auth.uid()) AND has_role(auth.uid(), 'admin'::app_role));
@@ -74,10 +82,12 @@ CREATE POLICY "Users can view own permissions"
   ON public.user_permissions FOR SELECT
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Admins can view all permissions" ON public.user_permissions;
 CREATE POLICY "Admins can view all permissions"
   ON public.user_permissions FOR SELECT
   USING (is_active_user(auth.uid()) AND has_role(auth.uid(), 'admin'::app_role));
 
+DROP POLICY IF EXISTS "Admins can manage permissions" ON public.user_permissions;
 CREATE POLICY "Admins can manage permissions"
   ON public.user_permissions FOR ALL
   USING (is_active_user(auth.uid()) AND has_role(auth.uid(), 'admin'::app_role))
@@ -96,6 +106,7 @@ CREATE POLICY "Active users can view daily_orders"
   ON public.daily_orders FOR SELECT
   USING (is_active_user(auth.uid()));
 
+DROP POLICY IF EXISTS "Ops/HR/admin can manage daily_orders" ON public.daily_orders;
 CREATE POLICY "Ops/HR/admin can manage daily_orders"
   ON public.daily_orders FOR ALL
   USING (
@@ -121,6 +132,7 @@ CREATE POLICY "Active users can view app_targets"
   ON public.app_targets FOR SELECT
   USING (is_active_user(auth.uid()));
 
+DROP POLICY IF EXISTS "Admin/ops/finance can manage app_targets" ON public.app_targets;
 CREATE POLICY "Admin/ops/finance can manage app_targets"
   ON public.app_targets FOR ALL
   USING (
@@ -155,6 +167,7 @@ CREATE POLICY "Admins can manage apps"
 DROP POLICY IF EXISTS "Finance/admin can view external_deductions"   ON public.external_deductions;
 DROP POLICY IF EXISTS "Finance/admin can manage external_deductions" ON public.external_deductions;
 
+DROP POLICY IF EXISTS "Finance/admin can view external_deductions" ON public.external_deductions;
 CREATE POLICY "Finance/admin can view external_deductions"
   ON public.external_deductions FOR SELECT
   USING (
@@ -164,6 +177,7 @@ CREATE POLICY "Finance/admin can view external_deductions"
     )
   );
 
+DROP POLICY IF EXISTS "Finance/admin can manage external_deductions" ON public.external_deductions;
 CREATE POLICY "Finance/admin can manage external_deductions"
   ON public.external_deductions FOR ALL
   USING (
@@ -192,6 +206,7 @@ CREATE POLICY "Active users can view employees"
   ON public.employees FOR SELECT
   USING (is_active_user(auth.uid()));
 
+DROP POLICY IF EXISTS "HR/admin can manage employees" ON public.employees;
 CREATE POLICY "HR/admin can manage employees"
   ON public.employees FOR ALL
   USING (
@@ -215,6 +230,7 @@ CREATE POLICY "Active users can view employee_apps"
   ON public.employee_apps FOR SELECT
   USING (is_active_user(auth.uid()));
 
+DROP POLICY IF EXISTS "HR/admin can manage employee_apps" ON public.employee_apps;
 CREATE POLICY "HR/admin can manage employee_apps"
   ON public.employee_apps FOR ALL
   USING (
@@ -238,6 +254,7 @@ CREATE POLICY "Active users can view employee_scheme"
   ON public.employee_scheme FOR SELECT
   USING (is_active_user(auth.uid()));
 
+DROP POLICY IF EXISTS "HR/admin can manage employee_scheme" ON public.employee_scheme;
 CREATE POLICY "HR/admin can manage employee_scheme"
   ON public.employee_scheme FOR ALL
   USING (
@@ -261,6 +278,7 @@ CREATE POLICY "Active users can view employee_tiers"
   ON public.employee_tiers FOR SELECT
   USING (is_active_user(auth.uid()));
 
+DROP POLICY IF EXISTS "HR/admin can manage employee_tiers" ON public.employee_tiers;
 CREATE POLICY "HR/admin can manage employee_tiers"
   ON public.employee_tiers FOR ALL
   USING (
@@ -284,6 +302,7 @@ CREATE POLICY "Active users can view departments"
   ON public.departments FOR SELECT
   USING (is_active_user(auth.uid()));
 
+DROP POLICY IF EXISTS "HR/admin can manage departments" ON public.departments;
 CREATE POLICY "HR/admin can manage departments"
   ON public.departments FOR ALL
   USING (
@@ -307,6 +326,7 @@ CREATE POLICY "Active users can view positions"
   ON public.positions FOR SELECT
   USING (is_active_user(auth.uid()));
 
+DROP POLICY IF EXISTS "HR/admin can manage positions" ON public.positions;
 CREATE POLICY "HR/admin can manage positions"
   ON public.positions FOR ALL
   USING (
@@ -335,6 +355,7 @@ CREATE POLICY "Active users can view attendance"
   ON public.attendance FOR SELECT
   USING (is_active_user(auth.uid()));
 
+DROP POLICY IF EXISTS "HR/admin can manage attendance" ON public.attendance;
 CREATE POLICY "HR/admin can manage attendance"
   ON public.attendance FOR ALL
   USING (
@@ -358,6 +379,7 @@ CREATE POLICY "Active users can view advances"
   ON public.advances FOR SELECT
   USING (is_active_user(auth.uid()));
 
+DROP POLICY IF EXISTS "Finance/admin can manage advances" ON public.advances;
 CREATE POLICY "Finance/admin can manage advances"
   ON public.advances FOR ALL
   USING (
@@ -377,10 +399,12 @@ CREATE POLICY "Finance/admin can manage advances"
 DROP POLICY IF EXISTS "Active users can view advance_installments"   ON public.advance_installments;
 DROP POLICY IF EXISTS "Finance/admin can manage advance_installments" ON public.advance_installments;
 
+DROP POLICY IF EXISTS "Active users can view advance_installments" ON public.advance_installments;
 CREATE POLICY "Active users can view advance_installments"
   ON public.advance_installments FOR SELECT
   USING (is_active_user(auth.uid()));
 
+DROP POLICY IF EXISTS "Finance/admin can manage advance_installments" ON public.advance_installments;
 CREATE POLICY "Finance/admin can manage advance_installments"
   ON public.advance_installments FOR ALL
   USING (
@@ -404,6 +428,7 @@ CREATE POLICY "Active users can view alerts"
   ON public.alerts FOR SELECT
   USING (is_active_user(auth.uid()));
 
+DROP POLICY IF EXISTS "HR/admin can manage alerts" ON public.alerts;
 CREATE POLICY "HR/admin can manage alerts"
   ON public.alerts FOR ALL
   USING (
@@ -437,6 +462,7 @@ CREATE POLICY "Finance/admin can view salary_records"
     )
   );
 
+DROP POLICY IF EXISTS "Finance/admin can manage salary_records" ON public.salary_records;
 CREATE POLICY "Finance/admin can manage salary_records"
   ON public.salary_records FOR ALL
   USING (
@@ -465,6 +491,7 @@ CREATE POLICY "Finance/admin can view pl_records"
     )
   );
 
+DROP POLICY IF EXISTS "Finance/admin can manage pl_records" ON public.pl_records;
 CREATE POLICY "Finance/admin can manage pl_records"
   ON public.pl_records FOR ALL
   USING (
@@ -488,6 +515,7 @@ CREATE POLICY "Active users can view salary_schemes"
   ON public.salary_schemes FOR SELECT
   USING (is_active_user(auth.uid()));
 
+DROP POLICY IF EXISTS "Admins/finance can manage salary_schemes" ON public.salary_schemes;
 CREATE POLICY "Admins/finance can manage salary_schemes"
   ON public.salary_schemes FOR ALL
   USING (
@@ -507,10 +535,12 @@ CREATE POLICY "Admins/finance can manage salary_schemes"
 DROP POLICY IF EXISTS "Active users can view salary_scheme_tiers"    ON public.salary_scheme_tiers;
 DROP POLICY IF EXISTS "Admins/finance can manage salary_scheme_tiers" ON public.salary_scheme_tiers;
 
+DROP POLICY IF EXISTS "Active users can view salary_scheme_tiers" ON public.salary_scheme_tiers;
 CREATE POLICY "Active users can view salary_scheme_tiers"
   ON public.salary_scheme_tiers FOR SELECT
   USING (is_active_user(auth.uid()));
 
+DROP POLICY IF EXISTS "Admins/finance can manage salary_scheme_tiers" ON public.salary_scheme_tiers;
 CREATE POLICY "Admins/finance can manage salary_scheme_tiers"
   ON public.salary_scheme_tiers FOR ALL
   USING (
@@ -530,10 +560,12 @@ CREATE POLICY "Admins/finance can manage salary_scheme_tiers"
 DROP POLICY IF EXISTS "Active users can view scheme_month_snapshots"       ON public.scheme_month_snapshots;
 DROP POLICY IF EXISTS "Admins/finance can manage scheme_month_snapshots"   ON public.scheme_month_snapshots;
 
+DROP POLICY IF EXISTS "Active users can view scheme_month_snapshots" ON public.scheme_month_snapshots;
 CREATE POLICY "Active users can view scheme_month_snapshots"
   ON public.scheme_month_snapshots FOR SELECT
   USING (is_active_user(auth.uid()));
 
+DROP POLICY IF EXISTS "Admins/finance can manage scheme_month_snapshots" ON public.scheme_month_snapshots;
 CREATE POLICY "Admins/finance can manage scheme_month_snapshots"
   ON public.scheme_month_snapshots FOR ALL
   USING (
@@ -562,6 +594,7 @@ CREATE POLICY "Active users can view vehicles"
   ON public.vehicles FOR SELECT
   USING (is_active_user(auth.uid()));
 
+DROP POLICY IF EXISTS "Operations/admin can manage vehicles" ON public.vehicles;
 CREATE POLICY "Operations/admin can manage vehicles"
   ON public.vehicles FOR ALL
   USING (
@@ -581,10 +614,12 @@ CREATE POLICY "Operations/admin can manage vehicles"
 DROP POLICY IF EXISTS "Active users can view vehicle_assignments"    ON public.vehicle_assignments;
 DROP POLICY IF EXISTS "Operations/admin can manage vehicle_assignments" ON public.vehicle_assignments;
 
+DROP POLICY IF EXISTS "Active users can view vehicle_assignments" ON public.vehicle_assignments;
 CREATE POLICY "Active users can view vehicle_assignments"
   ON public.vehicle_assignments FOR SELECT
   USING (is_active_user(auth.uid()));
 
+DROP POLICY IF EXISTS "Operations/admin can manage vehicle_assignments" ON public.vehicle_assignments;
 CREATE POLICY "Operations/admin can manage vehicle_assignments"
   ON public.vehicle_assignments FOR ALL
   USING (
@@ -608,6 +643,7 @@ CREATE POLICY "Active users can view maintenance_logs"
   ON public.maintenance_logs FOR SELECT
   USING (is_active_user(auth.uid()));
 
+DROP POLICY IF EXISTS "Operations/admin can manage maintenance_logs" ON public.maintenance_logs;
 CREATE POLICY "Operations/admin can manage maintenance_logs"
   ON public.maintenance_logs FOR ALL
   USING (
@@ -631,6 +667,7 @@ CREATE POLICY "Active users can view vehicle_mileage"
   ON public.vehicle_mileage FOR SELECT
   USING (is_active_user(auth.uid()));
 
+DROP POLICY IF EXISTS "Admin/operations can manage vehicle_mileage" ON public.vehicle_mileage;
 CREATE POLICY "Admin/operations can manage vehicle_mileage"
   ON public.vehicle_mileage FOR ALL
   USING (
@@ -650,10 +687,12 @@ CREATE POLICY "Admin/operations can manage vehicle_mileage"
 DROP POLICY IF EXISTS "Active users can view vehicle_mileage_daily"       ON public.vehicle_mileage_daily;
 DROP POLICY IF EXISTS "Admin/operations can manage vehicle_mileage_daily" ON public.vehicle_mileage_daily;
 
+DROP POLICY IF EXISTS "Active users can view vehicle_mileage_daily" ON public.vehicle_mileage_daily;
 CREATE POLICY "Active users can view vehicle_mileage_daily"
   ON public.vehicle_mileage_daily FOR SELECT
   USING (is_active_user(auth.uid()));
 
+DROP POLICY IF EXISTS "Admin/operations can manage vehicle_mileage_daily" ON public.vehicle_mileage_daily;
 CREATE POLICY "Admin/operations can manage vehicle_mileage_daily"
   ON public.vehicle_mileage_daily FOR ALL
   USING (
@@ -680,14 +719,17 @@ DROP POLICY IF EXISTS "Admins can update system_settings"            ON public.s
 DROP POLICY IF EXISTS "Admins can insert system_settings"            ON public.system_settings;
 
 -- system_settings are public (needed on login screen before auth)
+DROP POLICY IF EXISTS "Anyone can view system_settings" ON public.system_settings;
 CREATE POLICY "Anyone can view system_settings"
   ON public.system_settings FOR SELECT
   USING (true);
 
+DROP POLICY IF EXISTS "Admins can insert system_settings" ON public.system_settings;
 CREATE POLICY "Admins can insert system_settings"
   ON public.system_settings FOR INSERT
   WITH CHECK (is_active_user(auth.uid()) AND has_role(auth.uid(), 'admin'::app_role));
 
+DROP POLICY IF EXISTS "Admins can update system_settings" ON public.system_settings;
 CREATE POLICY "Admins can update system_settings"
   ON public.system_settings FOR UPDATE
   USING (is_active_user(auth.uid()) AND has_role(auth.uid(), 'admin'::app_role));
@@ -700,6 +742,7 @@ CREATE POLICY "Active users can view trade_registers"
   ON public.trade_registers FOR SELECT
   USING (is_active_user(auth.uid()));
 
+DROP POLICY IF EXISTS "Admins can manage trade_registers" ON public.trade_registers;
 CREATE POLICY "Admins can manage trade_registers"
   ON public.trade_registers FOR ALL
   USING (is_active_user(auth.uid()) AND has_role(auth.uid(), 'admin'::app_role))
@@ -710,10 +753,12 @@ DROP POLICY IF EXISTS "Admins can view audit_log"                    ON public.a
 DROP POLICY IF EXISTS "Active users can insert audit_log"            ON public.audit_log;
 DROP POLICY IF EXISTS "Authenticated can insert audit_log"           ON public.audit_log;
 
+DROP POLICY IF EXISTS "Admins can view audit_log" ON public.audit_log;
 CREATE POLICY "Admins can view audit_log"
   ON public.audit_log FOR SELECT
   USING (is_active_user(auth.uid()) AND has_role(auth.uid(), 'admin'::app_role));
 
+DROP POLICY IF EXISTS "Active users can insert audit_log" ON public.audit_log;
 CREATE POLICY "Active users can insert audit_log"
   ON public.audit_log FOR INSERT
   WITH CHECK (is_active_user(auth.uid()) AND auth.uid() = user_id);

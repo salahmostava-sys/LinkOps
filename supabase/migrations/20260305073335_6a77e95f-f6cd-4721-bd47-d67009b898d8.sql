@@ -27,6 +27,7 @@ VALUES (
 ) ON CONFLICT (id) DO NOTHING;
 
 -- Storage RLS policies
+DROP POLICY IF EXISTS "HR/admin can upload employee documents" ON storage.objects;
 CREATE POLICY "HR/admin can upload employee documents"
 ON storage.objects FOR INSERT
 WITH CHECK (
@@ -34,6 +35,7 @@ WITH CHECK (
   AND (has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'hr'::app_role))
 );
 
+DROP POLICY IF EXISTS "HR/admin can view employee documents" ON storage.objects;
 CREATE POLICY "HR/admin can view employee documents"
 ON storage.objects FOR SELECT
 USING (
@@ -41,6 +43,7 @@ USING (
   AND (has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'hr'::app_role))
 );
 
+DROP POLICY IF EXISTS "HR/admin can delete employee documents" ON storage.objects;
 CREATE POLICY "HR/admin can delete employee documents"
 ON storage.objects FOR DELETE
 USING (
@@ -48,6 +51,7 @@ USING (
   AND (has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'hr'::app_role))
 );
 
+DROP POLICY IF EXISTS "HR/admin can update employee documents" ON storage.objects;
 CREATE POLICY "HR/admin can update employee documents"
 ON storage.objects FOR UPDATE
 USING (

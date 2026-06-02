@@ -108,35 +108,43 @@ ALTER TABLE daily_shifts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE app_hybrid_rules ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies for daily_shifts
+DROP POLICY IF EXISTS "Authenticated users can view daily_shifts" ON daily_shifts;
 CREATE POLICY "Authenticated users can view daily_shifts"
   ON daily_shifts FOR SELECT
   USING (public.is_active_user(auth.uid()));
 
+DROP POLICY IF EXISTS "Authenticated users can insert daily_shifts" ON daily_shifts;
 CREATE POLICY "Authenticated users can insert daily_shifts"
   ON daily_shifts FOR INSERT
   WITH CHECK (public.is_active_user(auth.uid()));
 
+DROP POLICY IF EXISTS "Authenticated users can update daily_shifts" ON daily_shifts;
 CREATE POLICY "Authenticated users can update daily_shifts"
   ON daily_shifts FOR UPDATE
   USING (public.is_active_user(auth.uid()));
 
+DROP POLICY IF EXISTS "Authenticated users can delete daily_shifts" ON daily_shifts;
 CREATE POLICY "Authenticated users can delete daily_shifts"
   ON daily_shifts FOR DELETE
   USING (public.is_active_user(auth.uid()));
 
 -- RLS Policies for app_hybrid_rules
+DROP POLICY IF EXISTS "Authenticated users can view app_hybrid_rules" ON app_hybrid_rules;
 CREATE POLICY "Authenticated users can view app_hybrid_rules"
   ON app_hybrid_rules FOR SELECT
   USING (public.is_active_user(auth.uid()));
 
+DROP POLICY IF EXISTS "Authenticated users can insert app_hybrid_rules" ON app_hybrid_rules;
 CREATE POLICY "Authenticated users can insert app_hybrid_rules"
   ON app_hybrid_rules FOR INSERT
   WITH CHECK (public.is_active_user(auth.uid()));
 
+DROP POLICY IF EXISTS "Authenticated users can update app_hybrid_rules" ON app_hybrid_rules;
 CREATE POLICY "Authenticated users can update app_hybrid_rules"
   ON app_hybrid_rules FOR UPDATE
   USING (public.is_active_user(auth.uid()));
 
+DROP POLICY IF EXISTS "Authenticated users can delete app_hybrid_rules" ON app_hybrid_rules;
 CREATE POLICY "Authenticated users can delete app_hybrid_rules"
   ON app_hybrid_rules FOR DELETE
   USING (public.is_active_user(auth.uid()));

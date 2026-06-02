@@ -10,11 +10,13 @@ CREATE TABLE IF NOT EXISTS public.scheme_month_snapshots (
 
 ALTER TABLE public.scheme_month_snapshots ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Authenticated can view scheme_month_snapshots" ON public.scheme_month_snapshots;
 CREATE POLICY "Authenticated can view scheme_month_snapshots"
   ON public.scheme_month_snapshots FOR SELECT
   TO authenticated
   USING (true);
 
+DROP POLICY IF EXISTS "Admins/finance can manage scheme_month_snapshots" ON public.scheme_month_snapshots;
 CREATE POLICY "Admins/finance can manage scheme_month_snapshots"
   ON public.scheme_month_snapshots FOR ALL
   TO authenticated

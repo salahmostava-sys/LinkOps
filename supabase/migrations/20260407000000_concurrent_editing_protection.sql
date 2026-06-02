@@ -33,22 +33,26 @@ DROP POLICY IF EXISTS "Users can update own drafts" ON public.salary_drafts;
 DROP POLICY IF EXISTS "Users can delete own drafts" ON public.salary_drafts;
 
 -- 6. RLS Policy: Users can only see their own drafts
+DROP POLICY IF EXISTS "Users can view own drafts" ON public.salary_drafts;
 CREATE POLICY "Users can view own drafts"
 ON public.salary_drafts FOR SELECT
 USING (auth.uid() = user_id);
 
 -- 7. RLS Policy: Users can insert their own drafts
+DROP POLICY IF EXISTS "Users can insert own drafts" ON public.salary_drafts;
 CREATE POLICY "Users can insert own drafts"
 ON public.salary_drafts FOR INSERT
 WITH CHECK (auth.uid() = user_id);
 
 -- 8. RLS Policy: Users can update their own drafts
+DROP POLICY IF EXISTS "Users can update own drafts" ON public.salary_drafts;
 CREATE POLICY "Users can update own drafts"
 ON public.salary_drafts FOR UPDATE
 USING (auth.uid() = user_id)
 WITH CHECK (auth.uid() = user_id);
 
 -- 9. RLS Policy: Users can delete their own drafts
+DROP POLICY IF EXISTS "Users can delete own drafts" ON public.salary_drafts;
 CREATE POLICY "Users can delete own drafts"
 ON public.salary_drafts FOR DELETE
 USING (auth.uid() = user_id);

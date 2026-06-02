@@ -20,21 +20,25 @@ CREATE UNIQUE INDEX IF NOT EXISTS system_settings_singleton ON public.system_set
 ALTER TABLE public.system_settings ENABLE ROW LEVEL SECURITY;
 
 -- Everyone can read settings (it's public config)
+DROP POLICY IF EXISTS "Anyone can view system_settings" ON public.system_settings;
 CREATE POLICY "Anyone can view system_settings"
   ON public.system_settings FOR SELECT
   USING (true);
 
 -- Only admins can update
+DROP POLICY IF EXISTS "Admins can update system_settings" ON public.system_settings;
 CREATE POLICY "Admins can update system_settings"
   ON public.system_settings FOR UPDATE
   USING (has_role(auth.uid(), 'admin'::app_role));
 
 -- Only admins can insert
+DROP POLICY IF EXISTS "Admins can insert system_settings" ON public.system_settings;
 CREATE POLICY "Admins can insert system_settings"
   ON public.system_settings FOR INSERT
   WITH CHECK (has_role(auth.uid(), 'admin'::app_role));
 
 -- Auto-update timestamp
+DROP TRIGGER IF EXISTS update_system_settings_updated_at ON public.system_settings;
 CREATE TRIGGER update_system_settings_updated_at
   BEFORE UPDATE ON public.system_settings
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();

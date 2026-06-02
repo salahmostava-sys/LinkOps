@@ -4,6 +4,7 @@
 ALTER TABLE public.edge_rate_limits ENABLE ROW LEVEL SECURITY;
 
 -- Only service_role (Edge Functions) can access rows.
+DROP POLICY IF EXISTS "service_role_full_access" ON public.edge_rate_limits;
 CREATE POLICY "service_role_full_access" ON public.edge_rate_limits
   FOR ALL
   USING (auth.role() = 'service_role')

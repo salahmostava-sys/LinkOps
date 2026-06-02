@@ -23,16 +23,20 @@ CREATE TABLE IF NOT EXISTS public.leave_requests (
 ALTER TABLE public.leave_requests ENABLE ROW LEVEL SECURITY;
 
 -- SELECT: all authenticated users can read (SELECT with USING (true) is intentional for shared HR data)
+DROP POLICY IF EXISTS "leave_requests_select" ON public.leave_requests;
 CREATE POLICY "leave_requests_select" ON public.leave_requests
   FOR SELECT USING (true);
 
 -- INSERT/UPDATE/DELETE: require authenticated session
+DROP POLICY IF EXISTS "leave_requests_insert" ON public.leave_requests;
 CREATE POLICY "leave_requests_insert" ON public.leave_requests
   FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
 
+DROP POLICY IF EXISTS "leave_requests_update" ON public.leave_requests;
 CREATE POLICY "leave_requests_update" ON public.leave_requests
   FOR UPDATE USING (auth.uid() IS NOT NULL) WITH CHECK (auth.uid() IS NOT NULL);
 
+DROP POLICY IF EXISTS "leave_requests_delete" ON public.leave_requests;
 CREATE POLICY "leave_requests_delete" ON public.leave_requests
   FOR DELETE USING (auth.uid() IS NOT NULL);
 

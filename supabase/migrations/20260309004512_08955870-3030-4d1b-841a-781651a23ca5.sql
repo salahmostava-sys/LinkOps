@@ -12,14 +12,17 @@ CREATE TABLE IF NOT EXISTS public.departments (
 
 ALTER TABLE public.departments ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Active users can view departments" ON public.departments;
 CREATE POLICY "Active users can view departments"
   ON public.departments FOR SELECT
   USING (is_active_user(auth.uid()));
 
+DROP POLICY IF EXISTS "HR/admin can manage departments" ON public.departments;
 CREATE POLICY "HR/admin can manage departments"
   ON public.departments FOR ALL
   USING (is_active_user(auth.uid()) AND (has_role(auth.uid(), 'admin') OR has_role(auth.uid(), 'hr')));
 
+DROP TRIGGER IF EXISTS update_departments_updated_at ON public.departments;
 CREATE TRIGGER update_departments_updated_at
   BEFORE UPDATE ON public.departments
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
@@ -37,14 +40,17 @@ CREATE TABLE IF NOT EXISTS public.positions (
 
 ALTER TABLE public.positions ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Active users can view positions" ON public.positions;
 CREATE POLICY "Active users can view positions"
   ON public.positions FOR SELECT
   USING (is_active_user(auth.uid()));
 
+DROP POLICY IF EXISTS "HR/admin can manage positions" ON public.positions;
 CREATE POLICY "HR/admin can manage positions"
   ON public.positions FOR ALL
   USING (is_active_user(auth.uid()) AND (has_role(auth.uid(), 'admin') OR has_role(auth.uid(), 'hr')));
 
+DROP TRIGGER IF EXISTS update_positions_updated_at ON public.positions;
 CREATE TRIGGER update_positions_updated_at
   BEFORE UPDATE ON public.positions
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();

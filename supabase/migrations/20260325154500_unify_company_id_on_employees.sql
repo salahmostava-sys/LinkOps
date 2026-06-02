@@ -69,6 +69,7 @@ DROP POLICY IF EXISTS "Employees: insert" ON public.employees;
 DROP POLICY IF EXISTS "Employees: update" ON public.employees;
 DROP POLICY IF EXISTS "Employees: delete" ON public.employees;
 
+DROP POLICY IF EXISTS "Employees: select own company" ON public.employees;
 CREATE POLICY "Employees: select own company"
 ON public.employees
 FOR SELECT
@@ -84,6 +85,7 @@ USING (
   )
 );
 
+DROP POLICY IF EXISTS "Employees: insert" ON public.employees;
 CREATE POLICY "Employees: insert"
 ON public.employees
 FOR INSERT
@@ -97,6 +99,7 @@ WITH CHECK (
   )
 );
 
+DROP POLICY IF EXISTS "Employees: update" ON public.employees;
 CREATE POLICY "Employees: update"
 ON public.employees
 FOR UPDATE
@@ -118,6 +121,7 @@ WITH CHECK (
   )
 );
 
+DROP POLICY IF EXISTS "Employees: delete" ON public.employees;
 CREATE POLICY "Employees: delete"
 ON public.employees
 FOR DELETE

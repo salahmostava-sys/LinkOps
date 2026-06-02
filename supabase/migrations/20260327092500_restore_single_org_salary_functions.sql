@@ -1,6 +1,10 @@
 -- Restore salary RPC functions after single-org company_id removal.
 -- These definitions remove company_id dependencies that were left from tenant-era functions.
 
+DROP FUNCTION IF EXISTS public.calculate_salary_for_employee_month(uuid, text, text, numeric, text) CASCADE;
+DROP FUNCTION IF EXISTS public.calculate_salary_for_month(text, text) CASCADE;
+DROP FUNCTION IF EXISTS public.preview_salary_for_month(text) CASCADE;
+
 CREATE OR REPLACE FUNCTION public.calculate_salary_for_employee_month(
   p_employee_id uuid,
   p_month_year text,

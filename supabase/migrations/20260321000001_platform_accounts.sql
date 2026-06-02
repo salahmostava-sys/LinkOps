@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS public.platform_accounts (
 
 ALTER TABLE public.platform_accounts ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "platform_accounts_select" ON public.platform_accounts;
 CREATE POLICY "platform_accounts_select"
   ON public.platform_accounts FOR SELECT
   USING (
@@ -37,6 +38,7 @@ CREATE POLICY "platform_accounts_select"
     )
   );
 
+DROP POLICY IF EXISTS "platform_accounts_manage" ON public.platform_accounts;
 CREATE POLICY "platform_accounts_manage"
   ON public.platform_accounts FOR ALL
   USING (
@@ -52,6 +54,7 @@ CREATE POLICY "platform_accounts_manage"
     )
   );
 
+DROP TRIGGER IF EXISTS update_platform_accounts_updated_at ON public.platform_accounts;
 CREATE TRIGGER update_platform_accounts_updated_at
   BEFORE UPDATE ON public.platform_accounts
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
@@ -74,6 +77,7 @@ CREATE TABLE IF NOT EXISTS public.account_assignments (
 
 ALTER TABLE public.account_assignments ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "account_assignments_select" ON public.account_assignments;
 CREATE POLICY "account_assignments_select"
   ON public.account_assignments FOR SELECT
   USING (
@@ -85,6 +89,7 @@ CREATE POLICY "account_assignments_select"
     )
   );
 
+DROP POLICY IF EXISTS "account_assignments_insert_update" ON public.account_assignments;
 CREATE POLICY "account_assignments_insert_update"
   ON public.account_assignments FOR INSERT
   WITH CHECK (
@@ -94,6 +99,7 @@ CREATE POLICY "account_assignments_insert_update"
     )
   );
 
+DROP POLICY IF EXISTS "account_assignments_update_only" ON public.account_assignments;
 CREATE POLICY "account_assignments_update_only"
   ON public.account_assignments FOR UPDATE
   USING (
@@ -105,6 +111,7 @@ CREATE POLICY "account_assignments_update_only"
 
 -- NO DELETE policy intentionally — records are closed with end_date only
 
+DROP TRIGGER IF EXISTS update_account_assignments_updated_at ON public.account_assignments;
 CREATE TRIGGER update_account_assignments_updated_at
   BEFORE UPDATE ON public.account_assignments
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();

@@ -37,6 +37,7 @@ CREATE POLICY "Admin actions: select"
     )
   );
 
+DROP POLICY IF EXISTS "Admin actions: insert" ON public.admin_action_log;
 CREATE POLICY "Admin actions: insert"
   ON public.admin_action_log
   FOR INSERT

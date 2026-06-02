@@ -15,11 +15,13 @@ CREATE TABLE IF NOT EXISTS public.vehicle_mileage (
 
 ALTER TABLE public.vehicle_mileage ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Authenticated can view vehicle_mileage" ON public.vehicle_mileage;
 CREATE POLICY "Authenticated can view vehicle_mileage"
   ON public.vehicle_mileage FOR SELECT
   TO authenticated
   USING (true);
 
+DROP POLICY IF EXISTS "Admin/operations can manage vehicle_mileage" ON public.vehicle_mileage;
 CREATE POLICY "Admin/operations can manage vehicle_mileage"
   ON public.vehicle_mileage FOR ALL
   TO authenticated

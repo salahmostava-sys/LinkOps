@@ -379,12 +379,19 @@ RETURNS TRIGGER AS $$
 BEGIN NEW.updated_at = now(); RETURN NEW; END;
 $$ LANGUAGE plpgsql SET search_path = public;
 
+DROP TRIGGER IF EXISTS trg_profiles_updated_at ON public.profiles;
 CREATE TRIGGER trg_profiles_updated_at BEFORE UPDATE ON public.profiles FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+DROP TRIGGER IF EXISTS trg_employees_updated_at ON public.employees;
 CREATE TRIGGER trg_employees_updated_at BEFORE UPDATE ON public.employees FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+DROP TRIGGER IF EXISTS trg_vehicles_updated_at ON public.vehicles;
 CREATE TRIGGER trg_vehicles_updated_at BEFORE UPDATE ON public.vehicles FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+DROP TRIGGER IF EXISTS trg_advances_updated_at ON public.advances;
 CREATE TRIGGER trg_advances_updated_at BEFORE UPDATE ON public.advances FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+DROP TRIGGER IF EXISTS trg_salary_records_updated_at ON public.salary_records;
 CREATE TRIGGER trg_salary_records_updated_at BEFORE UPDATE ON public.salary_records FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+DROP TRIGGER IF EXISTS trg_salary_schemes_updated_at ON public.salary_schemes;
 CREATE TRIGGER trg_salary_schemes_updated_at BEFORE UPDATE ON public.salary_schemes FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+DROP TRIGGER IF EXISTS trg_daily_orders_updated_at ON public.daily_orders;
 CREATE TRIGGER trg_daily_orders_updated_at BEFORE UPDATE ON public.daily_orders FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
 -- ============================================================
@@ -400,6 +407,7 @@ BEGIN
 END;
 $$;
 
+DROP TRIGGER IF EXISTS on_auth_user_created ON public.handle_new_user();;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
@@ -409,88 +417,135 @@ CREATE TRIGGER on_auth_user_created
 -- ============================================================
 
 -- PROFILES
+DROP POLICY IF EXISTS "Users can view own profile" ON public.profiles;
 CREATE POLICY "Users can view own profile" ON public.profiles FOR SELECT TO authenticated USING (auth.uid() = id);
+DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
 CREATE POLICY "Users can update own profile" ON public.profiles FOR UPDATE TO authenticated USING (auth.uid() = id);
+DROP POLICY IF EXISTS "Admins can view all profiles" ON public.profiles;
 CREATE POLICY "Admins can view all profiles" ON public.profiles FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'admin'));
+DROP POLICY IF EXISTS "Admins can update all profiles" ON public.profiles;
 CREATE POLICY "Admins can update all profiles" ON public.profiles FOR UPDATE TO authenticated USING (public.has_role(auth.uid(), 'admin'));
+DROP POLICY IF EXISTS "Admins can insert profiles" ON public.profiles;
 CREATE POLICY "Admins can insert profiles" ON public.profiles FOR INSERT TO authenticated WITH CHECK (public.has_role(auth.uid(), 'admin'));
 
 -- USER ROLES
+DROP POLICY IF EXISTS "Users can view own roles" ON public.user_roles;
 CREATE POLICY "Users can view own roles" ON public.user_roles FOR SELECT TO authenticated USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Admins can manage all roles" ON public.user_roles;
 CREATE POLICY "Admins can manage all roles" ON public.user_roles FOR ALL TO authenticated USING (public.has_role(auth.uid(), 'admin'));
 
 -- USER PERMISSIONS
+DROP POLICY IF EXISTS "Users can view own permissions" ON public.user_permissions;
 CREATE POLICY "Users can view own permissions" ON public.user_permissions FOR SELECT TO authenticated USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Admins can manage all permissions" ON public.user_permissions;
 CREATE POLICY "Admins can manage all permissions" ON public.user_permissions FOR ALL TO authenticated USING (public.has_role(auth.uid(), 'admin'));
 
 -- TRADE REGISTERS
+DROP POLICY IF EXISTS "Authenticated can view trade_registers" ON public.trade_registers;
 CREATE POLICY "Authenticated can view trade_registers" ON public.trade_registers FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Admins can manage trade_registers" ON public.trade_registers;
 CREATE POLICY "Admins can manage trade_registers" ON public.trade_registers FOR ALL TO authenticated USING (public.has_role(auth.uid(), 'admin'));
 
 -- APPS
+DROP POLICY IF EXISTS "Authenticated can view apps" ON public.apps;
 CREATE POLICY "Authenticated can view apps" ON public.apps FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Admins can manage apps" ON public.apps;
 CREATE POLICY "Admins can manage apps" ON public.apps FOR ALL TO authenticated USING (public.has_role(auth.uid(), 'admin'));
 
 -- SALARY SCHEMES
+DROP POLICY IF EXISTS "Authenticated can view schemes" ON public.salary_schemes;
 CREATE POLICY "Authenticated can view schemes" ON public.salary_schemes FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Admins/finance can manage schemes" ON public.salary_schemes;
 CREATE POLICY "Admins/finance can manage schemes" ON public.salary_schemes FOR ALL TO authenticated USING (public.has_role(auth.uid(), 'admin') OR public.has_role(auth.uid(), 'finance'));
 
+DROP POLICY IF EXISTS "Authenticated can view scheme tiers" ON public.salary_scheme_tiers;
 CREATE POLICY "Authenticated can view scheme tiers" ON public.salary_scheme_tiers FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Admins/finance can manage scheme tiers" ON public.salary_scheme_tiers;
 CREATE POLICY "Admins/finance can manage scheme tiers" ON public.salary_scheme_tiers FOR ALL TO authenticated USING (public.has_role(auth.uid(), 'admin') OR public.has_role(auth.uid(), 'finance'));
 
 -- EMPLOYEES
+DROP POLICY IF EXISTS "Authenticated can view employees" ON public.employees;
 CREATE POLICY "Authenticated can view employees" ON public.employees FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "HR/admin can manage employees" ON public.employees;
 CREATE POLICY "HR/admin can manage employees" ON public.employees FOR ALL TO authenticated USING (public.has_role(auth.uid(), 'admin') OR public.has_role(auth.uid(), 'hr'));
 
+DROP POLICY IF EXISTS "Authenticated can view employee_scheme" ON public.employee_scheme;
 CREATE POLICY "Authenticated can view employee_scheme" ON public.employee_scheme FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "HR/admin can manage employee_scheme" ON public.employee_scheme;
 CREATE POLICY "HR/admin can manage employee_scheme" ON public.employee_scheme FOR ALL TO authenticated USING (public.has_role(auth.uid(), 'admin') OR public.has_role(auth.uid(), 'hr'));
 
+DROP POLICY IF EXISTS "Authenticated can view employee_apps" ON public.employee_apps;
 CREATE POLICY "Authenticated can view employee_apps" ON public.employee_apps FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "HR/admin can manage employee_apps" ON public.employee_apps;
 CREATE POLICY "HR/admin can manage employee_apps" ON public.employee_apps FOR ALL TO authenticated USING (public.has_role(auth.uid(), 'admin') OR public.has_role(auth.uid(), 'hr'));
 
 -- VEHICLES
+DROP POLICY IF EXISTS "Authenticated can view vehicles" ON public.vehicles;
 CREATE POLICY "Authenticated can view vehicles" ON public.vehicles FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Operations/admin can manage vehicles" ON public.vehicles;
 CREATE POLICY "Operations/admin can manage vehicles" ON public.vehicles FOR ALL TO authenticated USING (public.has_role(auth.uid(), 'admin') OR public.has_role(auth.uid(), 'operations'));
 
+DROP POLICY IF EXISTS "Authenticated can view vehicle_assignments" ON public.vehicle_assignments;
 CREATE POLICY "Authenticated can view vehicle_assignments" ON public.vehicle_assignments FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Operations/admin can manage vehicle_assignments" ON public.vehicle_assignments;
 CREATE POLICY "Operations/admin can manage vehicle_assignments" ON public.vehicle_assignments FOR ALL TO authenticated USING (public.has_role(auth.uid(), 'admin') OR public.has_role(auth.uid(), 'operations'));
 
+DROP POLICY IF EXISTS "Authenticated can view maintenance_logs" ON public.maintenance_logs;
 CREATE POLICY "Authenticated can view maintenance_logs" ON public.maintenance_logs FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Operations/admin can manage maintenance_logs" ON public.maintenance_logs;
 CREATE POLICY "Operations/admin can manage maintenance_logs" ON public.maintenance_logs FOR ALL TO authenticated USING (public.has_role(auth.uid(), 'admin') OR public.has_role(auth.uid(), 'operations'));
 
 -- ATTENDANCE
+DROP POLICY IF EXISTS "Authenticated can view attendance" ON public.attendance;
 CREATE POLICY "Authenticated can view attendance" ON public.attendance FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "HR/admin can manage attendance" ON public.attendance;
 CREATE POLICY "HR/admin can manage attendance" ON public.attendance FOR ALL TO authenticated USING (public.has_role(auth.uid(), 'admin') OR public.has_role(auth.uid(), 'hr'));
 
 -- DAILY ORDERS
+DROP POLICY IF EXISTS "Authenticated can view daily_orders" ON public.daily_orders;
 CREATE POLICY "Authenticated can view daily_orders" ON public.daily_orders FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Operations/admin can manage daily_orders" ON public.daily_orders;
 CREATE POLICY "Operations/admin can manage daily_orders" ON public.daily_orders FOR ALL TO authenticated USING (public.has_role(auth.uid(), 'admin') OR public.has_role(auth.uid(), 'operations') OR public.has_role(auth.uid(), 'hr'));
 
 -- ADVANCES
+DROP POLICY IF EXISTS "Authenticated can view advances" ON public.advances;
 CREATE POLICY "Authenticated can view advances" ON public.advances FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Finance/admin can manage advances" ON public.advances;
 CREATE POLICY "Finance/admin can manage advances" ON public.advances FOR ALL TO authenticated USING (public.has_role(auth.uid(), 'admin') OR public.has_role(auth.uid(), 'finance'));
 
+DROP POLICY IF EXISTS "Authenticated can view advance_installments" ON public.advance_installments;
 CREATE POLICY "Authenticated can view advance_installments" ON public.advance_installments FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Finance/admin can manage advance_installments" ON public.advance_installments;
 CREATE POLICY "Finance/admin can manage advance_installments" ON public.advance_installments FOR ALL TO authenticated USING (public.has_role(auth.uid(), 'admin') OR public.has_role(auth.uid(), 'finance'));
 
 -- EXTERNAL DEDUCTIONS
+DROP POLICY IF EXISTS "Finance/admin can view external_deductions" ON public.external_deductions;
 CREATE POLICY "Finance/admin can view external_deductions" ON public.external_deductions FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'admin') OR public.has_role(auth.uid(), 'finance'));
+DROP POLICY IF EXISTS "Finance/admin can manage external_deductions" ON public.external_deductions;
 CREATE POLICY "Finance/admin can manage external_deductions" ON public.external_deductions FOR ALL TO authenticated USING (public.has_role(auth.uid(), 'admin') OR public.has_role(auth.uid(), 'finance'));
 
 -- SALARY RECORDS
+DROP POLICY IF EXISTS "Finance/admin can view salary_records" ON public.salary_records;
 CREATE POLICY "Finance/admin can view salary_records" ON public.salary_records FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'admin') OR public.has_role(auth.uid(), 'finance'));
+DROP POLICY IF EXISTS "Finance/admin can manage salary_records" ON public.salary_records;
 CREATE POLICY "Finance/admin can manage salary_records" ON public.salary_records FOR ALL TO authenticated USING (public.has_role(auth.uid(), 'admin') OR public.has_role(auth.uid(), 'finance'));
 
 -- P&L RECORDS
+DROP POLICY IF EXISTS "Finance/admin can view pl_records" ON public.pl_records;
 CREATE POLICY "Finance/admin can view pl_records" ON public.pl_records FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'admin') OR public.has_role(auth.uid(), 'finance'));
+DROP POLICY IF EXISTS "Finance/admin can manage pl_records" ON public.pl_records;
 CREATE POLICY "Finance/admin can manage pl_records" ON public.pl_records FOR ALL TO authenticated USING (public.has_role(auth.uid(), 'admin') OR public.has_role(auth.uid(), 'finance'));
 
 -- ALERTS
+DROP POLICY IF EXISTS "Authenticated can view alerts" ON public.alerts;
 CREATE POLICY "Authenticated can view alerts" ON public.alerts FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "System can manage alerts" ON public.alerts;
 CREATE POLICY "System can manage alerts" ON public.alerts FOR ALL TO authenticated USING (public.has_role(auth.uid(), 'admin') OR public.has_role(auth.uid(), 'hr'));
 
 -- AUDIT LOG
+DROP POLICY IF EXISTS "Admins can view audit_log" ON public.audit_log;
 CREATE POLICY "Admins can view audit_log" ON public.audit_log FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'admin'));
+DROP POLICY IF EXISTS "Authenticated can insert audit_log" ON public.audit_log;
 CREATE POLICY "Authenticated can insert audit_log" ON public.audit_log FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
 
 -- ============================================================

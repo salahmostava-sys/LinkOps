@@ -38,19 +38,21 @@ CREATE TABLE IF NOT EXISTS public.maintenance_parts (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_maintenance_logs_vehicle_id ON public.maintenance_logs(vehicle_id);
-CREATE INDEX idx_maintenance_logs_maintenance_date ON public.maintenance_logs(maintenance_date DESC);
-CREATE INDEX idx_maintenance_parts_log_id ON public.maintenance_parts(maintenance_log_id);
-CREATE INDEX idx_maintenance_parts_part_id ON public.maintenance_parts(part_id);
+CREATE INDEX IF NOT EXISTS idx_maintenance_logs_vehicle_id ON public.maintenance_logs(vehicle_id);
+CREATE INDEX IF NOT EXISTS idx_maintenance_logs_maintenance_date ON public.maintenance_logs(maintenance_date DESC);
+CREATE INDEX IF NOT EXISTS idx_maintenance_parts_log_id ON public.maintenance_parts(maintenance_log_id);
+CREATE INDEX IF NOT EXISTS idx_maintenance_parts_part_id ON public.maintenance_parts(part_id);
 
 ALTER TABLE public.maintenance_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.maintenance_parts ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Active users can view maintenance_logs" ON public.maintenance_logs;
 CREATE POLICY "Active users can view maintenance_logs"
   ON public.maintenance_logs FOR SELECT
   TO authenticated
   USING (is_active_user(auth.uid()));
 
+DROP POLICY IF EXISTS "Operations/admin can manage maintenance_logs" ON public.maintenance_logs;
 CREATE POLICY "Operations/admin can manage maintenance_logs"
   ON public.maintenance_logs FOR ALL
   TO authenticated
@@ -67,11 +69,13 @@ CREATE POLICY "Operations/admin can manage maintenance_logs"
     )
   );
 
+DROP POLICY IF EXISTS "Active users can view maintenance_parts" ON public.maintenance_parts;
 CREATE POLICY "Active users can view maintenance_parts"
   ON public.maintenance_parts FOR SELECT
   TO authenticated
   USING (is_active_user(auth.uid()));
 
+DROP POLICY IF EXISTS "Operations/admin can manage maintenance_parts" ON public.maintenance_parts;
 CREATE POLICY "Operations/admin can manage maintenance_parts"
   ON public.maintenance_parts FOR ALL
   TO authenticated
