@@ -1,4 +1,4 @@
-﻿-- Fix ambiguous employee_id references in salary RPC path.
+-- Fix ambiguous employee_id references in salary RPC path.
 -- Recreates salary functions with fully-qualified column references.
 
 CREATE OR REPLACE FUNCTION public.calculate_salary_for_employee_month(

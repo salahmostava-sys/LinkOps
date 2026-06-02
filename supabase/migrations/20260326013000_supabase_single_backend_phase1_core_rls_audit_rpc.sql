@@ -1,4 +1,4 @@
-﻿-- ============================================================================
+-- ============================================================================
 -- PHASE 1: Supabase-only backend consolidation (core DB layer)
 -- - Helper functions: is_internal_user, has_permission
 -- - Explicit RLS policies for core tables (no global dynamic loops)

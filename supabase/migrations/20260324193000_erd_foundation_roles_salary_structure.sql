@@ -1,4 +1,4 @@
-﻿-- Phase 1 ERD foundation (non-breaking):
+-- Phase 1 ERD foundation (non-breaking):
 -- - explicit roles catalog + employee_roles (many-to-many)
 -- - normalize orders semantics on existing daily_orders table
 -- - add stable salary tiers structure

@@ -1,4 +1,4 @@
-﻿-- Fix Supabase Linter warnings:
+-- Fix Supabase Linter warnings:
 -- 1. security_definer_view → security_invoker IS TRUE
 -- 2. function_search_path_mutable → SET search_path = 'public'
 

@@ -1,4 +1,4 @@
-﻿-- ============================================================================
+-- ============================================================================
 -- Salary engine hardening:
 -- 1) Tenant-aware calculation in DB functions
 -- 2) Restrict direct RPC execution to service_role (Edge Function only)

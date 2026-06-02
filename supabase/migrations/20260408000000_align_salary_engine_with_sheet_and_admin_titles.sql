@@ -1,4 +1,4 @@
-﻿-- Align salary engine with the salaries sheet:
+-- Align salary engine with the salaries sheet:
 -- 1. Orders earnings use per-app pricing rules and attached salary schemes.
 -- 2. Fixed monthly schemes are prorated once per shared scheme id.
 -- 3. Month-wide salary calculations include active admin titles and any employee

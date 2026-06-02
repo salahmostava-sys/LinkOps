@@ -1,4 +1,4 @@
-﻿-- Migration: Update salary calculation to support shifts and hybrid work types
+-- Migration: Update salary calculation to support shifts and hybrid work types
 -- Date: 2025-01-XX
 -- Description: Enhances calculate_salary_for_employee_month to handle orders, shifts, and hybrid platforms
 

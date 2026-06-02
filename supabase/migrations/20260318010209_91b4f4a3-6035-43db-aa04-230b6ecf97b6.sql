@@ -1,4 +1,4 @@
-﻿
+
 CREATE TABLE IF NOT EXISTS public.employee_tiers (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   employee_id UUID NOT NULL REFERENCES public.employees(id) ON DELETE CASCADE,

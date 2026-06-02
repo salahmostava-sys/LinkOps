@@ -1,4 +1,4 @@
-﻿-- Fix dashboard_overview_rpc city enum casting issue.
+-- Fix dashboard_overview_rpc city enum casting issue.
 -- In some datasets employees.city can be NULL, and COALESCE on enum without text cast
 -- can throw: invalid input value for enum city_enum: "unknown".
 

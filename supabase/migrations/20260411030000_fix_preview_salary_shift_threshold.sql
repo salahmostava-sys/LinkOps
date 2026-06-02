@@ -1,4 +1,4 @@
-﻿-- Fix preview_salary_for_month: shift threshold hours_worked >= 8 → > 0
+-- Fix preview_salary_for_month: shift threshold hours_worked >= 8 → > 0
 -- UI now uses present=1/absent=0 so >= 8 never matches.
 
 BEGIN;

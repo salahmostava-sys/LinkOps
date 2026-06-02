@@ -1,4 +1,4 @@
-﻿-- Fix salary preview so unlinked apps do not keep showing activity or salary
+-- Fix salary preview so unlinked apps do not keep showing activity or salary
 -- on the payroll sheet after their scheme link is removed.
 
 BEGIN;

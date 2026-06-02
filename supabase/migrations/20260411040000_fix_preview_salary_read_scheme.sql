@@ -1,4 +1,4 @@
-﻿-- Fix: preview_salary_for_month now reads salary_schemes.monthly_amount
+-- Fix: preview_salary_for_month now reads salary_schemes.monthly_amount
 -- for shift apps instead of only checking pricing_rules.
 -- This matches how the UI configures shift rates via the Schemes page.
 

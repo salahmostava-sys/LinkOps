@@ -1,4 +1,4 @@
-﻿-- Pricing rules for payroll calculation (db-driven)
+-- Pricing rules for payroll calculation (db-driven)
 
 CREATE TABLE IF NOT EXISTS public.pricing_rules (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

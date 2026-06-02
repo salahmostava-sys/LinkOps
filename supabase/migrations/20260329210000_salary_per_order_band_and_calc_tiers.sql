@@ -1,4 +1,4 @@
-﻿-- 1) Allow per_order_band tier type (عدد الطلبات الكلي × سعر الشريحة — بدون تراكم شرائح).
+-- 1) Allow per_order_band tier type (عدد الطلبات الكلي × سعر الشريحة — بدون تراكم شرائح).
 -- 2) Align calc_tier_salary with band model: 1–300×3, 301–400×4, 401–449×5, 450–470 = 2500, >470 = 2500+(n-470)×5
 
 BEGIN;

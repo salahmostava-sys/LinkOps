@@ -1,4 +1,4 @@
-﻿-- Restore salary RPC functions after single-org company_id removal.
+-- Restore salary RPC functions after single-org company_id removal.
 -- These definitions remove company_id dependencies that were left from tenant-era functions.
 
 CREATE OR REPLACE FUNCTION public.calculate_salary_for_employee_month(

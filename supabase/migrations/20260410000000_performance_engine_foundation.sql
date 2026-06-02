@@ -1,4 +1,4 @@
-﻿BEGIN;
+BEGIN;
 
 -- Employee targets (monthly + daily)
 CREATE TABLE IF NOT EXISTS public.employee_targets (

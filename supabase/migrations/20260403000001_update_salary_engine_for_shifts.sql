@@ -1,4 +1,4 @@
-﻿-- Migration: Update salary engine to support shifts and hybrid platforms
+-- Migration: Update salary engine to support shifts and hybrid platforms
 -- Date: 2026-04-03
 -- Description: Replaces calculate_salary_for_employee_month and calculate_salary_for_month
 --              to support work_type: orders, shift, hybrid

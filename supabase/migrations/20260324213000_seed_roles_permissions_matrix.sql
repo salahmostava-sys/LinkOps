@@ -1,4 +1,4 @@
-﻿-- Seed/update granular permissions matrix for role-based authorization.
+-- Seed/update granular permissions matrix for role-based authorization.
 
 UPDATE public.roles
 SET permissions = jsonb_build_object(

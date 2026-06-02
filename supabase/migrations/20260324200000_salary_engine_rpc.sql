@@ -1,4 +1,4 @@
-﻿-- Phase 2: Salary engine in DB (month-level calculation + persistence)
+-- Phase 2: Salary engine in DB (month-level calculation + persistence)
 
 -- Piecewise tier function:
 -- <=300: x3

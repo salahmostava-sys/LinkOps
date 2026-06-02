@@ -1,4 +1,4 @@
-﻿-- Fix calc_tier_salary: use FLAT RATE (total_orders × tier_rate) instead of cumulative.
+-- Fix calc_tier_salary: use FLAT RATE (total_orders × tier_rate) instead of cumulative.
 -- Fix preview_salary_for_month: read salary_schemes.monthly_amount for shift platforms.
 -- Remove hardcoded 150/day fallback.
 

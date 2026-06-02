@@ -1,4 +1,4 @@
-﻿-- Dashboard overview aggregation (server-side).
+-- Dashboard overview aggregation (server-side).
 -- Returns a single JSON payload for the main dashboard tab.
 
 CREATE OR REPLACE FUNCTION public.dashboard_overview_rpc(

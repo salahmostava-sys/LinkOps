@@ -1,4 +1,4 @@
-﻿DROP FUNCTION IF EXISTS public.calculate_salary_for_employee_month(UUID, TEXT, TEXT, NUMERIC, TEXT);
+DROP FUNCTION IF EXISTS public.calculate_salary_for_employee_month(UUID, TEXT, TEXT, NUMERIC, TEXT);
 
 CREATE OR REPLACE FUNCTION public.calculate_salary_for_employee_month(
   p_employee_id UUID,

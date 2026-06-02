@@ -1,4 +1,4 @@
-﻿-- Ensure roles exist in fresh environments, then apply permission matrix.
+-- Ensure roles exist in fresh environments, then apply permission matrix.
 
 -- Some environments may already have `roles_title_check` without `finance`.
 -- Ensure the constraint allows all expected role titles.

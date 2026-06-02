@@ -1,4 +1,4 @@
-﻿BEGIN;
+BEGIN;
 
 CREATE TABLE IF NOT EXISTS public.commercial_records (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
