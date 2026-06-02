@@ -76,7 +76,7 @@ export function useSpreadsheetGrid() {
 
   useEffect(() => {
     setIsMonthLocked(sq.spreadsheetMonthLock);
-  }, [sq.spreadsheetMonthLock]);
+  }, [sq.spreadsheetMonthLock, year, month]);
 
   useEffect(() => {
     const error = sq.spreadsheetBaseError || sq.spreadsheetMonthError || sq.spreadsheetLockError;
@@ -342,6 +342,7 @@ export function useSpreadsheetGrid() {
       if (isMonthLocked) {
         await orderService.unlockMonth(my);
         setIsMonthLocked(false);
+        queryClient.invalidateQueries({ queryKey: sq.qk.spreadsheetMonthLock(year, month) });
         toast.success('تم فتح الشهر بنجاح');
       } else {
         if (!isPastMonth(year, month)) {
@@ -352,6 +353,7 @@ export function useSpreadsheetGrid() {
         await orderService.lockMonth(my);
         setIsMonthLocked(true);
         setCellPopover(null);
+        queryClient.invalidateQueries({ queryKey: sq.qk.spreadsheetMonthLock(year, month) });
         toast.success('تم قفل الشهر بنجاح');
       }
     } catch (e: unknown) {
