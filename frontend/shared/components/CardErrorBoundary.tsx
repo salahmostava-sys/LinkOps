@@ -1,6 +1,6 @@
 import React, { Component, type ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
-import { getErrorMessage } from '../services/serviceError';
+import { getErrorMessage } from '@services/serviceError';
 
 interface Props {
   children: ReactNode;
