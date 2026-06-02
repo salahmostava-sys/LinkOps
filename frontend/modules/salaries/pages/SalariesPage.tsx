@@ -11,6 +11,7 @@ import { useSystemSettings } from '@app/providers/SystemSettingsContext';
 import type { PricingRule } from '@services/salaryService';
 import { useQueryClient } from '@tanstack/react-query';
 import Loading from '@shared/components/Loading';
+import { CardErrorBoundary } from '@shared/components/CardErrorBoundary';
 import { toast as sonnerToast } from '@shared/components/ui/sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@shared/components/ui/dialog';
 
