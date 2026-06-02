@@ -24,7 +24,7 @@ import { EmployeeActionsBar } from '@modules/employees/components/EmployeeAction
 import { EmployeeDetailedTable } from '@modules/employees/components/EmployeeTable';
 import { useEmployeeActions } from '@modules/employees/hooks/useEmployeeTable';
 import Loading from '@shared/components/Loading';
-import CommercialRecordsManager from '@shared/components/employees/CommercialRecordsManager';
+import { CommercialRecordsManager } from '@shared/components/employees/CommercialRecordsManager';
 import { EmployeeKPIs } from '@modules/employees/components/EmployeeKPIs';
 import {
   ALL_COLUMNS, DEFAULT_HIDDEN_COLS,

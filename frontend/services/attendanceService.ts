@@ -2,7 +2,7 @@ import { supabase } from '@services/supabase/client';
 import { handleSupabaseError } from '@services/serviceError';
 import { filterEmployeesForAttendanceMonth, filterOperationallyVisibleEmployees } from '@shared/lib/employeeVisibility';
 
-export const attendanceService = {
+const attendanceService = {
   getDailyAttendanceBase: async () => {
     const [employeesRes, appsRes, employeeAppsRes] = await Promise.all([
       supabase

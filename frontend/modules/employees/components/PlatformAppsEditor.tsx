@@ -4,7 +4,7 @@ import { Button } from '@shared/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@shared/components/ui/popover';
 import { Checkbox } from '@shared/components/ui/checkbox';
 import { useToast } from '@shared/hooks/use-toast';
-import employeeService from '@services/employeeService';
+import { employeeService } from '@services/employeeService';
 import { getErrorMessage } from '@services/serviceError';
 
 type PlatformApp = {

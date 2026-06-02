@@ -13,4 +13,4 @@ export const externalDeductionService = {
   },
 };
 
-export default externalDeductionService;
+

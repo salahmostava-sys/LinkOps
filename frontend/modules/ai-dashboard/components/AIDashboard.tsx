@@ -373,4 +373,3 @@ export function AIDashboard({
   );
 }
 
-export default AIDashboard;

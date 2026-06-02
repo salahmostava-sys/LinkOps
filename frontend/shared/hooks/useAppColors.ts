@@ -83,4 +83,3 @@ export const useAppColors = () => {
   return { apps: apps ?? [], activeApps, loading: query.isLoading };
 };
 
-export default useAppColors;

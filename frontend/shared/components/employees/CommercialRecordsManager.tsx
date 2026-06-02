@@ -311,5 +311,4 @@ export function CommercialRecordsManager({
   );
 }
 
-export default CommercialRecordsManager;
 

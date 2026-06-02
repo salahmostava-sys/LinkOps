@@ -94,4 +94,4 @@ export const salaryDataService = {
   },
 };
 
-export default salaryDataService;
+

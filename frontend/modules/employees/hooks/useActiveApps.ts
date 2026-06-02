@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAuthQueryGate, authQueryUserId } from '@shared/hooks/useAuthQueryGate';
-import employeeService from '@services/employeeService';
+import { employeeService } from '@services/employeeService';
 
 export function useActiveApps() {
   const { enabled, userId } = useAuthQueryGate();
