@@ -5,7 +5,7 @@
 -- ── Views: security_invoker ──
 
 CREATE OR REPLACE VIEW public.v_rider_daily_platform_orders
-WITH (security_invoker IS TRUE)
+WITH (security_invoker = true)
 AS
 SELECT
   d.employee_id,

@@ -5,6 +5,7 @@
 -- ============================================================================
 -- 1. calc_tier_salary — flat rate per tier
 -- ============================================================================
+DROP FUNCTION IF EXISTS public.calc_tier_salary(INTEGER) CASCADE;
 CREATE OR REPLACE FUNCTION public.calc_tier_salary(p_orders INTEGER)
 RETURNS NUMERIC
 LANGUAGE plpgsql
