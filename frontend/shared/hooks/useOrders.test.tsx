@@ -5,11 +5,25 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { useOrders } from './useOrders';
 import { orderService } from '@services/orderService';
 
+vi.mock('@app/providers/AuthContext', () => ({
+  useAuth: () => ({ user: { id: 'user-1' }, session: { access_token: 'tok' } }),
+}));
+
+vi.mock('@shared/hooks/useAuthQueryGate', () => ({
+  useAuthQueryGate: () => ({ userId: 'user-1', authReady: true }),
+  authQueryUserId: (id: string) => id,
+}));
+
+vi.mock('@shared/hooks/useQueryErrorToast', () => ({
+  useQueryErrorToast: vi.fn(),
+}));
+
 vi.mock('@services/orderService', () => ({
   orderService: {
     getAll: vi.fn(),
   },
 }));
+
 
 describe('useOrders', () => {
   beforeEach(() => {

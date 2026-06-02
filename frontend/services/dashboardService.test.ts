@@ -47,18 +47,21 @@ describe('dashboardService', () => {
     );
   });
 
-  it('throws when operational stats employee query fails', async () => {
+  it('throws when KPIs employee query fails', async () => {
     tableResults.employees = {
       data: null,
       error: new Error('employees query failed'),
     };
+    tableResults.attendance = { data: [], error: null };
+    tableResults.advances = { data: [], error: null };
+    tableResults.salary_records = { data: [], error: null };
 
-    await expect(dashboardService.getOperationalStats('2026-04')).rejects.toThrow(
-      'dashboardService.getOperationalStats.employeesRes: employees query failed',
+    await expect(dashboardService.getKPIs('2026-04', '2026-04-05')).rejects.toThrow(
+      'dashboardService.getKPIs.empRes: employees query failed',
     );
   });
 
-  it('filters operationally hidden employees from operational stats', async () => {
+  it('filters operationally hidden employees from active employee count', async () => {
     tableResults.employees = {
       data: [
         {
@@ -66,35 +69,23 @@ describe('dashboardService', () => {
           status: 'active',
           sponsorship_status: 'sponsored',
           probation_end_date: null,
-          city: 'makkah',
-          license_status: 'has_license',
-          tier_id: null,
         },
         {
           id: 'emp-hidden',
           status: 'active',
           sponsorship_status: 'terminated',
           probation_end_date: '2026-03-01',
-          city: 'jeddah',
-          license_status: 'applied',
-          tier_id: null,
         },
       ],
       error: null,
     };
     tableResults.attendance = { data: [], error: null };
-    tableResults.daily_orders = { data: [], error: null };
-    tableResults.fuel_records = { data: [], error: null };
-    tableResults.maintenance_records = { data: [], error: null };
-    tableResults.vehicles = { data: [], error: null };
-    tableResults.alerts = { data: [], error: null };
+    tableResults.advances = { data: [], error: null };
+    tableResults.salary_records = { data: [], error: null };
 
-    const result = await dashboardService.getOperationalStats('2026-04');
+    const result = await dashboardService.getKPIs('2026-04', '2026-04-05');
 
-    expect(result.employees.total).toBe(1);
-    expect(result.employees.byCity.makkah).toBe(1);
-    expect(result.employees.byCity.jeddah).toBe(0);
-    expect(result.employees.withLicense).toBe(1);
-    expect(result.employees.appliedLicense).toBe(0);
+    // Only the sponsored employee without terminated probation should be visible
+    expect(result.kpis.activeEmployees).toBe(1);
   });
 });

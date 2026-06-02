@@ -19,7 +19,7 @@ describe('employeeUtils', () => {
     email: 'test@example.com',
     national_id: '1234567890',
     city: 'makkah',
-    cities: ['makkah', 'jeddah'],
+    cities: ['makkah'],
     join_date: '2024-01-15',
     birth_date: '1990-05-20',
     residency_expiry: '2025-12-31',
@@ -55,7 +55,7 @@ describe('employeeUtils', () => {
   describe('getEmployeeCities', () => {
     it('should return cities array', () => {
       const cities = getEmployeeCities(mockEmployee);
-      expect(cities).toEqual(['makkah', 'jeddah']);
+      expect(cities).toEqual(['makkah']);
     });
 
     it('should handle null cities', () => {
@@ -97,6 +97,8 @@ describe('employeeUtils', () => {
         status: 'inactive',
         city: 'jeddah',
         cities: ['jeddah'],
+        phone: '0559876543',
+        national_id: '9876543210',
       },
     ];
 

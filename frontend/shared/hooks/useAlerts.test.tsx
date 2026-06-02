@@ -5,6 +5,19 @@ import { alertsService } from '@services/alertsService';
 import { buildAlertsFromResponses } from '@shared/lib/alertsBuilder';
 import { createQueryClientWrapper } from '@shared/test/authedQuerySetup';
 
+vi.mock('@app/providers/AuthContext', () => ({
+  useAuth: () => ({ user: { id: 'user-1' }, session: { access_token: 'tok' } }),
+}));
+
+vi.mock('@shared/hooks/useAuthQueryGate', () => ({
+  useAuthQueryGate: () => ({ userId: 'user-1', authReady: true }),
+  authQueryUserId: (id: string) => id,
+}));
+
+vi.mock('@shared/hooks/useQueryErrorToast', () => ({
+  useQueryErrorToast: vi.fn(),
+}));
+
 vi.mock('@app/providers/SystemSettingsContext', () => ({
   useSystemSettings: () => ({ settings: { iqama_alert_days: 90 } }),
 }));
@@ -22,7 +35,6 @@ vi.mock('@services/alertsService', () => ({
 vi.mock('@shared/lib/alertsBuilder', () => ({
   buildAlertsFromResponses: vi.fn(),
 }));
-
 
 describe('useAlerts', () => {
   beforeEach(() => {

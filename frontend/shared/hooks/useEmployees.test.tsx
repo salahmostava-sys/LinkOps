@@ -4,12 +4,24 @@ import { useEmployees } from './useEmployees';
 import { employeeService } from '@services/employeeService';
 import { createQueryClientWrapper } from '@shared/test/authedQuerySetup';
 
+vi.mock('@app/providers/AuthContext', () => ({
+  useAuth: () => ({ user: { id: 'user-1' }, session: { access_token: 'tok' } }),
+}));
+
+vi.mock('@shared/hooks/useAuthQueryGate', () => ({
+  useAuthQueryGate: () => ({ userId: 'user-1', authReady: true }),
+  authQueryUserId: (id: string) => id,
+}));
+
+vi.mock('@shared/hooks/useQueryErrorToast', () => ({
+  useQueryErrorToast: vi.fn(),
+}));
+
 vi.mock('@services/employeeService', () => ({
   employeeService: {
     getAll: vi.fn(),
   },
 }));
-
 
 describe('useEmployees', () => {
   beforeEach(() => {

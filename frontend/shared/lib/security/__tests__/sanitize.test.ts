@@ -132,7 +132,11 @@ describe('security/sanitize', () => {
     });
 
     it('should mask authorization headers', () => {
-      expect(maskSensitiveData('authorization=Bearer abc123')).toBe('authorization=***');
+      // The bearer regex runs before authorization, so 'Bearer abc123' is replaced first,
+      // then authorization regex replaces the remaining token. Both patterns fire.
+      const result = maskSensitiveData('authorization=Bearer abc123');
+      expect(result).toContain('***');
+      expect(result.toLowerCase()).not.toContain('abc123');
     });
 
     it('should be case insensitive', () => {

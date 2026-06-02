@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { http, HttpResponse } from 'msw';
 import { server } from '@shared/test/msw/server';
 import { sendWhatsAppMessage } from './whatsapp';
@@ -6,7 +6,10 @@ import { sendWhatsAppMessage } from './whatsapp';
 const API_BASE = 'https://graph.facebook.com/v19.0';
 
 describe('sendWhatsAppMessage (MSW)', () => {
+  beforeAll(() => server.listen({ onUnhandledRequest: 'bypass' }));
+  afterAll(() => server.close());
   afterEach(() => {
+    server.resetHandlers();
     localStorage.clear();
   });
 
