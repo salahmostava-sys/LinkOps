@@ -192,7 +192,7 @@ const DocumentsPage = () => {
             </table>
           </div>
           <div className="px-4 py-3 border-t border-border/30 text-xs text-muted-foreground">
-            {filtered.length} موظف {filtered.length !== employees.length ? `من أصل ${employees.length}` : ''}
+            {filtered.length} موظف {filtered.length === employees.length ? '' : `من أصل ${employees.length}`}
           </div>
         </div>
       )}

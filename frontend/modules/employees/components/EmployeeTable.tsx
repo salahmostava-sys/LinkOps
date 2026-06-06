@@ -211,16 +211,16 @@ function buildDateRangeFilter(ctx: FilterContext): React.ReactNode {
     else setColFilter(col.key, from);
   };
   return (
-    <div className="space-y-1.5" onClick={(event) => event.stopPropagation()} onKeyDown={(event) => event.stopPropagation()} role="group" aria-label="اختيار نطاق التاريخ">
+    <fieldset className="space-y-1.5" aria-label="اختيار نطاق التاريخ">
       <div className="flex items-center gap-1">
         <span className="text-[10px] text-muted-foreground w-6">من</span>
-        <Input type="date" className="h-7 text-xs px-1.5 flex-1" value={rangeFrom} onChange={(event) => updateRange(normalizeArabicDigits(event.target.value), rangeTo)} />
+        <Input type="date" className="h-7 text-xs px-1.5 flex-1" value={rangeFrom} onChange={(event) => updateRange(normalizeArabicDigits(event.target.value), rangeTo)} onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()} />
       </div>
       <div className="flex items-center gap-1">
         <span className="text-[10px] text-muted-foreground w-6">إلى</span>
-        <Input type="date" className="h-7 text-xs px-1.5 flex-1" value={rangeTo} onChange={(event) => updateRange(rangeFrom, normalizeArabicDigits(event.target.value))} />
+        <Input type="date" className="h-7 text-xs px-1.5 flex-1" value={rangeTo} onChange={(event) => updateRange(rangeFrom, normalizeArabicDigits(event.target.value))} onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()} />
       </div>
-    </div>
+    </fieldset>
   );
 }
 

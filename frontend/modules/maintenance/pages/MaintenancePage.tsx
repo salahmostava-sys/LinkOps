@@ -77,10 +77,10 @@ const MaintenancePage = () => {
           <span className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded" dir="ltr">
             spare_parts
           </span>{' '}
-          للمخزون، و
+          للمخزون، و{' '}
           <span className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded mx-0.5" dir="ltr">
             maintenance_parts
-          </span>
+          </span>{' '}
           لربط القطع بكل عملية صيانة. عند إضافة صيانة بكميات قطع، يُحدَّث رصيد المخزون تلقائياً حسب سياسات الخادم.
         </p>
       </div>

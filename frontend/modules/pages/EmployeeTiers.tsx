@@ -109,7 +109,7 @@ function collectTierImportValidatedRows(
     const appIds = mapPlatformNamesToIds(platformNames, apps);
     const simRaw = row.sim_number;
     const simText = toSafeText(simRaw).trim();
-    const simStr = simText !== '' ? simText : null;
+    const simStr = simText === '' ? null : simText;
     validatedRows.push({
       rowIndex: i,
       payload: {
@@ -236,7 +236,7 @@ const EmployeeSelect = ({
   const filtered = employees.filter(e => e.name.includes(q));
 
   useEffect(() => {
-    const handler = (e: MouseEvent) => { if (!ref.current?.contains(e.target as Node)) setOpen(false); };
+    const handler = (e: MouseEvent) => { if (e.target instanceof Node && !ref.current?.contains(e.target)) setOpen(false); };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);

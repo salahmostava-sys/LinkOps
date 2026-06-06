@@ -282,7 +282,7 @@ function AiAnalyticsForecastSection({
         <TrendingUp className="h-5 w-5 text-primary" />
         <span className="font-semibold">تنبؤ الطلبات للشهر القادم:</span>
         <span className="text-2xl font-bold tabular-nums">
-          {forecast !== null ? forecast.next.toLocaleString('ar-SA') : '—'}
+          {forecast === null ? '—' : forecast.next.toLocaleString('ar-SA')}
         </span>
       </div>
       {forecast !== null && (

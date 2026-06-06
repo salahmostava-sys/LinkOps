@@ -291,7 +291,7 @@ export function enrichWithDelta(
   previous: number | null | undefined,
   unit = '',
 ): EnrichedValue {
-  const formatted = `${value.toLocaleString('ar-SA')}${unit ? ` ${unit}` : ''}`;
+  const formatted = value.toLocaleString('ar-SA') + (unit ? ` ${unit}` : '');
 
   if (previous === null || previous === 0) {
     return { value, formatted, delta: null, enrichedText: formatted };
@@ -465,7 +465,7 @@ function computeMedian(values: number[]): number {
   if (values.length === 0) return 0;
   const sorted = [...values].sort((a, b) => a - b);
   const mid = Math.floor(sorted.length / 2);
-  return sorted.length % 2 !== 0
-    ? sorted[mid]
-    : Math.round((sorted[mid - 1] + sorted[mid]) / 2);
+  return sorted.length % 2 === 0
+    ? Math.round((sorted[mid - 1] + sorted[mid]) / 2)
+    : sorted[mid];
 }

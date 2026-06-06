@@ -281,7 +281,7 @@ function AlertCard({ label, value, severity }: Readonly<{ label: string; value: 
   const s = SEVERITY[severity];
   const isEmpty = value === 0;
   return (
-    <div className={`rounded-lg border p-3 flex flex-col gap-1 ${isEmpty ? 'bg-muted/20 border-border opacity-60' : `${s.bg} ${s.border}`}`}>
+    <div className={`rounded-lg border p-3 flex flex-col gap-1 ${isEmpty ? 'bg-muted/20 border-border opacity-60' : s.bg + ' ' + s.border}`}>
       <div className={`text-2xl font-bold tabular-nums ${isEmpty ? 'text-muted-foreground' : s.val}`}>{value}</div>
       <div className={`text-xs leading-tight ${isEmpty ? 'text-muted-foreground' : s.label}`}>{label}</div>
     </div>

@@ -70,11 +70,17 @@ export const AddLeaveModal = ({ open, onOpenChange, employees, onSaved }: Readon
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
       dir="rtl"
       open
-      onClick={(e) => { if (e.target === e.currentTarget) onOpenChange(false); }}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onOpenChange(false); }}
       onClose={() => onOpenChange(false)}
     >
-      <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+      <div 
+        className="fixed inset-0" 
+        onClick={() => onOpenChange(false)} 
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onOpenChange(false); }} 
+        role="button" 
+        tabIndex={0} 
+        aria-label="إغلاق" 
+      />
+      <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden relative z-10">
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <h2 className="text-lg font-bold text-foreground flex items-center gap-2"><CalendarDays size={18} /> إضافة طلب إجازة</h2>
           <button aria-label="إغلاق" onClick={() => onOpenChange(false)} className="text-muted-foreground hover:text-foreground transition-colors"><X size={18} /></button>

@@ -403,7 +403,7 @@ function buildTargetDetail(achievementPct: number): string | null {
   return null;
 }
 
-function buildExcellentJudgment(trend: 'improving' | 'declining' | 'stable', isConsistent: boolean): string[] {
+function buildExcellentJudgment(trend: PerformanceTrend, isConsistent: boolean): string[] {
   const parts: string[] = ['أداء ممتاز'];
   if (trend === 'improving') parts.push('ويتحسّن');
   if (isConsistent) parts.push('ومنتظم');
@@ -411,14 +411,14 @@ function buildExcellentJudgment(trend: 'improving' | 'declining' | 'stable', isC
   return parts;
 }
 
-function buildGoodJudgment(trend: 'improving' | 'declining' | 'stable', isConsistent: boolean): string[] {
+function buildGoodJudgment(trend: PerformanceTrend, isConsistent: boolean): string[] {
   const parts: string[] = ['أداء جيد'];
   if (trend === 'declining') parts.push('لكنه يتراجع');
   else if (isConsistent) parts.push('ومنتظم');
   return parts;
 }
 
-function buildAverageJudgment(trend: 'improving' | 'declining' | 'stable', isConsistent: boolean): string[] {
+function buildAverageJudgment(trend: PerformanceTrend, isConsistent: boolean): string[] {
   const parts: string[] = ['أداء متوسط'];
   if (trend === 'improving') parts.push('لكنه يتحسّن');
   else if (isConsistent === false) parts.push('وغير مستقر');
@@ -426,14 +426,14 @@ function buildAverageJudgment(trend: 'improving' | 'declining' | 'stable', isCon
   return parts;
 }
 
-function buildWeakJudgment(trend: 'improving' | 'declining' | 'stable'): string[] {
+function buildWeakJudgment(trend: PerformanceTrend): string[] {
   const parts: string[] = ['أداء ضعيف'];
   if (trend === 'declining') parts.push('ومتراجع');
   parts.push('— يحتاج متابعة عاجلة');
   return parts;
 }
 
-const TIER_JUDGMENT_BUILDERS: Record<PerformanceTier, (trend: 'improving' | 'declining' | 'stable', isConsistent: boolean) => string[]> = {
+const TIER_JUDGMENT_BUILDERS: Record<PerformanceTier, (trend: PerformanceTrend, isConsistent: boolean) => string[]> = {
   excellent: buildExcellentJudgment,
   good: buildGoodJudgment,
   average: buildAverageJudgment,
@@ -442,7 +442,7 @@ const TIER_JUDGMENT_BUILDERS: Record<PerformanceTier, (trend: 'improving' | 'dec
 
 function buildJudgmentText(
   tier: PerformanceTier,
-  trend: 'improving' | 'declining' | 'stable',
+  trend: PerformanceTrend,
   isConsistent: boolean,
 ): string {
   return TIER_JUDGMENT_BUILDERS[tier](trend, isConsistent).join(' ');
