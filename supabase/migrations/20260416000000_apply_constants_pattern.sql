@@ -10,8 +10,8 @@
 --   3. Reduces typo risks
 --   4. Makes code more readable
 
--- First, ensure constants are available
-\i 20260415000000_constants.sql
+-- Constants are available from migration 20260415000001_constants.sql
+-- (applied before this migration in the sequence)
 
 -- =============================================================================
 -- Refactored: calc_tier_salary with constants
