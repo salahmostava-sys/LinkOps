@@ -1,4 +1,4 @@
-
+﻿
 -- ============================================================
 -- ENUMS
 -- ============================================================
@@ -14,6 +14,12 @@ CREATE TYPE public.deduction_type AS ENUM ('fine', 'return', 'delay', 'accident'
 CREATE TYPE public.approval_status AS ENUM (_const_installment_pending(), _const_approval_approved(), 'rejected');
 CREATE TYPE public.maintenance_type AS ENUM ('routine', 'breakdown', 'accident');
 CREATE TYPE public.scheme_status AS ENUM (_const_employee_active(), 'archived');
+
+CREATE OR REPLACE FUNCTION _const_role_admin() RETURNS public.app_role AS $$ BEGIN RETURN _const_role_admin(); END; $$ LANGUAGE plpgsql IMMUTABLE;
+CREATE OR REPLACE FUNCTION _const_role_hr() RETURNS public.app_role AS $$ BEGIN RETURN _const_role_hr(); END; $$ LANGUAGE plpgsql IMMUTABLE;
+CREATE OR REPLACE FUNCTION _const_role_finance() RETURNS public.app_role AS $$ BEGIN RETURN _const_role_finance(); END; $$ LANGUAGE plpgsql IMMUTABLE;
+CREATE OR REPLACE FUNCTION _const_role_operations() RETURNS public.app_role AS $$ BEGIN RETURN _const_role_operations(); END; $$ LANGUAGE plpgsql IMMUTABLE;
+CREATE OR REPLACE FUNCTION _const_role_viewer() RETURNS public.app_role AS $$ BEGIN RETURN _const_role_viewer(); END; $$ LANGUAGE plpgsql IMMUTABLE;
 
 -- ============================================================
 -- PROFILES (linked to auth.users)

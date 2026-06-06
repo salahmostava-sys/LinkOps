@@ -1,4 +1,4 @@
--- =============================================================================
+﻿-- =============================================================================
 -- Security Fix: Revoke anon EXECUTE on sensitive SECURITY DEFINER functions
 --               + Fix mutable search_path on is_admin_or_hr
 -- =============================================================================
@@ -28,8 +28,8 @@ SET search_path TO 'public'
 AS $$
 BEGIN
   RETURN (
-    public.has_role(uid, 'admin'::public.app_role)
-    OR public.has_role(uid, 'hr'::public.app_role)
+    public.has_role(uid, _const_role_admin())
+    OR public.has_role(uid, _const_role_hr())
   );
 END;
 $$;

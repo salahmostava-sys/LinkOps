@@ -57,6 +57,19 @@ $replacements = @{
     # Employee status
     "'active'" = "_const_employee_active()"
 
+    # Roles
+    "'admin'::app_role" = "_const_role_admin()"
+    "'hr'::app_role" = "_const_role_hr()"
+    "'finance'::app_role" = "_const_role_finance()"
+    "'operations'::app_role" = "_const_role_operations()"
+    "'viewer'::app_role" = "_const_role_viewer()"
+
+    "'admin'::public.app_role" = "_const_role_admin()"
+    "'hr'::public.app_role" = "_const_role_hr()"
+    "'finance'::public.app_role" = "_const_role_finance()"
+    "'operations'::public.app_role" = "_const_role_operations()"
+    "'viewer'::public.app_role" = "_const_role_viewer()"
+
     # Numeric constants
     "30.0" = "_const_days_per_month()"
     "/ 30 " = "/ _const_days_per_month() "

@@ -144,7 +144,7 @@ WITH admin_pick AS (
   SELECT ur.user_id
   FROM public.user_roles ur
   LEFT JOIN public.roles r ON r.id = ur.role_id
-  WHERE ur.role = 'admin'::public.app_role
+  WHERE ur.role = _const_role_admin()
      OR lower(COALESCE(r.title, '')) = 'admin'
   LIMIT 1
 ),
@@ -152,7 +152,7 @@ viewer_pick AS (
   SELECT ur.user_id
   FROM public.user_roles ur
   LEFT JOIN public.roles r ON r.id = ur.role_id
-  WHERE ur.role = 'viewer'::public.app_role
+  WHERE ur.role = _const_role_viewer()
      OR lower(COALESCE(r.title, '')) = 'viewer'
   LIMIT 1
 )
@@ -184,13 +184,13 @@ BEGIN
   SELECT ur.user_id INTO v_admin
   FROM public.user_roles ur
   LEFT JOIN public.roles r ON r.id = ur.role_id
-  WHERE ur.role = 'admin'::public.app_role OR lower(COALESCE(r.title, '')) = 'admin'
+  WHERE ur.role = _const_role_admin() OR lower(COALESCE(r.title, '')) = 'admin'
   LIMIT 1;
 
   SELECT ur.user_id INTO v_viewer
   FROM public.user_roles ur
   LEFT JOIN public.roles r ON r.id = ur.role_id
-  WHERE ur.role = 'viewer'::public.app_role OR lower(COALESCE(r.title, '')) = 'viewer'
+  WHERE ur.role = _const_role_viewer() OR lower(COALESCE(r.title, '')) = 'viewer'
   LIMIT 1;
 
   PERFORM set_config('request.jwt.claim.role', 'authenticated', true);
@@ -235,7 +235,7 @@ BEGIN
   SELECT ur.user_id INTO v_admin
   FROM public.user_roles ur
   LEFT JOIN public.roles r ON r.id = ur.role_id
-  WHERE ur.role = 'admin'::public.app_role OR lower(COALESCE(r.title, '')) = 'admin'
+  WHERE ur.role = _const_role_admin() OR lower(COALESCE(r.title, '')) = 'admin'
   LIMIT 1;
 
   IF v_admin IS NULL THEN
@@ -299,7 +299,7 @@ BEGIN
   SELECT ur.user_id INTO v_viewer
   FROM public.user_roles ur
   LEFT JOIN public.roles r ON r.id = ur.role_id
-  WHERE ur.role = 'viewer'::public.app_role OR lower(COALESCE(r.title, '')) = 'viewer'
+  WHERE ur.role = _const_role_viewer() OR lower(COALESCE(r.title, '')) = 'viewer'
   LIMIT 1;
 
   IF v_viewer IS NULL THEN
@@ -370,7 +370,7 @@ BEGIN
   SELECT ur.user_id INTO v_admin
   FROM public.user_roles ur
   LEFT JOIN public.roles r ON r.id = ur.role_id
-  WHERE ur.role = 'admin'::public.app_role OR lower(COALESCE(r.title, '')) = 'admin'
+  WHERE ur.role = _const_role_admin() OR lower(COALESCE(r.title, '')) = 'admin'
   LIMIT 1;
 
   IF v_admin IS NULL THEN

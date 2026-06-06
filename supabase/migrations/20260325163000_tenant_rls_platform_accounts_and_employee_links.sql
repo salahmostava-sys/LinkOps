@@ -1,4 +1,4 @@
--- ============================================================================
+﻿-- ============================================================================
 -- Tenant hardening for employee-linked tables
 -- Tables:
 --   - employee_apps
@@ -216,9 +216,9 @@ USING (
   is_active_user(auth.uid())
   AND public.employee_in_my_company(employee_id)
   AND (
-    has_role(auth.uid(), 'admin'::app_role)
-    OR has_role(auth.uid(), 'hr'::app_role)
-    OR has_role(auth.uid(), 'operations'::app_role)
+    has_role(auth.uid(), _const_role_admin())
+    OR has_role(auth.uid(), _const_role_hr())
+    OR has_role(auth.uid(), _const_role_operations())
   )
 );
 
@@ -231,16 +231,16 @@ USING (
   is_active_user(auth.uid())
   AND public.employee_in_my_company(employee_id)
   AND (
-    has_role(auth.uid(), 'admin'::app_role)
-    OR has_role(auth.uid(), 'hr'::app_role)
+    has_role(auth.uid(), _const_role_admin())
+    OR has_role(auth.uid(), _const_role_hr())
   )
 )
 WITH CHECK (
   is_active_user(auth.uid())
   AND public.employee_in_my_company(employee_id)
   AND (
-    has_role(auth.uid(), 'admin'::app_role)
-    OR has_role(auth.uid(), 'hr'::app_role)
+    has_role(auth.uid(), _const_role_admin())
+    OR has_role(auth.uid(), _const_role_hr())
   )
 );
 
@@ -259,9 +259,9 @@ USING (
   is_active_user(auth.uid())
   AND public.employee_in_my_company(employee_id)
   AND (
-    has_role(auth.uid(), 'admin'::app_role)
-    OR has_role(auth.uid(), 'hr'::app_role)
-    OR has_role(auth.uid(), 'finance'::app_role)
+    has_role(auth.uid(), _const_role_admin())
+    OR has_role(auth.uid(), _const_role_hr())
+    OR has_role(auth.uid(), _const_role_finance())
   )
 );
 
@@ -274,16 +274,16 @@ USING (
   is_active_user(auth.uid())
   AND public.employee_in_my_company(employee_id)
   AND (
-    has_role(auth.uid(), 'admin'::app_role)
-    OR has_role(auth.uid(), 'hr'::app_role)
+    has_role(auth.uid(), _const_role_admin())
+    OR has_role(auth.uid(), _const_role_hr())
   )
 )
 WITH CHECK (
   is_active_user(auth.uid())
   AND public.employee_in_my_company(employee_id)
   AND (
-    has_role(auth.uid(), 'admin'::app_role)
-    OR has_role(auth.uid(), 'hr'::app_role)
+    has_role(auth.uid(), _const_role_admin())
+    OR has_role(auth.uid(), _const_role_hr())
   )
 );
 
@@ -302,10 +302,10 @@ USING (
   is_active_user(auth.uid())
   AND company_id = public.jwt_company_id()
   AND (
-    has_role(auth.uid(), 'admin'::app_role)
-    OR has_role(auth.uid(), 'hr'::app_role)
-    OR has_role(auth.uid(), 'operations'::app_role)
-    OR has_role(auth.uid(), 'finance'::app_role)
+    has_role(auth.uid(), _const_role_admin())
+    OR has_role(auth.uid(), _const_role_hr())
+    OR has_role(auth.uid(), _const_role_operations())
+    OR has_role(auth.uid(), _const_role_finance())
   )
 );
 
@@ -318,16 +318,16 @@ USING (
   is_active_user(auth.uid())
   AND company_id = public.jwt_company_id()
   AND (
-    has_role(auth.uid(), 'admin'::app_role)
-    OR has_role(auth.uid(), 'hr'::app_role)
+    has_role(auth.uid(), _const_role_admin())
+    OR has_role(auth.uid(), _const_role_hr())
   )
 )
 WITH CHECK (
   is_active_user(auth.uid())
   AND company_id = public.jwt_company_id()
   AND (
-    has_role(auth.uid(), 'admin'::app_role)
-    OR has_role(auth.uid(), 'hr'::app_role)
+    has_role(auth.uid(), _const_role_admin())
+    OR has_role(auth.uid(), _const_role_hr())
   )
 );
 
@@ -347,10 +347,10 @@ USING (
   is_active_user(auth.uid())
   AND company_id = public.jwt_company_id()
   AND (
-    has_role(auth.uid(), 'admin'::app_role)
-    OR has_role(auth.uid(), 'hr'::app_role)
-    OR has_role(auth.uid(), 'operations'::app_role)
-    OR has_role(auth.uid(), 'finance'::app_role)
+    has_role(auth.uid(), _const_role_admin())
+    OR has_role(auth.uid(), _const_role_hr())
+    OR has_role(auth.uid(), _const_role_operations())
+    OR has_role(auth.uid(), _const_role_finance())
   )
 );
 
@@ -365,8 +365,8 @@ WITH CHECK (
   AND public.employee_in_my_company(employee_id)
   AND public.platform_account_in_my_company(account_id)
   AND (
-    has_role(auth.uid(), 'admin'::app_role)
-    OR has_role(auth.uid(), 'hr'::app_role)
+    has_role(auth.uid(), _const_role_admin())
+    OR has_role(auth.uid(), _const_role_hr())
   )
 );
 
@@ -380,8 +380,8 @@ USING (
   AND company_id = public.jwt_company_id()
   AND public.assignment_in_my_company(id)
   AND (
-    has_role(auth.uid(), 'admin'::app_role)
-    OR has_role(auth.uid(), 'hr'::app_role)
+    has_role(auth.uid(), _const_role_admin())
+    OR has_role(auth.uid(), _const_role_hr())
   )
 )
 WITH CHECK (
@@ -390,8 +390,8 @@ WITH CHECK (
   AND public.employee_in_my_company(employee_id)
   AND public.platform_account_in_my_company(account_id)
   AND (
-    has_role(auth.uid(), 'admin'::app_role)
-    OR has_role(auth.uid(), 'hr'::app_role)
+    has_role(auth.uid(), _const_role_admin())
+    OR has_role(auth.uid(), _const_role_hr())
   )
 );
 

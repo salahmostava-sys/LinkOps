@@ -1,4 +1,4 @@
--- RLS hardening for core payroll-related tables
+﻿-- RLS hardening for core payroll-related tables
 -- Scope: employees, attendance, salary_records
 
 -- ============================================================================
@@ -14,11 +14,11 @@ CREATE POLICY "Role scoped select employees"
   ON public.employees FOR SELECT
   USING (
     is_active_user(auth.uid()) AND (
-      has_role(auth.uid(), 'admin'::app_role) OR
-      has_role(auth.uid(), 'hr'::app_role) OR
-      has_role(auth.uid(), 'operations'::app_role) OR
-      has_role(auth.uid(), 'finance'::app_role) OR
-      has_role(auth.uid(), 'viewer'::app_role)
+      has_role(auth.uid(), _const_role_admin()) OR
+      has_role(auth.uid(), _const_role_hr()) OR
+      has_role(auth.uid(), _const_role_operations()) OR
+      has_role(auth.uid(), _const_role_finance()) OR
+      has_role(auth.uid(), _const_role_viewer())
     )
   );
 
@@ -27,14 +27,14 @@ CREATE POLICY "HR admin manage employees"
   ON public.employees FOR ALL
   USING (
     is_active_user(auth.uid()) AND (
-      has_role(auth.uid(), 'admin'::app_role) OR
-      has_role(auth.uid(), 'hr'::app_role)
+      has_role(auth.uid(), _const_role_admin()) OR
+      has_role(auth.uid(), _const_role_hr())
     )
   )
   WITH CHECK (
     is_active_user(auth.uid()) AND (
-      has_role(auth.uid(), 'admin'::app_role) OR
-      has_role(auth.uid(), 'hr'::app_role)
+      has_role(auth.uid(), _const_role_admin()) OR
+      has_role(auth.uid(), _const_role_hr())
     )
   );
 
@@ -51,10 +51,10 @@ CREATE POLICY "Role scoped select attendance"
   ON public.attendance FOR SELECT
   USING (
     is_active_user(auth.uid()) AND (
-      has_role(auth.uid(), 'admin'::app_role) OR
-      has_role(auth.uid(), 'hr'::app_role) OR
-      has_role(auth.uid(), 'operations'::app_role) OR
-      has_role(auth.uid(), 'finance'::app_role)
+      has_role(auth.uid(), _const_role_admin()) OR
+      has_role(auth.uid(), _const_role_hr()) OR
+      has_role(auth.uid(), _const_role_operations()) OR
+      has_role(auth.uid(), _const_role_finance())
     )
   );
 
@@ -63,8 +63,8 @@ CREATE POLICY "HR admin insert attendance"
   ON public.attendance FOR INSERT
   WITH CHECK (
     is_active_user(auth.uid()) AND (
-      has_role(auth.uid(), 'admin'::app_role) OR
-      has_role(auth.uid(), 'hr'::app_role)
+      has_role(auth.uid(), _const_role_admin()) OR
+      has_role(auth.uid(), _const_role_hr())
     )
   );
 
@@ -73,14 +73,14 @@ CREATE POLICY "HR admin update attendance"
   ON public.attendance FOR UPDATE
   USING (
     is_active_user(auth.uid()) AND (
-      has_role(auth.uid(), 'admin'::app_role) OR
-      has_role(auth.uid(), 'hr'::app_role)
+      has_role(auth.uid(), _const_role_admin()) OR
+      has_role(auth.uid(), _const_role_hr())
     )
   )
   WITH CHECK (
     is_active_user(auth.uid()) AND (
-      has_role(auth.uid(), 'admin'::app_role) OR
-      has_role(auth.uid(), 'hr'::app_role)
+      has_role(auth.uid(), _const_role_admin()) OR
+      has_role(auth.uid(), _const_role_hr())
     )
   );
 
@@ -89,8 +89,8 @@ CREATE POLICY "HR admin delete attendance"
   ON public.attendance FOR DELETE
   USING (
     is_active_user(auth.uid()) AND (
-      has_role(auth.uid(), 'admin'::app_role) OR
-      has_role(auth.uid(), 'hr'::app_role)
+      has_role(auth.uid(), _const_role_admin()) OR
+      has_role(auth.uid(), _const_role_hr())
     )
   );
 
@@ -107,8 +107,8 @@ CREATE POLICY "Finance admin select salary_records"
   ON public.salary_records FOR SELECT
   USING (
     is_active_user(auth.uid()) AND (
-      has_role(auth.uid(), 'admin'::app_role) OR
-      has_role(auth.uid(), 'finance'::app_role)
+      has_role(auth.uid(), _const_role_admin()) OR
+      has_role(auth.uid(), _const_role_finance())
     )
   );
 
@@ -117,13 +117,13 @@ CREATE POLICY "Finance admin manage salary_records"
   ON public.salary_records FOR ALL
   USING (
     is_active_user(auth.uid()) AND (
-      has_role(auth.uid(), 'admin'::app_role) OR
-      has_role(auth.uid(), 'finance'::app_role)
+      has_role(auth.uid(), _const_role_admin()) OR
+      has_role(auth.uid(), _const_role_finance())
     )
   )
   WITH CHECK (
     is_active_user(auth.uid()) AND (
-      has_role(auth.uid(), 'admin'::app_role) OR
-      has_role(auth.uid(), 'finance'::app_role)
+      has_role(auth.uid(), _const_role_admin()) OR
+      has_role(auth.uid(), _const_role_finance())
     )
   );

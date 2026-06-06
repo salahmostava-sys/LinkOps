@@ -1,4 +1,4 @@
--- ══════════════════════════════════════════════════════════════════════════════
+﻿-- ══════════════════════════════════════════════════════════════════════════════
 -- Platform Accounts + Account Assignments + System Settings iqama_alert_days
 -- Run this ONCE in: Supabase Dashboard → SQL Editor
 -- ══════════════════════════════════════════════════════════════════════════════
@@ -31,10 +31,10 @@ CREATE POLICY "platform_accounts_select"
   ON public.platform_accounts FOR SELECT
   USING (
     is_active_user(auth.uid()) AND (
-      has_role(auth.uid(), 'admin'::app_role) OR
-      has_role(auth.uid(), 'hr'::app_role)    OR
-      has_role(auth.uid(), 'operations'::app_role) OR
-      has_role(auth.uid(), 'finance'::app_role)
+      has_role(auth.uid(), _const_role_admin()) OR
+      has_role(auth.uid(), _const_role_hr())    OR
+      has_role(auth.uid(), _const_role_operations()) OR
+      has_role(auth.uid(), _const_role_finance())
     )
   );
 
@@ -43,14 +43,14 @@ CREATE POLICY "platform_accounts_manage"
   ON public.platform_accounts FOR ALL
   USING (
     is_active_user(auth.uid()) AND (
-      has_role(auth.uid(), 'admin'::app_role) OR
-      has_role(auth.uid(), 'hr'::app_role)
+      has_role(auth.uid(), _const_role_admin()) OR
+      has_role(auth.uid(), _const_role_hr())
     )
   )
   WITH CHECK (
     is_active_user(auth.uid()) AND (
-      has_role(auth.uid(), 'admin'::app_role) OR
-      has_role(auth.uid(), 'hr'::app_role)
+      has_role(auth.uid(), _const_role_admin()) OR
+      has_role(auth.uid(), _const_role_hr())
     )
   );
 
@@ -82,10 +82,10 @@ CREATE POLICY "account_assignments_select"
   ON public.account_assignments FOR SELECT
   USING (
     is_active_user(auth.uid()) AND (
-      has_role(auth.uid(), 'admin'::app_role) OR
-      has_role(auth.uid(), 'hr'::app_role)    OR
-      has_role(auth.uid(), 'operations'::app_role) OR
-      has_role(auth.uid(), 'finance'::app_role)
+      has_role(auth.uid(), _const_role_admin()) OR
+      has_role(auth.uid(), _const_role_hr())    OR
+      has_role(auth.uid(), _const_role_operations()) OR
+      has_role(auth.uid(), _const_role_finance())
     )
   );
 
@@ -94,8 +94,8 @@ CREATE POLICY "account_assignments_insert_update"
   ON public.account_assignments FOR INSERT
   WITH CHECK (
     is_active_user(auth.uid()) AND (
-      has_role(auth.uid(), 'admin'::app_role) OR
-      has_role(auth.uid(), 'hr'::app_role)
+      has_role(auth.uid(), _const_role_admin()) OR
+      has_role(auth.uid(), _const_role_hr())
     )
   );
 
@@ -104,8 +104,8 @@ CREATE POLICY "account_assignments_update_only"
   ON public.account_assignments FOR UPDATE
   USING (
     is_active_user(auth.uid()) AND (
-      has_role(auth.uid(), 'admin'::app_role) OR
-      has_role(auth.uid(), 'hr'::app_role)
+      has_role(auth.uid(), _const_role_admin()) OR
+      has_role(auth.uid(), _const_role_hr())
     )
   );
 

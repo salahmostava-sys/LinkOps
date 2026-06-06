@@ -1,4 +1,4 @@
-BEGIN;
+﻿BEGIN;
 
 CREATE TABLE IF NOT EXISTS public.commercial_records (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -155,7 +155,7 @@ BEGIN
     LEFT JOIN public.roles r ON r.id = ur.role_id
     WHERE ur.user_id = auth.uid()
       AND (
-        ur.role = 'admin'::public.app_role
+        ur.role = _const_role_admin()
         OR lower(COALESCE(r.title, '')) = 'admin'
       )
   ) THEN
@@ -183,7 +183,7 @@ BEGIN
     FROM public.user_roles ur
     WHERE ur.user_id = auth.uid()
       AND (
-        (ur.role = 'hr'::public.app_role AND (
+        (ur.role = _const_role_hr() AND (
           (p_resource = 'employees'  AND p_action IN ('view','write')) OR
           (p_resource = _const_work_orders()     AND p_action IN ('view','write')) OR
           (p_resource = 'attendance' AND p_action IN ('view','write')) OR
@@ -192,7 +192,7 @@ BEGIN
           (p_resource = 'financials' AND p_action = 'view')
         ))
         OR
-        (ur.role = 'finance'::public.app_role AND (
+        (ur.role = _const_role_finance() AND (
           (p_resource = 'employees'  AND p_action = 'view') OR
           (p_resource = _const_work_orders()     AND p_action = 'view') OR
           (p_resource = 'attendance' AND p_action = 'view') OR
@@ -201,7 +201,7 @@ BEGIN
           (p_resource = 'roles'      AND p_action = 'view')
         ))
         OR
-        (ur.role = 'operations'::public.app_role AND (
+        (ur.role = _const_role_operations() AND (
           (p_resource = 'employees'  AND p_action IN ('view','write')) OR
           (p_resource = _const_work_orders()     AND p_action IN ('view','write')) OR
           (p_resource = 'attendance' AND p_action IN ('view','write')) OR
@@ -209,7 +209,7 @@ BEGIN
           (p_resource = 'financials' AND p_action = 'view')
         ))
         OR
-        (ur.role = 'viewer'::public.app_role AND p_action = 'view')
+        (ur.role = _const_role_viewer() AND p_action = 'view')
       )
   ) THEN
     RETURN true;

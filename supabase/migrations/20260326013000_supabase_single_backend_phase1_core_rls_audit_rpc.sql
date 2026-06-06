@@ -1,4 +1,4 @@
--- ============================================================================
+﻿-- ============================================================================
 -- PHASE 1: Supabase-only backend consolidation (core DB layer)
 -- - Helper functions: is_internal_user, has_permission
 -- - Explicit RLS policies for core tables (no global dynamic loops)
@@ -53,7 +53,7 @@ BEGIN
     LEFT JOIN public.roles r ON r.id = ur.role_id
     WHERE ur.user_id = auth.uid()
       AND (
-        ur.role = 'admin'::public.app_role
+        ur.role = _const_role_admin()
         OR lower(COALESCE(r.title, '')) = 'admin'
       )
   ) THEN
@@ -84,7 +84,7 @@ BEGIN
     WHERE ur.user_id = auth.uid()
       AND (
         -- HR
-        (ur.role = 'hr'::public.app_role AND (
+        (ur.role = _const_role_hr() AND (
           (p_resource = 'employees'  AND p_action IN ('view','write')) OR
           (p_resource = _const_work_orders()     AND p_action IN ('view','write')) OR
           (p_resource = 'attendance' AND p_action IN ('view','write')) OR
@@ -94,7 +94,7 @@ BEGIN
         ))
         OR
         -- Finance
-        (ur.role = 'finance'::public.app_role AND (
+        (ur.role = _const_role_finance() AND (
           (p_resource = 'employees'  AND p_action = 'view') OR
           (p_resource = _const_work_orders()     AND p_action = 'view') OR
           (p_resource = 'attendance' AND p_action = 'view') OR
@@ -104,7 +104,7 @@ BEGIN
         ))
         OR
         -- Operations
-        (ur.role = 'operations'::public.app_role AND (
+        (ur.role = _const_role_operations() AND (
           (p_resource = 'employees'  AND p_action = 'view') OR
           (p_resource = _const_work_orders()     AND p_action IN ('view','write')) OR
           (p_resource = 'attendance' AND p_action IN ('view','write')) OR
@@ -113,7 +113,7 @@ BEGIN
         ))
         OR
         -- Viewer
-        (ur.role = 'viewer'::public.app_role AND p_action = 'view')
+        (ur.role = _const_role_viewer() AND p_action = 'view')
       )
   ) THEN
     RETURN true;

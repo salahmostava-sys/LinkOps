@@ -1,4 +1,4 @@
-
+﻿
 CREATE TABLE IF NOT EXISTS public.employee_tiers (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   employee_id UUID NOT NULL REFERENCES public.employees(id) ON DELETE CASCADE,
@@ -21,7 +21,7 @@ CREATE POLICY "Active users can view employee_tiers"
 DROP POLICY IF EXISTS "HR/admin can manage employee_tiers" ON public.employee_tiers;
 CREATE POLICY "HR/admin can manage employee_tiers"
   ON public.employee_tiers FOR ALL
-  USING (is_active_user(auth.uid()) AND (has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'hr'::app_role)));
+  USING (is_active_user(auth.uid()) AND (has_role(auth.uid(), _const_role_admin()) OR has_role(auth.uid(), _const_role_hr())));
 
 DROP TRIGGER IF EXISTS update_employee_tiers_updated_at ON public.employee_tiers;
 CREATE TRIGGER update_employee_tiers_updated_at

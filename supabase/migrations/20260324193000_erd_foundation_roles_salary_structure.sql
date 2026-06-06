@@ -1,4 +1,4 @@
--- Phase 1 ERD foundation (non-breaking):
+﻿-- Phase 1 ERD foundation (non-breaking):
 -- - explicit roles catalog + employee_roles (many-to-many)
 -- - normalize orders semantics on existing daily_orders table
 -- - add stable salary tiers structure
@@ -140,8 +140,8 @@ CREATE POLICY "Active users can view roles"
   USING (is_active_user(auth.uid()));
 CREATE POLICY "Admin can manage roles"
   ON public.roles FOR ALL
-  USING (has_role(auth.uid(), 'admin'::app_role))
-  WITH CHECK (has_role(auth.uid(), 'admin'::app_role));
+  USING (has_role(auth.uid(), _const_role_admin()))
+  WITH CHECK (has_role(auth.uid(), _const_role_admin()));
 
 DROP POLICY IF EXISTS "Active users can view employee_roles" ON public.employee_roles;
 DROP POLICY IF EXISTS "Admin or HR can manage employee_roles" ON public.employee_roles;
@@ -152,12 +152,12 @@ DROP POLICY IF EXISTS "Admin or HR can manage employee_roles" ON public.employee
 CREATE POLICY "Admin or HR can manage employee_roles"
   ON public.employee_roles FOR ALL
   USING (
-    has_role(auth.uid(), 'admin'::app_role) OR
-    has_role(auth.uid(), 'hr'::app_role)
+    has_role(auth.uid(), _const_role_admin()) OR
+    has_role(auth.uid(), _const_role_hr())
   )
   WITH CHECK (
-    has_role(auth.uid(), 'admin'::app_role) OR
-    has_role(auth.uid(), 'hr'::app_role)
+    has_role(auth.uid(), _const_role_admin()) OR
+    has_role(auth.uid(), _const_role_hr())
   );
 
 DROP POLICY IF EXISTS "Active users can view salary_tiers" ON public.salary_tiers;
@@ -169,10 +169,10 @@ DROP POLICY IF EXISTS "Finance admin can manage salary_tiers" ON public.salary_t
 CREATE POLICY "Finance admin can manage salary_tiers"
   ON public.salary_tiers FOR ALL
   USING (
-    has_role(auth.uid(), 'admin'::app_role) OR
-    has_role(auth.uid(), 'finance'::app_role)
+    has_role(auth.uid(), _const_role_admin()) OR
+    has_role(auth.uid(), _const_role_finance())
   )
   WITH CHECK (
-    has_role(auth.uid(), 'admin'::app_role) OR
-    has_role(auth.uid(), 'finance'::app_role)
+    has_role(auth.uid(), _const_role_admin()) OR
+    has_role(auth.uid(), _const_role_finance())
   );

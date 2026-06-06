@@ -1,4 +1,4 @@
--- تشغيل مرة واحدة في Supabase → SQL Editor إذا ظهرت رسالة:
+﻿-- تشغيل مرة واحدة في Supabase → SQL Editor إذا ظهرت رسالة:
 -- "Could not find the table 'public.spare_parts' in the schema cache"
 -- آمن للتكرار: يستخدم IF NOT EXISTS / DROP IF EXISTS حيث يلزم.
 -- للجداول الكاملة (maintenance_logs، maintenance_parts، المحفزات) شغّل أيضاً
@@ -34,14 +34,14 @@ CREATE POLICY "Admin/operations can manage spare_parts"
   TO authenticated
   USING (
     is_active_user(auth.uid()) AND (
-      has_role(auth.uid(), 'admin'::app_role) OR
-      has_role(auth.uid(), 'operations'::app_role)
+      has_role(auth.uid(), _const_role_admin()) OR
+      has_role(auth.uid(), _const_role_operations())
     )
   )
   WITH CHECK (
     is_active_user(auth.uid()) AND (
-      has_role(auth.uid(), 'admin'::app_role) OR
-      has_role(auth.uid(), 'operations'::app_role)
+      has_role(auth.uid(), _const_role_admin()) OR
+      has_role(auth.uid(), _const_role_operations())
     )
   );
 

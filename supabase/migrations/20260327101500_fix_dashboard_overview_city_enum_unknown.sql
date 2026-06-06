@@ -1,4 +1,4 @@
--- Fix dashboard_overview_rpc city enum casting issue.
+﻿-- Fix dashboard_overview_rpc city enum casting issue.
 -- In some datasets employees.city can be NULL, and COALESCE on enum without text cast
 -- can throw: invalid input value for enum city_enum: "unknown".
 
@@ -21,10 +21,10 @@ BEGIN
   IF NOT (
     is_active_user(auth.uid())
     AND (
-      has_role(auth.uid(), 'admin'::app_role)
-      OR has_role(auth.uid(), 'hr'::app_role)
-      OR has_role(auth.uid(), 'finance'::app_role)
-      OR has_role(auth.uid(), 'operations'::app_role)
+      has_role(auth.uid(), _const_role_admin())
+      OR has_role(auth.uid(), _const_role_hr())
+      OR has_role(auth.uid(), _const_role_finance())
+      OR has_role(auth.uid(), _const_role_operations())
     )
   ) THEN
     RAISE EXCEPTION 'Not allowed';

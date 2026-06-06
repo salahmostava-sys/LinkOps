@@ -1,4 +1,4 @@
--- Dashboard overview aggregation (server-side).
+﻿-- Dashboard overview aggregation (server-side).
 -- Returns a single JSON payload for the main dashboard tab.
 
 CREATE OR REPLACE FUNCTION public.dashboard_overview_rpc(
@@ -20,10 +20,10 @@ BEGIN
   IF NOT (
     is_active_user(auth.uid())
     AND (
-      has_role(auth.uid(), 'admin'::app_role)
-      OR has_role(auth.uid(), 'hr'::app_role)
-      OR has_role(auth.uid(), 'finance'::app_role)
-      OR has_role(auth.uid(), 'operations'::app_role)
+      has_role(auth.uid(), _const_role_admin())
+      OR has_role(auth.uid(), _const_role_hr())
+      OR has_role(auth.uid(), _const_role_finance())
+      OR has_role(auth.uid(), _const_role_operations())
     )
   ) THEN
     RAISE EXCEPTION 'Not allowed';

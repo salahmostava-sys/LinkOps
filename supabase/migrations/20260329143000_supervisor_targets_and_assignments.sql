@@ -1,4 +1,4 @@
--- Supervisor monthly targets + rider assignments (single-org safe).
+﻿-- Supervisor monthly targets + rider assignments (single-org safe).
 
 BEGIN;
 
@@ -36,14 +36,14 @@ CREATE POLICY "Operations/admin can manage supervisor_employee_assignments"
   TO authenticated
   USING (
     is_active_user(auth.uid()) AND (
-      has_role(auth.uid(), 'admin'::app_role) OR
-      has_role(auth.uid(), 'operations'::app_role)
+      has_role(auth.uid(), _const_role_admin()) OR
+      has_role(auth.uid(), _const_role_operations())
     )
   )
   WITH CHECK (
     is_active_user(auth.uid()) AND (
-      has_role(auth.uid(), 'admin'::app_role) OR
-      has_role(auth.uid(), 'operations'::app_role)
+      has_role(auth.uid(), _const_role_admin()) OR
+      has_role(auth.uid(), _const_role_operations())
     )
   );
 
@@ -82,14 +82,14 @@ CREATE POLICY "Operations/admin can manage supervisor_targets"
   TO authenticated
   USING (
     is_active_user(auth.uid()) AND (
-      has_role(auth.uid(), 'admin'::app_role) OR
-      has_role(auth.uid(), 'operations'::app_role)
+      has_role(auth.uid(), _const_role_admin()) OR
+      has_role(auth.uid(), _const_role_operations())
     )
   )
   WITH CHECK (
     is_active_user(auth.uid()) AND (
-      has_role(auth.uid(), 'admin'::app_role) OR
-      has_role(auth.uid(), 'operations'::app_role)
+      has_role(auth.uid(), _const_role_admin()) OR
+      has_role(auth.uid(), _const_role_operations())
     )
   );
 

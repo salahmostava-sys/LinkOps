@@ -2604,7 +2604,7 @@ ALTER FUNCTION public.is_salary_admin_job_title(text) SET search_path = public;
 -- Helper function for Admin/HR access check
 CREATE OR REPLACE FUNCTION public.is_admin_or_hr(uid uuid) RETURNS boolean AS $$
 BEGIN
-  RETURN is_active_user(uid) AND (has_role(uid, 'admin'::app_role) OR has_role(uid, 'hr'::app_role));
+  RETURN is_active_user(uid) AND (has_role(uid, _const_role_admin()) OR has_role(uid, _const_role_hr()));
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
@@ -2863,8 +2863,8 @@ SET search_path TO 'public'
 AS $$
 BEGIN
   RETURN (
-    public.has_role(uid, 'admin'::public.app_role)
-    OR public.has_role(uid, 'hr'::public.app_role)
+    public.has_role(uid, _const_role_admin())
+    OR public.has_role(uid, _const_role_hr())
   );
 END;
 $$;

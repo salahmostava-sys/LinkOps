@@ -1,4 +1,4 @@
--- Pricing rules for payroll calculation (db-driven)
+﻿-- Pricing rules for payroll calculation (db-driven)
 
 CREATE TABLE IF NOT EXISTS public.pricing_rules (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -42,14 +42,14 @@ CREATE POLICY "Finance/admin can manage pricing_rules"
   ON public.pricing_rules FOR ALL
   USING (
     is_active_user(auth.uid()) AND (
-      has_role(auth.uid(), 'admin'::app_role) OR
-      has_role(auth.uid(), 'finance'::app_role)
+      has_role(auth.uid(), _const_role_admin()) OR
+      has_role(auth.uid(), _const_role_finance())
     )
   )
   WITH CHECK (
     is_active_user(auth.uid()) AND (
-      has_role(auth.uid(), 'admin'::app_role) OR
-      has_role(auth.uid(), 'finance'::app_role)
+      has_role(auth.uid(), _const_role_admin()) OR
+      has_role(auth.uid(), _const_role_finance())
     )
   );
 

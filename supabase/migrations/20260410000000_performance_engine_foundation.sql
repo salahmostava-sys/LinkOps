@@ -1,4 +1,4 @@
-BEGIN;
+﻿BEGIN;
 
 -- Employee targets (monthly + daily)
 CREATE TABLE IF NOT EXISTS public.employee_targets (
@@ -42,19 +42,19 @@ CREATE POLICY employee_targets_manage_policy
   USING (
     public.is_active_user(auth.uid())
     AND (
-      public.has_role(auth.uid(), 'admin'::app_role)
-      OR public.has_role(auth.uid(), 'operations'::app_role)
-      OR public.has_role(auth.uid(), 'hr'::app_role)
-      OR public.has_role(auth.uid(), 'finance'::app_role)
+      public.has_role(auth.uid(), _const_role_admin())
+      OR public.has_role(auth.uid(), _const_role_operations())
+      OR public.has_role(auth.uid(), _const_role_hr())
+      OR public.has_role(auth.uid(), _const_role_finance())
     )
   )
   WITH CHECK (
     public.is_active_user(auth.uid())
     AND (
-      public.has_role(auth.uid(), 'admin'::app_role)
-      OR public.has_role(auth.uid(), 'operations'::app_role)
-      OR public.has_role(auth.uid(), 'hr'::app_role)
-      OR public.has_role(auth.uid(), 'finance'::app_role)
+      public.has_role(auth.uid(), _const_role_admin())
+      OR public.has_role(auth.uid(), _const_role_operations())
+      OR public.has_role(auth.uid(), _const_role_hr())
+      OR public.has_role(auth.uid(), _const_role_finance())
     )
   );
 
@@ -107,10 +107,10 @@ CREATE POLICY order_import_batches_select_policy
   USING (
     public.is_active_user(auth.uid())
     AND (
-      public.has_role(auth.uid(), 'admin'::app_role)
-      OR public.has_role(auth.uid(), 'operations'::app_role)
-      OR public.has_role(auth.uid(), 'hr'::app_role)
-      OR public.has_role(auth.uid(), 'finance'::app_role)
+      public.has_role(auth.uid(), _const_role_admin())
+      OR public.has_role(auth.uid(), _const_role_operations())
+      OR public.has_role(auth.uid(), _const_role_hr())
+      OR public.has_role(auth.uid(), _const_role_finance())
     )
   );
 
@@ -121,19 +121,19 @@ CREATE POLICY order_import_batches_manage_policy
   USING (
     public.is_active_user(auth.uid())
     AND (
-      public.has_role(auth.uid(), 'admin'::app_role)
-      OR public.has_role(auth.uid(), 'operations'::app_role)
-      OR public.has_role(auth.uid(), 'hr'::app_role)
-      OR public.has_role(auth.uid(), 'finance'::app_role)
+      public.has_role(auth.uid(), _const_role_admin())
+      OR public.has_role(auth.uid(), _const_role_operations())
+      OR public.has_role(auth.uid(), _const_role_hr())
+      OR public.has_role(auth.uid(), _const_role_finance())
     )
   )
   WITH CHECK (
     public.is_active_user(auth.uid())
     AND (
-      public.has_role(auth.uid(), 'admin'::app_role)
-      OR public.has_role(auth.uid(), 'operations'::app_role)
-      OR public.has_role(auth.uid(), 'hr'::app_role)
-      OR public.has_role(auth.uid(), 'finance'::app_role)
+      public.has_role(auth.uid(), _const_role_admin())
+      OR public.has_role(auth.uid(), _const_role_operations())
+      OR public.has_role(auth.uid(), _const_role_hr())
+      OR public.has_role(auth.uid(), _const_role_finance())
     )
   );
 
@@ -178,8 +178,8 @@ CREATE POLICY salary_month_snapshots_select_policy
   USING (
     public.is_active_user(auth.uid())
     AND (
-      public.has_role(auth.uid(), 'admin'::app_role)
-      OR public.has_role(auth.uid(), 'finance'::app_role)
+      public.has_role(auth.uid(), _const_role_admin())
+      OR public.has_role(auth.uid(), _const_role_finance())
     )
   );
 
@@ -190,15 +190,15 @@ CREATE POLICY salary_month_snapshots_manage_policy
   USING (
     public.is_active_user(auth.uid())
     AND (
-      public.has_role(auth.uid(), 'admin'::app_role)
-      OR public.has_role(auth.uid(), 'finance'::app_role)
+      public.has_role(auth.uid(), _const_role_admin())
+      OR public.has_role(auth.uid(), _const_role_finance())
     )
   )
   WITH CHECK (
     public.is_active_user(auth.uid())
     AND (
-      public.has_role(auth.uid(), 'admin'::app_role)
-      OR public.has_role(auth.uid(), 'finance'::app_role)
+      public.has_role(auth.uid(), _const_role_admin())
+      OR public.has_role(auth.uid(), _const_role_finance())
     )
   );
 
@@ -356,9 +356,9 @@ BEGIN
   IF NOT (
     public.is_active_user(auth.uid())
     AND (
-      public.has_role(auth.uid(), 'admin'::app_role)
-      OR public.has_role(auth.uid(), 'operations'::app_role)
-      OR public.has_role(auth.uid(), 'hr'::app_role)
+      public.has_role(auth.uid(), _const_role_admin())
+      OR public.has_role(auth.uid(), _const_role_operations())
+      OR public.has_role(auth.uid(), _const_role_hr())
     )
   ) THEN
     RAISE EXCEPTION 'Not allowed';
@@ -524,8 +524,8 @@ BEGIN
   IF NOT (
     public.is_active_user(auth.uid())
     AND (
-      public.has_role(auth.uid(), 'admin'::app_role)
-      OR public.has_role(auth.uid(), 'finance'::app_role)
+      public.has_role(auth.uid(), _const_role_admin())
+      OR public.has_role(auth.uid(), _const_role_finance())
     )
   ) THEN
     RAISE EXCEPTION 'Not allowed';

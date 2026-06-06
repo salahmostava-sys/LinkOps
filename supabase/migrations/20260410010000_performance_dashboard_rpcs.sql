@@ -1,4 +1,4 @@
-BEGIN;
+﻿BEGIN;
 
 CREATE INDEX IF NOT EXISTS idx_daily_orders_perf_date_employee
   ON public.daily_orders(date, employee_id, app_id)
@@ -32,10 +32,10 @@ BEGIN
   IF NOT (
     public.is_active_user(auth.uid())
     AND (
-      public.has_role(auth.uid(), 'admin'::app_role)
-      OR public.has_role(auth.uid(), 'hr'::app_role)
-      OR public.has_role(auth.uid(), 'finance'::app_role)
-      OR public.has_role(auth.uid(), 'operations'::app_role)
+      public.has_role(auth.uid(), _const_role_admin())
+      OR public.has_role(auth.uid(), _const_role_hr())
+      OR public.has_role(auth.uid(), _const_role_finance())
+      OR public.has_role(auth.uid(), _const_role_operations())
     )
   ) THEN
     RAISE EXCEPTION 'Not allowed';
@@ -658,10 +658,10 @@ BEGIN
   IF NOT (
     public.is_active_user(auth.uid())
     AND (
-      public.has_role(auth.uid(), 'admin'::app_role)
-      OR public.has_role(auth.uid(), 'hr'::app_role)
-      OR public.has_role(auth.uid(), 'finance'::app_role)
-      OR public.has_role(auth.uid(), 'operations'::app_role)
+      public.has_role(auth.uid(), _const_role_admin())
+      OR public.has_role(auth.uid(), _const_role_hr())
+      OR public.has_role(auth.uid(), _const_role_finance())
+      OR public.has_role(auth.uid(), _const_role_operations())
     )
   ) THEN
     RAISE EXCEPTION 'Not allowed';
