@@ -1,5 +1,5 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 
 function walk(dir) {
     let results = [];
@@ -7,7 +7,7 @@ function walk(dir) {
     list.forEach(file => {
         file = dir + '/' + file;
         const stat = fs.statSync(file);
-        if (stat && stat.isDirectory()) { 
+        if (stat?.isDirectory()) {
             results = results.concat(walk(file));
         } else { 
             results.push(file);
@@ -30,28 +30,28 @@ allFiles.forEach(file => {
 
     // Fix node imports
     if (file.endsWith('.js')) {
-        content = content.replace(/require\('fs'\)/g, "require('node:fs')");
-        content = content.replace(/require\("fs"\)/g, 'require("node:fs")');
-        content = content.replace(/require\('child_process'\)/g, "require('node:child_process')");
-        content = content.replace(/require\("child_process"\)/g, 'require("node:child_process")');
+        content = content.replaceAll("require('fs')", "require('node:fs')");
+        content = content.replaceAll('require("fs")', 'require("node:fs")');
+        content = content.replaceAll("require('child_process')", "require('node:child_process')");
+        content = content.replaceAll('require("child_process")', 'require("node:child_process")');
     }
 
     // Replace replace with replaceAll where flagged
     if (file.includes('generate_fk_indexes.js')) {
-        content = content.replace(/sql\.replace\(\/--\.\*\\n\/g, ''\)/g, "sql.replaceAll(/--.*\\n/g, '')");
+        content = content.replaceAll(String.raw`sql.replace(/--.*\n/g, '')`, String.raw`sql.replaceAll(/--.*\n/g, '')`);
     }
     
     // Fix python function
     if (file.endsWith('fix_migrations.py')) {
-        content = content.replace(/def replace_policy\(content\):/g, 'def replace_policy(content=content):');
-        content = content.replace(/def replace_trigger\(content\):/g, 'def replace_trigger(content=content):');
+        content = content.replaceAll('def replace_policy(content):', 'def replace_policy(content=content):');
+        content = content.replaceAll('def replace_trigger(content):', 'def replace_trigger(content=content):');
     }
 
     // Replace Write-Host with Write-Output in PS1
     if (file.endsWith('.ps1')) {
-        content = content.replace(/Write-Host/g, 'Write-Output');
-        content = content.replace(/\$matches /g, '$matchRes ');
-        content = content.replace(/\$matches\[/g, '$matchRes[');
+        content = content.replaceAll('Write-Host', 'Write-Output');
+        content = content.replaceAll('$matches ', '$matchRes ');
+        content = content.replaceAll('$matches[', '$matchRes[');
     }
 
     if (content !== original) {

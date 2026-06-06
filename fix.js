@@ -9,6 +9,6 @@ c = c.replace(
 
 c = c.replaceAll(/isRTL \? '(.*?)' : '(.*?)'/g, "t(isRTL, '$1', '$2')");
 c = c.replaceAll(/isRTL \? `(.*?)` : `(.*?)`/g, "t(isRTL, `$1`, `$2`)");
-c = c.replaceAll(/isRTL \? opt\.labelAr : opt\.labelEn/g, "t(isRTL, opt.labelAr, opt.labelEn)");
+c = c.replaceAll('isRTL ? opt.labelAr : opt.labelEn', "t(isRTL, opt.labelAr, opt.labelEn)");
 
 fs.writeFileSync('frontend/shared/components/settings/ProjectSettings.tsx', c);
