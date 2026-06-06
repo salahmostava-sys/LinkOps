@@ -45,6 +45,45 @@ export type InlineSelectEditorProps = Readonly<{
   renderDisplay: () => React.ReactNode;
 }>;
 
+function InlineEditorPopover({
+  open,
+  setOpen,
+  saving,
+  renderDisplay,
+  children,
+  widthClass = "w-64"
+}: Readonly<{
+  open: boolean;
+  setOpen: (v: boolean) => void;
+  saving: boolean;
+  renderDisplay: () => React.ReactNode;
+  children: React.ReactNode;
+  widthClass?: string;
+}>) {
+  if (!open) {
+    return (
+      <InlineEditTrigger saving={saving} onClick={() => setOpen(true)}>
+        {renderDisplay()}
+      </InlineEditTrigger>
+    );
+  }
+
+  return (
+    <Popover modal={false} open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <InlineEditTrigger saving={saving}>{renderDisplay()}</InlineEditTrigger>
+      </PopoverTrigger>
+      <PopoverContent
+        className={`${widthClass} p-3`}
+        align="center"
+        onClick={(event) => event.stopPropagation()}
+      >
+        {children}
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 export function InlineSelectEditor({
   value,
   options,
@@ -64,43 +103,26 @@ export function InlineSelectEditor({
     }
   };
 
-  if (!open) {
-    return (
-      <InlineEditTrigger saving={saving} onClick={() => setOpen(true)}>
-        {renderDisplay()}
-      </InlineEditTrigger>
-    );
-  }
-
   return (
-    <Popover modal={false} open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <InlineEditTrigger saving={saving}>{renderDisplay()}</InlineEditTrigger>
-      </PopoverTrigger>
-      <PopoverContent
-        className="w-56 p-2"
-        align="center"
-        onClick={(event) => event.stopPropagation()}
-      >
-        <div className="space-y-1">
-          {options.map((option) => {
-            const isSelected = option.value === value;
-            return (
-              <button
-                key={option.value}
-                type="button"
-                disabled={saving}
-                onClick={() => { handleSelect(option.value); }}
-                className="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                <span>{option.label}</span>
-                {isSelected && <Check size={14} className="text-primary" />}
-              </button>
-            );
-          })}
-        </div>
-      </PopoverContent>
-    </Popover>
+    <InlineEditorPopover open={open} setOpen={setOpen} saving={saving} renderDisplay={renderDisplay} widthClass="w-56 p-2">
+      <div className="space-y-1">
+        {options.map((option) => {
+          const isSelected = option.value === value;
+          return (
+            <button
+              key={option.value}
+              type="button"
+              disabled={saving}
+              onClick={() => { handleSelect(option.value); }}
+              className="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <span>{option.label}</span>
+              {isSelected && <Check size={14} className="text-primary" />}
+            </button>
+          );
+        })}
+      </div>
+    </InlineEditorPopover>
   );
 }
 
@@ -141,80 +163,63 @@ export function InlineInputEditor({
     }
   };
 
-  if (!open) {
-    return (
-      <InlineEditTrigger saving={saving} onClick={() => setOpen(true)}>
-        {renderDisplay()}
-      </InlineEditTrigger>
-    );
-  }
-
   return (
-    <Popover modal={false} open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <InlineEditTrigger saving={saving}>{renderDisplay()}</InlineEditTrigger>
-      </PopoverTrigger>
-      <PopoverContent
-        className="w-64 p-3"
-        align="center"
-        onClick={(event) => event.stopPropagation()}
-      >
-        <div className="space-y-3">
-          <Input
-            type={inputType}
-            value={draft}
-            dir={dir}
-            placeholder={placeholder}
-            onChange={(event) => setDraft(inputType === 'date' ? normalizeArabicDigits(event.target.value) : event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') {
-                event.preventDefault();
-                handleSave();
-              }
+    <InlineEditorPopover open={open} setOpen={setOpen} saving={saving} renderDisplay={renderDisplay}>
+      <div className="space-y-3">
+        <Input
+          type={inputType}
+          value={draft}
+          dir={dir}
+          placeholder={placeholder}
+          onChange={(event) => setDraft(inputType === 'date' ? normalizeArabicDigits(event.target.value) : event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter') {
+              event.preventDefault();
+              handleSave();
+            }
+          }}
+          autoFocus
+        />
+        <div className="flex items-center justify-between gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-8 px-3"
+            onClick={() => {
+              setDraft(value);
+              setOpen(false);
             }}
-            autoFocus
-          />
-          <div className="flex items-center justify-between gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="h-8 px-3"
-              onClick={() => {
-                setDraft(value);
-                setOpen(false);
-              }}
-              disabled={saving}
-            >
-              إلغاء
-            </Button>
-            <div className="flex items-center gap-2">
-              {value && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 px-3 text-destructive hover:text-destructive"
-                  onClick={() => setDraft('')}
-                  disabled={saving}
-                >
-                  مسح
-                </Button>
-              )}
+            disabled={saving}
+          >
+            إلغاء
+          </Button>
+          <div className="flex items-center gap-2">
+            {value && (
               <Button
                 type="button"
+                variant="ghost"
                 size="sm"
-                className="h-8 px-3"
-                onClick={() => { handleSave(); }}
+                className="h-8 px-3 text-destructive hover:text-destructive"
+                onClick={() => setDraft('')}
                 disabled={saving}
               >
-                {saving ? <Loader2 size={13} className="animate-spin" /> : 'حفظ'}
+                مسح
               </Button>
-            </div>
+            )}
+            <Button
+              type="button"
+              size="sm"
+              className="h-8 px-3"
+              onClick={() => { handleSave(); }}
+              disabled={saving}
+            >
+              {saving ? <Loader2 size={13} className="animate-spin" /> : 'حفظ'}
+            </Button>
           </div>
         </div>
-      </PopoverContent>
-    </Popover>
+      </div>
+    </InlineEditorPopover>
   );
 }
 
@@ -260,65 +265,48 @@ export function InlineMultiSelectEditor({
     }
   };
 
-  if (!open) {
-    return (
-      <InlineEditTrigger saving={saving} onClick={() => setOpen(true)}>
-        {renderDisplay()}
-      </InlineEditTrigger>
-    );
-  }
-
   return (
-    <Popover modal={false} open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <InlineEditTrigger saving={saving}>{renderDisplay()}</InlineEditTrigger>
-      </PopoverTrigger>
-      <PopoverContent
-        className="w-64 p-3"
-        align="center"
-        onClick={(event) => event.stopPropagation()}
-      >
-        <div className="space-y-3">
-          <div className="max-h-64 space-y-2 overflow-y-auto">
-            {options.map((option) => (
-              <label
-                key={option.value}
-                className="flex cursor-pointer items-center gap-2 rounded-md px-1 py-1 text-sm hover:bg-muted/50"
-              >
-                <Checkbox
-                  checked={selectedValues.has(option.value)}
-                  onCheckedChange={() => handleToggle(option.value)}
-                />
-                <span>{option.label}</span>
-              </label>
-            ))}
-          </div>
-          <div className="flex items-center justify-between gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="h-8 px-3"
-              onClick={() => {
-                setSelectedValues(new Set(values));
-                setOpen(false);
-              }}
-              disabled={saving}
+    <InlineEditorPopover open={open} setOpen={setOpen} saving={saving} renderDisplay={renderDisplay}>
+      <div className="space-y-3">
+        <div className="max-h-64 space-y-2 overflow-y-auto">
+          {options.map((option) => (
+            <label
+              key={option.value}
+              className="flex cursor-pointer items-center gap-2 rounded-md px-1 py-1 text-sm hover:bg-muted/50"
             >
-              إلغاء
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              className="h-8 px-3"
-              onClick={() => { handleSave(); }}
-              disabled={saving}
-            >
-              {saving ? <Loader2 size={13} className="animate-spin" /> : 'حفظ'}
-            </Button>
-          </div>
+              <Checkbox
+                checked={selectedValues.has(option.value)}
+                onCheckedChange={() => handleToggle(option.value)}
+              />
+              <span>{option.label}</span>
+            </label>
+          ))}
         </div>
-      </PopoverContent>
-    </Popover>
+        <div className="flex items-center justify-between gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-8 px-3"
+            onClick={() => {
+              setSelectedValues(new Set(values));
+              setOpen(false);
+            }}
+            disabled={saving}
+          >
+            إلغاء
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            className="h-8 px-3"
+            onClick={() => { handleSave(); }}
+            disabled={saving}
+          >
+            {saving ? <Loader2 size={13} className="animate-spin" /> : 'حفظ'}
+          </Button>
+        </div>
+      </div>
+    </InlineEditorPopover>
   );
 }

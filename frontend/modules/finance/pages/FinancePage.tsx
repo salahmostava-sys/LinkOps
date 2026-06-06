@@ -1,4 +1,4 @@
-﻿import type React from 'react';
+import type React from 'react';
 import { useState, type Dispatch, type SetStateAction } from 'react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -131,83 +131,18 @@ type TableProps = {
   onAddRow: () => void;
 };
 
-function RevenueTable(props: Readonly<TableProps>) {
-  const { loading, items, editingId, editField, editText, setEditText, setEditingId, startEdit, saveEdit, deleteTransaction, isDeleting, isSaving, newItem, setNewItem, onAddRow } = props;
-  return (
-    <table className="w-full text-sm">
-      <thead>
-        <tr className="bg-muted/30">
-          <th className="px-3 py-2 text-center text-[11px] font-semibold text-muted-foreground w-36">المبلغ (ر.س)</th>
-          <th className="px-3 py-2 text-start text-[11px] font-semibold text-muted-foreground">الوصف</th>
-          <th className="px-3 py-2 w-10"></th>
-        </tr>
-      </thead>
-      <tbody>
-        {loading && (
-          <tr><td colSpan={3} className="text-center py-8 text-muted-foreground text-xs">جاري التحميل...</td></tr>
-        )}
-        {!loading && items.length === 0 && (
-          <tr><td colSpan={3} className="text-center py-8 text-muted-foreground text-xs">لا توجد إيرادات — أضف من الأسفل</td></tr>
-        )}
-        {!loading && items.length > 0 && (
-          [...items].sort((a, b) => b.date.localeCompare(a.date)).map(t => {
-            const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-              if (e.key === 'Enter') { (e.target as HTMLInputElement).blur(); }
-              else if (e.key === 'Escape') { setEditingId(null); }
-            };
-            return (
-              <tr key={t.id} className="border-t border-border/20 hover:bg-muted/10">
-                <td className="px-3 py-2.5 text-center font-bold text-emerald-600">
-                  {editingId === t.id && editField === 'amount' ? (
-                    <Input autoFocus type="number" min="0" value={editText} onChange={e => setEditText(e.target.value)}
-                      onBlur={() => { saveEdit(t.id); }} onKeyDown={handleKeyDown}
-                      className="h-7 text-sm text-center font-bold" dir="ltr" />
-                  ) : (
-                    <button type="button" className={t.is_auto ? '' : 'cursor-pointer hover:opacity-70'} onClick={() => { if (!t.is_auto) startEdit(t.id, 'amount', String(t.amount)); }} disabled={t.is_auto}>
-                      {t.amount.toLocaleString('en-US')}
-                    </button>
-                  )}
-                </td>
-                <td className="px-3 py-2.5 text-sm text-foreground">
-                  {editingId === t.id && editField === 'description' ? (
-                    <Input autoFocus value={editText} onChange={e => setEditText(e.target.value)}
-                      onBlur={() => { saveEdit(t.id); }} onKeyDown={handleKeyDown}
-                      className="h-7 text-sm" dir="rtl" />
-                  ) : (
-                    <button type="button" className={t.is_auto ? '' : 'cursor-pointer hover:text-primary'} onClick={() => { if (!t.is_auto) startEdit(t.id, 'description', t.description || t.category); }} disabled={t.is_auto}>
-                      {t.description || t.category}
-                    </button>
-                  )}
-                </td>
-                <td className="px-3 py-2.5 text-center">
-                  {t.is_auto ? <Lock size={12} className="mx-auto text-muted-foreground/40" /> : (
-                    <button aria-label="حذف" type="button" onClick={() => { deleteTransaction(t.id); }} disabled={isDeleting} className="p-1 rounded hover:bg-destructive/10 text-destructive/60 hover:text-destructive"><Trash2 size={13} /></button>
-                  )}
-                </td>
-              </tr>
-            );
-          })
-        )}
-        <tr className="border-t-2 border-emerald-200 dark:border-emerald-900 bg-emerald-50/30 dark:bg-emerald-950/10">
-          <td className="px-2 py-2">
-            <Input type="number" min="0" step="0.01" placeholder="0" value={newItem.amount} onChange={e => setNewItem(r => ({ ...r, amount: e.target.value }))} className="h-9 text-sm text-center font-bold w-full" dir="ltr" />
-          </td>
-          <td className="px-2 py-2">
-            <Input placeholder="وصف الإيراد..." value={newItem.description} onChange={e => setNewItem(r => ({ ...r, description: e.target.value }))} className="h-9 text-sm w-full" dir="rtl" />
-          </td>
-          <td className="px-2 py-2 text-center">
-            <Button size="sm" onClick={onAddRow} disabled={isSaving || !newItem.amount} className="h-9 w-9 p-0 bg-emerald-600 hover:bg-emerald-700">
-              <Plus size={16} />
-            </Button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  );
-}
+type TransactionTableProps = TableProps & { type: 'revenue' | 'expense' };
 
-function ExpenseTable(props: Readonly<TableProps>) {
-  const { loading, items, editingId, editField, editText, setEditText, setEditingId, startEdit, saveEdit, deleteTransaction, isDeleting, isSaving, newItem, setNewItem, onAddRow } = props;
+function TransactionTable(props: Readonly<TransactionTableProps>) {
+  const { type, loading, items, editingId, editField, editText, setEditText, setEditingId, startEdit, saveEdit, deleteTransaction, isDeleting, isSaving, newItem, setNewItem, onAddRow } = props;
+  
+  const isRev = type === 'revenue';
+  const colorText = isRev ? 'text-emerald-600' : 'text-rose-500';
+  const colorBg = isRev ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-rose-500 hover:bg-rose-600';
+  const rowBorder = isRev ? 'border-emerald-200 dark:border-emerald-900 bg-emerald-50/30 dark:bg-emerald-950/10' : 'border-rose-200 dark:border-rose-900 bg-rose-50/30 dark:bg-rose-950/10';
+  const emptyText = isRev ? 'لا توجد إيرادات — أضف من الأسفل' : 'لا توجد مصاريف — أضف من الأسفل أو اضغط مزامنة الرواتب';
+  const descPlaceholder = isRev ? 'وصف الإيراد...' : 'وصف المصروف...';
+
   return (
     <table className="w-full text-sm">
       <thead>
@@ -222,7 +157,7 @@ function ExpenseTable(props: Readonly<TableProps>) {
           <tr><td colSpan={3} className="text-center py-8 text-muted-foreground text-xs">جاري التحميل...</td></tr>
         )}
         {!loading && items.length === 0 && (
-          <tr><td colSpan={3} className="text-center py-8 text-muted-foreground text-xs">لا توجد مصاريف — أضف من الأسفل أو اضغط مزامنة الرواتب</td></tr>
+          <tr><td colSpan={3} className="text-center py-8 text-muted-foreground text-xs">{emptyText}</td></tr>
         )}
         {!loading && items.length > 0 && (
           [...items].sort((a, b) => b.date.localeCompare(a.date)).map(t => {
@@ -232,7 +167,7 @@ function ExpenseTable(props: Readonly<TableProps>) {
             };
             return (
               <tr key={t.id} className="border-t border-border/20 hover:bg-muted/10">
-                <td className="px-3 py-2.5 text-center font-bold text-rose-500">
+                <td className={`px-3 py-2.5 text-center font-bold ${colorText}`}>
                   {editingId === t.id && editField === 'amount' ? (
                     <Input autoFocus type="number" min="0" value={editText} onChange={e => setEditText(e.target.value)}
                       onBlur={() => { saveEdit(t.id); }} onKeyDown={handleKeyDown}
@@ -251,28 +186,30 @@ function ExpenseTable(props: Readonly<TableProps>) {
                   ) : (
                     <button type="button" className={t.is_auto ? '' : 'cursor-pointer hover:text-primary'} onClick={() => { if (!t.is_auto) startEdit(t.id, 'description', t.description || t.category); }} disabled={t.is_auto}>
                       {t.description || t.category}
-                      {t.is_auto && <span className="text-[10px] text-muted-foreground ms-1.5">🔒</span>}
+                      {t.is_auto && !isRev && <span className="text-[10px] text-muted-foreground ms-1.5">🔒</span>}
                     </button>
                   )}
                 </td>
                 <td className="px-3 py-2.5 text-center">
-                  {!t.is_auto && (
-                    <button aria-label="حذف" type="button" onClick={() => { deleteTransaction(t.id); }} disabled={isDeleting} className="p-1 rounded hover:bg-destructive/10 text-destructive/60 hover:text-destructive"><Trash2 size={13} /></button>
+                  {t.is_auto && isRev ? <Lock size={12} className="mx-auto text-muted-foreground/40" /> : (
+                    (!t.is_auto || isRev) && (
+                      <button aria-label="حذف" type="button" onClick={() => { deleteTransaction(t.id); }} disabled={isDeleting} className="p-1 rounded hover:bg-destructive/10 text-destructive/60 hover:text-destructive"><Trash2 size={13} /></button>
+                    )
                   )}
                 </td>
               </tr>
             );
           })
         )}
-        <tr className="border-t-2 border-rose-200 dark:border-rose-900 bg-rose-50/30 dark:bg-rose-950/10">
+        <tr className={`border-t-2 ${rowBorder}`}>
           <td className="px-2 py-2">
             <Input type="number" min="0" step="0.01" placeholder="0" value={newItem.amount} onChange={e => setNewItem(r => ({ ...r, amount: e.target.value }))} className="h-9 text-sm text-center font-bold w-full" dir="ltr" />
           </td>
           <td className="px-2 py-2">
-            <Input placeholder="وصف المصروف..." value={newItem.description} onChange={e => setNewItem(r => ({ ...r, description: e.target.value }))} className="h-9 text-sm w-full" dir="rtl" />
+            <Input placeholder={descPlaceholder} value={newItem.description} onChange={e => setNewItem(r => ({ ...r, description: e.target.value }))} className="h-9 text-sm w-full" dir="rtl" />
           </td>
           <td className="px-2 py-2 text-center">
-            <Button size="sm" onClick={onAddRow} disabled={isSaving || !newItem.amount} className="h-9 w-9 p-0 bg-rose-500 hover:bg-rose-600">
+            <Button size="sm" onClick={onAddRow} disabled={isSaving || !newItem.amount} className={`h-9 w-9 p-0 text-white ${colorBg}`}>
               <Plus size={16} />
             </Button>
           </td>
@@ -424,7 +361,8 @@ export default function FinancePage() {
             <h3 className="text-sm font-bold text-emerald-700 dark:text-emerald-400">💰 الإيرادات</h3>
             <span className="text-xs text-emerald-600 font-bold">{revenue.toLocaleString('en-US')} ر.س</span>
           </div>
-          <RevenueTable
+          <TransactionTable
+            type="revenue"
             loading={loading} items={revenueItems} editingId={editingId} editField={editField}
             editText={editText} setEditText={setEditText} setEditingId={setEditingId}
             startEdit={startEdit} saveEdit={saveEdit} deleteTransaction={deleteTransaction}
@@ -439,7 +377,8 @@ export default function FinancePage() {
             <h3 className="text-sm font-bold text-rose-600 dark:text-rose-400">💸 المصاريف</h3>
             <span className="text-xs text-rose-500 font-bold">{expenses.toLocaleString('en-US')} ر.س</span>
           </div>
-          <ExpenseTable
+          <TransactionTable
+            type="expense"
             loading={loading} items={expenseItems} editingId={editingId} editField={editField}
             editText={editText} setEditText={setEditText} setEditingId={setEditingId}
             startEdit={startEdit} saveEdit={saveEdit} deleteTransaction={deleteTransaction}
