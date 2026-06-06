@@ -26,7 +26,7 @@ WITH core_tables AS (
 )
 SELECT table_name
 FROM core_tables
-ORDER BY table_name;
+ORDER BY table_name ASC;
 
 -- --------------------------------------------------------------------------
 -- 1) RLS status verification
@@ -56,7 +56,7 @@ FROM core_tables c
 JOIN pg_class cls ON cls.relname = c.table_name
 JOIN pg_namespace nsp ON nsp.oid = cls.relnamespace
 WHERE nsp.nspname = 'public'
-ORDER BY c.table_name;
+ORDER BY c.table_name ASC;
 
 -- --------------------------------------------------------------------------
 -- 2) Legacy policy detection + SAFE DROP statement generation
@@ -83,7 +83,7 @@ SELECT
 FROM pg_policies p
 JOIN core_tables c ON c.table_name = p.tablename
 WHERE p.schemaname = 'public'
-ORDER BY p.tablename, p.policyname;
+ORDER BY p.tablename, p.policyname ASC;
 
 -- 2.2 Policies NOT following required convention.
 WITH core_tables AS (
@@ -102,7 +102,7 @@ FROM pg_policies p
 JOIN core_tables c ON c.table_name = p.tablename
 WHERE p.schemaname = 'public'
   AND p.policyname !~ ('^p_' || p.tablename || '_(select|insert|update|delete)$')
-ORDER BY p.tablename, p.policyname;
+ORDER BY p.tablename, p.policyname ASC;
 
 -- 2.3 Duplicate detector by action target.
 -- If >1 policy exists for same (table, action), they may conflict.
@@ -134,7 +134,7 @@ FROM pol p
 JOIN dups d
   ON d.tablename = p.tablename
  AND d.cmd = p.cmd
-ORDER BY p.tablename, p.cmd, p.policyname;
+ORDER BY p.tablename, p.cmd, p.policyname ASC;
 
 -- --------------------------------------------------------------------------
 -- 3) Role simulation prerequisites (admin + viewer existence checks)
@@ -160,15 +160,17 @@ SELECT
   'admin' AS role_label,
   a.user_id,
   (a.user_id IS NOT NULL) AS exists_in_user_roles,
-  EXISTS (SELECT 1 FROM auth.users u WHERE u.id = a.user_id) AS exists_in_auth_users
+  (u.id IS NOT NULL) AS exists_in_auth_users
 FROM admin_pick a
+LEFT JOIN auth.users u ON u.id = a.user_id
 UNION ALL
 SELECT
   'viewer' AS role_label,
   v.user_id,
   (v.user_id IS NOT NULL) AS exists_in_user_roles,
-  EXISTS (SELECT 1 FROM auth.users u WHERE u.id = v.user_id) AS exists_in_auth_users
-FROM viewer_pick v;
+  (u.id IS NOT NULL) AS exists_in_auth_users
+FROM viewer_pick v
+LEFT JOIN auth.users u ON u.id = v.user_id;
 
 -- --------------------------------------------------------------------------
 -- 4) has_permission() validation (direct checks)

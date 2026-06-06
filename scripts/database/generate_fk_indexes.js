@@ -1,11 +1,11 @@
-const { execSync } = require('child_process');
-const fs = require('fs');
+const { execSync } = require('node:child_process');
+const fs = require('node:fs');
 
 console.log("Fetching foreign keys and indexes from database...");
 
 const query = `
 WITH fk_actions AS (
-    SELECT 
+    SELECT
         tc.constraint_name,
         tc.table_name,
         kcu.column_name,
@@ -33,12 +33,12 @@ indexes AS (
       AND a.attnum = ANY(ix.indkey)
       AND t.relkind = 'r'
 )
-SELECT 
+SELECT
     f.table_name,
     f.column_name,
     f.constraint_name
 FROM fk_actions f
-LEFT JOIN indexes i 
+LEFT JOIN indexes i
   ON f.table_name = i.table_name AND f.column_name = i.column_name
 WHERE i.index_name IS NULL;
 `;
@@ -51,16 +51,16 @@ try {
         process.exit(1);
     }
     const data = JSON.parse(jsonStr[0]);
-    
+
     let sql = `-- Migration to index all unindexed foreign keys for performance\n\n`;
-    
+
     for (const row of data) {
         const idxName = `idx_${row.table_name}_${row.column_name}`;
         // Ensure index name isn't too long (postgres max is 63)
         const finalIdxName = idxName.substring(0, 63);
         sql += `CREATE INDEX IF NOT EXISTS "${finalIdxName}" ON public."${row.table_name}" ("${row.column_name}");\n`;
     }
-    
+
     fs.writeFileSync('supabase/migrations/20260606000009_index_foreign_keys.sql', sql);
     console.log(`Generated migration with ${data.length} indexes!`);
 

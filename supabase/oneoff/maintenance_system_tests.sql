@@ -37,7 +37,7 @@ WHERE trigger_schema = 'public'
     'trg_restore_stock',
     'trg_update_total_cost'
   )
-ORDER BY trigger_name;
+ORDER BY trigger_name ASC;
 
 -- النتيجة المتوقعة: 4 triggers
 
@@ -55,7 +55,7 @@ WHERE routine_schema = 'public'
     'restore_spare_part_stock',
     'update_maintenance_total_cost'
   )
-ORDER BY routine_name;
+ORDER BY routine_name ASC;
 
 -- النتيجة المتوقعة: 4 functions
 
@@ -186,7 +186,7 @@ SELECT
 FROM pg_policies
 WHERE schemaname = 'public'
   AND tablename IN ('spare_parts', 'maintenance_logs', 'maintenance_parts')
-ORDER BY tablename, policyname;
+ORDER BY tablename, policyname ASC;
 
 -- النتيجة المتوقعة: قائمة بجميع الـ policies المطبقة
 

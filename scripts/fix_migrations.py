@@ -21,12 +21,12 @@ for filename in files:
         full_match = match.group(0)
         policy_name = match.group(2)
         table_name = match.group(3).rstrip('(').strip()
-        
+
         start_idx = max(0, match.start() - 200)
         before_text = content[start_idx:match.start()]
         if f'DROP POLICY IF EXISTS "{policy_name}"' in before_text:
             return full_match
-            
+
         stats['policies'] += 1
         return f'DROP POLICY IF EXISTS "{policy_name}" ON {table_name};\n{full_match}'
 
@@ -34,16 +34,16 @@ for filename in files:
     if new_content != content:
         modified = True
         content = new_content
-        
+
     def replace_trigger(match):
         full_match = match.group(0)
         trigger_name = match.group(2)
-        
+
         start_idx = max(0, match.start() - 200)
         before_text = content[start_idx:match.start()]
         if 'DROP TRIGGER IF EXISTS' in before_text:
             return full_match
-            
+
         remaining_text = content[match.start():min(len(content), match.start() + 300)]
         table_match = re.search(r'ON\s+(public\.\S+)', remaining_text)
         if table_match:

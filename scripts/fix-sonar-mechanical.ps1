@@ -16,53 +16,53 @@ $voidFixCount = 0
 foreach ($file in $tsFiles) {
     $content = Get-Content $file.FullName -Raw
     $original = $content
-    
+
     # Fix `void refetch()` or `void queryClient.invalidateQueries(...)` patterns
     # Replace `void someFunc(` with `someFunc(` when on its own line (statement)
     # For onClick handlers: `() => void func()` → `() => { func(); }`
-    
+
     # Pattern 1: onClick={() => void someFunc(args)}  →  onClick={() => { someFunc(args); }}
     $content = $content -replace 'onClick=\{?\(\)\s*=>\s*void\s+(\w[\w.]*\([^)]*\))\}?', 'onClick={() => { $1; }}'
-    
-    # Pattern 2: `void someFunc();` on its own line → `someFunc();`  
+
+    # Pattern 2: `void someFunc();` on its own line → `someFunc();`
     # But NOT `void` as a type
     $content = $content -replace '(?m)^(\s+)void\s+([\w.]+(?:\([^)]*\)|\.\w+\([^)]*\)));?\s*$', '$1$2;'
-    
+
     # Pattern 3: onRetry={() => void perfQ.refetch()} → onRetry={() => { perfQ.refetch(); }}
     $content = $content -replace '\(\)\s*=>\s*void\s+([\w.]+\([^)]*\))', '() => { $1; }'
-    
+
     # Pattern 4: `() => { void someFunc(); }` → `() => { someFunc(); }`
     $content = $content -replace 'void\s+([\w.]+(?:\.[\w]+)*\(\))', '$1'
-    
+
     if ($content -ne $original) {
         Set-Content $file.FullName $content -NoNewline
         $voidFixCount++
-        Write-Host "Fixed void: $($file.Name)"
+        Write-Output "Fixed void: $($file.Name)"
     }
 }
-Write-Host "Phase 1a: Fixed $voidFixCount files with void operator"
+Write-Output "Phase 1a: Fixed $voidFixCount files with void operator"
 
 # --- Phase 1b: parseInt/parseFloat/isNaN → Number.* ---
 $numFixCount = 0
 foreach ($file in $tsFiles) {
     $content = Get-Content $file.FullName -Raw
     $original = $content
-    
+
     # parseInt( → Number.parseInt(  (but not Number.parseInt or already prefixed)
     $content = $content -replace '(?<!Number\.)(?<!\w)parseInt\(', 'Number.parseInt('
-    
+
     # parseFloat( → Number.parseFloat(
     $content = $content -replace '(?<!Number\.)(?<!\w)parseFloat\(', 'Number.parseFloat('
-    
+
     # isNaN( → Number.isNaN(  (but not Number.isNaN)
     $content = $content -replace '(?<!Number\.)(?<!\w)isNaN\(', 'Number.isNaN('
-    
+
     if ($content -ne $original) {
         Set-Content $file.FullName $content -NoNewline
         $numFixCount++
-        Write-Host "Fixed Number.*: $($file.Name)"
+        Write-Output "Fixed Number.*: $($file.Name)"
     }
 }
-Write-Host "Phase 1b: Fixed $numFixCount files with parseInt/parseFloat/isNaN"
+Write-Output "Phase 1b: Fixed $numFixCount files with parseInt/parseFloat/isNaN"
 
-Write-Host "`n=== Done ==="
+Write-Output "`n=== Done ==="

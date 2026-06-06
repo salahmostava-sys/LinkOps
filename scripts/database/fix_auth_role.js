@@ -1,5 +1,5 @@
-const { execSync } = require('child_process');
-const fs = require('fs');
+const { execSync } = require('node:child_process');
+const fs = require('node:fs');
 
 console.log("Fetching policies for auth.role() replacement...");
 
@@ -9,14 +9,14 @@ try {
     const rawOut = execSync(`npx supabase db query --linked "${query}" --output-format json`, { encoding: 'utf8' });
     const jsonStr = rawOut.match(/\[.*\]/s);
     const policies = JSON.parse(jsonStr[0]);
-    
+
     let sql = `-- Fix remaining auth.role() warnings\n\n`;
     let changed = false;
-    
+
     for (const p of policies) {
         let newQual = p.qual ? p.qual.replace(/(?<!\(select\s+)auth\.role\(\)/g, '(select auth.role())') : null;
         let newWithCheck = p.with_check ? p.with_check.replace(/(?<!\(select\s+)auth\.role\(\)/g, '(select auth.role())') : null;
-        
+
         if ((p.qual && newQual !== p.qual) || (p.with_check && newWithCheck !== p.with_check)) {
             changed = true;
             sql += `DROP POLICY IF EXISTS "${p.policyname}" ON public."${p.tablename}";\n`;
@@ -29,7 +29,7 @@ try {
             sql += `;\n\n`;
         }
     }
-    
+
     if (changed) {
         fs.writeFileSync('supabase/migrations/20260606000011_fix_auth_role_warnings.sql', sql);
         console.log(`Generated migration 20260606000011_fix_auth_role_warnings.sql!`);

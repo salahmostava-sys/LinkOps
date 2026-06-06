@@ -36,34 +36,10 @@ BEGIN
     func_neq2 := 'neq_text_' || e.typname;
 
     -- Re-create with SET search_path = public
-    EXECUTE format(
-      'CREATE OR REPLACE FUNCTION public.%I(a public.%I, b text)
-       RETURNS boolean LANGUAGE sql IMMUTABLE STRICT
-       SET search_path = public
-       AS $f$ SELECT a::text = b; $f$;',
-      func_eq1, e.typname
-    );
-    EXECUTE format(
-      'CREATE OR REPLACE FUNCTION public.%I(a text, b public.%I)
-       RETURNS boolean LANGUAGE sql IMMUTABLE STRICT
-       SET search_path = public
-       AS $f$ SELECT a = b::text; $f$;',
-      func_eq2, e.typname
-    );
-    EXECUTE format(
-      'CREATE OR REPLACE FUNCTION public.%I(a public.%I, b text)
-       RETURNS boolean LANGUAGE sql IMMUTABLE STRICT
-       SET search_path = public
-       AS $f$ SELECT a::text <> b; $f$;',
-      func_neq1, e.typname
-    );
-    EXECUTE format(
-      'CREATE OR REPLACE FUNCTION public.%I(a text, b public.%I)
-       RETURNS boolean LANGUAGE sql IMMUTABLE STRICT
-       SET search_path = public
-       AS $f$ SELECT a <> b::text; $f$;',
-      func_neq2, e.typname
-    );
+    EXECUTE format('CREATE OR REPLACE FUNCTION public.%I(a public.%I, b text) RETURNS boolean LANGUAGE sql IMMUTABLE STRICT SET search_path = public AS $f$ SELECT a::text = b; $f$;', func_eq1, e.typname);
+    EXECUTE format('CREATE OR REPLACE FUNCTION public.%I(a text, b public.%I) RETURNS boolean LANGUAGE sql IMMUTABLE STRICT SET search_path = public AS $f$ SELECT a = b::text; $f$;', func_eq2, e.typname);
+    EXECUTE format('CREATE OR REPLACE FUNCTION public.%I(a public.%I, b text) RETURNS boolean LANGUAGE sql IMMUTABLE STRICT SET search_path = public AS $f$ SELECT a::text <> b; $f$;', func_neq1, e.typname);
+    EXECUTE format('CREATE OR REPLACE FUNCTION public.%I(a text, b public.%I) RETURNS boolean LANGUAGE sql IMMUTABLE STRICT SET search_path = public AS $f$ SELECT a <> b::text; $f$;', func_neq2, e.typname);
   END LOOP;
 END $$;
 

@@ -14,8 +14,8 @@ function Invoke-Step {
     [scriptblock]$Action
   )
 
-  Write-Host ""
-  Write-Host "==> $Name"
+  Write-Output ""
+  Write-Output "==> $Name"
   & $Action
 }
 
@@ -141,5 +141,5 @@ if (-not $SkipSupabase) {
   }
 }
 
-Write-Host ""
-Write-Host 'System audit completed successfully.'
+Write-Output ""
+Write-Output 'System audit completed successfully.'

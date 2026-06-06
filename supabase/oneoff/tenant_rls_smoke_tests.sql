@@ -60,7 +60,7 @@ WHERE table_schema = 'public'
     'salary_records'
   )
   AND column_name = 'company_id'
-ORDER BY table_name;
+ORDER BY table_name ASC;
 
 -- A2b) Any required table still missing company_id?
 WITH required_tables AS (
@@ -106,7 +106,7 @@ LEFT JOIN information_schema.columns c
  AND c.table_name = rt.table_name
  AND c.column_name = 'company_id'
 WHERE c.column_name IS NULL
-ORDER BY rt.table_name;
+ORDER BY rt.table_name ASC;
 
 -- A3) company_id must be NOT NULL on canonical operational tables.
 SELECT table_name, is_nullable
@@ -239,7 +239,7 @@ WITH policy_counts AS (
 )
 SELECT *
 FROM policy_counts
-ORDER BY tablename;
+ORDER BY tablename ASC;
 
 -- ----------------------------------------------------------------------------
 -- SECTION D: runtime RLS behavior checks
@@ -305,7 +305,7 @@ WHERE pronamespace = 'public'::regnamespace
     'assignment_in_my_company',
     'advance_in_my_company'
   )
-ORDER BY proname;
+ORDER BY proname ASC;
 
 -- E2) Salary RPC execution should be edge-only (service_role).
 SELECT
@@ -321,4 +321,4 @@ JOIN pg_namespace n ON n.oid = p.pronamespace
 JOIN pg_roles r ON r.rolname IN ('anon', 'authenticated', 'service_role')
 WHERE n.nspname = 'public'
   AND p.proname IN ('calculate_salary_for_employee_month', 'calculate_salary_for_month', 'preview_salary_for_month')
-ORDER BY p.proname, r.rolname;
+ORDER BY p.proname, r.rolname ASC;

@@ -1,5 +1,5 @@
-const { execSync } = require('child_process');
-const fs = require('fs');
+const { execSync } = require('node:child_process');
+const fs = require('node:fs');
 
 console.log("Fetching policies for the 3 tables...");
 
@@ -13,16 +13,16 @@ try {
         process.exit(1);
     }
     const policies = JSON.parse(jsonStr[0]);
-    
+
     let sql = `-- Fix remaining auth_rls_initplan warnings\n\n`;
-    
+
     for (const p of policies) {
         // Replace exact word matches of auth.uid() that aren't already wrapped.
         // We just do a global replace of auth.uid() to (select auth.uid())
         // but avoid replacing if it's already (select auth.uid())
         let newQual = p.qual ? p.qual.replace(/(?<!\(select\s+)auth\.uid\(\)/g, '(select auth.uid())') : null;
         let newWithCheck = p.with_check ? p.with_check.replace(/(?<!\(select\s+)auth\.uid\(\)/g, '(select auth.uid())') : null;
-        
+
         if ((p.qual && newQual !== p.qual) || (p.with_check && newWithCheck !== p.with_check)) {
             sql += `DROP POLICY IF EXISTS "${p.policyname}" ON public."${p.tablename}";\n`;
             sql += `CREATE POLICY "${p.policyname}" ON public."${p.tablename}" FOR ${p.cmd}\n`;
@@ -34,7 +34,7 @@ try {
             sql += `;\n\n`;
         }
     }
-    
+
     fs.writeFileSync('supabase/migrations/20260606000010_fix_remaining_auth_rls.sql', sql);
     console.log(`Generated migration 20260606000010_fix_remaining_auth_rls.sql!`);
 
