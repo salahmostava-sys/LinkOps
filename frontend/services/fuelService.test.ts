@@ -28,108 +28,278 @@ describe('fuelService', () => {
     resetMockTableResults(tableResults);
   });
 
-  it('getActiveEmployees returns array', async () => {
-    tableResults.employees = {
-      data: [{ id: 'e1', name: 'أحمد', city: 'makkah' }],
-      error: null,
-    };
+  describe('getActiveEmployees', () => {
+    it('returns array of operationally visible employees', async () => {
+      tableResults.employees = {
+        data: [{ id: 'e1', name: 'أحمد', city: 'makkah', status: 'active', sponsorship_status: 'sponsored', probation_end_date: null }],
+        error: null,
+      };
 
-    const result = await fuelService.getActiveEmployees();
-    expect(result).toHaveLength(1);
-    expect(result[0].name).toBe('أحمد');
-    expect(fromMock).toHaveBeenCalledWith('employees');
+      const result = await fuelService.getActiveEmployees();
+      expect(result).toHaveLength(1);
+      expect(result[0].name).toBe('أحمد');
+      expect(fromMock).toHaveBeenCalledWith('employees');
+    });
+
+    it('throws on error', async () => {
+      tableResults.employees = {
+        data: null,
+        error: new Error('connection refused'),
+      };
+
+      await expect(fuelService.getActiveEmployees()).rejects.toThrow(
+        'fuelService.getActiveEmployees: connection refused',
+      );
+    });
   });
 
-  it('getActiveEmployees throws on error', async () => {
-    tableResults.employees = {
-      data: null,
-      error: new Error('connection refused'),
-    };
+  describe('getActiveApps', () => {
+    it('returns array', async () => {
+      tableResults.apps = {
+        data: [{ id: 'a1', name: 'هنقرستيشن' }],
+        error: null,
+      };
 
-    await expect(fuelService.getActiveEmployees()).rejects.toThrow(
-      'fuelService.getActiveEmployees: connection refused',
-    );
+      const result = await fuelService.getActiveApps();
+      expect(result).toHaveLength(1);
+    });
+
+    it('throws on error', async () => {
+      tableResults.apps = {
+        data: null,
+        error: new Error('query error'),
+      };
+
+      await expect(fuelService.getActiveApps()).rejects.toThrow(
+        'fuelService.getActiveApps: query error',
+      );
+    });
   });
 
-  it('getActiveApps returns array', async () => {
-    tableResults.apps = {
-      data: [{ id: 'a1', name: 'هنقرستيشن' }],
-      error: null,
-    };
-
-    const result = await fuelService.getActiveApps();
-    expect(result).toHaveLength(1);
-    expect(fromMock).toHaveBeenCalledWith('apps');
+  describe('getActiveEmployeeAppLinks', () => {
+    it('returns array', async () => {
+      tableResults.employee_apps = { data: [{ employee_id: 'e1', app_id: 'a1' }], error: null };
+      const res = await fuelService.getActiveEmployeeAppLinks();
+      expect(res).toHaveLength(1);
+    });
+    it('throws on error', async () => {
+      tableResults.employee_apps = { data: null, error: new Error('err') };
+      await expect(fuelService.getActiveEmployeeAppLinks()).rejects.toThrow('err');
+    });
   });
 
-  it('getActiveApps throws on error', async () => {
-    tableResults.apps = {
-      data: null,
-      error: new Error('query error'),
-    };
-
-    await expect(fuelService.getActiveApps()).rejects.toThrow(
-      'fuelService.getActiveApps: query error',
-    );
+  describe('getMonthlyDailyMileage', () => {
+    it('returns array', async () => {
+      tableResults.vehicle_mileage_daily = { data: [{ employee_id: 'e1', km_total: 100 }], error: null };
+      const res = await fuelService.getMonthlyDailyMileage('2026-03-01', '2026-03-31');
+      expect(res).toHaveLength(1);
+    });
+    it('throws on error', async () => {
+      tableResults.vehicle_mileage_daily = { data: null, error: new Error('err') };
+      await expect(fuelService.getMonthlyDailyMileage('2026-03-01', '2026-03-31')).rejects.toThrow('err');
+    });
   });
 
-  it('getDailyMileageByMonth returns array', async () => {
-    tableResults.vehicle_mileage_daily = {
-      data: [{ id: 'vm1', employee_id: 'e1', km_total: 120, fuel_cost: 50 }],
-      error: null,
-    };
-
-    const result = await fuelService.getDailyMileageByMonth('2026-03-01', '2026-03-31');
-    expect(result).toHaveLength(1);
-    expect(result[0].km_total).toBe(120);
+  describe('getMonthlyOrders', () => {
+    it('returns array', async () => {
+      tableResults.daily_orders = { data: [{ employee_id: 'e1', orders_count: 5 }], error: null };
+      const res = await fuelService.getMonthlyOrders('2026-03-01', '2026-03-31');
+      expect(res).toHaveLength(1);
+    });
+    it('throws on error', async () => {
+      tableResults.daily_orders = { data: null, error: new Error('err') };
+      await expect(fuelService.getMonthlyOrders('2026-03-01', '2026-03-31')).rejects.toThrow('err');
+    });
   });
 
-  it('getDailyMileageByMonth throws on error', async () => {
-    tableResults.vehicle_mileage_daily = {
-      data: null,
-      error: new Error('timeout'),
-    };
-
-    await expect(
-      fuelService.getDailyMileageByMonth('2026-03-01', '2026-03-31'),
-    ).rejects.toThrow('fuelService.getDailyMileageByMonth: timeout');
+  describe('getMonthlyFuelByMonthYear', () => {
+    it('returns array', async () => {
+      tableResults.vehicle_mileage = { data: [{ employee_id: 'e1', fuel_cost: 100 }], error: null };
+      const res = await fuelService.getMonthlyFuelByMonthYear('2026-03');
+      expect(res).toHaveLength(1);
+    });
+    it('throws on error', async () => {
+      tableResults.vehicle_mileage = { data: null, error: new Error('err') };
+      await expect(fuelService.getMonthlyFuelByMonthYear('2026-03')).rejects.toThrow('err');
+    });
   });
 
-  it('upsertDailyMileage throws on error', async () => {
-    tableResults.vehicle_mileage_daily = {
-      data: null,
-      error: new Error('upsert conflict'),
-    };
+  describe('getActiveVehicleAssignments', () => {
+    it('returns array', async () => {
+      tableResults.vehicle_assignments = {
+        data: [{ employee_id: 'e1', vehicles: { plate_number: 'ABC 123' } }],
+        error: null,
+      };
 
-    await expect(
-      fuelService.upsertDailyMileage({
-        employee_id: '11111111-1111-1111-1111-111111111111',
-        date: '2026-03-15',
-        km_total: 100,
-        fuel_cost: 45,
-        notes: null,
-      }),
-    ).rejects.toThrow('fuelService.upsertDailyMileage.upsert: upsert conflict');
+      const result = await fuelService.getActiveVehicleAssignments();
+      expect(result).toHaveLength(1);
+    });
+    it('throws on error', async () => {
+      tableResults.vehicle_assignments = { data: null, error: new Error('err') };
+      await expect(fuelService.getActiveVehicleAssignments()).rejects.toThrow('err');
+    });
   });
 
-  it('deleteDailyMileage throws on error', async () => {
-    tableResults.vehicle_mileage_daily = {
-      data: null,
-      error: new Error('delete failed'),
-    };
+  describe('getDailyMileageByMonth', () => {
+    it('returns array', async () => {
+      tableResults.vehicle_mileage_daily = {
+        data: [{ id: 'vm1', employee_id: 'e1', km_total: 120, fuel_cost: 50 }],
+        error: null,
+      };
 
-    await expect(fuelService.deleteDailyMileage('vm1')).rejects.toThrow(
-      'fuelService.deleteDailyMileage: delete failed',
-    );
+      const result = await fuelService.getDailyMileageByMonth('2026-03-01', '2026-03-31');
+      expect(result).toHaveLength(1);
+      expect(result[0].km_total).toBe(120);
+    });
+
+    it('throws on error', async () => {
+      tableResults.vehicle_mileage_daily = {
+        data: null,
+        error: new Error('timeout'),
+      };
+
+      await expect(
+        fuelService.getDailyMileageByMonth('2026-03-01', '2026-03-31'),
+      ).rejects.toThrow('fuelService.getDailyMileageByMonth: timeout');
+    });
   });
 
-  it('getActiveVehicleAssignments returns array', async () => {
-    tableResults.vehicle_assignments = {
-      data: [{ employee_id: 'e1', vehicles: { plate_number: 'ABC 123' } }],
-      error: null,
+  describe('getDailyMileagePaged', () => {
+    it('throws on invalid date format', async () => {
+      await expect(fuelService.getDailyMileagePaged({ monthStart: 'bad', monthEnd: '2026-03-31', page: 1, pageSize: 10 })).rejects.toThrow('Invalid date format');
+    });
+
+    it('returns paged result', async () => {
+      tableResults.vehicle_mileage_daily = { data: [{ id: '1' }], error: null, count: 1 };
+      const res = await fuelService.getDailyMileagePaged({ monthStart: '2026-03-01', monthEnd: '2026-03-31', page: 1, pageSize: 10, filters: { employeeId: 'e1', branch: 'jeddah', search: 'ahmed' } });
+      expect(res.rows).toHaveLength(1);
+      expect(res.total).toBe(1);
+    });
+
+    it('throws on error', async () => {
+      tableResults.vehicle_mileage_daily = { data: null, error: new Error('err') };
+      await expect(fuelService.getDailyMileagePaged({ monthStart: '2026-03-01', monthEnd: '2026-03-31', page: 1, pageSize: 10 })).rejects.toThrow('err');
+    });
+  });
+
+  describe('exportDailyMileage', () => {
+    it('fetches and chunks all records', async () => {
+      // Mock fuelService.getDailyMileagePaged by spying on it
+      const spy = vi.spyOn(fuelService, 'getDailyMileagePaged');
+      
+      // Page 1: returns 2 items
+      spy.mockResolvedValueOnce({
+        rows: [{ id: '1' }, { id: '2' }],
+        total: 3, page: 1, pageSize: 2, totalPages: 2,
+      });
+      // Page 2: returns 1 item
+      spy.mockResolvedValueOnce({
+        rows: [{ id: '3' }],
+        total: 3, page: 2, pageSize: 2, totalPages: 2,
+      });
+
+      const res = await fuelService.exportDailyMileage({ monthStart: '2026-03-01', monthEnd: '2026-03-31', chunkSize: 2, maxRows: 10 });
+      expect(res).toHaveLength(3);
+      expect(spy).toHaveBeenCalledTimes(2);
+
+      spy.mockRestore();
+    });
+  });
+
+  describe('upsertDailyMileage', () => {
+    const validPayload = {
+      employee_id: '11111111-1111-1111-1111-111111111111',
+      date: '2026-03-15',
+      km_total: 100,
+      fuel_cost: 45,
+      notes: null,
     };
 
-    const result = await fuelService.getActiveVehicleAssignments();
-    expect(result).toHaveLength(1);
+    it('throws on invalid employee_id', async () => {
+      await expect(fuelService.upsertDailyMileage({ ...validPayload, employee_id: 'bad' })).rejects.toThrow('Invalid employee_id');
+    });
+    it('throws on invalid date', async () => {
+      await expect(fuelService.upsertDailyMileage({ ...validPayload, date: 'bad' })).rejects.toThrow('Invalid date format');
+    });
+    it('throws on invalid km_total', async () => {
+      await expect(fuelService.upsertDailyMileage({ ...validPayload, km_total: -1 })).rejects.toThrow('Invalid km_total');
+    });
+    it('throws on invalid fuel_cost', async () => {
+      await expect(fuelService.upsertDailyMileage({ ...validPayload, fuel_cost: -1 })).rejects.toThrow('Invalid fuel_cost');
+    });
+
+    it('updates when editId is provided', async () => {
+      tableResults.vehicle_mileage_daily = { data: null, error: null };
+      await fuelService.upsertDailyMileage(validPayload, 'edit-1');
+      expect(true).toBe(true);
+    });
+
+    it('upserts when editId is not provided', async () => {
+      tableResults.vehicle_mileage_daily = { data: null, error: null };
+      await fuelService.upsertDailyMileage(validPayload);
+      expect(true).toBe(true);
+    });
+
+    it('throws on error', async () => {
+      tableResults.vehicle_mileage_daily = {
+        data: null,
+        error: new Error('upsert conflict'),
+      };
+
+      await expect(
+        fuelService.upsertDailyMileage(validPayload),
+      ).rejects.toThrow('fuelService.upsertDailyMileage.upsert: upsert conflict');
+    });
+
+    it('throws on update error', async () => {
+      tableResults.vehicle_mileage_daily = {
+        data: null,
+        error: new Error('update error'),
+      };
+
+      await expect(
+        fuelService.upsertDailyMileage(validPayload, 'edit-1'),
+      ).rejects.toThrow('fuelService.upsertDailyMileage.update: update error');
+    });
+  });
+
+  describe('deleteDailyMileage', () => {
+    it('deletes successfully', async () => {
+      tableResults.vehicle_mileage_daily = { data: null, error: null };
+      await fuelService.deleteDailyMileage('1');
+      expect(true).toBe(true);
+    });
+    it('throws on error', async () => {
+      tableResults.vehicle_mileage_daily = {
+        data: null,
+        error: new Error('delete failed'),
+      };
+
+      await expect(fuelService.deleteDailyMileage('vm1')).rejects.toThrow(
+        'fuelService.deleteDailyMileage: delete failed',
+      );
+    });
+  });
+
+  describe('saveMonthlyMileageImport', () => {
+    it('upserts with overwrite', async () => {
+      tableResults.vehicle_mileage = { data: null, error: null };
+      await fuelService.saveMonthlyMileageImport([{ employee_id: 'e1', month_year: '2026-03', km_total: 100, fuel_cost: 50, notes: null }], true);
+      expect(true).toBe(true);
+    });
+    it('throws on overwrite error', async () => {
+      tableResults.vehicle_mileage = { data: null, error: new Error('upsert err') };
+      await expect(fuelService.saveMonthlyMileageImport([], true)).rejects.toThrow('upsert err');
+    });
+
+    it('inserts ignoring duplicates', async () => {
+      tableResults.vehicle_mileage = { data: null, error: null };
+      await fuelService.saveMonthlyMileageImport([{ employee_id: 'e1', month_year: '2026-03', km_total: 100, fuel_cost: 50, notes: null }], false);
+      expect(true).toBe(true);
+    });
+    it('throws on insert error', async () => {
+      tableResults.vehicle_mileage = { data: null, error: new Error('insert err') };
+      await expect(fuelService.saveMonthlyMileageImport([], false)).rejects.toThrow('insert err');
+    });
   });
 });

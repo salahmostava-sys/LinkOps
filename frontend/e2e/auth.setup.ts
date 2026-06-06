@@ -1,6 +1,9 @@
 import { test as setup, expect } from '@playwright/test';
 import path from 'node:path';
 
+import { fileURLToPath } from 'node:url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const authFile = path.join(__dirname, '../playwright/.auth/user.json');
 
 setup('authenticate', async ({ page }) => {

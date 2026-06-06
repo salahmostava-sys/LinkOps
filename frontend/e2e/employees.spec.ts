@@ -1,7 +1,13 @@
 import { test, expect } from '@playwright/test';
 
+const email = process.env.E2E_DASHBOARD_EMAIL;
+const password = process.env.E2E_DASHBOARD_PASSWORD;
+const shouldAssertAuthenticatedDashboard = !!email && !!password;
+
 test.describe('صفحة الموظفين (Employees)', () => {
   test('يجب أن تعرض صفحة الموظفين الأساسية والتبويبات', async ({ page }) => {
+    test.skip(!shouldAssertAuthenticatedDashboard, 'Requires authenticated session');
+
     // Navigate to employees page
     await page.goto('/employees');
 

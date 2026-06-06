@@ -1,3 +1,4 @@
+import React from 'react';
 import { getAppColor, type AppColorData } from '@shared/hooks/useAppColors';
 import { ColorBadge } from '@shared/components/ui/ColorBadge';
 
@@ -42,7 +43,7 @@ const SortIcon = ({ active, dir }: { active: boolean; dir: SortDir }) => {
   return <span className="text-[10px] mr-0.5">{dir === 'asc' ? '↑' : '↓'}</span>;
 };
 
-export const OrdersSummaryTable = ({
+export const OrdersSummaryTable = React.memo(({
   loading,
   apps,
   appColorsList,
@@ -166,4 +167,6 @@ export const OrdersSummaryTable = ({
       )}
     </table>
   );
-};
+});
+
+OrdersSummaryTable.displayName = 'OrdersSummaryTable';

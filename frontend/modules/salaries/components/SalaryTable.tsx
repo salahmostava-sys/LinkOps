@@ -1,4 +1,4 @@
-﻿/**
+/**
  * SalaryTable — Virtualized salary table.
  *
  * Uses @tanstack/react-virtual to render only visible rows (~15-20 at a time),
@@ -271,7 +271,7 @@ const SalaryRowCells = memo(function SalaryRowCells({
 });
 
 // ── Main component ────────────────────────────────────────────────────────────
-export function SalaryTable(props: Readonly<SalaryTableProps>) {
+export const SalaryTable = React.memo(function SalaryTable(props: Readonly<SalaryTableProps>) {
   const {
     loadingData, rows, filtered, computeRow, platforms, platformColors,
     appCustomColumns, empPlatformScheme, sortField, sortDir, handleSort,
@@ -646,4 +646,4 @@ export function SalaryTable(props: Readonly<SalaryTableProps>) {
       </div>
     </div>
   );
-}
+});

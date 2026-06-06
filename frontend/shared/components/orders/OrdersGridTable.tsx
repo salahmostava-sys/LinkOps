@@ -55,7 +55,7 @@ type Props = {
   handleCellClick: (event: React.MouseEvent, employeeId: string, day: number) => void;
 };
 
-export const OrdersGridTable = ({
+export const OrdersGridTable = React.memo(({
   loading,
   tableRef,
   seqColMin,
@@ -290,4 +290,6 @@ export const OrdersGridTable = ({
       )}
     </div>
   );
-};
+});
+
+OrdersGridTable.displayName = 'OrdersGridTable';

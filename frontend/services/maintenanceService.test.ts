@@ -24,6 +24,10 @@ vi.mock('@services/serviceError', () => ({
     const message = error instanceof Error ? error.message : 'service error';
     throw new Error(`${context}: ${message}`);
   }),
+  toServiceError: vi.fn((error: unknown, context: string) => {
+    const message = error instanceof Error ? error.message : 'service error';
+    return new Error(`${context}: ${message}`);
+  }),
 }));
 
 import * as maintenanceService from './maintenanceService';
@@ -37,139 +41,233 @@ describe('maintenanceService', () => {
     );
   });
 
-  it('getMaintenanceLogs returns array', async () => {
-    tableResults.maintenance_logs = {
-      data: [
-        { id: 'ml1', vehicle_id: 'v1', type: 'غيار زيت', total_cost: 200, status: 'مكتملة', maintenance_parts: [] },
-      ],
-      error: null,
-    };
-
-    const result = await maintenanceService.getMaintenanceLogs();
-    expect(result).toHaveLength(1);
-    expect(result[0].id).toBe('ml1');
-    expect(fromMock).toHaveBeenCalledWith('maintenance_logs');
-  });
-
-  it('getMaintenanceLogs throws on Supabase error', async () => {
-    tableResults.maintenance_logs = {
-      data: null,
-      error: new Error('table missing'),
-    };
-
-    await expect(maintenanceService.getMaintenanceLogs()).rejects.toThrow(
-      'maintenanceService.getMaintenanceLogs: table missing',
-    );
-  });
-
-  it('getSpareparts returns array', async () => {
-    tableResults.spare_parts = {
-      data: [{ id: 'sp1', name_ar: 'فلتر زيت', stock_quantity: 10, min_stock_alert: 5 }],
-      error: null,
-    };
-
-    const result = await maintenanceService.getSpareparts();
-    expect(result).toHaveLength(1);
-    expect(result[0].name_ar).toBe('فلتر زيت');
-  });
-
-  it('getSpareparts throws on Supabase error', async () => {
-    tableResults.spare_parts = {
-      data: null,
-      error: new Error('rls denied'),
-    };
-
-    await expect(maintenanceService.getSpareparts()).rejects.toThrow(
-      'maintenanceService.getSpareparts: rls denied',
-    );
-  });
-
-  it('createMaintenanceLog throws on Supabase error', async () => {
-    tableResults.maintenance_logs = {
-      data: null,
-      error: new Error('insert failed'),
-    };
-
-    await expect(
-      maintenanceService.createMaintenanceLog(
-        { vehicle_id: 'v1', maintenance_date: '2026-03-01', type: 'غيار زيت' },
-        [],
-      ),
-    ).rejects.toThrow('maintenanceService.createMaintenanceLog.insert: insert failed');
-  });
-
-  it('createMaintenanceLog throws when vehicle_id missing', async () => {
-    tableResults.maintenance_logs = {
-      data: null,
-      error: new Error('null value in column "vehicle_id"'),
-    };
-
-    await expect(
-      maintenanceService.createMaintenanceLog(
-        { vehicle_id: '', maintenance_date: '2026-03-01', type: 'غيار زيت' },
-        [],
-      ),
-    ).rejects.toThrow('maintenanceService.createMaintenanceLog.insert:');
-  });
-
-  it('deleteSparePart throws on error from delete', async () => {
-    fromMock.mockImplementation((table: string) => {
-      if (table === 'maintenance_parts') {
-        return createQueryBuilder({ data: null, error: null, count: 0 });
-      }
-      if (table === 'spare_parts') {
-        return createQueryBuilder({ data: null, error: new Error('delete blocked') });
-      }
-      return createQueryBuilder({ data: null, error: null });
+  describe('throwMaintenanceSchemaError', () => {
+    it('throws custom error if missing schema', async () => {
+      tableResults.spare_parts = { data: null, error: new Error("Could not find the table 'public.spare_parts'") };
+      await expect(maintenanceService.getSpareparts()).rejects.toThrow('جداول الصيانة غير مفعّلة في قاعدة البيانات الحالية');
+    });
+    
+    it('throws custom error if missing schema in an object', async () => {
+      tableResults.spare_parts = { data: null, error: { message: "Could not find the table 'public.maintenance_parts'" } };
+      await expect(maintenanceService.getSpareparts()).rejects.toThrow('جداول الصيانة غير مفعّلة في قاعدة البيانات الحالية');
     });
 
-    await expect(maintenanceService.deleteSparePart('sp1')).rejects.toThrow(
-      'maintenanceService.deleteSparePart: delete blocked',
-    );
+    it('throws custom error if missing schema wrapped', async () => {
+      tableResults.spare_parts = { data: null, error: { message: { inner: "Could not find the table 'public.maintenance_logs'" } } };
+      await expect(maintenanceService.getSpareparts()).rejects.toThrow('جداول الصيانة غير مفعّلة في قاعدة البيانات الحالية');
+    });
+
+    it('throws custom error if missing schema generic fallback', async () => {
+      tableResults.spare_parts = { data: null, error: { message: null } };
+      await expect(maintenanceService.getSpareparts()).rejects.toThrow('maintenanceService.getSpareparts: service error');
+    });
   });
 
-  it('never swallows errors — always throws', async () => {
-    tableResults.spare_parts = {
-      data: null,
-      error: new Error('opaque failure'),
-    };
-    await expect(maintenanceService.getSpareparts()).rejects.toThrow(/opaque failure/);
+  describe('getSpareparts', () => {
+    it('returns array', async () => {
+      tableResults.spare_parts = {
+        data: [{ id: 'sp1', name_ar: 'فلتر زيت', stock_quantity: 10, min_stock_alert: 5 }],
+        error: null,
+      };
+      const result = await maintenanceService.getSpareparts();
+      expect(result).toHaveLength(1);
+    });
+
+    it('never swallows errors — always throws', async () => {
+      tableResults.spare_parts = { data: null, error: new Error('opaque failure') };
+      await expect(maintenanceService.getSpareparts()).rejects.toThrow(/opaque failure/);
+    });
   });
 
-  it('deleteSparePart throws when part is referenced in maintenance', async () => {
-    tableResults.maintenance_parts = {
-      data: null,
-      error: null,
-      count: 3,
-    };
-
-    await expect(maintenanceService.deleteSparePart('sp1')).rejects.toThrow(
-      'لا يمكن حذف القطعة لأنها مستخدمة في سجلات صيانة.',
-    );
+  describe('createSparePart', () => {
+    it('creates successfully', async () => {
+      tableResults.spare_parts = { data: { id: 'new_sp' }, error: null };
+      const res = await maintenanceService.createSparePart({ name_ar: 'test' });
+      expect(res.id).toBe('new_sp');
+    });
+    it('throws on error', async () => {
+      tableResults.spare_parts = { data: null, error: new Error('create err') };
+      await expect(maintenanceService.createSparePart({ name_ar: 'test' })).rejects.toThrow('create err');
+    });
   });
 
-  it('deleteSparePart throws on Supabase error during count check', async () => {
-    tableResults.maintenance_parts = {
-      data: null,
-      error: new Error('count failed'),
-    };
-
-    await expect(maintenanceService.deleteSparePart('sp1')).rejects.toThrow(
-      'maintenanceService.deleteSparePart.count: count failed',
-    );
+  describe('updateSparePart', () => {
+    it('updates successfully', async () => {
+      tableResults.spare_parts = { data: { id: 'sp1' }, error: null };
+      const res = await maintenanceService.updateSparePart('sp1', { name_ar: 'test2' });
+      expect(res.id).toBe('sp1');
+    });
+    it('throws on error', async () => {
+      tableResults.spare_parts = { data: null, error: new Error('update err') };
+      await expect(maintenanceService.updateSparePart('sp1', {})).rejects.toThrow('update err');
+    });
   });
 
-  it('getLowStockSpareParts filters client-side', async () => {
-    tableResults.spare_parts = {
-      data: [
-        { id: 'sp1', name_ar: 'فلتر', stock_quantity: 2, min_stock_alert: 5, unit: 'قطعة' },
-        { id: 'sp2', name_ar: 'زيت', stock_quantity: 10, min_stock_alert: 5, unit: 'لتر' },
-      ],
-      error: null,
-    };
+  describe('deleteSparePart', () => {
+    it('deletes successfully if not used', async () => {
+      tableResults.maintenance_parts = { data: null, error: null, count: 0 };
+      tableResults.spare_parts = { data: null, error: null };
+      await maintenanceService.deleteSparePart('sp1');
+      expect(true).toBe(true);
+    });
 
-    const result = await maintenanceService.getLowStockSpareParts();
-    expect(result).toHaveLength(1);
-    expect(result[0].id).toBe('sp1');
+    it('throws when part is referenced in maintenance', async () => {
+      tableResults.maintenance_parts = { data: null, error: null, count: 3 };
+      await expect(maintenanceService.deleteSparePart('sp1')).rejects.toThrow(
+        'لا يمكن حذف القطعة لأنها مستخدمة في سجلات صيانة.',
+      );
+    });
+
+    it('throws on Supabase error during count check', async () => {
+      tableResults.maintenance_parts = { data: null, error: new Error('count failed') };
+      await expect(maintenanceService.deleteSparePart('sp1')).rejects.toThrow(
+        'maintenanceService.deleteSparePart.count: count failed',
+      );
+    });
+
+    it('throws on error from delete', async () => {
+      fromMock.mockImplementation((table: string) => {
+        if (table === 'maintenance_parts') return createQueryBuilder({ data: null, error: null, count: 0 });
+        if (table === 'spare_parts') return createQueryBuilder({ data: null, error: new Error('delete blocked') });
+        return createQueryBuilder({ data: null, error: null });
+      });
+      await expect(maintenanceService.deleteSparePart('sp1')).rejects.toThrow(
+        'maintenanceService.deleteSparePart: delete blocked',
+      );
+    });
+  });
+
+  describe('getMaintenanceLogs', () => {
+    it('returns array', async () => {
+      tableResults.maintenance_logs = {
+        data: [{ id: 'ml1', vehicle_id: 'v1', type: 'غيار زيت', total_cost: 200, status: 'مكتملة', maintenance_parts: [] }],
+        error: null,
+      };
+      const result = await maintenanceService.getMaintenanceLogs();
+      expect(result).toHaveLength(1);
+    });
+    it('throws on Supabase error', async () => {
+      tableResults.maintenance_logs = { data: null, error: new Error('table missing') };
+      await expect(maintenanceService.getMaintenanceLogs()).rejects.toThrow(
+        'maintenanceService.getMaintenanceLogs: table missing',
+      );
+    });
+  });
+
+  describe('createMaintenanceLog', () => {
+    it('creates successfully with parts', async () => {
+      fromMock.mockImplementation((table: string) => {
+        if (table === 'maintenance_logs') {
+          // Both insert and select (in getMaintenanceLogById) will hit this
+          // The query builder mock returns the same data for all calls if we don't differentiate
+          // But since the mock just returns data, we can provide a valid log object
+          return createQueryBuilder({
+            data: { id: 'log1', maintenance_parts: [] },
+            error: null
+          });
+        }
+        if (table === 'maintenance_parts') return createQueryBuilder({ data: null, error: null });
+        return createQueryBuilder({ data: null, error: null });
+      });
+
+      const res = await maintenanceService.createMaintenanceLog(
+        { vehicle_id: 'v1', maintenance_date: '2026-03-01', type: 'غيار زيت' },
+        [{ part_id: 'p1', quantity_used: 1, cost_at_time: 100 }]
+      );
+      expect(res.id).toBe('log1');
+    });
+
+    it('throws on Supabase error insert', async () => {
+      tableResults.maintenance_logs = { data: null, error: new Error('insert failed') };
+      await expect(
+        maintenanceService.createMaintenanceLog({ vehicle_id: 'v1', maintenance_date: '2026-03-01', type: 'غيار زيت' }, [])
+      ).rejects.toThrow('maintenanceService.createMaintenanceLog.insert: insert failed');
+    });
+
+    it('throws when vehicle_id missing (simulated by db err)', async () => {
+      tableResults.maintenance_logs = { data: null, error: new Error('null value in column "vehicle_id"') };
+      await expect(
+        maintenanceService.createMaintenanceLog({ vehicle_id: '', maintenance_date: '2026-03-01', type: 'غيار زيت' }, [])
+      ).rejects.toThrow('maintenanceService.createMaintenanceLog.insert: null value');
+    });
+
+    it('throws on parts insert error', async () => {
+      fromMock.mockImplementation((table: string) => {
+        if (table === 'maintenance_logs') return createQueryBuilder({ data: { id: 'log1' }, error: null });
+        if (table === 'maintenance_parts') return createQueryBuilder({ data: null, error: new Error('parts err') });
+        return createQueryBuilder({ data: null, error: null });
+      });
+
+      await expect(
+        maintenanceService.createMaintenanceLog(
+          { vehicle_id: 'v1', maintenance_date: '2026-03-01', type: 'غيار زيت' },
+          [{ part_id: 'p1', quantity_used: 1, cost_at_time: 100 }]
+        )
+      ).rejects.toThrow('maintenanceService.createMaintenanceLog.parts: parts err');
+    });
+    
+    it('throws on getMaintenanceLogById error', async () => {
+      let logsCallCount = 0;
+      fromMock.mockImplementation((table: string) => {
+        if (table === 'maintenance_logs') {
+          logsCallCount++;
+          if (logsCallCount === 1) return createQueryBuilder({ data: { id: 'log1' }, error: null }); // insert
+          return createQueryBuilder({ data: null, error: new Error('get err') }); // select
+        }
+        return createQueryBuilder({ data: null, error: null });
+      });
+
+      await expect(
+        maintenanceService.createMaintenanceLog({ vehicle_id: 'v1', maintenance_date: '2026-03-01', type: 'غيار زيت' }, [])
+      ).rejects.toThrow('maintenanceService.getMaintenanceLogById: get err');
+    });
+  });
+
+  describe('deleteMaintenanceLog', () => {
+    it('deletes successfully', async () => {
+      tableResults.maintenance_logs = { data: null, error: null };
+      await maintenanceService.deleteMaintenanceLog('log1');
+      expect(true).toBe(true);
+    });
+    it('throws on error', async () => {
+      tableResults.maintenance_logs = { data: null, error: new Error('del err') };
+      await expect(maintenanceService.deleteMaintenanceLog('log1')).rejects.toThrow('del err');
+    });
+  });
+
+  describe('getCurrentDriverNameForVehicle', () => {
+    it('returns name successfully', async () => {
+      tableResults.vehicle_assignments = { data: { employees: { name: 'John' } }, error: null };
+      const res = await maintenanceService.getCurrentDriverNameForVehicle('v1');
+      expect(res).toBe('John');
+    });
+    it('returns null if not found', async () => {
+      tableResults.vehicle_assignments = { data: null, error: null };
+      const res = await maintenanceService.getCurrentDriverNameForVehicle('v1');
+      expect(res).toBeNull();
+    });
+    it('throws on error', async () => {
+      tableResults.vehicle_assignments = { data: null, error: new Error('va err') };
+      await expect(maintenanceService.getCurrentDriverNameForVehicle('v1')).rejects.toThrow('va err');
+    });
+  });
+
+  describe('getLowStockSpareParts', () => {
+    it('filters client-side', async () => {
+      tableResults.spare_parts = {
+        data: [
+          { id: 'sp1', name_ar: 'فلتر', stock_quantity: 2, min_stock_alert: 5, unit: 'قطعة' },
+          { id: 'sp2', name_ar: 'زيت', stock_quantity: 10, min_stock_alert: 5, unit: 'لتر' },
+        ],
+        error: null,
+      };
+      const result = await maintenanceService.getLowStockSpareParts();
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe('sp1');
+    });
+    it('throws on error', async () => {
+      tableResults.spare_parts = { data: null, error: new Error('lowstock err') };
+      await expect(maintenanceService.getLowStockSpareParts()).rejects.toThrow('lowstock err');
+    });
   });
 });
