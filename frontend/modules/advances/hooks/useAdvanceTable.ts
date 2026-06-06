@@ -33,18 +33,31 @@ function safeText(value: unknown): string {
   }
 }
 
-export function useAdvanceTable(
-  advances: Advance[],
-  employees: { id: string; name: string; national_id?: string | null; sponsorship_status?: string | null }[],
-  search: string,
-  statusFilter: string,
-  showWrittenOff: boolean,
-  filters: FilterState,
-  refetchAdvancesData: () => void,
-  deleteEmployeeAdvancesId: string | null,
-  setDeleteEmployeeAdvancesId: (v: string | null) => void,
-  setDeletingEmployeeAdvances: (v: boolean) => void
-) {
+export interface UseAdvanceTableProps {
+  advances: Advance[];
+  employees: { id: string; name: string; national_id?: string | null; sponsorship_status?: string | null }[];
+  search: string;
+  statusFilter: string;
+  showWrittenOff: boolean;
+  filters: FilterState;
+  refetchAdvancesData: () => void;
+  deleteEmployeeAdvancesId: string | null;
+  setDeleteEmployeeAdvancesId: (v: string | null) => void;
+  setDeletingEmployeeAdvances: (v: boolean) => void;
+}
+
+export function useAdvanceTable({
+  advances,
+  employees,
+  search,
+  statusFilter,
+  showWrittenOff,
+  filters,
+  refetchAdvancesData,
+  deleteEmployeeAdvancesId,
+  setDeleteEmployeeAdvancesId,
+  setDeletingEmployeeAdvances
+}: UseAdvanceTableProps) {
   const { toast } = useToast();
   const importRef = useRef<HTMLInputElement>(null);
   const tableRef = useRef<HTMLTableElement>(null);

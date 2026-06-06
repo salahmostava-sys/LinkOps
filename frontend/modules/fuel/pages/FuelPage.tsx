@@ -1,4 +1,4 @@
-﻿import { Loader2, ShieldAlert, Pencil, Trash2, X, Check, Car } from 'lucide-react';
+import { Loader2, ShieldAlert, Pencil, Trash2, X, Check, Car } from 'lucide-react';
 import { useFuelPage } from '@modules/fuel/hooks/useFuelPage';
 import { FuelPageHeader } from '@modules/fuel/components/FuelPageHeader';
 import { FuelFiltersToolbar, FuelPlatformTabs } from '@modules/fuel/components/FuelFilters';
@@ -438,13 +438,15 @@ export default function FuelPage() {
 
       <Card className="border-border/60 shadow-sm overflow-hidden">
         <CardContent className="p-0">
-          {loading ? (
+          {loading && (
             <div className="flex items-center justify-center py-20">
               <Loader2 size={24} className="animate-spin text-primary" />
             </div>
-          ) : view === 'monthly' ? (
+          )}
+          {!loading && view === 'monthly' && (
             <MonthlyTable rows={filteredMonthly} />
-          ) : view === 'daily' ? (
+          )}
+          {!loading && view === 'daily' && (
             <DailyTable
               rows={filteredDaily}
               editing={editingDaily}
@@ -455,7 +457,8 @@ export default function FuelPage() {
               onDelete={handleDeleteDaily}
               onUpdateEditing={updateEditingDaily}
             />
-          ) : (
+          )}
+          {!loading && view === 'spreadsheet' && (
             <SpreadsheetView
               monthly={filteredMonthly}
               daily={filteredDaily}

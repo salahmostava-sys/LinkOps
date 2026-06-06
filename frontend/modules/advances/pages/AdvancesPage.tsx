@@ -1,4 +1,4 @@
-﻿import { Suspense, lazy, useEffect, useRef, useState } from 'react';
+import { Suspense, lazy, useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { CreditCard, FolderOpen, UserPlus, AlertTriangle } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@shared/components/ui/dropdown-menu';
@@ -97,7 +97,7 @@ const Advances = () => {
     handleTemplate,
     handlePrintTable,
     handleDeleteEmployeeAllAdvances,
-  } = useAdvanceTable(
+  } = useAdvanceTable({
     advances,
     employees,
     search,
@@ -108,7 +108,7 @@ const Advances = () => {
     deleteEmployeeAdvancesId,
     setDeleteEmployeeAdvancesId,
     setDeletingEmployeeAdvances
-  );
+  });
 
   // Local state mirrors React Query data — kept intentionally because useAdvanceTable
   // receives these arrays and may trigger optimistic updates via fetchAll/refetchAdvancesData.

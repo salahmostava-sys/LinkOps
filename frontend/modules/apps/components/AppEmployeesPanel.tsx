@@ -1,4 +1,4 @@
-﻿import { Check, X } from 'lucide-react';
+import { Check, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import type { AppData, AppEmployee } from '@modules/apps/types';
@@ -52,16 +52,18 @@ export const AppEmployeesPanel = ({
       </div>
 
       <div className="ta-table-wrap">
-        {loading ? (
+        {loading && (
           <div className="flex flex-col items-center gap-2 py-12 text-center text-sm text-muted-foreground">
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
             جاري تحميل أرقام المناديب...
           </div>
-        ) : employees.length === 0 ? (
+        )}
+        {!loading && employees.length === 0 && (
           <div className="rounded-xl border border-dashed border-border bg-muted/10 py-12 text-center text-muted-foreground">
             لم يتم تسجيل أي طلبات لهذه المنصة بواسطة المناديب في هذا الشهر.
           </div>
-        ) : (
+        )}
+        {!loading && employees.length > 0 && (
           <table className="w-full">
             <thead className="ta-thead">
               <tr>

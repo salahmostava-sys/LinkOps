@@ -48,12 +48,12 @@ export function DashboardHeader({
             const isAnalyticsTab = tab === 'analytics';
             const isRankingTab = tab === 'ranking';
 
-  const tabLabel =
-    tab === 'overview'
-      ? 'النظرة العامة'
-      : tab === 'analytics'
-        ? 'التحليلات والتوقعات'
-        : 'التصنيفات';
+            const tabLabels = {
+              overview: 'النظرة العامة',
+              analytics: 'التحليلات والتوقعات',
+              ranking: 'التصنيفات',
+            };
+            const tabLabel = tabLabels[tab];
 
             return (
               <button

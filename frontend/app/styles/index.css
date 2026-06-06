@@ -353,28 +353,28 @@
   .badge-urgent {
     @apply inline-flex items-center gap-1 text-xs font-medium px-2.5 py-0.5 rounded-full;
     background: rgba(153, 27, 27, 0.12);
-    color: #991b1b;
+    color: #7f1d1d;
     font-weight: 600;
   }
 
   .badge-warning {
     @apply inline-flex items-center gap-1 text-xs font-medium px-2.5 py-0.5 rounded-full;
     background: rgba(146, 64, 14, 0.12);
-    color: #92400e;
+    color: #78350f;
     font-weight: 600;
   }
 
   .badge-success {
     @apply inline-flex items-center gap-1 text-xs font-medium px-2.5 py-0.5 rounded-full;
     background: rgba(6, 95, 70, 0.12);
-    color: #047857;
+    color: #064e3b;
     font-weight: 600;
   }
 
   .badge-info {
     @apply inline-flex items-center gap-1 text-xs font-medium px-2.5 py-0.5 rounded-full;
     background: rgba(30, 58, 138, 0.12);
-    color: #1e40af;
+    color: #1e3a8a;
     font-weight: 600;
   }
 

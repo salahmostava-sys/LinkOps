@@ -1,4 +1,4 @@
-﻿/**
+/**
  * FuelSpreadsheetView — جدول بيانات استهلاك المناديب
  *
  * الصفوف = المناديب
@@ -430,11 +430,12 @@ export default function FuelSpreadsheetView(props: Readonly<{
                     {dayHeaders.map((dh) => {
                       const cell = row.days.get(dh.dayNum) ?? null;
                       const hasData = cell !== null;
-                      const dayCellClass = dh.isWeekend && !hasData
-                        ? 'bg-rose-50/40 dark:bg-rose-950/10 hover:bg-rose-100/60 dark:hover:bg-rose-950/20'
-                        : hasData
-                          ? 'bg-emerald-50/60 dark:bg-emerald-950/20 hover:bg-emerald-100 dark:hover:bg-emerald-950/40'
-                          : 'bg-muted/10 hover:bg-muted/30';
+                      let dayCellClass = 'bg-muted/10 hover:bg-muted/30';
+                      if (hasData) {
+                        dayCellClass = 'bg-emerald-50/60 dark:bg-emerald-950/20 hover:bg-emerald-100 dark:hover:bg-emerald-950/40';
+                      } else if (dh.isWeekend) {
+                        dayCellClass = 'bg-rose-50/40 dark:bg-rose-950/10 hover:bg-rose-100/60 dark:hover:bg-rose-950/20';
+                      }
                       return (
                         <td
                           key={dh.dayNum}

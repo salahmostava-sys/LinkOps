@@ -1,4 +1,4 @@
-﻿import type { SupervisorPerformanceRow } from '@services/dashboardService';
+import type { SupervisorPerformanceRow } from '@services/dashboardService';
 
 type Props = {
   loading: boolean;
@@ -27,17 +27,19 @@ export function DashboardSupervisorTargetsCard({ loading, rows }: Readonly<Props
         </div>
       </div>
       <div className="p-4">
-        {loading ? (
+        {loading && (
           <div className="space-y-2">
             {['r1', 'r2', 'r3'].map((k) => (
               <div key={k} className="h-10 rounded-lg bg-muted/40 animate-pulse" />
             ))}
           </div>
-        ) : rows.length === 0 ? (
+        )}
+        {!loading && rows.length === 0 && (
           <p className="text-sm text-muted-foreground text-center py-8">
             لا توجد تارجتات مشرفين لهذا الشهر بعد.
           </p>
-        ) : (
+        )}
+        {!loading && rows.length > 0 && (
           <div className="overflow-x-auto">
             <table className="w-full text-sm min-w-[560px]" dir="rtl">
               <thead className="bg-muted/40">

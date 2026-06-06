@@ -37,14 +37,14 @@ async function requireAuth(req, res) {
   return { user, callerClient };
 }
 
-const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || '')
+const ALLOWED_ORIGINS = new Set((process.env.ALLOWED_ORIGINS || '')
   .split(',')
   .map(s => s.trim())
-  .filter(Boolean);
+  .filter(Boolean));
 
 function setCors(req, res) {
   const origin = req.headers?.origin;
-  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+  if (origin && ALLOWED_ORIGINS.has(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Vary', 'Origin');
   }

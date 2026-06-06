@@ -74,13 +74,14 @@ const AppsPage = () => {
       <AppsPageHeader canEdit={permissions.can_edit} onAdd={openingCreateModal} />
 
       <PageSection title={pageTitle}>
-        {appsLoading ? (
+        {appsLoading && (
           <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
             {[1, 2, 3, 4, 5].map((item) => (
               <div key={item} className="h-40 animate-pulse rounded-2xl bg-muted/40" />
             ))}
           </div>
-        ) : apps.length === 0 ? (
+        )}
+        {!appsLoading && apps.length === 0 && (
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12 text-center">
               <Package size={48} className="text-muted-foreground/50 mb-4" />
@@ -92,7 +93,8 @@ const AppsPage = () => {
               </p>
             </CardContent>
           </Card>
-        ) : (
+        )}
+        {!appsLoading && apps.length > 0 && (
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
             {apps.map((app) => {
               const isAppSelected = selectedApp?.id === app.id;
