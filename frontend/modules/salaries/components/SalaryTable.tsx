@@ -271,7 +271,7 @@ const SalaryRowCells = memo(function SalaryRowCells({
 });
 
 // ── Main component ────────────────────────────────────────────────────────────
-export const SalaryTable = React.memo(function SalaryTable(props: Readonly<SalaryTableProps>) {
+export const SalaryTable = memo(function SalaryTable(props: Readonly<SalaryTableProps>) {
   const {
     loadingData, rows, filtered, computeRow, platforms, platformColors,
     appCustomColumns, empPlatformScheme, sortField, sortDir, handleSort,

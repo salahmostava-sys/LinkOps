@@ -95,4 +95,12 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    files: ["**/*.test.ts", "**/*.test.tsx", "**/*.setup.ts", "**/__tests__/**/*.ts"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-unnecessary-type-assertion": "off",
+      "sonarjs/no-duplicate-string": "off"
+    }
+  }
 );
