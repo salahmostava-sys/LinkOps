@@ -18,22 +18,18 @@ async function getAuthHeader(): Promise<string | null> {
 }
 
 async function callGroqServer(messages: GroqMessage[]): Promise<string> {
-  const authHeader = await getAuthHeader();
-  if (!authHeader) throw new Error('Not authenticated');
+  const { data: sessionData } = await supabase.auth.getSession();
+  if (!sessionData.session?.access_token) throw new Error('Not authenticated');
 
-  const res = await fetch('/api/functions/groq-chat', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': authHeader },
-    body: JSON.stringify({ messages }),
+  const { data, error } = await supabase.functions.invoke('groq-chat', {
+    body: { messages },
   });
 
-  const data = await res.json() as { message?: string; error?: string };
-
-  if (!res.ok || data.error) {
-    throw new Error(data.error ?? 'groq-chat server error');
+  if (error || data?.error) {
+    throw new Error(error?.message || data?.error || 'groq-chat server error');
   }
 
-  return data.message ?? '';
+  return data?.message ?? '';
 }
 
 export const groqService = {
@@ -47,12 +43,10 @@ export const groqService = {
     try {
       const authHeader = await getAuthHeader();
       if (!authHeader) { _configured = false; return false; }
-      const res = await fetch('/api/functions/groq-chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': authHeader },
-        body: JSON.stringify({ messages: [{ role: 'user', content: 'ping' }] }),
+      const { data, error } = await supabase.functions.invoke('groq-chat', {
+        body: { messages: [{ role: 'user', content: 'ping' }] },
       });
-      _configured = res.ok;
+      _configured = !error && !data?.error;
     } catch {
       _configured = false;
     }

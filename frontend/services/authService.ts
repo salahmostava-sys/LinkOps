@@ -21,29 +21,25 @@ async function callAdminApi<T = void>(
   body: Record<string, unknown>,
   expectData?: boolean
 ): Promise<T | void> {
-  let res: Response;
-  try {
-    res = await fetch("/api/functions/admin-update-user", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify(body),
+    const { data: edgeData, error: edgeError } = await supabase.functions.invoke("admin-update-user", {
+      body,
     });
-  } catch {
-    throw new Error("تعذر الاتصال بالخادم. يرجى التحقق من أن الخادم يعمل والمحاولة مجدداً.");
-  }
-
-  if (!res.ok) {
-    const contentType = res.headers.get("content-type") ?? "";
-    if (!contentType.includes("application/json")) {
-      // Proxy returned HTML (e.g. 502 when API server is down)
-      throw new Error("الخادم غير متاح حالياً. يرجى الانتظار لحظة والمحاولة مجدداً.");
+    
+    if (edgeError) {
+      if (edgeError.message?.includes("Failed to fetch") || edgeError.message?.includes("NetworkError")) {
+        throw new Error("الخادم غير متاح حالياً. يرجى الانتظار لحظة والمحاولة مجدداً.");
+      }
+      throw new Error(edgeError.message || "تعذر الاتصال بالخادم. يرجى التحقق من أن الخادم يعمل والمحاولة مجدداً.");
     }
-    const json = await res.json().catch(() => ({})) as { error?: string };
-    throw new Error(json.error ?? "حدث خطأ في الخادم. يرجى المحاولة مجدداً.");
-  }
-
-  if (expectData) {
-    return res.json() as Promise<T>;
+    
+    if (expectData) {
+      return edgeData as T;
+    }
+  } catch (error) {
+    if (error instanceof Error && error.message !== "تعذر الاتصال بالخادم. يرجى التحقق من أن الخادم يعمل والمحاولة مجدداً.") {
+      throw error;
+    }
+    throw new Error("تعذر الاتصال بالخادم. يرجى التحقق من أن الخادم يعمل والمحاولة مجدداً.");
   }
 }
 

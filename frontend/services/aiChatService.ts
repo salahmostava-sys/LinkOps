@@ -24,19 +24,16 @@ export const aiChatService = {
       throw toServiceError(new Error('Not authenticated'), 'aiChatService.sendMessage');
     }
 
-    const res = await fetch('/api/functions/ai-chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': authHeader },
-      body: JSON.stringify({ messages }),
+    const { data, error } = await supabase.functions.invoke('ai-chat', {
+      body: { messages },
     });
 
-    const data = await res.json() as AiChatResponse;
-
-    if (!res.ok) {
-      const msg = data.error ?? 'عذرًا، حدث خطأ في الاتصال. حاول مرة أخرى.';
+    if (error) {
+      const msg = error.message ?? 'عذرًا، حدث خطأ في الاتصال. حاول مرة أخرى.';
       throw toServiceError(new Error(msg), 'aiChatService.sendMessage');
     }
 
-    return data.message ?? data.error ?? 'لا يوجد رد';
+    const aiData = data as AiChatResponse;
+    return aiData?.message ?? aiData?.error ?? 'لا يوجد رد';
   },
 };
