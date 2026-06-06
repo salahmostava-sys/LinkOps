@@ -21,6 +21,7 @@ async function callAdminApi<T = void>(
   body: Record<string, unknown>,
   expectData?: boolean
 ): Promise<T | void> {
+  try {
     const { data: edgeData, error: edgeError } = await supabase.functions.invoke("admin-update-user", {
       body,
     });
