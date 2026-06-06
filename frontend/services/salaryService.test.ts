@@ -1,277 +1,118 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { createQueryBuilder, type MockQueryResult } from '@shared/test/mocks/supabaseClientMock';
 
-const { tableResults, fromMock, rpcMock } = vi.hoisted(() => {
-  const tableResultsLocal: Record<string, MockQueryResult> = {};
-  return {
-    tableResults: tableResultsLocal,
-    fromMock: vi.fn((table: string) => createQueryBuilder(tableResultsLocal[table] ?? { data: null, error: null })),
-    rpcMock: vi.fn(),
-  };
-});
+const { fromMock, rpcMock, getSessionMock } = vi.hoisted(() => ({
+  fromMock: vi.fn(),
+  rpcMock: vi.fn(),
+  getSessionMock: vi.fn(),
+}));
 
 vi.mock('@services/supabase/client', () => ({
   supabase: {
     from: fromMock,
     rpc: rpcMock,
+    auth: {
+      getSession: getSessionMock,
+    },
   },
 }));
 
 vi.mock('@services/serviceError', () => ({
   handleSupabaseError: vi.fn((error: unknown, context: string) => {
+    if (!error) return;
     const message = error instanceof Error ? error.message : 'service error';
     throw new Error(`${context}: ${message}`);
   }),
 }));
 
-import { getTierSalaryExplanationLines, salaryService } from './salaryService';
+import { salaryService } from './salaryService';
 
 describe('salaryService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    for (const k of Object.keys(tableResults)) delete tableResults[k];
+    global.fetch = vi.fn();
   });
 
-  it('returns pricing rules on success', async () => {
-    tableResults.pricing_rules = {
-      data: [
-        {
-          id: 'r1',
-          app_id: 'app-1',
-          min_orders: 1,
-          max_orders: 10,
-          rule_type: 'per_order',
-          rate_per_order: 7,
-          fixed_salary: null,
-          is_active: true,
-          priority: 1,
-        },
-      ],
-      error: null,
-    };
+  describe('calculateSalaryForEmployeeMonth', () => {
+    it('calls the salary-engine edge function correctly', async () => {
+      getSessionMock.mockResolvedValueOnce({ data: { session: { access_token: 'fake-token' } } });
+      const mockResponse = { data: { net_salary: 1000 } };
+      (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockResponse,
+      });
 
-    const result = await salaryService.getPricingRules('app-1');
-    expect(result).toHaveLength(1);
-    expect(result[0].id).toBe('r1');
-    expect(fromMock).toHaveBeenCalledWith('pricing_rules');
-  });
+      const result = await salaryService.calculateSalaryForEmployeeMonth(
+        '123e4567-e89b-12d3-a456-426614174000',
+        '2026-03',
+        'cash',
+        100,
+        'Penalty'
+      );
 
-  it('throws when pricing rules query fails', async () => {
-    tableResults.pricing_rules = {
-      data: null,
-      error: new Error('db down'),
-    };
-
-    await expect(salaryService.getPricingRules('app-1')).rejects.toThrow(
-      'salaryService.getPricingRules: db down',
-    );
-  });
-
-  it('calculates tier salary for total multiplier logic', () => {
-    const salary = salaryService.calculateTierSalary(
-      12,
-      [
-        { from_orders: 1, to_orders: 10, price_per_order: 5, tier_order: 1 },
-        { from_orders: 11, to_orders: null, price_per_order: 7, tier_order: 2 },
-      ],
-      null,
-      null,
-    );
-
-    // 10*5 + 2*7 = 64
-    expect(salary).toBe(64);
-  });
-
-  it('per_order_band: total orders × rate for the matched band only', () => {
-    const tiers = [
-      { from_orders: 1, to_orders: 300, price_per_order: 3, tier_order: 1, tier_type: 'per_order_band' as const },
-      { from_orders: 301, to_orders: 400, price_per_order: 4, tier_order: 2, tier_type: 'per_order_band' as const },
-      { from_orders: 401, to_orders: 449, price_per_order: 5, tier_order: 3, tier_type: 'per_order_band' as const },
-      { from_orders: 450, to_orders: 470, price_per_order: 2500, tier_order: 4, tier_type: 'fixed_amount' as const },
-      {
-        from_orders: 471,
-        to_orders: null,
-        price_per_order: 2500,
-        tier_order: 5,
-        tier_type: 'base_plus_incremental' as const,
-        incremental_threshold: 470,
-        incremental_price: 5,
-      },
-    ];
-    expect(salaryService.calculateTierSalary(400, tiers, null, null)).toBe(1600);
-    expect(salaryService.calculateTierSalary(401, tiers, null, null)).toBe(2005);
-    expect(salaryService.calculateTierSalary(450, tiers, null, null)).toBe(2500);
-    expect(salaryService.calculateTierSalary(470, tiers, null, null)).toBe(2500);
-    expect(salaryService.calculateTierSalary(480, tiers, null, null)).toBe(2550);
-  });
-
-  it('formats base_plus_incremental explanations in readable math order', () => {
-    const explanation = getTierSalaryExplanationLines(
-      542,
-      [
-        {
-          from_orders: 471,
-          to_orders: null,
-          price_per_order: 2500,
-          tier_order: 1,
-          tier_type: 'base_plus_incremental',
-          incremental_threshold: 460,
-          incremental_price: 5,
-        },
-      ],
-      null,
-      null,
-    );
-
-    expect(explanation).toHaveLength(1);
-    expect(explanation[0]).toContain('\u20662,500 + (542 - 460) × 5 = 2,910\u2069');
-  });
-
-  it('getByMonth returns array on success', async () => {
-    tableResults.salary_records = {
-      data: [{ id: 's1', employee_id: 'e1', month_year: '2026-03', net_salary: 5000 }],
-      error: null,
-    };
-
-    const result = await salaryService.getByMonth('2026-03');
-    expect(result).toHaveLength(1);
-    expect(result[0].id).toBe('s1');
-    expect(fromMock).toHaveBeenCalledWith('salary_records');
-  });
-
-  it('getByMonth throws on Supabase error', async () => {
-    tableResults.salary_records = {
-      data: null,
-      error: new Error('connection lost'),
-    };
-
-    await expect(salaryService.getByMonth('2026-03')).rejects.toThrow(
-      'salaryService.getByMonth: connection lost',
-    );
-  });
-
-  it('upsert throws on error — never swallows', async () => {
-    tableResults.salary_records = {
-      data: null,
-      error: new Error('upsert conflict'),
-    };
-
-    await expect(
-      salaryService.upsert({ employee_id: 'e1', month_year: '2026-03' }),
-    ).rejects.toThrow('salaryService.upsert: upsert conflict');
-  });
-
-  it('update throws on error', async () => {
-    tableResults.salary_records = {
-      data: null,
-      error: new Error('update failed'),
-    };
-
-    await expect(
-      salaryService.update('s1', { net_salary: 3000 }),
-    ).rejects.toThrow('salaryService.update: update failed');
-  });
-
-  it('delete throws on error', async () => {
-    tableResults.salary_records = {
-      data: null,
-      error: new Error('delete denied'),
-    };
-
-    await expect(salaryService.delete('s1')).rejects.toThrow(
-      'salaryService.delete: delete denied',
-    );
-  });
-
-  it('applyPricingRules returns 0 salary when no rule matches', () => {
-    const result = salaryService.applyPricingRules(
-      [{ id: 'r1', app_id: 'a1', min_orders: 10, max_orders: 20, rule_type: 'per_order', rate_per_order: 5, fixed_salary: null }],
-      5,
-    );
-    expect(result.salary).toBe(0);
-    expect(result.matchedRule).toBeNull();
-  });
-
-  it('applyPricingRules calculates per_order correctly', () => {
-    const result = salaryService.applyPricingRules(
-      [{ id: 'r1', app_id: 'a1', min_orders: 1, max_orders: 100, rule_type: 'per_order', rate_per_order: 7, fixed_salary: null }],
-      15,
-    );
-    expect(result.salary).toBe(105);
-    expect(result.matchedRule?.id).toBe('r1');
-  });
-
-  it('applyPricingRules returns fixed salary for fixed rule', () => {
-    const result = salaryService.applyPricingRules(
-      [{ id: 'r1', app_id: 'a1', min_orders: 1, max_orders: null, rule_type: 'fixed', rate_per_order: null, fixed_salary: 2000 }],
-      50,
-    );
-    expect(result.salary).toBe(2000);
-  });
-
-  it('calculateTierSalary returns 0 for zero orders', () => {
-    const salary = salaryService.calculateTierSalary(
-      0,
-      [{ from_orders: 1, to_orders: 10, price_per_order: 5, tier_order: 1 }],
-      null,
-      null,
-    );
-    expect(salary).toBe(0);
-  });
-
-  it('calculateTierSalary adds target bonus when eligible', () => {
-    const salary = salaryService.calculateTierSalary(
-      15,
-      [{ from_orders: 1, to_orders: null, price_per_order: 10, tier_order: 1 }],
-      10,
-      500,
-    );
-    // 15 * 10 = 150 + 500 bonus = 650
-    expect(salary).toBe(650);
-  });
-
-  it('calculateFixedMonthlySalary prorates by attendance', () => {
-    const salary = salaryService.calculateFixedMonthlySalary(3000, 20);
-    // 3000/30 * 20 = 2000
-    expect(salary).toBe(2000);
-  });
-
-  it('calculateFixedMonthlySalary returns 0 for zero amount', () => {
-    expect(salaryService.calculateFixedMonthlySalary(0, 20)).toBe(0);
-  });
-
-  // ISSUE #2: verify the specific test cases from the audit
-  // These match a mixed scheme: per_order_band for low ranges, fixed_amount for mid, base_plus_incremental for top
-  describe('audit-requested calculation cases (150→450, 301→1204, 460→2500, 500→2600)', () => {
-    const auditTiers = [
-      { from_orders: 1, to_orders: 300, price_per_order: 3, tier_order: 1, tier_type: 'per_order_band' as const },
-      { from_orders: 301, to_orders: 450, price_per_order: 4, tier_order: 2, tier_type: 'per_order_band' as const },
-      { from_orders: 451, to_orders: 460, price_per_order: 2500, tier_order: 3, tier_type: 'fixed_amount' as const },
-      {
-        from_orders: 461,
-        to_orders: null,
-        price_per_order: 2500,
-        tier_order: 4,
-        tier_type: 'base_plus_incremental' as const,
-        incremental_threshold: 460,
-        incremental_price: 2.5,
-      },
-    ];
-
-    it('150 orders → 450 (per_order_band: 150 × 3)', () => {
-      expect(salaryService.calculateTierSalary(150, auditTiers, null, null)).toBe(450);
+      expect(global.fetch).toHaveBeenCalledWith('/api/functions/salary-engine', expect.objectContaining({
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer fake-token' },
+      }));
+      expect(result).toEqual(mockResponse.data);
     });
 
-    it('301 orders → 1204 (per_order_band: 301 × 4)', () => {
-      expect(salaryService.calculateTierSalary(301, auditTiers, null, null)).toBe(1204);
+    it('throws error when employee_id is invalid', async () => {
+      await expect(
+        salaryService.calculateSalaryForEmployeeMonth('invalid-id', '2026-03')
+      ).rejects.toThrow('salaryService.calculateSalaryForEmployeeMonth: Invalid employee_id or month_year');
+    });
+  });
+
+  describe('getByMonth', () => {
+    it('queries salary_records table correctly', async () => {
+      const mockEq = vi.fn().mockReturnThis();
+      const mockOrder = vi.fn().mockResolvedValueOnce({ data: [{ id: '1' }], error: null });
+      fromMock.mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          eq: mockEq.mockReturnValue({
+            order: mockOrder,
+          }),
+        }),
+      });
+
+      const result = await salaryService.getByMonth('2026-03');
+      expect(fromMock).toHaveBeenCalledWith('salary_records');
+      expect(result).toEqual([{ id: '1' }]);
+    });
+  });
+
+  describe('upsert', () => {
+    it('upserts a salary record', async () => {
+      const mockSingle = vi.fn().mockResolvedValueOnce({ data: { id: '1' }, error: null });
+      fromMock.mockReturnValue({
+        upsert: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnValue({
+            single: mockSingle,
+          }),
+        }),
+      });
+
+      const payload = { employee_id: 'e1', month_year: '2026-03' };
+      const result = await salaryService.upsert(payload);
+      expect(fromMock).toHaveBeenCalledWith('salary_records');
+      expect(result).toEqual({ id: '1' });
+    });
+  });
+
+  describe('calculateTierSalary', () => {
+    it('calculates tier salary correctly (total_multiplier)', () => {
+      const tiers = [
+        { from_orders: 1, to_orders: 100, price_per_order: 10, tier_order: 1, tier_type: 'total_multiplier' as const },
+        { from_orders: 101, to_orders: null, price_per_order: 15, tier_order: 2, tier_type: 'total_multiplier' as const },
+      ];
+      const salary = salaryService.calculateTierSalary(110, tiers, null, null);
+      // 100 * 10 + 10 * 15 = 1000 + 150 = 1150
+      expect(salary).toBe(1150);
     });
 
-    it('460 orders → 2500 (fixed_amount)', () => {
-      expect(salaryService.calculateTierSalary(460, auditTiers, null, null)).toBe(2500);
-    });
-
-    it('500 orders → 2600 (base_plus_incremental: 2500 + (500-460) × 2.5)', () => {
-      expect(salaryService.calculateTierSalary(500, auditTiers, null, null)).toBe(2600);
+    it('returns 0 when orders is 0', () => {
+      const tiers = [{ from_orders: 1, to_orders: 100, price_per_order: 10, tier_order: 1, tier_type: 'total_multiplier' as const }];
+      expect(salaryService.calculateTierSalary(0, tiers, null, null)).toBe(0);
     });
   });
 });

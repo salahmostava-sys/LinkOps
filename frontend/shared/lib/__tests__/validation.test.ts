@@ -25,8 +25,8 @@ describe('validation', () => {
     });
 
     it('should reject files exceeding max size', () => {
-      const largeContent = new Array(6 * 1024 * 1024).fill('a').join('');
-      const file = new File([largeContent], 'large.pdf', { type: 'application/pdf' });
+      const file = new File(['a'], 'large.pdf', { type: 'application/pdf' });
+      Object.defineProperty(file, 'size', { value: 6 * 1024 * 1024 });
       const result = validateUploadFile(file);
       expect(result.valid).toBe(false);
       expect(result.error).toBe('الملف كبير جدًا');

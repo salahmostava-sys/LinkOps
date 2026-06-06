@@ -1,100 +1,65 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { exportSpreadsheetExcel } from './spreadsheetFileOps';
+
+const { toastSuccessMock, toastErrorMock, aoaToSheetMock, bookNewMock, bookAppendSheetMock, writeFileMock } = vi.hoisted(() => ({
+  toastSuccessMock: vi.fn(),
+  toastErrorMock: vi.fn(),
+  aoaToSheetMock: vi.fn(),
+  bookNewMock: vi.fn(),
+  bookAppendSheetMock: vi.fn(),
+  writeFileMock: vi.fn(),
+}));
 
 vi.mock('@shared/components/ui/sonner', () => ({
   toast: {
-    error: vi.fn(),
-    warning: vi.fn(),
-    success: vi.fn(),
-    dismiss: vi.fn(),
+    success: toastSuccessMock,
+    error: toastErrorMock,
   },
 }));
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const toastMocks = (await import('@shared/components/ui/sonner')).toast as any;
-
-vi.mock('@services/orderService', () => ({
-  orderService: {
-    bulkUpsert: vi.fn(),
-  },
+vi.mock('@shared/lib/toastMessages', () => ({
+  TOAST_SUCCESS_ACTION: 'Success Action',
+  TOAST_SUCCESS_OPERATION: 'Success Op',
 }));
 
-const { orderService } = await import('@services/orderService');
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const bulkUpsertMock = orderService.bulkUpsert as any;
-
-vi.mock('@shared/lib/logger', () => ({
-  logError: vi.fn(),
-  logger: {
-    warn: vi.fn(),
-    error: vi.fn(),
-  },
+vi.mock('@modules/orders/utils/xlsx', () => ({
+  loadXlsx: vi.fn().mockResolvedValue({
+    utils: {
+      aoa_to_sheet: aoaToSheetMock,
+      book_new: bookNewMock,
+      book_append_sheet: bookAppendSheetMock,
+    },
+    writeFile: writeFileMock,
+    read: vi.fn(),
+  }),
 }));
 
-import { saveSpreadsheetMonth } from './spreadsheetFileOps';
-
-describe('saveSpreadsheetMonth', () => {
+describe('spreadsheetFileOps', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('persists an empty grid via bulkUpsert (clear month path)', async () => {
-    bulkUpsertMock.mockResolvedValue({ saved: 0, failed: [] });
-    const setSaving = vi.fn();
+  describe('exportSpreadsheetExcel', () => {
+    it('generates and downloads an excel file', async () => {
+      const filteredEmployees = [{ id: 'emp1', name: 'John', platform_accounts: [] }];
+      const empDayTotal = vi.fn().mockReturnValue(5);
+      const empMonthTotal = vi.fn().mockReturnValue(15);
+      const dayArr = [1, 2, 3];
 
-    const result = await saveSpreadsheetMonth({
-      isMonthLocked: false,
-      year: 2026,
-      month: 4,
-      days: 30,
-      data: {},
-      setSaving,
-      employees: [],
-      apps: [],
+      await exportSpreadsheetExcel({
+        year: 2026,
+        month: 3,
+        dayArr,
+        filteredEmployees,
+        empDayTotal,
+        empMonthTotal,
+      });
+
+      expect(aoaToSheetMock).toHaveBeenCalled();
+      expect(bookNewMock).toHaveBeenCalled();
+      expect(bookAppendSheetMock).toHaveBeenCalled();
+      expect(writeFileMock).toHaveBeenCalledWith(undefined, 'طلبات_3_2026.xlsx'); // undefined because bookNewMock doesn't return anything
+      expect(toastSuccessMock).toHaveBeenCalledWith('Success Action');
     });
-
-    expect(result).toBe(true);
-    expect(bulkUpsertMock).toHaveBeenCalledWith([], 100);
-    expect(toastMocks.success).toHaveBeenCalledTimes(1);
-    expect(toastMocks.error).not.toHaveBeenCalled();
-    expect(setSaving).toHaveBeenNthCalledWith(1, true);
-    expect(setSaving).toHaveBeenLastCalledWith(false);
-  });
-
-  it('blocks saving when the grid only contains invalid rows', async () => {
-    const setSaving = vi.fn();
-
-    const result = await saveSpreadsheetMonth({
-      isMonthLocked: false,
-      year: 2026,
-      month: 4,
-      days: 30,
-      data: {
-        'emp-1::app-1::31': 5,
-      },
-      setSaving,
-      employees: [
-        {
-          id: 'emp-1',
-          name: 'Employee One',
-          salary_type: 'orders',
-          status: 'active',
-          sponsorship_status: null,
-        },
-      ],
-      apps: [
-        {
-          id: 'app-1',
-          name: 'App One',
-          name_en: 'App One',
-        },
-      ],
-    });
-
-    expect(result).toBe(false);
-    expect(bulkUpsertMock).not.toHaveBeenCalled();
-    expect(toastMocks.warning).toHaveBeenCalledTimes(1);
-    expect(toastMocks.error).toHaveBeenCalledTimes(1);
-    expect(setSaving).toHaveBeenNthCalledWith(1, true);
-    expect(setSaving).toHaveBeenLastCalledWith(false);
   });
 });

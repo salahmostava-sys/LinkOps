@@ -434,3 +434,158 @@ describe('buildSalaryRows', () => {
     expect(rows[0].preferEngineBaseSalary).toBe(true);
   });
 });
+
+import {
+  buildSalaryDraftPatch,
+  buildSalaryRowSnapshot,
+  buildSavedMap,
+  buildPreviewMap,
+  buildAttendanceDaysMap,
+} from './salaryDomain';
+
+describe('salaryDomain mappings', () => {
+  it('buildSalaryDraftPatch maps correctly', () => {
+    const row = buildRow(['Keeta']);
+    row.engineBaseSalary = 1200;
+    const patch = buildSalaryDraftPatch(row);
+    expect(patch.engineBaseSalary).toBe(1200);
+    
+    row.engineBaseSalary = undefined;
+    const patch2 = buildSalaryDraftPatch(row);
+    expect(patch2.engineBaseSalary).toBe(0); // coercing undefined to 0
+  });
+
+  it('buildSalaryRowSnapshot maps correctly', () => {
+    const row = buildRow(['Keeta']);
+    const snapshot = buildSalaryRowSnapshot(row);
+    expect(snapshot.bankAccount).toBe('123456');
+    expect(snapshot.hasIban).toBe(true);
+  });
+
+  it('buildSavedMap maps saved records', () => {
+    const records = [
+      {
+        employee_id: 'emp-1',
+        is_approved: true,
+        net_salary: 1000,
+      }
+    ];
+    const map = buildSavedMap(records as any);
+    expect(map['emp-1'].is_approved).toBe(true);
+    expect(map['emp-1'].net_salary).toBe(1000);
+  });
+
+  it('buildPreviewMap normalizes data', () => {
+    const previewData = [
+      {
+        employee_id: 'emp-1',
+        base_salary: 1500,
+        platform_breakdown: [
+          { app_name: 'Keeta', work_type: 'orders', orders_count: 5, earnings: 100 }
+        ]
+      }
+    ];
+    const map = buildPreviewMap(previewData as any);
+    expect(map['emp-1'].base_salary).toBe(1500);
+    expect(map['emp-1'].platform_breakdown['Keeta'].ordersCount).toBe(5);
+  });
+
+  it('buildAttendanceDaysMap counts correctly', () => {
+    const rows = [
+      { employee_id: 'emp-1' },
+      { employee_id: 'emp-1' },
+      { employee_id: 'emp-2' },
+    ];
+    const map = buildAttendanceDaysMap(rows);
+    expect(map['emp-1']).toBe(2);
+    expect(map['emp-2']).toBe(1);
+  });
+});
+
+import { getManualDeductionTotal, getTotalDeductions, fetchPricingRulesMap } from './salaryDomain';
+import { salaryService } from '@services/salaryService';
+
+vi.mock('@services/salaryService', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@services/salaryService')>();
+  return {
+    ...actual,
+    salaryService: {
+      ...actual.salaryService,
+      getPricingRulesForApps: vi.fn(),
+    }
+  };
+});
+
+describe('salaryDomain deductions & pricing', () => {
+  it('getManualDeductionTotal sums custom deductions', () => {
+    const row = buildRow([]);
+    row.customDeductions = { a: 10, b: 15 };
+    expect(getManualDeductionTotal(row)).toBe(25);
+    
+    row.customDeductions = {};
+    expect(getManualDeductionTotal(row)).toBe(0);
+  });
+
+  it('getTotalDeductions sums all deductions', () => {
+    const row = buildRow([]);
+    row.advanceDeduction = 50;
+    row.externalDeduction = 20;
+    row.violations = 10;
+    row.customDeductions = { 'manual': 5 };
+    expect(getTotalDeductions(row)).toBe(85);
+  });
+
+  it('fetchPricingRulesMap fetches rules for all apps', async () => {
+    vi.mocked(salaryService.getPricingRulesForApps).mockResolvedValueOnce({ 'app-1': [] });
+    const result = await fetchPricingRulesMap({ 'App1': 'app-1' });
+    expect(salaryService.getPricingRulesForApps).toHaveBeenCalledWith(['app-1']);
+    expect(result).toEqual({ 'app-1': [] });
+
+    const emptyResult = await fetchPricingRulesMap({});
+    expect(emptyResult).toEqual({});
+  });
+});
+
+import { prepareSalaryState } from './salaryDomain';
+import { salaryDraftService } from '@services/salaryDraftService';
+import { salaryDataService } from '@services/salaryDataService';
+
+vi.mock('@services/salaryDraftService', () => ({
+  salaryDraftService: {
+    getDraft: vi.fn().mockResolvedValue(null),
+  }
+}));
+
+vi.mock('@services/salaryDataService', () => ({
+  salaryDataService: {
+    getEmployeeAdvanceInstallments: vi.fn().mockResolvedValue([]),
+    getAdvanceInstallmentsForMonth: vi.fn().mockResolvedValue([]),
+  }
+}));
+
+describe('salaryDomain prepareSalaryState', () => {
+  it('prepares salary state correctly', async () => {
+    vi.mocked(salaryService.getPricingRulesForApps).mockResolvedValue({});
+    const context = {
+      monthlyContext: {
+        employees: [],
+        orders: [],
+        appsWithSchemeRes: [],
+        attendanceRows: [],
+        fuelRes: [],
+        savedRecords: [],
+        allAdvances: [],
+      },
+      previewData: [],
+    };
+    const state = await prepareSalaryState({
+      salaryBaseContext: context,
+      selectedMonth: '2026-03',
+      activeEmployeeIdsInMonth: new Set(),
+    });
+
+    expect(state.hydratedRows).toEqual([]);
+    expect(state.appsWithoutPricingRules).toEqual([]);
+    expect(state.appsWithoutScheme).toEqual([]);
+  });
+});

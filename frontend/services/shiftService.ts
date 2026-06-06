@@ -15,7 +15,8 @@ export const shiftService = {
   getByMonth: async (monthYear: string, filters: Pick<ShiftFilter, 'employeeId' | 'appId'> = {}) => {
     const [year, month] = monthYear.split('-');
     const from = `${year}-${month}-01`;
-    const to = new Date(Number(year), Number(month), 0).toISOString().split('T')[0];
+    const lastDay = new Date(Number(year), Number(month), 0).getDate();
+    const to = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;
 
     let query = supabase
       .from('daily_shifts')
@@ -34,7 +35,8 @@ export const shiftService = {
 
   getMonthRaw: async (year: number, month: number) => {
     const from = `${year}-${String(month).padStart(2, '0')}-01`;
-    const to = new Date(year, month, 0).toISOString().split('T')[0];
+    const lastDay = new Date(year, month, 0).getDate();
+    const to = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
     const { data, error } = await supabase
       .from('daily_shifts')
       .select('employee_id, app_id, date, hours_worked')
@@ -97,7 +99,8 @@ export const shiftService = {
    */
   deleteByMonthAndApp: async (year: number, month: number, appId: string) => {
     const from = `${year}-${String(month).padStart(2, '0')}-01`;
-    const to = new Date(year, month, 0).toISOString().split('T')[0];
+    const lastDay = new Date(year, month, 0).getDate();
+    const to = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
     const { error } = await supabase
       .from('daily_shifts')
       .delete()
@@ -110,7 +113,8 @@ export const shiftService = {
   getTotalHoursByEmployee: async (employeeId: string, monthYear: string) => {
     const [year, month] = monthYear.split('-');
     const from = `${year}-${month}-01`;
-    const to = new Date(Number(year), Number(month), 0).toISOString().split('T')[0];
+    const lastDay = new Date(Number(year), Number(month), 0).getDate();
+    const to = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;
 
     const { data, error } = await supabase
       .from('daily_shifts')
