@@ -508,14 +508,14 @@ export default function FuelSpreadsheetView(props: Readonly<{
                       >
                         {hasData ? (
                           <div className="space-y-[1px] leading-none">
-                            {ct!.orders > 0 && (
-                              <p className="font-bold text-blue-600 text-[9px]">{ct!.orders.toLocaleString('en-US')}</p>
+                            {ct.orders > 0 && (
+                              <p className="font-bold text-blue-600 text-[9px]">{ct.orders.toLocaleString('en-US')}</p>
                             )}
-                            {ct!.km > 0 && (
-                              <p className="font-semibold text-emerald-600 text-[8px]">{ct!.km.toLocaleString('en-US')}</p>
+                            {ct.km > 0 && (
+                              <p className="font-semibold text-emerald-600 text-[8px]">{ct.km.toLocaleString('en-US')}</p>
                             )}
-                            {ct!.fuel > 0 && (
-                              <p className="text-amber-600 text-[7px]">{ct!.fuel.toLocaleString('en-US')}</p>
+                            {ct.fuel > 0 && (
+                              <p className="text-amber-600 text-[7px]">{ct.fuel.toLocaleString('en-US')}</p>
                             )}
                           </div>
                         ) : (

@@ -114,7 +114,7 @@ export const authService = {
     dedupe(`role:${userId}`, async () => {
       const { data: rpcRole, error: rpcError } = await supabase.rpc("get_my_role");
       if (!rpcError) {
-        return (rpcRole as AppRole | null) ?? null;
+        return (rpcRole) ?? null;
       }
 
       const { data, error } = await supabase
@@ -152,7 +152,7 @@ export const authService = {
       .eq("id", userId)
       .maybeSingle();
     throwIfError(error, "authService.fetchProfile");
-    return data as UserProfile | null;
+    return data;
   },
 
   updatePassword: async (newPassword: string): Promise<void> => {
@@ -212,7 +212,7 @@ export const authService = {
       true
     );
     if (!result?.user_id) throw new Error("authService.createManagedUser: missing user_id");
-    return result as AdminCreateUserResult;
+    return result;
   },
 
   deleteManagedUser: async (userId: string | null): Promise<void> => {

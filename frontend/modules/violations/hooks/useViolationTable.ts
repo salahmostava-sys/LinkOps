@@ -368,8 +368,8 @@ export function useViolationTable() {
     setEditViolationId(v.id);
     setEditForm({
       amount: String(v.amount ?? ''),
-      incident_date: v.incident_date || '',
-      note: v.violation_details || '',
+      incident_date: v.incident_date ?? '',
+      note: v.violation_details ?? '',
       approval_status: v.status || 'pending',
     });
     setEditDialogOpen(true);
@@ -387,7 +387,7 @@ export function useViolationTable() {
         amount,
         incident_date: editForm.incident_date,
         note: editForm.note,
-        approval_status: editForm.approval_status as 'pending' | 'approved' | 'rejected',
+        approval_status: editForm.approval_status,
       });
     } catch (e: unknown) {
       setEditSaving(false);
@@ -431,7 +431,7 @@ export function useViolationTable() {
     }
     const today = new Date().toISOString().slice(0, 10);
     const violationDate = v.incident_date || today;
-    const fullDetails = (v.violation_details || '').trim() || '—';
+    const fullDetails = (v.violation_details ?? '').trim() || '—';
 
     const advanceNote = [
       `مخالفة مرورية بتاريخ ${violationDate}.`,

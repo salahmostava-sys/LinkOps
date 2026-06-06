@@ -59,7 +59,7 @@ const normalizePaymentMethod = (
 };
 
 const readSavedSnapshot = (value: unknown): Partial<SalaryRowSnapshot> | null =>
-  isRecordObject(value) ? (value as unknown as Partial<SalaryRowSnapshot>) : null;
+  isRecordObject(value) ? (value) : null;
 
 const getFallbackSavedCustomDeductions = (manualDeduction: number): Record<string, number> => {
   if (manualDeduction <= 0) return {};
@@ -159,7 +159,7 @@ const normalizePreviewPlatformBreakdown = (value: unknown) => {
 
   const typedValue = value as unknown as SalaryPreviewPlatformBreakdown[];
   typedValue.forEach((item) => {
-    const appName = String(item.app_name || '').trim();
+    const appName = String(item.app_name ?? '').trim();
     if (!appName) return;
 
     breakdown[appName] = {
@@ -178,7 +178,7 @@ const normalizePreviewPlatformBreakdown = (value: unknown) => {
 export const buildPreviewMap = (previewData: Array<Record<string, unknown>> | null | undefined) => {
   const previewMap: Record<string, PreviewMapEntry> = {};
   (previewData || []).forEach((row) => {
-    const employeeId = String(row.employee_id || '');
+    const employeeId = String(row.employee_id ?? '');
     if (!employeeId) return;
     previewMap[employeeId] = {
       base_salary: Number(row.base_salary || 0),
@@ -442,7 +442,7 @@ export const buildSalaryRows = ({
     const baseRow: SalaryRow = {
       id: `${employeeId}-${selectedMonth}`,
       employeeId,
-      employeeName: String(emp.name || ''),
+      employeeName: String(emp.name ?? ''),
       jobTitle: String(emp.job_title || 'مندوب توصيل'),
       nationalId: String(emp.national_id || '•'),
       city: toCityArabicLabel(rawCity),
@@ -681,7 +681,7 @@ export async function prepareSalaryState({
   const rulesMap = await fetchPricingRulesMap(appNameToId);
   const builtEmpPlatformScheme = buildEmpPlatformSchemeMap(employees.map((emp) => emp.id), platformNames, appSchemeMap);
   const newRows = buildSalaryRows({
-    employees: employees as unknown as Array<Record<string, unknown>>,
+    employees: employees,
     selectedMonth,
     platformNames,
     appNameToId,

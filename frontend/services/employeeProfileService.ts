@@ -86,10 +86,10 @@ export const employeeProfileService = {
     if (ordersRes.error) handleSupabaseError(ordersRes.error, 'employeeProfileService.getRelatedData.dailyOrders');
 
     return {
-      advances: (advancesRes.data ?? []) as EmployeeProfileAdvance[],
-      salaries: (salariesRes.data ?? []) as EmployeeProfileSalaryRecord[],
-      employeeApps: (appsRes.data ?? []) as EmployeeProfileApp[],
-      dailyOrders: (ordersRes.data ?? []) as EmployeeProfileDailyOrder[],
+      advances: (advancesRes.data ?? []),
+      salaries: (salariesRes.data ?? []),
+      employeeApps: (appsRes.data ?? []),
+      dailyOrders: (ordersRes.data ?? []),
     };
   },
 };

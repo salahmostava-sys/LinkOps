@@ -57,7 +57,7 @@ const AttendanceStats = ({ selectedMonth, selectedYear }: Readonly<Props>) => {
         const next: typeof totals = { present: 0, absent: 0, leave: 0, sick: 0, late: 0 };
         attRows.forEach((r) => {
           const s = r.status;
-          if (s && s in next) next[s as keyof typeof next]++;
+          if (s && s in next) next[s]++;
         });
         setTotals(next);
       } catch (err) {

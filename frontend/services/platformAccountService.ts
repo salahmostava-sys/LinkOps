@@ -162,7 +162,7 @@ export const platformAccountService = {
   createAccount: async (payload: PlatformAccountWritePayload) => {
     const { data, error } = await supabase.from('platform_accounts').insert(payload).select('id').single();
     if (error) handleSupabaseError(error, 'platformAccountService.createAccount');
-    return data as { id: string };
+    return data;
   },
 
   updateAccount: async (id: string, payload: PlatformAccountWritePayload) => {

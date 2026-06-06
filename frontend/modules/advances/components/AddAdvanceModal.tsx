@@ -203,7 +203,7 @@ export const EditAdvanceModal = ({ advance, onClose, onSaved }: Readonly<EditAdv
     disbursement_date: advance.disbursement_date,
     first_deduction_month: advance.first_deduction_month,
     status: advance.status,
-    note: advance.note || '',
+    note: advance.note ?? '',
   });
 
   const remaining = Number.parseFloat(form.amount) || 0;
@@ -432,7 +432,7 @@ export const TransactionsModal = ({ employeeId, employeeName, nationalId, totalD
     }
   };
 
-  const startEditNote = (inst: Installment) => { setEditingNoteId(inst.id); setNoteValue(inst.notes || ''); };
+  const startEditNote = (inst: Installment) => { setEditingNoteId(inst.id); setNoteValue(inst.notes ?? ''); };
   const saveNote = async (instId: string) => {
     setSavingNote(true);
     try {

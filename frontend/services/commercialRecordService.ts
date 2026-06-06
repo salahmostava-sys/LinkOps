@@ -46,7 +46,7 @@ async function listManagedCommercialRecords(): Promise<CommercialRecordRow[]> {
     .order('name', { ascending: true });
 
   if (error) throw error;
-  return (data ?? []) as CommercialRecordRow[];
+  return (data ?? []);
 }
 
 async function listEmployeeCommercialRecordUsage(): Promise<Map<string, { name: string; count: number }>> {
@@ -137,7 +137,7 @@ export const commercialRecordService = {
       throw toServiceError(error, 'commercialRecordService.createRecord');
     }
 
-    return data as CommercialRecordRow;
+    return data;
   },
 
   async updateRecord(recordId: string, nextName: string, previousName: string) {

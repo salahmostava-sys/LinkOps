@@ -52,10 +52,10 @@ export default function CompanySettingsContent() {
   useEffect(() => {
     if (!tradeRegister) return;
     setRecordId(tradeRegister.id);
-    setNameAr(tradeRegister.name || '');
-    setNameEn(tradeRegister.name_en || '');
-    setCrNumber(tradeRegister.cr_number || '');
-    setTaxNumber(tradeRegister.notes || '');
+    setNameAr(tradeRegister.name ?? '');
+    setNameEn(tradeRegister.name_en ?? '');
+    setCrNumber(tradeRegister.cr_number ?? '');
+    setTaxNumber(tradeRegister.notes ?? '');
   }, [tradeRegister]);
 
   const handleSave = async () => {

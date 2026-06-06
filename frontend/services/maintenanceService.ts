@@ -206,7 +206,7 @@ export async function createMaintenanceLog(
     .insert({
       vehicle_id: data.vehicle_id,
       date: data.maintenance_date ?? new Date().toISOString().split('T')[0],
-      type: data.type as Database['public']['Enums']['maintenance_type'],
+      type: data.type,
       description: data.notes ?? null,
       created_by: uid,
     })

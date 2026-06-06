@@ -174,7 +174,7 @@ export function useSalaryPersistence(params: UseSalaryPersistenceParams) {
       if (!advanceIdToStatuses.has(inst.advance_id)) {
         advanceIdToStatuses.set(inst.advance_id, []);
       }
-      advanceIdToStatuses.get(inst.advance_id)!.push(effective as string);
+      advanceIdToStatuses.get(inst.advance_id)!.push(effective);
     }
 
     // Complete any advance where all installments are now deducted â€” parallel, not serial

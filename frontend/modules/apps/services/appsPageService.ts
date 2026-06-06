@@ -30,8 +30,8 @@ export const appsPageService = {
         custom_columns?: Json | null;
         work_type?: 'orders' | 'shift' | 'hybrid' | null;
       }>,
-      orderRows as AppMonthlyOrderRow[],
-      assignments as AppEmployeeAssignmentRow[],
+      orderRows,
+      assignments,
     );
   },
 
@@ -49,8 +49,8 @@ export const appsPageService = {
     ]);
 
     return buildAppEmployees({
-      assignments: assignments as AppEmployeeAssignmentRow[],
-      orderRows: orderRows as AppEmployeeOrderRow[],
+      assignments: assignments,
+      orderRows: orderRows,
       targetOrders,
       daysInMonth,
       daysPassed,

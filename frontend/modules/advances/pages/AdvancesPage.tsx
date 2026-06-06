@@ -60,8 +60,8 @@ const Advances = () => {
         advanceService.getEmployees(),
       ]);
       return {
-        advances: (advRows || []) as Advance[],
-        employees: (empRows || []) as { id: string; name: string; national_id?: string | null; sponsorship_status?: string | null }[],
+        advances: (advRows || []),
+        employees: (empRows || []),
       };
     },
     retry: defaultQueryRetry,

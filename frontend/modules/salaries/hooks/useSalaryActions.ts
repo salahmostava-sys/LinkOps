@@ -142,7 +142,7 @@ export function useSalaryActions(params: UseSalaryActionsParams) {
           if (scheme?.salary_scheme_tiers) {
             salary = salaryService.calculateTierSalary(
               value,
-              scheme.salary_scheme_tiers as SalarySchemeTier[],
+              scheme.salary_scheme_tiers,
               scheme.target_orders,
               scheme.target_bonus,
             );

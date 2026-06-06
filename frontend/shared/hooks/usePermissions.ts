@@ -154,13 +154,13 @@ export const usePermissions = (pageKey: string) => {
       const customPermission = await permissionsService.getUserPermission(user.id, pageKey);
       if (customPermission) return customPermission;
 
-      const defaults = DEFAULT_PERMISSIONS[role as AppRole] || DEFAULT_PERMISSIONS.viewer;
+      const defaults = DEFAULT_PERMISSIONS[role] || DEFAULT_PERMISSIONS.viewer;
       return defaults[pageKey] || DENY_ALL;
     },
   });
 
   const fallbackPermission =
-    role === null ? DENY_ALL : (DEFAULT_PERMISSIONS[role as AppRole] || DEFAULT_PERMISSIONS.viewer)[pageKey] || DENY_ALL;
+    role === null ? DENY_ALL : (DEFAULT_PERMISSIONS[role] || DEFAULT_PERMISSIONS.viewer)[pageKey] || DENY_ALL;
 
   // While user exists but role hasn't resolved yet (auth race condition), treat as loading.
   // This prevents PageGuard from immediately showing "Access Denied" before the role arrives.

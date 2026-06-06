@@ -42,10 +42,10 @@ export function useFuelTable(args: {
     const data = filteredDaily.map(r => ({
       'التاريخ': r.date,
       'اليوم': DAY_NAMES[new Date(r.date + 'T12:00:00').getDay()],
-      'الاسم': r.employee?.name || '',
+      'الاسم': r.employee?.name ?? '',
       'الكيلومترات': r.km_total,
       'تكلفة البنزين (ر.س)': r.fuel_cost,
-      'ملاحظات': r.notes || '',
+      'ملاحظات': r.notes ?? '',
     }));
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();

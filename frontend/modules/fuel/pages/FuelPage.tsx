@@ -232,7 +232,7 @@ function DailyTable({
                   id: row.id,
                   km_total: String(row.km_total),
                   fuel_cost: String(row.fuel_cost),
-                  notes: row.notes || '',
+                  notes: row.notes ?? '',
                 })
               }
               onCancelEdit={() => setEditing(null)}

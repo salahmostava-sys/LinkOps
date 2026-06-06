@@ -271,7 +271,7 @@ const SalarySchemes = ({ embedded = false }: Readonly<SalarySchemesProps>) => {
 
       return {
         schemes: (sData || []) as Scheme[],
-        apps: (aData || []) as AppItem[],
+        apps: (aData || []),
         tiersMap,
         snapshotsMap,
       };
@@ -351,7 +351,7 @@ const SalarySchemes = ({ embedded = false }: Readonly<SalarySchemesProps>) => {
             from: t.from ?? 1,
             to: t.to ?? 500,
             pricePerOrder: t.pricePerOrder ?? 5,
-            tierType: (t.tierType ?? 'total_multiplier') as TierType,
+            tierType: (t.tierType ?? 'total_multiplier'),
             incrementalThreshold: t.incrementalThreshold,
             incrementalPrice: t.incrementalPrice,
           }))
@@ -371,7 +371,7 @@ const SalarySchemes = ({ embedded = false }: Readonly<SalarySchemesProps>) => {
 
   const addTier = () => setFormTiers(prev => [
     ...prev,
-    { from: (prev[prev.length - 1]?.to || 0) + 1, to: (prev[prev.length - 1]?.to || 0) + 500, pricePerOrder: 6, tierType: 'per_order_band' as TierType }
+    { from: (prev[prev.length - 1]?.to || 0) + 1, to: (prev[prev.length - 1]?.to || 0) + 500, pricePerOrder: 6, tierType: 'per_order_band' }
   ]);
   const removeTier = (i: number) => setFormTiers(prev => prev.filter((_, idx) => idx !== i));
   const updateTier = (i: number, field: string, val: number | string) =>
@@ -455,8 +455,8 @@ const SalarySchemes = ({ embedded = false }: Readonly<SalarySchemesProps>) => {
   const handleArchive = async (id: string, currentStatus: string) => {
     const newStatus = currentStatus === 'active' ? 'archived' : 'active';
     try {
-      await salarySchemeService.updateSchemeStatus(id, newStatus as 'active' | 'archived');
-      setSchemes(prev => prev.map(s => s.id === id ? { ...s, status: newStatus as 'active' | 'archived' } : s));
+      await salarySchemeService.updateSchemeStatus(id, newStatus);
+      setSchemes(prev => prev.map(s => s.id === id ? { ...s, status: newStatus } : s));
       toast({ title: 'تم التحديث' });
       await invalidateRelatedQueries();
     } catch (err: unknown) {

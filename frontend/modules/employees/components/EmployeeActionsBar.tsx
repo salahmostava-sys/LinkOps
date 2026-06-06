@@ -106,7 +106,7 @@ export function EmployeeActionsBar({
               <input
                 type="text"
                 placeholder="بحث عن موظف..."
-                value={colFilters.name || ''}
+                value={colFilters.name ?? ''}
                 onChange={e => setColFilter('name', e.target.value)}
                 className="h-9 w-48 rounded-lg border border-border bg-background pe-8 ps-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
               />

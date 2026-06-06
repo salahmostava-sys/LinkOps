@@ -132,7 +132,7 @@ export function ShiftsTabWrapper() {
           ...s,
           date: toShiftDate(raw.date),
         };
-      }) as ShiftRow[]}
+      })}
       employees={shiftEmployees}
       allEmployees={employees}
       apps={apps}

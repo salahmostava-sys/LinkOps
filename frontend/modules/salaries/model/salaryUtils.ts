@@ -39,7 +39,7 @@ const RIDER_JOB_TITLE_KEYWORDS = [
 ];
 
 const normalizeSalaryJobTitle = (value?: string | null) =>
-  String(value || '')
+  String(value ?? '')
     .toLowerCase()
     .normalize('NFKD')
     .replaceAll(/[\u064B-\u065F\u0670]/g, '')

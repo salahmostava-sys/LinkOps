@@ -147,7 +147,7 @@ export function AppWorkTypeSettings({ appId, appName, currentWorkType, onWorkTyp
                       step="0.5"
                       min="0"
                       max="24"
-                      value={hybridRule.min_hours_for_shift || ''}
+                      value={hybridRule.min_hours_for_shift ?? ''}
                       onChange={(e) =>
                         setHybridRule({ ...hybridRule, min_hours_for_shift: Number.parseFloat(e.target.value) })
                       }
@@ -164,7 +164,7 @@ export function AppWorkTypeSettings({ appId, appName, currentWorkType, onWorkTyp
                       type="number"
                       step="0.01"
                       min="0"
-                      value={hybridRule.shift_rate || ''}
+                      value={hybridRule.shift_rate ?? ''}
                       onChange={(e) =>
                         setHybridRule({ ...hybridRule, shift_rate: Number.parseFloat(e.target.value) })
                       }

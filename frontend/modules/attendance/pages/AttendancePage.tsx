@@ -78,7 +78,7 @@ const Attendance = () => {
         'الموظف': r.employee_name || '—',
         'التاريخ': r.date,
         'الحالة': r.status,
-        'ملاحظات': r.notes || '',
+        'ملاحظات': r.notes ?? '',
       }));
 
       const XLSX = await loadXlsx();
@@ -111,7 +111,7 @@ const Attendance = () => {
       const XLSX = await loadXlsx();
       const workbook = XLSX.read(data, { type: 'array' });
       const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      const json = XLSX.utils.sheet_to_json(sheet, { header: 1 }) as string[][];
+      const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
       const rows = json.slice(1).filter((row: string[]) => row[0] && row[1]);
       if (rows.length === 0) {

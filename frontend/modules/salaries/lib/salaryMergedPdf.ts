@@ -100,7 +100,7 @@ export function buildMergedSalaryPageHtml({
   const statusLabel = { pending: 'معلّق', approved: 'معتمد', paid: 'مصروف' }[row.status];
   const paymentMethodLabel = row.paymentMethod === 'bank' ? '🏦 تحويل بنكي' : '💵 نقدي';
   const ibanLine = row.paymentMethod === 'bank' && row.hasIban
-    ? escapeHtml(row.bankAccount || '')
+    ? escapeHtml(row.bankAccount ?? '')
     : (row.paymentMethod === 'bank' ? '—' : 'لا يُصرف تحويلاً');
   const transferRows =
     row.transfer > 0

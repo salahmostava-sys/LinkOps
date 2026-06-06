@@ -10,7 +10,7 @@ vi.mock('@services/maintenanceService', () => ({
 
 const mockGate = vi.hoisted(() => ({
   enabled: true,
-  userId: 'test-user-id' as string | null,
+  userId: 'test-user-id',
 }));
 
 vi.mock('@shared/hooks/useAuthQueryGate', () => ({

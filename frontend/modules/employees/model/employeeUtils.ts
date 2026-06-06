@@ -136,8 +136,8 @@ function matchesColumnFilter(employee: Employee, key: string, filterValue: strin
   const predicates: Record<string, () => boolean> = {
     name: () => matchesText(employee.name, filterValue),
     name_en: () => matchesText(employee.name_en, filterValue),
-    national_id: () => (employee.national_id || '').includes(filterValue),
-    phone: () => (employee.phone || '').includes(filterValue),
+    national_id: () => (employee.national_id ?? '').includes(filterValue),
+    phone: () => (employee.phone ?? '').includes(filterValue),
     job_title: () => matchesText(employee.job_title, filterValue),
     city: () => matchesEmployeeCities(employee, filterValue),
     nationality: () => matchesText(employee.nationality, filterValue),
@@ -154,7 +154,7 @@ function matchesColumnFilter(employee: Employee, key: string, filterValue: strin
     health_insurance_expiry: () => matchesDate(employee.health_insurance_expiry, filterValue),
     license_expiry: () => matchesDate(employee.license_expiry, filterValue),
     email: () => matchesText(employee.email, filterValue),
-    bank_account_number: () => (employee.bank_account_number || '').includes(filterValue),
+    bank_account_number: () => (employee.bank_account_number ?? '').includes(filterValue),
   };
   const predicate = predicates[key];
   if (!predicate) return true;

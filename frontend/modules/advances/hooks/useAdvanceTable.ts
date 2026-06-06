@@ -89,7 +89,7 @@ export function useAdvanceTable(
       }
       const entry = map.get(empId);
       if (!entry) return;
-      const disb = adv.disbursement_date || '';
+      const disb = adv.disbursement_date ?? '';
       if (disb && disb > entry.latestDisbursementDate) entry.latestDisbursementDate = disb;
       entry.totalDebt += adv.amount;
       entry.totalPaid += paid;
@@ -174,8 +174,8 @@ export function useAdvanceTable(
         const installments = monthly > 0 ? Math.ceil(amount / monthly) : 1;
         await advanceService.create({
           employee_id: emp.id, amount, monthly_amount: monthly, total_installments: installments,
-          disbursement_date: String(row.disbursement_date || '') || format(new Date(), 'yyyy-MM-dd'),
-          first_deduction_month: String(row.first_deduction_month || '') || format(new Date(), 'yyyy-MM'),
+          disbursement_date: String(row.disbursement_date ?? '') || format(new Date(), 'yyyy-MM-dd'),
+          first_deduction_month: String(row.first_deduction_month ?? '') || format(new Date(), 'yyyy-MM'),
           status: 'active',
         });
         success++;
@@ -192,13 +192,13 @@ export function useAdvanceTable(
     const exportedAdvances = advances.filter((adv) => filteredEmployeeIds.has(adv.employee_id));
     const headerRow = ADVANCE_IO_COLUMNS.map((c) => c.label);
     const rows = exportedAdvances.map((adv) => {
-      const employeeName = adv.employees?.name || '';
+      const employeeName = adv.employees?.name ?? '';
       return [
         employeeName,
         adv.amount,
         adv.monthly_amount,
-        adv.disbursement_date || '',
-        adv.first_deduction_month || '',
+        adv.disbursement_date ?? '',
+        adv.first_deduction_month ?? '',
       ];
     });
     const ws = XLSX.utils.aoa_to_sheet([headerRow, ...rows]);

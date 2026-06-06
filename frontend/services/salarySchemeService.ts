@@ -48,7 +48,7 @@ export const salarySchemeService = {
   createScheme: async (payload: SchemePayload) => {
     const { data, error } = await supabase.from('salary_schemes').insert(payload).select('id').single();
     if (error) throw toServiceError(error, 'salarySchemeService.createScheme');
-    return data as { id: string };
+    return data;
   },
 
   deleteSchemeTiers: async (schemeId: string) => {

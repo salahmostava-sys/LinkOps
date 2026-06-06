@@ -163,7 +163,7 @@ const renderDailyExpandedContent = ({
                     </>
                   ) : (
                     <>
-                      <button aria-label="تعديل" type="button" className="p-1 rounded hover:bg-muted" onClick={() => setEditingDaily({ id: dr.id, km_total: String(dr.km_total), fuel_cost: String(dr.fuel_cost), notes: dr.notes || '' })}><Edit2 size={13} /></button>
+                      <button aria-label="تعديل" type="button" className="p-1 rounded hover:bg-muted" onClick={() => setEditingDaily({ id: dr.id, km_total: String(dr.km_total), fuel_cost: String(dr.fuel_cost), notes: dr.notes ?? '' })}><Edit2 size={13} /></button>
                       <button aria-label="حذف" type="button" className="p-1 rounded hover:bg-destructive/10 text-destructive" onClick={() => handleDeleteDaily(dr.id)}><Trash2 size={13} /></button>
                     </>
                   )}

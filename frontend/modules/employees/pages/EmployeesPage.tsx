@@ -130,7 +130,7 @@ const Employees = () => {
     const showHidden = colFilters.status === 'ended' ||
       colFilters.sponsorship_status === 'absconded' ||
       colFilters.sponsorship_status === 'terminated';
-    const source = showHidden ? (allEmployeesData as Employee[]) : (employeesData as Employee[]);
+    const source = showHidden ? (allEmployeesData) : (employeesData);
     setData(source ?? []);
   }, [employeesData, allEmployeesData, colFilters.status, colFilters.sponsorship_status]);
 
@@ -218,7 +218,7 @@ const Employees = () => {
   // ── Clear selectedEmployee if no longer visible in current month ──
   // (moved out of render body into an effect to avoid setState during render)
   const selectedEmp = selectedEmployee
-    ? ((employeesData as Employee[]).find(e => e.id === selectedEmployee) ?? data.find(e => e.id === selectedEmployee))
+    ? ((employeesData).find(e => e.id === selectedEmployee) ?? data.find(e => e.id === selectedEmployee))
     : undefined;
   const selectedEmpVisible = selectedEmp
     ? isEmployeeVisibleInMonth(selectedEmp, activeEmployeeIdsInMonth)
@@ -235,7 +235,7 @@ const Employees = () => {
     return (
       <Suspense fallback={<InlineLoader minHeightClassName="min-h-[420px]" />}>
         <EmployeeProfile
-          employee={selectedEmp as EmployeeProfileProps['employee']}
+          employee={selectedEmp}
           onBack={() => setSelectedEmployee(null)}
         />
       </Suspense>
@@ -299,7 +299,7 @@ const Employees = () => {
 
       {/* ── KPI tab ── */}
       {activeTab === 'kpi' && (
-        <EmployeeKPIs allEmployees={allEmployeesData as Employee[]} />
+        <EmployeeKPIs allEmployees={allEmployeesData} />
       )}
 
       {/* ── Table tab ── */}

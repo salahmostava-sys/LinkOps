@@ -51,8 +51,8 @@ export function useMonthSummaryTab() {
         orderService.getActiveApps(),
       ]);
       return {
-        employees: (employees || []) as Employee[],
-        apps: (apps || []) as App[],
+        employees: (employees || []),
+        apps: (apps || []),
       };
     },
     select: (base) => ({
@@ -73,7 +73,7 @@ export function useMonthSummaryTab() {
         orderService.getMonthLockStatus(my),
       ]);
       return {
-        targets: (targetsRows || []) as AppTargetRow[],
+        targets: (targetsRows || []),
         locked: lockRes.locked,
       };
     },
@@ -92,7 +92,7 @@ export function useMonthSummaryTab() {
     enabled,
     queryFn: async () => {
       const rows = await orderService.getMonthRaw(year, month);
-      return (rows || []) as OrderRawRow[];
+      return (rows || []);
     },
     select: (rows) => buildDailyDataMap(rows),
     retry: defaultQueryRetry,
@@ -112,7 +112,7 @@ export function useMonthSummaryTab() {
   const apps = useMemo<App[]>(() => summaryBaseData?.apps ?? [], [summaryBaseData]);
   const orderAppIds = useMemo(() => new Set(apps.map((app) => app.id)), [apps]);
   const filteredMonthData = useMemo(
-    () => filterDailyDataByAppIds(summaryMonthRawData as DailyData, orderAppIds),
+    () => filterDailyDataByAppIds(summaryMonthRawData, orderAppIds),
     [orderAppIds, summaryMonthRawData],
   );
 

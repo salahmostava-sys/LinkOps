@@ -20,6 +20,6 @@ export const documentService = {
       .eq('status', 'active')
       .order('name');
     if (error) handleSupabaseError(error, 'documentService.getActiveEmployeeDocs');
-    return (data ?? []) as EmployeeDoc[];
+    return (data ?? []);
   },
 };

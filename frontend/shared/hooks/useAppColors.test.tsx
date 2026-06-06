@@ -10,8 +10,8 @@ vi.mock('@services/appService', () => ({
 }));
 
 const mockAuth = vi.hoisted(() => ({
-  user: { id: 'u1' } as { id: string } | null,
-  session: { access_token: 'tok' } as { access_token: string } | null,
+  user: { id: 'u1' },
+  session: { access_token: 'tok' },
 }));
 
 const useQueryErrorToastMock = vi.hoisted(() => vi.fn());

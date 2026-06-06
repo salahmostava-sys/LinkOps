@@ -28,7 +28,7 @@ describe('auditService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     for (const k of Object.keys(tableResults)) delete tableResults[k];
-    getCurrentUser.mockResolvedValue({ id: 'user-1' } as User);
+    getCurrentUser.mockResolvedValue({ id: 'user-1' });
   });
 
   it('logAdminAction succeeds when insert succeeds', async () => {

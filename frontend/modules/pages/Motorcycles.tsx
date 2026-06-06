@@ -420,7 +420,7 @@ const Motorcycles = () => {
 
   const filtered = data.filter(v => {
     const q = search.toLowerCase();
-    const matchSearch = !q || v.plate_number.toLowerCase().includes(q) || (v.brand || '').toLowerCase().includes(q) || (v.model || '').toLowerCase().includes(q);
+    const matchSearch = !q || v.plate_number.toLowerCase().includes(q) || (v.brand ?? '').toLowerCase().includes(q) || (v.model ?? '').toLowerCase().includes(q);
     const matchStatus = statusFilter === 'all' || v.status === statusFilter;
     const matchType = typeFilter === 'all' || v.type === typeFilter;
     return matchSearch && matchStatus && matchType;
@@ -436,21 +436,21 @@ const Motorcycles = () => {
 
   const exportCell = (v: Vehicle, key: (typeof MOTORCYCLE_IO_COLUMNS)[number]['key']): string | number => {
     switch (key) {
-      case 'current_rider': return v.current_rider || '';
+      case 'current_rider': return v.current_rider ?? '';
       case 'type': return typeLabels[v.type] ?? v.type;
       case 'status': return statusLabels[v.status] ?? v.status;
       case 'has_fuel_chip': return v.has_fuel_chip ? 'نعم' : 'لا';
       case 'plate_number': return v.plate_number;
-      case 'plate_number_en': return v.plate_number_en || '';
-      case 'brand': return v.brand || '';
-      case 'model': return v.model || '';
+      case 'plate_number_en': return v.plate_number_en ?? '';
+      case 'brand': return v.brand ?? '';
+      case 'model': return v.model ?? '';
       case 'year': return v.year ?? '';
-      case 'serial_number': return v.serial_number || '';
-      case 'chassis_number': return v.chassis_number || '';
-      case 'notes': return v.notes || '';
-      case 'insurance_expiry': return v.insurance_expiry || '';
-      case 'registration_expiry': return v.registration_expiry || '';
-      case 'authorization_expiry': return v.authorization_expiry || '';
+      case 'serial_number': return v.serial_number ?? '';
+      case 'chassis_number': return v.chassis_number ?? '';
+      case 'notes': return v.notes ?? '';
+      case 'insurance_expiry': return v.insurance_expiry ?? '';
+      case 'registration_expiry': return v.registration_expiry ?? '';
+      case 'authorization_expiry': return v.authorization_expiry ?? '';
       default: return '';
     }
   };

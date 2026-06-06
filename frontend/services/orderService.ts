@@ -275,7 +275,7 @@ export const orderService = {
     const { data, error, count } = await query;
     if (error) throw toServiceError(error, 'orderService.getMonthPaged');
     return createPagedResult({
-      rows: (data || []) as unknown[],
+      rows: (data || []),
       total: count,
       page,
       pageSize,

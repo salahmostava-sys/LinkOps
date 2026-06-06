@@ -125,7 +125,7 @@ export function OrdersImportHistorySummary(props: Readonly<OrdersImportHistorySu
                   </div>
                   <ul className="space-y-1">
                     {batch.error_summary.map((err) => (
-                      <li key={`${err.row}-${err.reason}-${err.details || ''}`} className="text-[11px] text-rose-600">
+                      <li key={`${err.row}-${err.reason}-${err.details ?? ''}`} className="text-[11px] text-rose-600">
                         {err.row ? `الصف ${err.row}: ` : ''}{err.reason}
                         {err.details ? ` (${err.details})` : ''}
                       </li>

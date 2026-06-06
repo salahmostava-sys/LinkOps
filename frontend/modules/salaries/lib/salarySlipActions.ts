@@ -64,7 +64,9 @@ export function printSlipHTML(html: string): void {
         // Fallback: open in new window
         const win = globalThis.open('', '_blank');
         if (win) {
-          win.document.write(html);
+          const parser = new DOMParser();
+          const newDoc = parser.parseFromString(html, 'text/html');
+          win.document.replaceChild(win.document.adoptNode(newDoc.documentElement), win.document.documentElement);
           win.document.close();
           win.print();
         }
@@ -96,7 +98,9 @@ export function exportSlipPDF(html: string, filename: string): void {
     return;
   }
 
-  printWindow.document.write(html);
+  const parser = new DOMParser();
+  const newDoc = parser.parseFromString(html, 'text/html');
+  printWindow.document.replaceChild(printWindow.document.adoptNode(newDoc.documentElement), printWindow.document.documentElement);
   printWindow.document.close();
   printWindow.document.title = filename.replaceAll('.pdf', '');
 

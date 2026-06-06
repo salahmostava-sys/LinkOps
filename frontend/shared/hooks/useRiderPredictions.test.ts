@@ -6,7 +6,7 @@ import { createQueryBuilder, type MockQueryResult } from '@shared/test/mocks/sup
 
 const mockGate = vi.hoisted(() => ({
   enabled: true,
-  userId: 'u1' as string | null,
+  userId: 'u1',
   authLoading: false,
 }));
 

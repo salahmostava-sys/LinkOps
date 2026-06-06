@@ -50,7 +50,7 @@ describe('useEmployees', () => {
 
   it('returns empty list when service returns no rows', async () => {
     vi.mocked(employeeService.getAll).mockResolvedValue(
-      [] as unknown as Awaited<ReturnType<typeof employeeService.getAll>>,
+      [],
     );
 
     const { result } = renderHook(() => useEmployees(), { wrapper: createQueryClientWrapper({ queries: { retryDelay: 1 } }) });

@@ -90,7 +90,7 @@ const AppLayoutInner = ({ children }: Readonly<AppLayoutProps>) => { // NOSONAR:
   }, [user?.id]);
 
   const Sep = isRTL ? ChevronLeft : ChevronRight;
-  const displayEmail = user?.email || '';
+  const displayEmail = user?.email ?? '';
   const displayName = profileName || displayEmail.split('@')[0];
   const initials = displayName.charAt(0).toUpperCase();
   const roleLabel = role ? roleLabelsMap[role] || role : '';

@@ -101,7 +101,7 @@ const toSlipTranslations = (values: readonly string[]): SlipTranslations => {
   SLIP_KEYS.forEach((key, idx) => {
     out[key] = values[idx];
   });
-  return out as SlipTranslations;
+  return out;
 };
 
 const translations: Record<SlipLanguage, SlipTranslations> = {

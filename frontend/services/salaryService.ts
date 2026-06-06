@@ -530,7 +530,7 @@ export const salaryService = {
         .select(primarySelect)
         .eq('month_year', monthYear)
         .range(0, 0); // just 1 row to test column existence
-      if (error && String(error.message || '').includes('sheet_snapshot')) {
+      if (error && String(error.message ?? '').includes('sheet_snapshot')) {
         useFallback = true;
       } else if (error) {
         handleSupabaseError(error, 'salaryService.getMonthRecordsForSalaryContext');
@@ -586,7 +586,7 @@ export const salaryService = {
     // If the sheet_snapshot column doesn't exist (migration pending),
     // fail loudly instead of silently dropping data.
     // The migration should be run before deploying code that uses this column.
-    if (error && String(error.message || '').includes('sheet_snapshot')) {
+    if (error && String(error.message ?? '').includes('sheet_snapshot')) {
       logError(
         '[salaryService.upsertMany] CRITICAL: sheet_snapshot column missing from salary_records. ' +
         'Run the pending DB migration before using this feature.',

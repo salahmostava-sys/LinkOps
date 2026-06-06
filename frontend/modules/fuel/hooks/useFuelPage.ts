@@ -115,15 +115,15 @@ export function useFuelPage() { // NOSONAR: page data layer with many independen
         fuelApi.getActiveEmployeeAppLinks(),
         fuelApi.getActiveVehicleAssignments(),
       ]);
-      const vehicleMap = buildVehicleMap((assignmentRows || []) as VehicleAssignmentRow[]);
+      const vehicleMap = buildVehicleMap((assignmentRows || []));
       const employeesWithVehicles = (empRows || []).map((emp: Employee) => ({
         ...emp,
         vehicle: vehicleMap[emp.id] || null,
       }));
       return {
-        employees: employeesWithVehicles as Employee[],
-        apps: (appRows || []) as AppRow[],
-        links: (linkRows || []) as { employee_id: string; app_id: string }[],
+        employees: employeesWithVehicles,
+        apps: (appRows || []),
+        links: (linkRows || []),
       };
     },
     retry: defaultQueryRetry,
@@ -153,7 +153,7 @@ export function useFuelPage() { // NOSONAR: page data layer with many independen
       const ms = `${monthYear}-01`;
       const me = format(endOfMonth(new Date(`${monthYear}-01`)), 'yyyy-MM-dd');
       const rows = await fuelApi.getMonthlyOrders(ms, me);
-      return (rows || []) as { employee_id: string; orders_count: number }[];
+      return (rows || []);
     },
     retry: defaultQueryRetry,
     staleTime: 30_000,
@@ -200,9 +200,9 @@ export function useFuelPage() { // NOSONAR: page data layer with many independen
         fuelApi.getMonthlyOrders(ms, me),
         fuelApi.getActiveVehicleAssignments(),
       ]);
-      const ordersMap = buildOrdersMap((orderRows || []) as MonthlyOrderRow[]);
-      const vehicleMap = buildVehicleMap((assignmentRows || []) as VehicleAssignmentRow[]);
-      const aggMap = buildMonthlyAggMap((dailyRowsRaw || []) as DailyMileageAggSource[], employeeIdsOnPlatform);
+      const ordersMap = buildOrdersMap((orderRows || []));
+      const vehicleMap = buildVehicleMap((assignmentRows || []));
+      const aggMap = buildMonthlyAggMap((dailyRowsRaw || []), employeeIdsOnPlatform);
       return buildMonthlyRows(aggMap, ordersMap, vehicleMap, employees);
     },
     retry: defaultQueryRetry,
@@ -221,7 +221,7 @@ export function useFuelPage() { // NOSONAR: page data layer with many independen
       const ms = `${monthYear}-01`;
       const me = format(endOfMonth(new Date(`${monthYear}-01`)), 'yyyy-MM-dd');
       const dailyData = await fuelApi.getDailyMileageByMonth(ms, me);
-      const mappedRows = mapDailyRows((dailyData || []) as DailyMileageResponseRow[]);
+      const mappedRows = mapDailyRows((dailyData || []));
       return applyDailyFilters(mappedRows, selectedEmployee, employeeIdsOnPlatform);
     },
     retry: defaultQueryRetry,

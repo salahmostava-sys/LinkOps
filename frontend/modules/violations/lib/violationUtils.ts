@@ -75,14 +75,14 @@ export function getViolationSortValue(
     case 'amount':
       return row.amount || 0;
     case 'incident_date':
-      return row.incident_date || '';
+      return row.incident_date ?? '';
     case 'status':
-      return row.status || '';
+      return row.status ?? '';
     case 'violation_details':
-      return row.violation_details || '';
+      return row.violation_details ?? '';
     case 'advance_status':
       return isConverted(row) ? 1 : 0;
     default:
-      return row.employee_name || '';
+      return row.employee_name ?? '';
   }
 }

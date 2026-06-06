@@ -132,8 +132,8 @@ function tierRowsMatchFilters(
   statusFilter: string,
   empMap: Record<string, Employee>,
 ): boolean {
-  const name = empMap[tier.employee_id]?.name || '';
-  const matchSearch = !search || (tier.sim_number || '').includes(search) || name.includes(search);
+  const name = empMap[tier.employee_id]?.name ?? '';
+  const matchSearch = !search || (tier.sim_number ?? '').includes(search) || name.includes(search);
   const matchStatus = statusFilter === 'all' || tier.delivery_status === statusFilter;
   return matchSearch && matchStatus;
 }
@@ -146,10 +146,10 @@ function compareTierRowsForSort(
   empMap: Record<string, Employee>,
 ): number {
   const va = sortField === 'employee_name'
-    ? (empMap[a.employee_id]?.name || '')
+    ? (empMap[a.employee_id]?.name ?? '')
     : toSafeText(getTierFieldValue(a, sortField));
   const vb = sortField === 'employee_name'
-    ? (empMap[b.employee_id]?.name || '')
+    ? (empMap[b.employee_id]?.name ?? '')
     : toSafeText(getTierFieldValue(b, sortField));
   if (va < vb) return sortDir === 'asc' ? -1 : 1;
   if (va > vb) return sortDir === 'asc' ? 1 : -1;
@@ -311,8 +311,8 @@ const EmployeeTiers = () => {
       ]);
 
       return {
-        employees: (employeeRows || []) as Employee[],
-        apps: (appsRows || []) as AppRow[],
+        employees: (employeeRows || []),
+        apps: (appsRows || []),
         tiers: ((tiersRows || []) as TierRow[]).map((t) => ({
           ...t,
           app_ids: Array.isArray(t.app_ids) ? t.app_ids : (t.app_ids ? JSON.parse(t.app_ids) : []),
@@ -463,7 +463,7 @@ const EmployeeTiers = () => {
       await employeeTierService.createTier({
         sim_number: newRow.sim_number || null,
         employee_id: newRow.employee_id,
-        package_type: newRow.package_type || '',
+        package_type: newRow.package_type ?? '',
         renewal_date: newRow.renewal_date || new Date().toISOString().slice(0, 10),
         delivery_status: newRow.delivery_status || STATUS_DELIVERED,
         app_ids: newRow.app_ids || [],
@@ -581,8 +581,8 @@ const EmployeeTiers = () => {
       const rows = filtered.map((t) => {
         const platformLabel = apps.filter((a) => t.app_ids.includes(a.id)).map((a) => a.name).join('، ');
         return [
-          t.sim_number || '',
-          empMap[t.employee_id]?.name || '',
+          t.sim_number ?? '',
+          empMap[t.employee_id]?.name ?? '',
           t.package_type,
           t.renewal_date,
           statusLabel(t.delivery_status),
@@ -814,7 +814,7 @@ const EmployeeTiers = () => {
                     {/* sim_number */}
                     <td className="px-2 py-2 min-w-0 align-top">
                       <Input
-                        value={newRow.sim_number || ''}
+                        value={newRow.sim_number ?? ''}
                         onChange={e => setNewRow(p => ({ ...p, sim_number: e.target.value }))}
                         placeholder="رقم الشريحة"
                         className="h-8 text-xs w-full min-w-0"
@@ -824,13 +824,13 @@ const EmployeeTiers = () => {
                     {/* employee */}
                     <td className="px-2 py-2 min-w-0 align-top">
                       <div className="w-full min-w-0">
-                        <EmployeeSelect employees={employees} value={newRow.employee_id || ''} onChange={id => setNewRow(p => ({ ...p, employee_id: id }))} />
+                        <EmployeeSelect employees={employees} value={newRow.employee_id ?? ''} onChange={id => setNewRow(p => ({ ...p, employee_id: id }))} />
                       </div>
                     </td>
                     {/* package */}
                     <td className="px-2 py-2 min-w-0 align-top">
                       <Input
-                        value={newRow.package_type || ''}
+                        value={newRow.package_type ?? ''}
                         onChange={e => setNewRow(p => ({ ...p, package_type: e.target.value }))}
                         placeholder="نوع الباقة"
                         className="h-8 text-xs w-full min-w-0"
@@ -886,7 +886,7 @@ const EmployeeTiers = () => {
                         {/* sim_number */}
                         <td className="px-2 py-2 min-w-0 align-top">
                           <Input
-                            value={row.sim_number || ''}
+                            value={row.sim_number ?? ''}
                             onChange={e => patchRow(tier.id, { sim_number: e.target.value })}
                             className="h-8 text-xs w-full min-w-0 font-mono"
                             dir="ltr"
@@ -912,7 +912,7 @@ const EmployeeTiers = () => {
                         {/* package_type */}
                         <td className="px-2 py-2 min-w-0 align-top">
                           <Input
-                            value={row.package_type || ''}
+                            value={row.package_type ?? ''}
                             onChange={e => patchRow(tier.id, { package_type: e.target.value })}
                             className="h-8 text-xs w-full min-w-0"
                             placeholder="نوع الباقة"

@@ -43,7 +43,7 @@ describe('authService admin user management', () => {
     fetchMock.mockResolvedValue({
       ok: true,
       json: () => Promise.resolve({ user_id: 'user-99' }),
-    } as Response);
+    });
 
     const result = await authService.createManagedUser({
       name: 'Test User',
@@ -71,7 +71,7 @@ describe('authService admin user management', () => {
     fetchMock.mockResolvedValue({
       ok: true,
       json: () => ({ success: true }),
-    } as Response);
+    });
 
     await expect(
       authService.createManagedUser({
@@ -87,7 +87,7 @@ describe('authService admin user management', () => {
     fetchMock.mockResolvedValue({
       ok: true,
       json: () => Promise.resolve({ success: true }),
-    } as Response);
+    });
 
     await authService.deleteManagedUser('user-7');
 

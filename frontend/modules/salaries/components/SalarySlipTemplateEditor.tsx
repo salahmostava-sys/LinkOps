@@ -155,7 +155,7 @@ export function SalarySlipTemplateEditor() {
 
   const getSelectedColumns = useCallback((): string[] => {
     const cols = currentTemplate.selected_columns;
-    if (Array.isArray(cols)) return cols as string[];
+    if (Array.isArray(cols)) return cols;
     return [];
   }, [currentTemplate.selected_columns]);
 
@@ -324,7 +324,7 @@ export function SalarySlipTemplateEditor() {
                   <CardDescription className="text-xs mb-1">اترك فارغاً لاستخدام الهيدر الافتراضي</CardDescription>
                   <Textarea
                     id="header_html"
-                    value={currentTemplate.header_html || ''}
+                    value={currentTemplate.header_html ?? ''}
                     onChange={e => setCurrentTemplate({ ...currentTemplate, header_html: e.target.value })}
                     placeholder="<div class='header'>...</div>"
                     className="font-mono text-xs min-h-[250px] bg-slate-950 text-emerald-400 border-slate-800"
@@ -336,7 +336,7 @@ export function SalarySlipTemplateEditor() {
                   <CardDescription className="text-xs mb-1">اترك فارغاً لاستخدام الفوتر الافتراضي</CardDescription>
                   <Textarea
                     id="footer_html"
-                    value={currentTemplate.footer_html || ''}
+                    value={currentTemplate.footer_html ?? ''}
                     onChange={e => setCurrentTemplate({ ...currentTemplate, footer_html: e.target.value })}
                     placeholder="<div class='footer'>...</div>"
                     className="font-mono text-xs min-h-[250px] bg-slate-950 text-amber-400 border-slate-800"

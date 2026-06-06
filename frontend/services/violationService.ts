@@ -58,7 +58,7 @@ export const violationService = {
   createFineDeduction: async (payload: Record<string, unknown>) => {
     const { data, error } = await supabase.from('external_deductions').insert(payload as unknown as TablesInsert<'external_deductions'>).select('id').single();
     if (error) throw toServiceError(error, 'violationService.createFineDeduction');
-    return data as { id: string };
+    return data;
   },
 
   updateViolation: async (id: string, payload: Record<string, unknown>) => {
@@ -88,7 +88,7 @@ export const violationService = {
   createAdvanceFromFine: async (payload: Record<string, unknown>) => {
     const { data, error } = await supabase.from('advances').insert(payload as unknown as TablesInsert<'advances'>).select('id').single();
     if (error) throw toServiceError(error, 'violationService.createAdvanceFromFine');
-    return data as { id: string };
+    return data;
   },
 
   createSingleInstallment: async (payload: Record<string, unknown>) => {

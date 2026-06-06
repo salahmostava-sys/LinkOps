@@ -294,7 +294,7 @@ export function useSpreadsheetGrid() {
       });
       // Force reload data from DB to ensure grid matches actual saved state
       const freshRows = await orderService.getMonthRaw(year, month);
-      const freshData = buildDailyDataMap(freshRows as OrderRawRow[]);
+      const freshData = buildDailyDataMap(freshRows);
       setData(freshData);
     }
     setPendingImportFile(null);

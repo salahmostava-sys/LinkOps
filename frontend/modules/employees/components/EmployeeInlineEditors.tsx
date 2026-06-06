@@ -25,7 +25,7 @@ const InlineEditTrigger = forwardRef<HTMLButtonElement, Readonly<{
         event.stopPropagation();
         onClick?.(event);
       }}
-      {...(rest as React.ButtonHTMLAttributes<HTMLButtonElement>)}
+      {...(rest)}
     >
       <div className="min-w-0 flex-1 flex items-center justify-center pointer-events-none">{children}</div>
       {saving ? (

@@ -89,7 +89,7 @@ export const ImportModal = ({
     setSaving(true);
     try {
       const payload = toSave.map(r => ({
-        employee_id: r.manual_employee_id || r.matched_employee?.id || '',
+        employee_id: r.manual_employee_id || r.matched_employee?.id ?? '',
         month_year: monthYear,
         km_total: r.km_total,
         fuel_cost: r.fuel_cost,
@@ -196,7 +196,7 @@ export const ImportModal = ({
                               <span className="text-success text-xs flex items-center gap-1"><Check size={11} /> {emp?.name}</span>
                             ) : (
                               <Select
-                                value={row.manual_employee_id || ''}
+                                value={row.manual_employee_id ?? ''}
                                 onValueChange={(v) => handleManualEmployeeSelect(row.row_key, v)}
                               >
                                 <SelectTrigger className="h-7 text-xs border-warning/50"><SelectValue placeholder="اختر يدوياً..." /></SelectTrigger>

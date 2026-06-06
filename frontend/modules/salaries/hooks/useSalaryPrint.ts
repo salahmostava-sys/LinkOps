@@ -78,7 +78,9 @@ export function useSalaryPrint(params: UseSalaryPrintParams) {
 
     const win = globalThis.open('', '_blank', 'width=1100,height=800');
     if (win) {
-      win.document.write(html);
+      const parser = new DOMParser();
+      const newDoc = parser.parseFromString(html, 'text/html');
+      win.document.replaceChild(win.document.adoptNode(newDoc.documentElement), win.document.documentElement);
       win.document.close();
       win.focus();
       setTimeout(() => { win.print(); }, 500);
@@ -115,7 +117,9 @@ export function useSalaryPrint(params: UseSalaryPrintParams) {
 
     const win = globalThis.open('', '_blank');
     if (win) {
-      win.document.write(mergedHtml);
+      const parser = new DOMParser();
+      const newDoc = parser.parseFromString(mergedHtml, 'text/html');
+      win.document.replaceChild(win.document.adoptNode(newDoc.documentElement), win.document.documentElement);
       win.document.close();
       win.focus();
       setTimeout(() => win.print(), 500);

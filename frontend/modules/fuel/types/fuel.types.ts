@@ -89,7 +89,7 @@ export const buildMonthlyAggMap = (
     if (employeeIdsOnPlatform && !employeeIdsOnPlatform.has(row.employee_id)) return;
     const emp = row.employees;
     if (!aggMap[row.employee_id]) {
-      aggMap[row.employee_id] = { km: 0, fuel: 0, count: 0, name: emp?.name || '', photo: emp?.personal_photo_url };
+      aggMap[row.employee_id] = { km: 0, fuel: 0, count: 0, name: emp?.name ?? '', photo: emp?.personal_photo_url };
     }
     aggMap[row.employee_id].km += Number(row.km_total) || 0;
     aggMap[row.employee_id].fuel += Number(row.fuel_cost) || 0;

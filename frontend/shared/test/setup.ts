@@ -128,7 +128,7 @@ if (!globalThis.matchMedia) {
     addEventListener: () => {},
     removeEventListener: () => {},
     dispatchEvent: () => false,
-  })) as typeof globalThis.matchMedia;
+  }));
 }
 
 if (!globalThis.URL.createObjectURL) {

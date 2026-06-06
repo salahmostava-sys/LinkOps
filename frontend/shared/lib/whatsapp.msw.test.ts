@@ -32,7 +32,7 @@ describe('sendWhatsAppMessage (MSW)', () => {
     server.use(
       http.post(`${API_BASE}/12345/messages`, async ({ request }) => {
         const body = (await request.json()) as { to?: string };
-        sentTo = body.to || '';
+        sentTo = body.to ?? '';
         return HttpResponse.json({ success: true }, { status: 200 });
       })
     );

@@ -34,7 +34,7 @@ export const SALARY_IMPORT_TEMPLATE_HEADERS = SALARY_IO_COLUMNS.map((c) => c.lab
 
 const HEADER_LABEL_TO_KEY: Record<string, SalaryIoKey> = Object.fromEntries(
   SALARY_IO_COLUMNS.map((c) => [c.label, c.key])
-) as Record<string, SalaryIoKey>;
+);
 
 type SalaryImportMapped = Partial<SalaryIoRecord>;
 const NUMERIC_KEYS = new Set<keyof SalaryImportMapped>([

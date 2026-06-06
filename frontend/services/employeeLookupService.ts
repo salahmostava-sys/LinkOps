@@ -18,5 +18,5 @@ export async function getActiveEmployeesWithJobTitle(): Promise<ActiveEmployeeWi
     .eq('status', 'active')
     .order('name');
   if (error) handleSupabaseError(error, 'getActiveEmployeesWithJobTitle');
-  return (data ?? []) as ActiveEmployeeWithJobTitle[];
+  return (data ?? []);
 }

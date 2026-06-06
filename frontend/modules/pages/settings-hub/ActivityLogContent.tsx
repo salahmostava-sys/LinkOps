@@ -274,11 +274,11 @@ export default function ActivityLogContent() {
       if (!data.length) return;
       const rows = data.map(l => ({
         'التاريخ':         format(new Date(l.created_at), 'yyyy-MM-dd HH:mm:ss'),
-        'اسم المستخدم':   l.user_name || '',
-        'البريد الإلكتروني': l.user_email || '',
+        'اسم المستخدم':   l.user_name ?? '',
+        'البريد الإلكتروني': l.user_email ?? '',
         'الوحدة':         tableLabels[l.table_name]?.ar || l.table_name,
         'العملية':        actionLabels[l.action]?.ar || l.action,
-        'معرف السجل':     l.record_id || '',
+        'معرف السجل':     l.record_id ?? '',
       }));
       const XLSX = await loadXlsx();
       const ws = XLSX.utils.json_to_sheet(rows);
@@ -579,7 +579,7 @@ export default function ActivityLogContent() {
                               {resolveUserLabel(log.profile, log.user_id)}
                             </span>
                             <span>قام بـ</span>
-                            <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold border ${actionColors[log.action] || ''}`}>
+                            <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold border ${actionColors[log.action] ?? ''}`}>
                               {getActionLabel(log.action)}
                             </span>
                             <span>في</span>

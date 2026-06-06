@@ -31,7 +31,7 @@ type DbKey =
 
 const HEADER_TO_DB: Record<string, DbKey> = Object.fromEntries(
   EMPLOYEE_IMPORT_COLUMNS.map((c) => [c.label, c.key])
-) as Record<string, DbKey>;
+);
 export const EMPLOYEE_TEMPLATE_AR_HEADERS = EMPLOYEE_IMPORT_COLUMNS.map((column) => column.label) as readonly string[];
 
 function toSafeText(value: unknown): string {

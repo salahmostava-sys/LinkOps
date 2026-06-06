@@ -74,17 +74,14 @@ export const usePlatformAccountsPage = () => {
         ]);
 
       return {
-        appsData: (appsRes ?? []) as PlatformAppOption[],
-        employeeData: (employeeRes ?? []) as PlatformEmployeeOption[],
+        appsData: (appsRes ?? []),
+        employeeData: (employeeRes ?? []),
         enrichedAccounts: buildPlatformAccounts({
-          apps: (appsRes ?? []) as PlatformAppOption[],
-          employees: (employeeRes ?? []) as PlatformEmployeeOption[],
+          apps: (appsRes ?? []),
+          employees: (employeeRes ?? []),
           accounts: (accountsRes ?? []) as PlatformAccountView[],
-          activeAssignments: (activeAssignmentsRes ?? []) as Array<{
-            account_id: string;
-            employee_id: string;
-          }>,
-          monthAssignmentRows: (monthAssignmentsRes ?? []) as Array<{ account_id: string }>,
+          activeAssignments: (activeAssignmentsRes ?? []),
+          monthAssignmentRows: (monthAssignmentsRes ?? []),
         }),
       };
     },

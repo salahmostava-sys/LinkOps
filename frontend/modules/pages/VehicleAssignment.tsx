@@ -279,9 +279,9 @@ const VehicleAssignment = () => {
   // derive from these arrays, and the assignment/return modals use them for display.
   useEffect(() => {
     if (!assignmentData) return;
-    setAssignments(assignmentData.assignments as Assignment[]);
-    setVehicles(assignmentData.vehicles as Vehicle[]);
-    setEmployees(assignmentData.employees as Employee[]);
+    setAssignments(assignmentData.assignments);
+    setVehicles(assignmentData.vehicles);
+    setEmployees(assignmentData.employees);
   }, [assignmentData]);
 
   useEffect(() => {
@@ -315,8 +315,8 @@ const VehicleAssignment = () => {
   const filtered = assignments.filter(a => {
     const q = search.toLowerCase();
     const matchSearch = !q
-      || (a.vehicles?.plate_number || '').toLowerCase().includes(q)
-      || (a.employees?.name || '').toLowerCase().includes(q);
+      || (a.vehicles?.plate_number ?? '').toLowerCase().includes(q)
+      || (a.employees?.name ?? '').toLowerCase().includes(q);
     const isReturned = !!a.returned_at;
     const matchStatus = showActive === 'all' || (showActive === 'active' && !isReturned) || (showActive === 'returned' && isReturned);
     return matchSearch && matchStatus;
@@ -367,14 +367,14 @@ const VehicleAssignment = () => {
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={async () => {
                 const rows = filtered.map(a => ({
-                  'المركبة': a.vehicles?.plate_number || '',
+                  'المركبة': a.vehicles?.plate_number ?? '',
                   'النوع': a.vehicles?.type === 'motorcycle' ? 'موتوسيكل' : 'سيارة',
-                  'المندوب': a.employees?.name || '',
+                  'المندوب': a.employees?.name ?? '',
                   'تاريخ الاستلام': a.start_at ? format(new Date(a.start_at), 'yyyy-MM-dd HH:mm') : '',
                   'تاريخ الإعادة': a.returned_at ? format(new Date(a.returned_at), 'yyyy-MM-dd HH:mm') : '',
                   'الحالة': a.returned_at ? 'تم الإعادة' : 'قيد الاستخدام',
-                  'السبب': a.reason || '',
-                  'ملاحظات': a.notes || '',
+                  'السبب': a.reason ?? '',
+                  'ملاحظات': a.notes ?? '',
                 }));
                 const XLSX = await loadXlsx();
                 const ws = XLSX.utils.json_to_sheet(rows);

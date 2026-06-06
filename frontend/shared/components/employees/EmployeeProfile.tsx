@@ -249,7 +249,7 @@ const EmployeeProfile = ({ employee, onBack }: Readonly<Props>) => {
   const [expandedAdv, setExpandedAdv] = useState<string | null>(null);
   const [expandedMonth, setExpandedMonth] = useState<string | null>(null);
   const [editingNationality, setEditingNationality] = useState(false);
-  const [nationalityValue, setNationalityValue] = useState(employee.nationality || '');
+  const [nationalityValue, setNationalityValue] = useState(employee.nationality ?? '');
   const [savingNationality, setSavingNationality] = useState(false);
 
   // Signed URL for personal photo (used in profile header)
@@ -369,7 +369,7 @@ const EmployeeProfile = ({ employee, onBack }: Readonly<Props>) => {
                       onOpenChange={(open) => {
                         if (!open && !savingNationality) {
                           setEditingNationality(false);
-                          setNationalityValue(employee.nationality || '');
+                          setNationalityValue(employee.nationality ?? '');
                         }
                       }}
                     >
@@ -412,7 +412,7 @@ const EmployeeProfile = ({ employee, onBack }: Readonly<Props>) => {
                     type="button"
                     onClick={() => {
                       setEditingNationality(true);
-                      setNationalityValue(employee.nationality || '');
+                      setNationalityValue(employee.nationality ?? '');
                     }}
                     className="text-sm font-medium text-foreground hover:text-primary transition-colors text-start"
                   >
@@ -430,7 +430,7 @@ const EmployeeProfile = ({ employee, onBack }: Readonly<Props>) => {
                 </div>
               )}
               {(employee.birth_date || employee.dob) && (
-                <InfoField label="تاريخ الميلاد" value={employee.birth_date || employee.dob || ''} />
+                <InfoField label="تاريخ الميلاد" value={employee.birth_date || employee.dob ?? ''} />
               )}
               {(employee.city || employee.cities?.length) && <InfoField label="المدن" value={employeeCitySummary(employee)} />}
               {employee.job_title && <InfoField label="المسمى الوظيفي" value={employee.job_title} />}
@@ -606,7 +606,7 @@ const EmployeeProfile = ({ employee, onBack }: Readonly<Props>) => {
                                   <td className="p-2">{inst.month_year}</td>
                                   <td className="p-2">{inst.amount.toLocaleString('en-US')} ر.س</td>
                                   <td className="p-2">
-                                    <span className={installmentStatusStyle[inst.status] || ''}>
+                                    <span className={installmentStatusStyle[inst.status] ?? ''}>
                                       {installmentStatusLabel[inst.status] || inst.status}
                                     </span>
                                   </td>

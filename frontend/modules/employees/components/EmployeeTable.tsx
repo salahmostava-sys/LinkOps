@@ -844,7 +844,7 @@ function EmployeeDetailedTableInner({
                     onFocusCapture={() => onRowEditStart?.(emp.id)}
                     onBlurCapture={(e) => {
                       // Only fire onRowEditEnd if focus left the row entirely
-                      if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                      if (!e.currentTarget.contains(e.relatedTarget)) {
                         onRowEditEnd?.();
                       }
                     }}

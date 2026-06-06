@@ -33,7 +33,7 @@ export const useAppsData = () => {
             is_active: app.is_active,
             employeeCount: count,
             custom_columns: (app.custom_columns as unknown[]) || [],
-          } as AppWithCount;
+          };
         })
       );
 

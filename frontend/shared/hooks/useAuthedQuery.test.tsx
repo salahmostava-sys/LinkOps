@@ -3,8 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createQueryClientWrapper } from '@shared/test/authedQuerySetup';
 
 const mockAuthState = vi.hoisted(() => ({
-  user: { id: 'u1' } as { id: string } | null,
-  session: { access_token: 'tok' } as { access_token: string } | null,
+  user: { id: 'u1' },
+  session: { access_token: 'tok' },
 }));
 
 const mockGateState = vi.hoisted(() => ({

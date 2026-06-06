@@ -45,7 +45,7 @@ export const useAlerts = () => {
       };
       // Supabase responses are { data, error } — buildAlertsFromResponses reads only .data
       return buildAlertsFromResponses(
-        employeesVisibleRes as { data: EmployeeAlertRow[] | null },
+        employeesVisibleRes,
         vehiclesRes as { data: VehicleExpiryRow[] | null },
         platformAccountsRes as { data: PlatformAccountAlertRow[] | null },
         dbAlertsRes as { data: PersistedAlertRow[] | null },

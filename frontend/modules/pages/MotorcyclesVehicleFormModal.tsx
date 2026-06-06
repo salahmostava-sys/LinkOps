@@ -64,19 +64,19 @@ export function VehicleFormModal({ open, onClose, onSaved, editVehicle }: Readon
 
     setForm({
       plate_number: editVehicle.plate_number,
-      plate_number_en: editVehicle.plate_number_en || '',
+      plate_number_en: editVehicle.plate_number_en ?? '',
       type: editVehicle.type,
-      brand: editVehicle.brand || '',
-      model: editVehicle.model || '',
+      brand: editVehicle.brand ?? '',
+      model: editVehicle.model ?? '',
       year: editVehicle.year?.toString() || '',
       status: editVehicle.status,
       has_fuel_chip: editVehicle.has_fuel_chip ?? false,
-      insurance_expiry: editVehicle.insurance_expiry || '',
-      registration_expiry: editVehicle.registration_expiry || '',
-      authorization_expiry: editVehicle.authorization_expiry || '',
-      chassis_number: editVehicle.chassis_number || '',
-      serial_number: editVehicle.serial_number || '',
-      notes: editVehicle.notes || '',
+      insurance_expiry: editVehicle.insurance_expiry ?? '',
+      registration_expiry: editVehicle.registration_expiry ?? '',
+      authorization_expiry: editVehicle.authorization_expiry ?? '',
+      chassis_number: editVehicle.chassis_number ?? '',
+      serial_number: editVehicle.serial_number ?? '',
+      notes: editVehicle.notes ?? '',
     });
   }, [editVehicle, open]);
 

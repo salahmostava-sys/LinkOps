@@ -111,7 +111,7 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
 
       const roleMap: Record<string, AppRole> = {};
       (roles || []).forEach((r) => {
-        roleMap[r.user_id] = (r.role as AppRole) || 'viewer';
+        roleMap[r.user_id] = (r.role) || 'viewer';
       });
 
       return ((profiles || []) as ProfileRow[]).map((p) => ({
@@ -119,7 +119,7 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
         name: p.name || 'بدون اسم',
         isActive: p.is_active ?? true,
         role: roleMap[p.id] || 'viewer',
-      })) as UserRow[];
+      }));
     },
     retry: defaultQueryRetry,
     staleTime: 60_000,
@@ -163,7 +163,7 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
     setMatrixLoading(true);
     try {
       const data = await userPermissionService.getUserPermissions(userId);
-      setMatrix(mergeMatrix(role, (data || []) as { permission_key: string; can_view: boolean; can_edit: boolean; can_delete: boolean }[]));
+      setMatrix(mergeMatrix(role, (data || [])));
     } catch (err: unknown) {
       const message = getErrorMessage(err, 'تعذر تحميل الصلاحيات');
       toast({ title: 'خطأ', description: message, variant: 'destructive' });

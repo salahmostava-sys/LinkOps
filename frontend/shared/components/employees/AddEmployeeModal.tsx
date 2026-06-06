@@ -416,33 +416,33 @@ async function rollbackNewEmployeeAfterSaveFailure(
 
 function buildEmployeeDefaultValues(editEmployee?: EmployeeData | null): EmployeeFormValues {
   return {
-    name: editEmployee?.name || '',
-    name_en: editEmployee?.name_en || '',
-    job_title: editEmployee?.job_title || '',
-    phone: editEmployee?.phone || '',
-    email: editEmployee?.email || '',
-    national_id: editEmployee?.national_id || '',
-    nationality: editEmployee?.nationality || '',
-    commercial_record: editEmployee?.commercial_record || '',
-    bank_account_number: editEmployee?.bank_account_number || '',
+    name: editEmployee?.name ?? '',
+    name_en: editEmployee?.name_en ?? '',
+    job_title: editEmployee?.job_title ?? '',
+    phone: editEmployee?.phone ?? '',
+    email: editEmployee?.email ?? '',
+    national_id: editEmployee?.national_id ?? '',
+    nationality: editEmployee?.nationality ?? '',
+    commercial_record: editEmployee?.commercial_record ?? '',
+    bank_account_number: editEmployee?.bank_account_number ?? '',
     cities: normalizeEmployeeCities(editEmployee?.cities ?? [], editEmployee?.city),
-    join_date: editEmployee?.join_date || '',
-    birth_date: editEmployee?.birth_date || '',
-    residency_expiry: editEmployee?.residency_expiry || '',
-    health_insurance_expiry: editEmployee?.health_insurance_expiry || '',
-    license_expiry: editEmployee?.license_expiry || '',
-    probation_end_date: editEmployee?.probation_end_date || '',
+    join_date: editEmployee?.join_date ?? '',
+    birth_date: editEmployee?.birth_date ?? '',
+    residency_expiry: editEmployee?.residency_expiry ?? '',
+    health_insurance_expiry: editEmployee?.health_insurance_expiry ?? '',
+    license_expiry: editEmployee?.license_expiry ?? '',
+    probation_end_date: editEmployee?.probation_end_date ?? '',
     probation_days: '',
-    license_status: (['has_license', 'no_license', 'applied'].includes(editEmployee?.license_status || '')
+    license_status: (['has_license', 'no_license', 'applied'].includes(editEmployee?.license_status ?? '')
       ? editEmployee?.license_status
       : 'no_license') as EmployeeFormValues['license_status'],
-    sponsorship_status: (['sponsored', 'not_sponsored', 'absconded', 'terminated'].includes(editEmployee?.sponsorship_status || '')
+    sponsorship_status: (['sponsored', 'not_sponsored', 'absconded', 'terminated'].includes(editEmployee?.sponsorship_status ?? '')
       ? editEmployee?.sponsorship_status
       : 'not_sponsored') as EmployeeFormValues['sponsorship_status'],
-    status: (['active', 'inactive', 'ended'].includes(editEmployee?.status || '')
+    status: (['active', 'inactive', 'ended'].includes(editEmployee?.status ?? '')
       ? editEmployee?.status
       : 'active') as EmployeeFormValues['status'],
-    preferred_language: (['ar', 'en'].includes(editEmployee?.preferred_language || '')
+    preferred_language: (['ar', 'en'].includes(editEmployee?.preferred_language ?? '')
       ? editEmployee?.preferred_language
       : 'ar') as EmployeeFormValues['preferred_language'],
   };
@@ -472,7 +472,7 @@ const AddEmployeeModal = ({ onClose, onSuccess, editEmployee }: Readonly<Props>)
   });
 
   const { trigger, setValue, getValues, watch, formState } = formApi;
-  const errors: Record<string, { message?: string }> = formState.errors as unknown as Record<string, { message?: string }>;
+  const errors: Record<string, { message?: string }> = formState.errors;
   const form = watch();
   const selectedCities = form.cities ?? [];
   const { recordNames: commercialRecordNames } = useCommercialRecords();

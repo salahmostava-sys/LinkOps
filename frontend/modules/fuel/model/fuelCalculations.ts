@@ -20,7 +20,7 @@ export const filterMonthlyRows = <T extends MonthlyRowLike>(rows: T[], search: s
   rows.filter((row) => !search || row.employee_name.toLowerCase().includes(search.toLowerCase()));
 
 export const filterDailyRows = <T extends DailyRowLike>(rows: T[], search: string): T[] =>
-  rows.filter((row) => !search || (row.employee?.name || '').toLowerCase().includes(search.toLowerCase()));
+  rows.filter((row) => !search || (row.employee?.name ?? '').toLowerCase().includes(search.toLowerCase()));
 
 export const calcMonthlyStats = <T extends MonthlyRowLike>(rows: T[]) => {
   const totalKm = rows.reduce((sum, row) => sum + row.km_total, 0);

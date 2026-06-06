@@ -64,8 +64,8 @@ const MonthlyRecord = ({ selectedMonth, selectedYear }: Readonly<Props>) => {
     queryFn: async () => {
       const result = await attendanceService.getMonthlyEmployeesAndAttendance(startDate, endDate);
       return {
-        employees: (result.employees || []) as Employee[],
-        attendanceRows: (result.attendanceRows || []) as AttendanceRow[],
+        employees: (result.employees || []),
+        attendanceRows: (result.attendanceRows || []),
       };
     },
   });

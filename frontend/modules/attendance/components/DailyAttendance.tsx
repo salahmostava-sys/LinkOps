@@ -116,7 +116,7 @@ const DailyAttendance = ({ selectedMonth, selectedYear }: Readonly<Props>) => {
 
         setEmployeeSource((baseData.employees as Employee[]) ?? []);
 
-        setApps((baseData.apps as App[]) ?? []);
+        setApps((baseData.apps) ?? []);
 
         // Build map: appId → Set<employeeId>
         const map: Record<string, Set<string>> = {};
@@ -165,13 +165,7 @@ const DailyAttendance = ({ selectedMonth, selectedYear }: Readonly<Props>) => {
     setRecords(
       mapAttendanceData(
         allEmployees,
-        (recordsQuery.data as Array<{
-          employee_id: string;
-          status?: string | null;
-          check_in?: string | null;
-          check_out?: string | null;
-          note?: string | null;
-        }> | undefined) ?? [],
+        (recordsQuery.data) ?? [],
       ),
     );
   }, [allEmployees, recordsQuery.data]);

@@ -32,9 +32,9 @@ export function useSpreadsheetQueries(
         orderService.getEmployeeAppAssignments(),
       ]);
       return {
-        employees: (employees || []) as Employee[],
-        apps: (apps || []) as App[],
-        employeeApps: (employeeApps || []) as EmployeeAppAssignmentRow[],
+        employees: (employees || []),
+        apps: (apps || []),
+        employeeApps: (employeeApps || []),
       };
     },
     select: (base) => {
@@ -64,7 +64,7 @@ export function useSpreadsheetQueries(
     enabled,
     queryFn: async () => {
       const rows = await orderService.getMonthRaw(year, month);
-      return (rows || []) as OrderRawRow[];
+      return (rows || []);
     },
     select: (rows) => buildDailyDataMap(rows),
     retry: defaultQueryRetry,
@@ -96,7 +96,7 @@ export function useSpreadsheetQueries(
     [spreadsheetBaseData],
   );
   const spreadsheetMonthData = useMemo(
-    () => filterDailyDataByAppIds(spreadsheetMonthRawData as DailyData, orderAppIds),
+    () => filterDailyDataByAppIds(spreadsheetMonthRawData, orderAppIds),
     [orderAppIds, spreadsheetMonthRawData],
   );
   const employees = useMemo<Employee[]>(

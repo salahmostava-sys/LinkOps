@@ -107,7 +107,7 @@ export default function ProfileSettingsContent({ omitPageHeading = false }: Read
   // Sync form from query (once) — moved to useEffect to avoid setState during render
   useEffect(() => {
     if (profileData && !profileSynced) {
-      setProfile({ name: profileData.name || '', avatar_url: profileData.avatar_url || '' });
+      setProfile({ name: profileData.name ?? '', avatar_url: profileData.avatar_url ?? '' });
       setProfileSynced(true);
     }
   }, [profileData, profileSynced]);
@@ -256,7 +256,7 @@ export default function ProfileSettingsContent({ omitPageHeading = false }: Read
         </div>
         <div>
           <Label className="text-sm mb-1.5 block text-foreground/80">البريد الإلكتروني</Label>
-          <Input value={user?.email || ''} readOnly dir="ltr" className="bg-muted/40 text-muted-foreground cursor-default" />
+          <Input value={user?.email ?? ''} readOnly dir="ltr" className="bg-muted/40 text-muted-foreground cursor-default" />
           <p className="text-[11px] text-muted-foreground mt-1.5 flex items-center gap-1">
             <AlertCircle size={11} />
             لتغيير البريد الإلكتروني، تواصل مع المسؤول

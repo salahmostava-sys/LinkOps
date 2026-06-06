@@ -151,7 +151,7 @@ export const salaryDraftService = {
 
     // Step 3: delete stale rows (those not in desired set)
     const staleEmployeeIds = (existingData || [])
-      .map((draft) => String(draft.employee_id || ''))
+      .map((draft) => String(draft.employee_id ?? ''))
       .filter((id) => id && !desiredEmployeeIds.has(id));
 
     if (staleEmployeeIds.length === 0) return;
