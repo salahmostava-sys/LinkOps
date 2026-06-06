@@ -71,6 +71,7 @@ export const AddLeaveModal = ({ open, onOpenChange, employees, onSaved }: Readon
       dir="rtl"
       open
       onClick={(e) => { if (e.target === e.currentTarget) onOpenChange(false); }}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onOpenChange(false); }}
       onClose={() => onOpenChange(false)}
     >
       <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">

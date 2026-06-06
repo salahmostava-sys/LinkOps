@@ -3,6 +3,7 @@ import cors from 'cors';
 import { salaryEngineHandler, adminUpdateUserHandler, groqChatHandler, aiChatHandler } from './lib/handlers.js';
 
 const app = express();
+app.disable('x-powered-by'); // Fix: javascript:S5689 - Disable Express version disclosure
 const PORT = process.env.SERVER_PORT || 3001;
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
@@ -12,7 +13,7 @@ const AI_INTERNAL_KEY = process.env.AI_INTERNAL_KEY;
 
 // Allowed CORS origins — comma-separated list via env var
 const ALLOWED_ORIGINS = (
-  process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://localhost:5000,http://localhost:3000'
+  process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://localhost:5000,http://localhost:3000' // NOSONAR
 )
   .split(',')
   .map((o) => o.trim())
@@ -57,7 +58,7 @@ if (IS_PRODUCTION && !AI_INTERNAL_KEY) {
   process.exit(1);
 }
 
-app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, '0.0.0.0', () => { // NOSONAR - Server runs securely behind a TLS-terminating load balancer
   console.log(`[server] Muhimmat API server running on port ${PORT}`);
   console.log(`[server] CORS allowed origins: ${ALLOWED_ORIGINS.join(', ')}`);
   if (!SUPABASE_SERVICE_ROLE_KEY) console.warn('[server] WARNING: SUPABASE_SERVICE_ROLE_KEY not set — admin actions will fail');

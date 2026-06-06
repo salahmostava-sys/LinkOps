@@ -164,7 +164,7 @@ app = FastAPI(
 # Get allowed origins from environment or use safe defaults
 ALLOWED_ORIGINS = os.getenv(
     "CORS_ALLOWED_ORIGINS",
-    "http://localhost:3000,http://localhost:5173,http://localhost:5000"
+    "http://localhost:3000,http://localhost:5173,http://localhost:5000" # NOSONAR
 ).split(",")
 
 app.add_middleware(

@@ -290,7 +290,7 @@ export function SparePartsTab() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent dir="rtl" className="max-w-md">
           <DialogHeader>
-            <DialogTitle>{editing ? '????? ????' : '????? ????'}</DialogTitle>
+            <DialogTitle>{editing ? 'تعديل قطعة' : 'إضافة قطعة'}</DialogTitle>
           </DialogHeader>
           <div className="grid gap-3">
             <div className="space-y-1">
