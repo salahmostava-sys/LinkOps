@@ -4,7 +4,7 @@ import { orderService } from '@services/orderService';
 import { filterRetainedEmployeesForMonth, isEmployeeVisibleInMonth } from '@shared/lib/employeeVisibility';
 import { isOrderCapableApp } from '@shared/lib/workType';
 import { defaultQueryRetry } from '@shared/lib/query';
-import type { App, DailyData, Employee, EmployeeAppAssignmentRow, OrderRawRow } from '@modules/orders/types';
+import type { App, Employee } from '@modules/orders/types';
 import { buildAppEmployeeIdsMap, buildDailyDataMap, filterDailyDataByAppIds } from '@modules/orders/utils/gridHelpers';
 import { monthYear } from '@modules/orders/utils/dateMonth';
 import { ordersQueryKeys } from '@modules/orders/hooks/ordersQueryKeys';

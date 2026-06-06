@@ -9,7 +9,7 @@ import { defaultQueryRetry } from '@shared/lib/query';
 import { orderService } from '@services/orderService';
 import { filterRetainedEmployeesForMonth, filterVisibleEmployeesInMonth } from '@shared/lib/employeeVisibility';
 import { useMonthlyActiveEmployeeIds } from '@shared/hooks/useMonthlyActiveEmployeeIds';
-import type { App, AppTargetRow, DailyData, Employee, OrderRawRow, OrdersEmployeeSortField } from '@modules/orders/types';
+import type { App, DailyData, Employee, OrdersEmployeeSortField } from '@modules/orders/types';
 import { buildDailyDataMap, filterDailyDataByAppIds, getOrdersEmployeeSortPair } from '@modules/orders/utils/gridHelpers';
 import { getDaysInMonth, monthYear } from '@modules/orders/utils/dateMonth';
 import { ordersQueryKeys } from '@modules/orders/hooks/ordersQueryKeys';

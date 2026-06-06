@@ -9,7 +9,7 @@ import { authQueryUserId, useAuthQueryGate } from '@shared/hooks/useAuthQueryGat
 import { orderService } from '@services/orderService';
 import { performanceService } from '@services/performanceService';
 import { bulkDeleteService } from '@services/bulkDeleteService';
-import type { DailyData, OrderRawRow } from '@modules/orders/types';
+import type { DailyData } from '@modules/orders/types';
 import type { OrdersPopoverState } from '@shared/components/orders/OrdersCellPopover';
 import type { UnmatchedEmployeeName } from '@shared/lib/nameMatching';
 import { useSpreadsheetQueries } from '@modules/orders/hooks/useSpreadsheetQueries';
