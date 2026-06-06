@@ -33,6 +33,12 @@ export default mergeConfig(
           '**/__tests__',
           '**/types.ts',
         ],
+        thresholds: {
+          statements: 50,
+          branches: 40,
+          functions: 50,
+          lines: 50,
+        },
       },
     },
   })

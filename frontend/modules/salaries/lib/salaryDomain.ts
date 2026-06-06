@@ -194,7 +194,9 @@ export const buildPreviewMap = (previewData: Array<Record<string, unknown>> | nu
 export const buildAttendanceDaysMap = (rows: Array<{ employee_id: string }> | null | undefined) => {
   const attendanceDaysMap: Record<string, number> = {};
   rows?.forEach((r) => {
-    attendanceDaysMap[r.employee_id] = (attendanceDaysMap[r.employee_id] || 0) + 1;
+    const employeeId = r.employee_id ? String(r.employee_id) : '';
+    if (!employeeId) return;
+    attendanceDaysMap[employeeId] = (attendanceDaysMap[employeeId] || 0) + 1;
   });
   return attendanceDaysMap;
 };
@@ -202,7 +204,9 @@ export const buildAttendanceDaysMap = (rows: Array<{ employee_id: string }> | nu
 export const buildFuelCostMap = (rows: Array<{ employee_id: string; fuel_cost: number | string }> | null | undefined) => {
   const fuelCostMap: Record<string, number> = {};
   rows?.forEach((r) => {
-    fuelCostMap[r.employee_id] = (fuelCostMap[r.employee_id] || 0) + Number(r.fuel_cost);
+    const employeeId = r.employee_id ? String(r.employee_id) : '';
+    if (!employeeId) return;
+    fuelCostMap[employeeId] = (fuelCostMap[employeeId] || 0) + Number(r.fuel_cost);
   });
   return fuelCostMap;
 };
@@ -210,11 +214,13 @@ export const buildFuelCostMap = (rows: Array<{ employee_id: string; fuel_cost: n
 export const buildOrdersMap = (rows: OrderWithAppRow[] | null | undefined) => {
   const ordMap: Record<string, Record<string, number>> = {};
   (rows || []).forEach((r) => {
+    const employeeId = r.employee_id ? String(r.employee_id) : '';
+    if (!employeeId) return;
     // Supabase returns foreign key relationship as object (not array)
     const appName = r.apps?.name;
     if (!appName) return;
-    if (!ordMap[r.employee_id]) ordMap[r.employee_id] = {};
-    ordMap[r.employee_id][appName] = (ordMap[r.employee_id][appName] || 0) + r.orders_count;
+    if (!ordMap[employeeId]) ordMap[employeeId] = {};
+    ordMap[employeeId][appName] = (ordMap[employeeId][appName] || 0) + r.orders_count;
   });
   return ordMap;
 };

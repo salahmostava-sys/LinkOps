@@ -352,29 +352,29 @@
   /* ─── Badges — dot + color, no borders ────────────────────────── */
   .badge-urgent {
     @apply inline-flex items-center gap-1 text-xs font-medium px-2.5 py-0.5 rounded-full;
-    background: rgba(153, 27, 27, 0.12);
-    color: #7f1d1d;
+    background: rgba(153, 27, 27, 0.15);
+    color: #6b1010;
     font-weight: 600;
   }
 
   .badge-warning {
     @apply inline-flex items-center gap-1 text-xs font-medium px-2.5 py-0.5 rounded-full;
-    background: rgba(146, 64, 14, 0.12);
-    color: #78350f;
+    background: rgba(146, 64, 14, 0.15);
+    color: #6b2c06;
     font-weight: 600;
   }
 
   .badge-success {
     @apply inline-flex items-center gap-1 text-xs font-medium px-2.5 py-0.5 rounded-full;
-    background: rgba(6, 95, 70, 0.12);
-    color: #064e3b;
+    background: rgba(6, 95, 70, 0.15);
+    color: #043e2e;
     font-weight: 600;
   }
 
   .badge-info {
     @apply inline-flex items-center gap-1 text-xs font-medium px-2.5 py-0.5 rounded-full;
-    background: rgba(30, 58, 138, 0.12);
-    color: #1e3a8a;
+    background: rgba(30, 58, 138, 0.15);
+    color: #172554;
     font-weight: 600;
   }
 
