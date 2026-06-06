@@ -1,6 +1,8 @@
 import { expect, test } from '@playwright/test';
 
 test.describe('صفحة تسجيل الدخول', () => {
+  test.use({ storageState: { cookies: [], origins: [] } });
+
   test('تعرض النموذج والعناوين الأساسية', async ({ page }) => {
     await page.goto('/login');
 

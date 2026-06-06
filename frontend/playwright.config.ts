@@ -34,7 +34,17 @@ export default defineConfig({
     locale: 'ar-SA',
     viewport: { width: 1280, height: 720 },
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  projects: [
+    { name: 'setup', testMatch: /.*\.setup\.ts/ },
+    {
+      name: 'chromium',
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: 'playwright/.auth/user.json',
+      },
+      dependencies: ['setup'],
+    },
+  ],
   webServer: {
     command: 'npm run dev',
     url: baseURL,

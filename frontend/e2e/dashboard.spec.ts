@@ -6,21 +6,21 @@ const shouldAssertAuthenticatedDashboard =
   process.env.E2E_ASSERT_AUTHENTICATED_DASHBOARD === '1' && !!email && !!password;
 
 test.describe('Dashboard smoke', () => {
-  test('redirects unauthenticated users to login', async ({ page }) => {
-    await page.goto('/');
+  test.describe('Unauthenticated', () => {
+    test.use({ storageState: { cookies: [], origins: [] } });
+    test('redirects unauthenticated users to login', async ({ page }) => {
+      await page.goto('/');
 
-    await expect(page).toHaveURL(/\/login$/);
-    await expect(page.getByRole('heading', { name: 'تسجيل الدخول' })).toBeVisible();
+      await expect(page).toHaveURL(/\/login$/);
+      await expect(page.getByRole('heading', { name: 'تسجيل الدخول' })).toBeVisible();
+    });
   });
 
-  test('logs in and shows dashboard entry UI', async ({ page }) => {
+  test('shows dashboard entry UI when authenticated', async ({ page }) => {
     test.skip(!shouldAssertAuthenticatedDashboard, 'Authenticated dashboard smoke requires confirmed dashboard credentials');
 
-    await page.goto('/login');
-
-    await page.locator('#login-email').fill(email ?? '');
-    await page.locator('#login-password').fill(password ?? '');
-    await page.getByRole('button', { name: 'تسجيل الدخول' }).click();
+    // With global auth setup, we just need to go to the root.
+    await page.goto('/');
 
     await expect(page).toHaveURL(/\/$/);
     await expect(page.getByRole('heading', { name: 'لوحة التحكم' })).toBeVisible();
