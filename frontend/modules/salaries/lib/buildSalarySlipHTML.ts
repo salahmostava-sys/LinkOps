@@ -141,7 +141,146 @@ const fmt = (n: number | string): string => {
 const colorStyle = (color?: string): string => {
   if (!color) return '';
   const c = COLOR_MAP[color];
-  return c ? `color:${c}` : '';
+  return c ? \`color:\${c}\` : '';
+};
+
+// ─── Section Builders ────────────────────────────────────────────────────────
+
+const buildHeader = (employee: SlipEmployeeInfo, projectName?: string, templateHeader?: string): string => {
+  if (templateHeader) return sanitizeTemplateHtml(templateHeader);
+  return \`
+    <div class="header">
+      <div>
+        <div class="header-brand">\${escapeHtml(projectName || 'كشف راتب شهري')}</div>
+        <div class="header-subtitle">\${escapeHtml(employee.month)}</div>
+      </div>
+      <span class="badge \${STATUS_CLASSES[employee.status] || 'badge-pending'}">\${STATUS_LABELS[employee.status] || employee.status}</span>
+    </div>\`;
+};
+
+const buildRiskBanner = (analysis?: BuildSalarySlipOptions['analysis']): string => {
+  if (!analysis || analysis.risk === 'normal') return '';
+  const riskLabel = analysis.risk === 'underpaid' ? 'تنبيه: ملاحظة انخفاض في المستحقات' : 'تنبيه: ملاحظة زيادة في المستحقات';
+  const riskClass = analysis.risk === 'underpaid' ? 'risk-underpaid' : 'risk-overpaid';
+  return \`<div class="risk-banner \${riskClass}">
+    <span>⚠️</span>
+    <span>\${riskLabel} (\${analysis.diff_percent}%) — الراتب المتوقع: \${analysis.expected_salary} ر.س</span>
+  </div>\`;
+};
+
+const buildInfoGrid = (infoFields: SlipField[]): string => {
+  if (infoFields.length === 0) return '';
+  return \`
+    <div class="info-grid">
+      \${infoFields.map(f => \`
+        <div class="info-row">
+          <span class="info-label">\${escapeHtml(f.label)}</span>
+          <span class="info-value">\${fmt(f.value)}</span>
+        </div>\`).join('')}
+    </div>\`;
+};
+
+const buildPlatformsTable = (platforms: SlipPlatformRow[]): string => {
+  if (platforms.length === 0) return '';
+  const totalOrders = platforms.reduce((s, p) => s + p.orders, 0);
+  const totalPlatformSalary = platforms.reduce((s, p) => s + p.salary, 0);
+  return \`
+    <div class="section-title">الطلبات والراتب حسب المنصة</div>
+    <table>
+      <tr>
+        <th>المنصة</th>
+        <th>الطلبات</th>
+        <th>الراتب</th>
+      </tr>
+      \${platforms.map(p => \`
+        <tr>
+          <td class="label-cell">\${escapeHtml(p.name)}</td>
+          <td class="value-cell">\${fmt(p.orders)}</td>
+          <td class="value-cell" style="color:#2563eb">\${fmt(p.salary)} ر.س</td>
+        </tr>\`).join('')}
+      <tr class="total-row">
+        <td class="label-cell">إجمالي المنصات</td>
+        <td class="value-cell">\${fmt(totalOrders)}</td>
+        <td class="value-cell" style="color:#2563eb">\${fmt(totalPlatformSalary)} ر.س</td>
+      </tr>
+    </table>\`;
+};
+
+const buildEarningsTable = (earningFields: SlipField[], totalFields: SlipField[]): string => {
+  if (earningFields.length === 0) return '';
+  return \`
+    <div class="section-title">الاستحقاقات</div>
+    <table>
+      \${earningFields.map(f => \`
+        <tr>
+          <td class="label-cell">\${escapeHtml(f.label)}</td>
+          <td class="value-cell" style="\${colorStyle(f.color || 'green')}">\${typeof f.value === 'number' ? \`+ \${fmt(f.value)} ر.س\` : fmt(f.value)}</td>
+        </tr>\`).join('')}
+      \${totalFields.filter(f => f.key.includes('earning')).map(f => \`
+        <tr class="total-row">
+          <td class="label-cell">\${escapeHtml(f.label)}</td>
+          <td class="value-cell" style="\${colorStyle(f.color || 'blue')}">\${fmt(f.value)} ر.س</td>
+        </tr>\`).join('')}
+    </table>\`;
+};
+
+const buildDeductionsTable = (deductionFields: SlipField[], totalFields: SlipField[]): string => {
+  if (deductionFields.length === 0) return '';
+  return \`
+    <div class="section-title">المستقطعات</div>
+    <table>
+      \${deductionFields.map(f => \`
+        <tr>
+          <td class="label-cell">\${escapeHtml(f.label)}</td>
+          <td class="value-cell" style="\${colorStyle(f.color || 'red')}">\${typeof f.value === 'number' && f.value > 0 ? \`- \${fmt(f.value)} ر.س\` : fmt(f.value)}</td>
+        </tr>\`).join('')}
+      \${totalFields.filter(f => f.key.includes('deduction')).map(f => \`
+        <tr class="deduction-total">
+          <td class="label-cell">\${escapeHtml(f.label)}</td>
+          <td class="value-cell" style="\${colorStyle(f.color || 'red')}">- \${fmt(f.value)} ر.س</td>
+        </tr>\`).join('')}
+    </table>\`;
+};
+
+const buildNetTable = (netFields: SlipField[]): string => {
+  if (netFields.length === 0) return '';
+  return \`
+    <div class="section-title">الصافي</div>
+    <table>
+      \${netFields.map(f => \`
+        <tr class="net-row">
+          <td class="label-cell">\${escapeHtml(f.label)}</td>
+          <td class="value-cell" style="\${colorStyle(f.color || 'green')}">\${fmt(f.value)} ر.س</td>
+        </tr>\`).join('')}
+    </table>\`;
+};
+
+const buildMiscTable = (miscTotals: SlipField[]): string => {
+  if (miscTotals.length === 0) return '';
+  return \`
+    <table>
+      \${miscTotals.map(f => \`
+        <tr>
+          <td class="label-cell">\${escapeHtml(f.label)}</td>
+          <td class="value-cell" style="\${colorStyle(f.color)}">\${fmt(f.value)} ر.س</td>
+        </tr>\`).join('')}
+    </table>\`;
+};
+
+const buildFooter = (templateFooter?: string): string => {
+  if (templateFooter) return sanitizeTemplateHtml(templateFooter);
+  return \`
+    <div class="footer">
+      <div class="signature-box">
+        <div class="signature-line"></div>
+        <div>توقيع المندوب</div>
+      </div>
+      <div class="signature-box">
+        <div class="signature-line"></div>
+        <div>اعتماد الإدارة</div>
+      </div>
+      <div>التاريخ: \${new Date().toLocaleDateString('ar-SA')}</div>
+    </div>\`;
 };
 
 // ─── Builder ─────────────────────────────────────────────────────────────────
@@ -159,156 +298,29 @@ export function buildSalarySlipHTML(options: BuildSalarySlipOptions): string {
   const deductionFields = fields.filter(f => f.type === 'deduction');
   const totalFields = fields.filter(f => f.type === 'total');
   const netFields = fields.filter(f => f.type === 'net');
-
-  // ── Header ────────────────────────────────────────────────────────────────
-  const headerHTML = template?.header_html
-    ? sanitizeTemplateHtml(template.header_html)
-    : `
-    <div class="header">
-      <div>
-        <div class="header-brand">${escapeHtml(projectName || 'كشف راتب شهري')}</div>
-        <div class="header-subtitle">${escapeHtml(employee.month)}</div>
-      </div>
-      <span class="badge ${STATUS_CLASSES[employee.status] || 'badge-pending'}">${STATUS_LABELS[employee.status] || employee.status}</span>
-    </div>`;
-
-  // ── Risk Banner ───────────────────────────────────────────────────────────
-  let riskHTML = '';
-  if (analysis && analysis.risk !== 'normal') {
-    const riskLabel = analysis.risk === 'underpaid' ? 'تنبيه: ملاحظة انخفاض في المستحقات' : 'تنبيه: ملاحظة زيادة في المستحقات';
-    const riskClass = analysis.risk === 'underpaid' ? 'risk-underpaid' : 'risk-overpaid';
-    riskHTML = `<div class="risk-banner ${riskClass}">
-      <span>⚠️</span>
-      <span>${riskLabel} (${analysis.diff_percent}%) — الراتب المتوقع: ${analysis.expected_salary} ر.س</span>
-    </div>`;
-  }
-
-  // ── Employee Info Grid (via map) ──────────────────────────────────────────
-  const infoHTML = infoFields.length > 0 ? `
-    <div class="info-grid">
-      ${infoFields.map(f => `
-        <div class="info-row">
-          <span class="info-label">${escapeHtml(f.label)}</span>
-          <span class="info-value">${fmt(f.value)}</span>
-        </div>`).join('')}
-    </div>` : '';
-
-  // ── Platforms Table (via map) ──────────────────────────────────────────────
-  const totalOrders = platforms.reduce((s, p) => s + p.orders, 0);
-  const totalPlatformSalary = platforms.reduce((s, p) => s + p.salary, 0);
-
-  const platformsHTML = platforms.length > 0 ? `
-    <div class="section-title">الطلبات والراتب حسب المنصة</div>
-    <table>
-      <tr>
-        <th>المنصة</th>
-        <th>الطلبات</th>
-        <th>الراتب</th>
-      </tr>
-      ${platforms.map(p => `
-        <tr>
-          <td class="label-cell">${escapeHtml(p.name)}</td>
-          <td class="value-cell">${fmt(p.orders)}</td>
-          <td class="value-cell" style="color:#2563eb">${fmt(p.salary)} ر.س</td>
-        </tr>`).join('')}
-      <tr class="total-row">
-        <td class="label-cell">إجمالي المنصات</td>
-        <td class="value-cell">${fmt(totalOrders)}</td>
-        <td class="value-cell" style="color:#2563eb">${fmt(totalPlatformSalary)} ر.س</td>
-      </tr>
-    </table>` : '';
-
-  // ── Earnings Table (via map) ──────────────────────────────────────────────
-  const earningsHTML = earningFields.length > 0 ? `
-    <div class="section-title">الاستحقاقات</div>
-    <table>
-      ${earningFields.map(f => `
-        <tr>
-          <td class="label-cell">${escapeHtml(f.label)}</td>
-          <td class="value-cell" style="${colorStyle(f.color || 'green')}">${typeof f.value === 'number' ? `+ ${fmt(f.value)} ر.س` : fmt(f.value)}</td>
-        </tr>`).join('')}
-      ${totalFields.filter(f => f.key.includes('earning')).map(f => `
-        <tr class="total-row">
-          <td class="label-cell">${escapeHtml(f.label)}</td>
-          <td class="value-cell" style="${colorStyle(f.color || 'blue')}">${fmt(f.value)} ر.س</td>
-        </tr>`).join('')}
-    </table>` : '';
-
-  // ── Deductions Table (via map) ─────────────────────────────────────────────
-  const deductionsHTML = deductionFields.length > 0 ? `
-    <div class="section-title">المستقطعات</div>
-    <table>
-      ${deductionFields.map(f => `
-        <tr>
-          <td class="label-cell">${escapeHtml(f.label)}</td>
-          <td class="value-cell" style="${colorStyle(f.color || 'red')}">${typeof f.value === 'number' && f.value > 0 ? `- ${fmt(f.value)} ر.س` : fmt(f.value)}</td>
-        </tr>`).join('')}
-      ${totalFields.filter(f => f.key.includes('deduction')).map(f => `
-        <tr class="deduction-total">
-          <td class="label-cell">${escapeHtml(f.label)}</td>
-          <td class="value-cell" style="${colorStyle(f.color || 'red')}">- ${fmt(f.value)} ر.س</td>
-        </tr>`).join('')}
-    </table>` : '';
-
-  // ── Net Salary (via map) ──────────────────────────────────────────────────
-  const netHTML = netFields.length > 0 ? `
-    <div class="section-title">الصافي</div>
-    <table>
-      ${netFields.map(f => `
-        <tr class="net-row">
-          <td class="label-cell">${escapeHtml(f.label)}</td>
-          <td class="value-cell" style="${colorStyle(f.color || 'green')}">${fmt(f.value)} ر.س</td>
-        </tr>`).join('')}
-    </table>` : '';
-
-  // ── Remaining totals (transfer, remaining, etc.) ──────────────────────────
   const miscTotals = totalFields.filter(f => !f.key.includes('earning') && !f.key.includes('deduction'));
-  const miscHTML = miscTotals.length > 0 ? `
-    <table>
-      ${miscTotals.map(f => `
-        <tr>
-          <td class="label-cell">${escapeHtml(f.label)}</td>
-          <td class="value-cell" style="${colorStyle(f.color)}">${fmt(f.value)} ر.س</td>
-        </tr>`).join('')}
-    </table>` : '';
-
-  // ── Footer ────────────────────────────────────────────────────────────────
-  const footerHTML = template?.footer_html
-    ? sanitizeTemplateHtml(template.footer_html)
-    : `
-    <div class="footer">
-      <div class="signature-box">
-        <div class="signature-line"></div>
-        <div>توقيع المندوب</div>
-      </div>
-      <div class="signature-box">
-        <div class="signature-line"></div>
-        <div>اعتماد الإدارة</div>
-      </div>
-      <div>التاريخ: ${new Date().toLocaleDateString('ar-SA')}</div>
-    </div>`;
 
   // ── Full Document ─────────────────────────────────────────────────────────
-  return `<!DOCTYPE html>
+  return \`<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>كشف راتب — ${escapeHtml(employee.name)}</title>
-  <style>${SLIP_CSS}</style>
+  <title>كشف راتب — \${escapeHtml(employee.name)}</title>
+  <style>\${SLIP_CSS}</style>
 </head>
 <body>
   <div class="slip-container">
-    ${headerHTML}
-    ${riskHTML}
-    ${infoHTML}
-    ${platformsHTML}
-    ${earningsHTML}
-    ${deductionsHTML}
-    ${netHTML}
-    ${miscHTML}
-    ${footerHTML}
+    \${buildHeader(employee, projectName, template?.header_html)}
+    \${buildRiskBanner(analysis)}
+    \${buildInfoGrid(infoFields)}
+    \${buildPlatformsTable(platforms)}
+    \${buildEarningsTable(earningFields, totalFields)}
+    \${buildDeductionsTable(deductionFields, totalFields)}
+    \${buildNetTable(netFields)}
+    \${buildMiscTable(miscTotals)}
+    \${buildFooter(template?.footer_html)}
   </div>
 </body>
-</html>`;
+</html>\`;
 }
