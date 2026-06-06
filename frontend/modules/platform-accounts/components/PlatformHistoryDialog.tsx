@@ -95,8 +95,7 @@ export const PlatformHistoryDialog = ({
                             </span>
                             {assignment.end_date && (
                               <>
-                                {' '}
-                                إلى:
+                                {" إلى: "}
                                 <span className="font-medium text-foreground ms-1">
                                   {assignment.end_date}
                                 </span>

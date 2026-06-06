@@ -129,14 +129,13 @@ export const AddReviewModal = ({ open, onOpenChange, employees, monthYear, revie
 
   return (
     <dialog
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-transparent"
       dir="rtl"
       open
-      onClick={(e) => { if (e.target === e.currentTarget) onOpenChange(false); }}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onOpenChange(false); }}
       onClose={() => onOpenChange(false)}
     >
-      <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden max-h-[90vh] flex flex-col">
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" aria-hidden="true" onClick={() => onOpenChange(false)} />
+      <div className="relative bg-card border border-border rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden max-h-[90vh] flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-border flex-shrink-0">
           <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
             <Star size={18} /> {editReview ? 'تعديل التقييم' : 'إضافة تقييم أداء'}

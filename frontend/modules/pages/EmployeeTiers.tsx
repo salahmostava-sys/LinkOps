@@ -284,6 +284,16 @@ const SortIcon = ({ field, sortField, sortDir }: { field: string; sortField: str
 /* ═══════════════════════════════════════════════════════════════
    MAIN COMPONENT
 ═══════════════════════════════════════════════════════════════ */
+const ThSort = ({ field, label, className, sortField, sortDir, onSort }: { field: string; label: string; className?: string; sortField: string | null; sortDir: SortDir; onSort: (field: string) => void }) => (
+  <th
+    className={`px-3 py-2.5 text-xs font-semibold text-muted-foreground whitespace-nowrap cursor-pointer select-none hover:text-foreground transition-colors border-b border-border/50 text-center ${className ?? ''}`}
+    onClick={() => onSort(field)}
+  >
+    {label} <SortIcon field={field} sortField={sortField} sortDir={sortDir} />
+  </th>
+);
+
+
 const EmployeeTiers = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -313,10 +323,18 @@ const EmployeeTiers = () => {
       return {
         employees: (employeeRows || []),
         apps: (appsRows || []),
-        tiers: ((tiersRows || []) as TierRow[]).map((t) => ({
-          ...t,
-          app_ids: Array.isArray(t.app_ids) ? t.app_ids : (t.app_ids ? JSON.parse(t.app_ids) : []),
-        })),
+        tiers: ((tiersRows || []) as TierRow[]).map((t) => {
+          let parsedApps: string[] = [];
+          if (Array.isArray(t.app_ids)) {
+            parsedApps = t.app_ids;
+          } else if (t.app_ids) {
+            try { parsedApps = JSON.parse(t.app_ids); } catch { /* ignore */ }
+          }
+          return {
+            ...t,
+            app_ids: parsedApps,
+          };
+        }),
       };
     },
     retry: defaultQueryRetry,
@@ -705,17 +723,7 @@ const EmployeeTiers = () => {
     return days >= 0 && days <= 30;
   }).length;
 
-  const ThSort = ({ field, label, className }: { field: string; label: string; className?: string }) => (
-    <th
-      className={cn(
-        'px-3 py-2.5 text-xs font-semibold text-muted-foreground whitespace-nowrap cursor-pointer select-none hover:text-foreground transition-colors border-b border-border/50 text-center',
-        className
-      )}
-      onClick={() => handleSort(field)}
-    >
-      {label} <SortIcon field={field} sortField={sortField} sortDir={sortDir} />
-    </th>
-  );
+  /* ── Stats ── */
 
   /* ══════════════ RENDER ══════════════ */
   return (
@@ -799,10 +807,10 @@ const EmployeeTiers = () => {
               </colgroup>
               <thead className="bg-muted/50">
                 <tr>
-                  <ThSort field="sim_number" label="رقم الشريحة" />
-                  <ThSort field="employee_name" label="المندوب" />
-                  <ThSort field="package_type" label="نوع الباقة" />
-                  <ThSort field="delivery_status" label="الحالة" />
+                  <ThSort field="sim_number" label="رقم الشريحة" sortField={sortField} sortDir={sortDir} onSort={handleSort} />
+                  <ThSort field="employee_name" label="المندوب" sortField={sortField} sortDir={sortDir} onSort={handleSort} />
+                  <ThSort field="package_type" label="نوع الباقة" sortField={sortField} sortDir={sortDir} onSort={handleSort} />
+                  <ThSort field="delivery_status" label="الحالة" sortField={sortField} sortDir={sortDir} onSort={handleSort} />
                   <th className="px-3 py-2.5 text-xs font-semibold text-muted-foreground border-b border-border/50 text-center min-w-0">المنصات</th>
                   <th className="px-3 py-2.5 text-xs font-semibold text-muted-foreground whitespace-nowrap border-b border-border/50 text-center">إجراءات</th>
                 </tr>

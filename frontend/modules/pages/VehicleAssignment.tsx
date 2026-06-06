@@ -139,9 +139,9 @@ const AssignmentFormModal = ({
 
           {/* Employee */}
           <div>
-            <label className="text-sm font-medium mb-1 block">المندوب *</label>
+            <label htmlFor="assign-employee" className="text-sm font-medium mb-1 block">المندوب *</label>
             <Select value={form.employee_id} onValueChange={v => setForm(p => ({ ...p, employee_id: v }))}>
-              <SelectTrigger><SelectValue placeholder="اختر المندوب" /></SelectTrigger>
+              <SelectTrigger id="assign-employee"><SelectValue placeholder="اختر المندوب" /></SelectTrigger>
               <SelectContent>
                 {employees.map(e => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}
               </SelectContent>
@@ -150,20 +150,20 @@ const AssignmentFormModal = ({
 
           {/* Date/time */}
           <div>
-            <label className="text-sm font-medium mb-1 block">تاريخ ووقت الاستلام</label>
-            <Input type="datetime-local" value={form.start_at} onChange={e => setForm(p => ({ ...p, start_at: e.target.value }))} />
+            <label htmlFor="assign-date" className="text-sm font-medium mb-1 block">تاريخ ووقت الاستلام</label>
+            <Input id="assign-date" type="datetime-local" value={form.start_at} onChange={e => setForm(p => ({ ...p, start_at: e.target.value }))} />
           </div>
 
           {/* Reason */}
           <div>
-            <label className="text-sm font-medium mb-1 block">سبب التسليم</label>
-            <Input value={form.reason} onChange={e => setForm(p => ({ ...p, reason: e.target.value }))} placeholder="مثال: توصيل شيفت صباحي..." />
+            <label htmlFor="assign-reason" className="text-sm font-medium mb-1 block">سبب التسليم</label>
+            <Input id="assign-reason" value={form.reason} onChange={e => setForm(p => ({ ...p, reason: e.target.value }))} placeholder="مثال: توصيل شيفت صباحي..." />
           </div>
 
           {/* Notes */}
           <div>
-            <label className="text-sm font-medium mb-1 block">ملاحظات</label>
-            <Input value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} placeholder="أي ملاحظات إضافية..." />
+            <label htmlFor="assign-notes" className="text-sm font-medium mb-1 block">ملاحظات</label>
+            <Input id="assign-notes" value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} placeholder="أي ملاحظات إضافية..." />
           </div>
         </div>
         <DialogFooter className="mt-4 gap-2">
@@ -229,8 +229,8 @@ const ReturnModal = ({
             <div><span className="text-muted-foreground">مدة الاستخدام: </span><span className="font-bold text-primary">{calcDuration(assignment?.start_at || null, null)}</span></div>
           </div>
           <div>
-            <label className="text-sm font-medium mb-1 block">تاريخ ووقت الإعادة</label>
-            <Input type="datetime-local" value={returnedAt} onChange={e => setReturnedAt(e.target.value)} />
+            <label htmlFor="return-date" className="text-sm font-medium mb-1 block">تاريخ ووقت الإعادة</label>
+            <Input id="return-date" type="datetime-local" value={returnedAt} onChange={e => setReturnedAt(e.target.value)} />
           </div>
         </div>
         <DialogFooter className="mt-4 gap-2">

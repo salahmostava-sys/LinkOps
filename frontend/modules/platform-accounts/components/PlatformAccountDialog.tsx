@@ -71,14 +71,14 @@ export const PlatformAccountDialog = ({
           </p>
 
           <div className="space-y-1.5">
-            <Label>المنصة</Label>
+            <Label htmlFor="account-platform">المنصة</Label>
             <Select
               value={accountForm.app_id}
               onValueChange={(value) =>
                 setAccountForm((current) => ({ ...current, app_id: value }))
               }
             >
-              <SelectTrigger>
+              <SelectTrigger id="account-platform">
                 <SelectValue placeholder="اختر المنصة" />
               </SelectTrigger>
               <SelectContent>
@@ -94,11 +94,9 @@ export const PlatformAccountDialog = ({
           <div className="space-y-2 rounded-lg border border-border/60 bg-muted/20 p-3">
             <p className="text-xs font-semibold text-foreground">بيانات الحساب على المنصة</p>
             <div className="space-y-1.5">
-              <Label>صاحب الحساب (من الموظفين)</Label>
+              <Label htmlFor="account-employee">صاحب الحساب (من الموظفين)</Label>
               <p className="text-[11px] text-muted-foreground">
-                عند الاختيار يُعبّأ تلقائيًا <strong>رقم الإقامة</strong> و
-                <strong>تاريخ انتهاء الإقامة</strong> من ملف الموظف؛ يمكنك تعديلهما أدناه إذا
-                اختلفت بيانات المنصة. (اختياري — يمكن تركه فارغًا)
+                عند الاختيار يُعبّأ تلقائيًا <strong>رقم الإقامة</strong> و{" "}<strong>تاريخ انتهاء الإقامة</strong> من ملف الموظف؛ يمكنك تعديلهما أدناه إذا اختلفت بيانات المنصة. (اختياري — يمكن تركه فارغًا)
               </p>
               <Select
                 value={accountEmployeeSelectValue}
@@ -107,7 +105,7 @@ export const PlatformAccountDialog = ({
                   applyEmployeeToAccountForm(employeeId);
                 }}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger id="account-employee" className="w-full">
                   <SelectValue
                     placeholder={editingAccount ? '- بدون ربط -' : 'اختر الموظف'}
                   />
@@ -131,10 +129,11 @@ export const PlatformAccountDialog = ({
 
               {editingAccount && !accountForm.employee_id && (
                 <div className="space-y-1.5 pt-1">
-                  <Label className="text-xs text-muted-foreground">
+                  <Label htmlFor="account-username" className="text-xs text-muted-foreground">
                     اسم صاحب الحساب (يدوي - سجلات قديمة)
                   </Label>
                   <Input
+                    id="account-username"
                     value={accountForm.account_username}
                     onChange={(event) =>
                       setAccountForm((current) => ({
@@ -150,8 +149,9 @@ export const PlatformAccountDialog = ({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
               <div className="space-y-1.5 sm:col-span-2">
-                <Label>رقم الحساب (ID على المنصة)</Label>
+                <Label htmlFor="account-id">رقم الحساب (ID على المنصة)</Label>
                 <Input
+                  id="account-id"
                   value={accountForm.account_id_on_platform}
                   onChange={(event) =>
                     setAccountForm((current) => ({
@@ -172,8 +172,9 @@ export const PlatformAccountDialog = ({
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label>رقم الإقامة</Label>
+                <Label htmlFor="account-iqama">رقم الإقامة</Label>
                 <Input
+                  id="account-iqama"
                   value={accountForm.iqama_number}
                   onChange={(event) =>
                     setAccountForm((current) => ({
@@ -186,8 +187,9 @@ export const PlatformAccountDialog = ({
                 />
               </div>
               <div className="space-y-1.5">
-                <Label>تاريخ انتهاء الإقامة</Label>
+                <Label htmlFor="account-iqama-expiry">تاريخ انتهاء الإقامة</Label>
                 <Input
+                  id="account-iqama-expiry"
                   type="date"
                   value={accountForm.iqama_expiry_date}
                   onChange={(event) =>
@@ -202,7 +204,7 @@ export const PlatformAccountDialog = ({
           </div>
 
           <div className="space-y-1.5">
-            <Label>الحالة</Label>
+            <Label htmlFor="account-status">الحالة</Label>
             <Select
               value={accountForm.status}
               onValueChange={(value) =>
@@ -212,7 +214,7 @@ export const PlatformAccountDialog = ({
                 }))
               }
             >
-              <SelectTrigger>
+              <SelectTrigger id="account-status">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -223,8 +225,9 @@ export const PlatformAccountDialog = ({
           </div>
 
           <div className="space-y-1.5">
-            <Label>ملاحظات</Label>
+            <Label htmlFor="account-notes">ملاحظات</Label>
             <Textarea
+              id="account-notes"
               value={accountForm.notes}
               onChange={(event) =>
                 setAccountForm((current) => ({

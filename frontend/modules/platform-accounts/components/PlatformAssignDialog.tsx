@@ -60,9 +60,7 @@ export const PlatformAssignDialog = ({
         </DialogHeader>
         <div className="space-y-4 py-2">
           <p className="text-xs text-muted-foreground leading-relaxed">
-            نفس الحساب قد يعمل عليه <span className="font-semibold text-foreground">عدة مناديب خلال الشهر</span>
-            {' '}بالتتابع: كل تعيين جديد يُغلق التعيين السابق ويُفتح سجل جديد. يظهر في الجدول
-            عمود «تعيينات الشهر» لعدد مرات التسجيل في الشهر الحالي.
+            نفس الحساب قد يعمل عليه <span className="font-semibold text-foreground">عدة مناديب خلال الشهر</span>{" "}بالتتابع: كل تعيين جديد يُغلق التعيين السابق ويُفتح سجل جديد. يظهر في الجدول عمود «تعيينات الشهر» لعدد مرات التسجيل في الشهر الحالي.
           </p>
 
           {assignTarget?.current_employee && (
@@ -76,14 +74,14 @@ export const PlatformAssignDialog = ({
           )}
 
           <div className="space-y-1.5">
-            <Label>المندوب الجديد</Label>
+            <Label htmlFor="assign-employee">المندوب الجديد</Label>
             <Select
               value={assignForm.employee_id}
               onValueChange={(value) =>
                 setAssignForm((current) => ({ ...current, employee_id: value }))
               }
             >
-              <SelectTrigger>
+              <SelectTrigger id="assign-employee">
                 <SelectValue placeholder="اختر المندوب" />
               </SelectTrigger>
               <SelectContent>
@@ -118,8 +116,9 @@ export const PlatformAssignDialog = ({
           </div>
 
           <div className="space-y-1.5">
-            <Label>تاريخ البداية</Label>
+            <Label htmlFor="assign-start-date">تاريخ البداية</Label>
             <Input
+              id="assign-start-date"
               type="date"
               value={assignForm.start_date}
               onChange={(event) =>
@@ -129,8 +128,9 @@ export const PlatformAssignDialog = ({
           </div>
 
           <div className="space-y-1.5">
-            <Label>ملاحظات</Label>
+            <Label htmlFor="assign-notes">ملاحظات</Label>
             <Textarea
+              id="assign-notes"
               value={assignForm.notes}
               onChange={(event) =>
                 setAssignForm((current) => ({ ...current, notes: event.target.value }))

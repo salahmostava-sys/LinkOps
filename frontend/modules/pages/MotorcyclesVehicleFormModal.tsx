@@ -80,11 +80,12 @@ export function VehicleFormModal({ open, onClose, onSaved, editVehicle }: Readon
     });
   }, [editVehicle, open]);
 
-  const saveButtonLabel = saving
-    ? 'جاري الحفظ...'
-    : editVehicle
-      ? 'حفظ التعديلات'
-      : 'إضافة المركبة';
+  let saveButtonLabel = 'إضافة المركبة';
+  if (saving) {
+    saveButtonLabel = 'جاري الحفظ...';
+  } else if (editVehicle) {
+    saveButtonLabel = 'حفظ التعديلات';
+  }
 
   const handleSave = async () => {
     if (!form.plate_number.trim()) {
