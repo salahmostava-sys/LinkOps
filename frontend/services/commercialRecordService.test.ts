@@ -23,7 +23,7 @@ vi.mock('@services/serviceError', () => ({
   }),
 }));
 
-import { commercialRecordService } from './commercialRecordService';
+import { commercialRecordService, COMMERCIAL_RECORDS_MIGRATION_REQUIRED_MESSAGE } from './commercialRecordService';
 
 describe('commercialRecordService', () => {
   beforeEach(() => {
@@ -31,45 +31,150 @@ describe('commercialRecordService', () => {
     for (const k of Object.keys(tableResults)) delete tableResults[k];
   });
 
-  it('merges managed and legacy commercial records with usage counts', async () => {
-    tableResults.commercial_records = {
-      data: [{ id: 'cr-1', name: 'سجل مكة' }],
-      error: null,
-    };
-    tableResults.employees = {
-      data: [
-        { commercial_record: 'سجل مكة' },
-        { commercial_record: 'سجل مكة' },
-        { commercial_record: 'سجل جدة' },
-      ],
-      error: null,
-    };
+  describe('listCatalog', () => {
+    it('merges managed and legacy commercial records with usage counts', async () => {
+      tableResults.commercial_records = {
+        data: [{ id: 'cr-1', name: 'سجل مكة' }],
+        error: null,
+      };
+      tableResults.employees = {
+        data: [
+          { commercial_record: 'سجل مكة' },
+          { commercial_record: 'سجل مكة' },
+          { commercial_record: 'سجل جدة' },
+        ],
+        error: null,
+      };
 
-    const result = await commercialRecordService.listCatalog();
+      const result = await commercialRecordService.listCatalog();
 
-    expect(result.tableAvailable).toBe(true);
-    expect(result.records).toEqual([
-      { id: 'cr-1', name: 'سجل مكة', usage_count: 2, source: 'managed' },
-      { id: null, name: 'سجل جدة', usage_count: 1, source: 'legacy' },
-    ]);
+      expect(result.tableAvailable).toBe(true);
+      expect(result.records).toEqual([
+        { id: 'cr-1', name: 'سجل مكة', usage_count: 2, source: 'managed' },
+        { id: null, name: 'سجل جدة', usage_count: 1, source: 'legacy' },
+      ]);
+    });
+
+    it('falls back to legacy values when managed table is missing', async () => {
+      tableResults.commercial_records = {
+        data: null,
+        error: new Error('relation "public.commercial_records" does not exist'),
+      };
+      tableResults.employees = {
+        data: [{ commercial_record: 'سجل رئيسي' }],
+        error: null,
+      };
+
+      const result = await commercialRecordService.listCatalog();
+
+      expect(result.tableAvailable).toBe(false);
+      expect(result.records).toEqual([
+        { id: null, name: 'سجل رئيسي', usage_count: 1, source: 'legacy' },
+      ]);
+    });
+
+    it('throws when getting employees fails', async () => {
+      tableResults.employees = { data: null, error: new Error('rls') };
+      await expect(commercialRecordService.listCatalog()).rejects.toThrow('commercialRecordService.listEmployeeCommercialRecordUsage: rls');
+    });
+
+    it('throws when getting records fails with non-missing error', async () => {
+      tableResults.employees = { data: [], error: null };
+      tableResults.commercial_records = { data: null, error: new Error('timeout') };
+      await expect(commercialRecordService.listCatalog()).rejects.toThrow('commercialRecordService.listCatalog: timeout');
+    });
   });
 
-  it('falls back to legacy values when managed table is missing', async () => {
-    tableResults.commercial_records = {
-      data: null,
-      error: new Error('relation "public.commercial_records" does not exist'),
-    };
-    tableResults.employees = {
-      data: [{ commercial_record: 'سجل رئيسي' }],
-      error: null,
-    };
+  describe('createRecord', () => {
+    it('creates record successfully', async () => {
+      tableResults.commercial_records = { data: { id: 'cr-1', name: 'New' }, error: null };
+      const res = await commercialRecordService.createRecord('New');
+      expect(res).toEqual({ id: 'cr-1', name: 'New' });
+    });
 
-    const result = await commercialRecordService.listCatalog();
+    it('throws when name is empty', async () => {
+      await expect(commercialRecordService.createRecord('   ')).rejects.toThrow('اسم السجل التجاري مطلوب');
+    });
 
-    expect(result.tableAvailable).toBe(false);
-    expect(result.records).toEqual([
-      { id: null, name: 'سجل رئيسي', usage_count: 1, source: 'legacy' },
-    ]);
+    it('throws migration error when table is missing', async () => {
+      tableResults.commercial_records = { data: null, error: new Error('commercial_records does not exist') };
+      await expect(commercialRecordService.createRecord('New')).rejects.toThrow(COMMERCIAL_RECORDS_MIGRATION_REQUIRED_MESSAGE);
+    });
+
+    it('throws normal error when db fails', async () => {
+      tableResults.commercial_records = { data: null, error: new Error('db error') };
+      await expect(commercialRecordService.createRecord('New')).rejects.toThrow('commercialRecordService.createRecord: db error');
+    });
+  });
+
+  describe('updateRecord', () => {
+    it('updates record successfully', async () => {
+      tableResults.commercial_records = { data: null, error: null };
+      tableResults.employees = { data: null, error: null };
+      await commercialRecordService.updateRecord('cr-1', 'New Name', 'Old Name');
+      expect(fromMock).toHaveBeenCalledWith('commercial_records');
+      expect(fromMock).toHaveBeenCalledWith('employees');
+    });
+
+    it('updates without sync if name is unchanged', async () => {
+      tableResults.commercial_records = { data: null, error: null };
+      await commercialRecordService.updateRecord('cr-1', 'Old Name', 'Old Name');
+      expect(fromMock).toHaveBeenCalledWith('commercial_records');
+      expect(fromMock).not.toHaveBeenCalledWith('employees');
+    });
+
+    it('throws when name is empty', async () => {
+      await expect(commercialRecordService.updateRecord('cr-1', '  ', 'Old')).rejects.toThrow('اسم السجل التجاري مطلوب');
+    });
+
+    it('throws migration error when table is missing', async () => {
+      tableResults.commercial_records = { data: null, error: new Error('commercial_records does not exist') };
+      await expect(commercialRecordService.updateRecord('cr-1', 'New', 'Old')).rejects.toThrow(COMMERCIAL_RECORDS_MIGRATION_REQUIRED_MESSAGE);
+    });
+
+    it('throws when record update fails', async () => {
+      tableResults.commercial_records = { data: null, error: new Error('db error') };
+      await expect(commercialRecordService.updateRecord('cr-1', 'New', 'Old')).rejects.toThrow('commercialRecordService.updateRecord.record: db error');
+    });
+
+    it('throws and rolls back when employee sync fails', async () => {
+      // It calls update on commercial_records (success), then update on employees (fails),
+      // then update on commercial_records again (rollback).
+      const mockUpdate = vi.fn()
+        .mockReturnValueOnce({ eq: vi.fn().mockResolvedValue({ error: null }) }) // commercial_records success
+        .mockReturnValueOnce({ eq: vi.fn().mockResolvedValue({ error: new Error('sync fail') }) }) // employees fail
+        .mockReturnValueOnce({ eq: vi.fn().mockResolvedValue({ error: null }) }); // rollback
+
+      const originalImpl = fromMock.getMockImplementation();
+      fromMock.mockImplementation((table) => {
+        if (table === 'commercial_records' || table === 'employees') {
+          return { update: mockUpdate } as any;
+        }
+        return createQueryBuilder({ data: null, error: null });
+      });
+
+      await expect(commercialRecordService.updateRecord('cr-1', 'New', 'Old')).rejects.toThrow('commercialRecordService.updateRecord.syncEmployees: sync fail');
+      expect(mockUpdate).toHaveBeenCalledTimes(3);
+      fromMock.mockImplementation(originalImpl as any);
+    });
+  });
+
+  describe('deleteRecord', () => {
+    it('deletes record successfully', async () => {
+      tableResults.commercial_records = { data: null, error: null };
+      await commercialRecordService.deleteRecord('cr-1');
+      expect(fromMock).toHaveBeenCalledWith('commercial_records');
+    });
+
+    it('throws migration error when table is missing', async () => {
+      tableResults.commercial_records = { data: null, error: new Error('commercial_records does not exist') };
+      await expect(commercialRecordService.deleteRecord('cr-1')).rejects.toThrow(COMMERCIAL_RECORDS_MIGRATION_REQUIRED_MESSAGE);
+    });
+
+    it('throws when delete fails', async () => {
+      tableResults.commercial_records = { data: null, error: new Error('db error') };
+      await expect(commercialRecordService.deleteRecord('cr-1')).rejects.toThrow('commercialRecordService.deleteRecord: db error');
+    });
   });
 });
 

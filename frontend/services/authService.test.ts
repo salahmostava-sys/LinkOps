@@ -2,12 +2,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createQueryBuilder, type MockQueryResult } from '@shared/test/mocks/supabaseClientMock';
 import { resetMockTableResults } from '@shared/test/mocks/serviceLayerTestUtils';
 
-const { getSessionMock, fetchMock, tableResults, fromMock, rpcMock, channelMock, removeChannelMock, onAuthStateChangeMock, signInWithPasswordMock, signOutMock, getUserMock, updateUserMock, refreshSessionMock } = vi.hoisted(() => {
+const { getSessionMock, invokeMock, tableResults, fromMock, rpcMock, channelMock, removeChannelMock, onAuthStateChangeMock, signInWithPasswordMock, signOutMock, getUserMock, updateUserMock, refreshSessionMock } = vi.hoisted(() => {
   const tableResultsLocal: Record<string, MockQueryResult> = {};
   return {
     tableResults: tableResultsLocal,
     getSessionMock: vi.fn(),
-    fetchMock: vi.fn(),
+    invokeMock: vi.fn(),
     fromMock: vi.fn((table: string) => createQueryBuilder(tableResultsLocal[table] ?? { data: null, error: null })),
     rpcMock: vi.fn(),
     channelMock: vi.fn(),
@@ -18,6 +18,7 @@ const { getSessionMock, fetchMock, tableResults, fromMock, rpcMock, channelMock,
     getUserMock: vi.fn(),
     updateUserMock: vi.fn(),
     refreshSessionMock: vi.fn(),
+    invokeMock: vi.fn(),
   };
 });
 
@@ -37,7 +38,7 @@ vi.mock('./supabase/client', () => ({
     channel: channelMock,
     removeChannel: removeChannelMock,
     functions: {
-      invoke: vi.fn(),
+      invoke: (...args: unknown[]) => invokeMock(...args),
     },
   },
 }));
@@ -53,15 +54,18 @@ vi.mock('./serviceError', () => ({
 import { authService } from './authService';
 
 describe('authService', () => {
-  beforeEach(() => {
+  afterEach(() => {
     vi.clearAllMocks();
+    invokeMock.mockReset();
     resetMockTableResults(tableResults);
+  });
+
+  beforeEach(() => {
     fromMock.mockImplementation((table: string) => createQueryBuilder(tableResults[table] ?? { data: null, error: null }));
     getSessionMock.mockResolvedValue({
       data: { session: { access_token: 'test-access-token' } },
       error: null,
     });
-    globalThis.fetch = fetchMock as typeof fetch;
   });
 
   describe('signIn', () => {
@@ -218,9 +222,9 @@ describe('authService', () => {
 
   describe('revokeSession', () => {
     it('calls admin API', async () => {
-      fetchMock.mockResolvedValue({ ok: true });
+      invokeMock.mockResolvedValue({ data: null, error: null });
       await authService.revokeSession('u1');
-      expect(fetchMock).toHaveBeenCalled();
+      expect(invokeMock).toHaveBeenCalled();
     });
     it('throws if no userId', async () => {
       await expect(authService.revokeSession(null)).rejects.toThrow('userId is required');
@@ -230,59 +234,56 @@ describe('authService', () => {
       await expect(authService.revokeSession('u1')).rejects.toThrow('not authenticated');
     });
     it('throws fallback message if res not ok and no JSON', async () => {
-      fetchMock.mockResolvedValue({ ok: false, headers: new Headers({ 'content-type': 'text/html' }) });
+      invokeMock.mockResolvedValue({ data: null, error: { message: 'NetworkError when attempting to fetch resource.' } });
       await expect(authService.revokeSession('u1')).rejects.toThrow('الخادم غير متاح حالياً');
     });
     it('throws json error message if provided', async () => {
-      fetchMock.mockResolvedValue({ ok: false, headers: new Headers({ 'content-type': 'application/json' }), json: () => Promise.resolve({ error: 'specific error' }) });
+      invokeMock.mockResolvedValue({ data: null, error: { message: 'specific error' } });
       await expect(authService.revokeSession('u1')).rejects.toThrow('specific error');
     });
     it('throws if fetch fails completely', async () => {
-      fetchMock.mockRejectedValue(new Error('Network error'));
-      await expect(authService.revokeSession('u1')).rejects.toThrow('تعذر الاتصال بالخادم');
+      invokeMock.mockRejectedValue(new Error('Network error'));
+      await expect(authService.revokeSession('u1')).rejects.toThrow('Network error');
     });
   });
 
   describe('createManagedUser', () => {
     it('createManagedUser sends create_user payload and returns the created user id', async () => {
-      fetchMock.mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve({ user_id: 'user-99' }),
+      invokeMock.mockResolvedValue({
+        data: { user_id: 'user-99' },
+        error: null,
       });
 
-      const result = await authService.createManagedUser({
-        name: 'Test User',
-        email: 'test@example.com',
-        password: 'password123',
-        role: 'operations',
+      const res = await authService.createManagedUser({
+        email: 'new@example.com',
+        password: 'pwd',
+        name: 'New User',
+        role: 'hr',
       });
 
-      expect(getSessionMock).toHaveBeenCalled();
-      expect(fetchMock).toHaveBeenCalledWith('/api/functions/admin-update-user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer test-access-token' },
-        body: JSON.stringify({
+      expect(res).toEqual({ user_id: 'user-99' });
+      expect(invokeMock).toHaveBeenCalledWith('admin-update-user', {
+        body: {
           action: 'create_user',
-          email: 'test@example.com',
-          password: 'password123',
-          name: 'Test User',
-          role: 'operations',
-        }),
+          email: 'new@example.com',
+          password: 'pwd',
+          name: 'New User',
+          role: 'hr',
+        },
       });
-      expect(result).toEqual({ user_id: 'user-99' });
     });
 
     it('createManagedUser rejects responses that omit the new user id', async () => {
-      fetchMock.mockResolvedValue({
-        ok: true,
-        json: () => ({ success: true }),
+      invokeMock.mockResolvedValue({
+        data: {},
+        error: null,
       });
 
       await expect(
         authService.createManagedUser({
-          name: 'Test User',
-          email: 'test@example.com',
-          password: 'password123',
+          email: 'new@example.com',
+          password: 'pwd',
+          name: 'New User',
           role: 'viewer',
         }),
       ).rejects.toThrow('authService.createManagedUser: missing user_id');
@@ -291,17 +292,12 @@ describe('authService', () => {
 
   describe('deleteManagedUser', () => {
     it('deleteManagedUser sends delete_user payload', async () => {
-      fetchMock.mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve({ success: true }),
-      });
+      invokeMock.mockResolvedValue({ data: null, error: null });
 
-      await authService.deleteManagedUser('user-7');
+      await authService.deleteManagedUser('u-99');
 
-      expect(fetchMock).toHaveBeenCalledWith('/api/functions/admin-update-user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer test-access-token' },
-        body: JSON.stringify({ user_id: 'user-7', action: 'delete_user' }),
+      expect(invokeMock).toHaveBeenCalledWith('admin-update-user', {
+        body: { action: 'delete_user', user_id: 'u-99' },
       });
     });
     

@@ -26,55 +26,116 @@ describe('violationService', () => {
     resetMockTableResults(tableResults);
   });
 
-  it('getViolations returns rows on success', async () => {
-    tableResults.external_deductions = {
-      data: [{ id: 'd1', employee_id: 'e1', amount: 100, incident_date: '2026-03-01', apply_month: '2026-03', approval_status: 'pending', note: null }],
-      error: null,
-    };
+  describe('getViolations', () => {
+    it('returns rows on success', async () => {
+      tableResults.external_deductions = {
+        data: [{ id: 'd1', employee_id: 'e1', amount: 100, incident_date: '2026-03-01', apply_month: '2026-03', approval_status: 'pending', note: null }],
+        error: null,
+      };
 
-    const rows = await violationService.getViolations();
-    expect(rows).toHaveLength(1);
-    expect(rows[0].id).toBe('d1');
-    expect(fromMock).toHaveBeenCalledWith('external_deductions');
+      const rows = await violationService.getViolations();
+      expect(rows).toHaveLength(1);
+      expect(rows[0].id).toBe('d1');
+      expect(fromMock).toHaveBeenCalledWith('external_deductions');
+    });
+
+    it('throws on Supabase error', async () => {
+      tableResults.external_deductions = { data: null, error: new Error('rls') };
+      await expect(violationService.getViolations()).rejects.toThrow('violationService.getViolations: rls');
+    });
   });
 
-  it('getViolations throws on Supabase error', async () => {
-    tableResults.external_deductions = {
-      data: null,
-      error: new Error('rls'),
-    };
+  describe('findVehiclesByPlateQuery', () => {
+    it('returns matches on success', async () => {
+      tableResults.vehicles = {
+        data: [{ id: 'v1', plate_number: 'أ ب ج', plate_number_en: null, brand: 'X', type: 'car' }],
+        error: null,
+      };
 
-    await expect(violationService.getViolations()).rejects.toThrow('violationService.getViolations: rls');
+      const rows = await violationService.findVehiclesByPlateQuery('أ');
+      expect(rows).toHaveLength(1);
+      expect(fromMock).toHaveBeenCalledWith('vehicles');
+    });
+
+    it('throws on Supabase error', async () => {
+      tableResults.vehicles = { data: null, error: new Error('timeout') };
+      await expect(violationService.findVehiclesByPlateQuery('x')).rejects.toThrow('violationService.findVehiclesByPlateQuery: timeout');
+    });
   });
 
-  it('findVehiclesByPlateQuery returns matches on success', async () => {
-    tableResults.vehicles = {
-      data: [{ id: 'v1', plate_number: 'أ ب ج', plate_number_en: null, brand: 'X', type: 'car' }],
-      error: null,
-    };
-
-    const rows = await violationService.findVehiclesByPlateQuery('أ');
-    expect(rows).toHaveLength(1);
-    expect(fromMock).toHaveBeenCalledWith('vehicles');
+  describe('findVehicleIdsByPlate', () => {
+    it('returns vehicle ids', async () => {
+      tableResults.vehicles = { data: [{ id: 'v1' }], error: null };
+      const res = await violationService.findVehicleIdsByPlate('123');
+      expect(res).toEqual([{ id: 'v1' }]);
+    });
   });
 
-  it('findVehiclesByPlateQuery throws on Supabase error', async () => {
-    tableResults.vehicles = { data: null, error: new Error('timeout') };
-
-    await expect(violationService.findVehiclesByPlateQuery('x')).rejects.toThrow(
-      'violationService.findVehiclesByPlateQuery: timeout',
-    );
+  describe('getAssignmentsByVehicleIds', () => {
+    it('returns assignments', async () => {
+      tableResults.vehicle_assignments = { data: [{ id: 'a1' }], error: null };
+      const res = await violationService.getAssignmentsByVehicleIds(['v1']);
+      expect(res).toEqual([{ id: 'a1' }]);
+    });
   });
 
-  it('deleteViolation resolves when delete succeeds', async () => {
-    tableResults.external_deductions = { data: null, error: null };
-
-    await expect(violationService.deleteViolation('d1')).resolves.toBeUndefined();
+  describe('getExistingFineDeductions', () => {
+    it('returns existing deductions', async () => {
+      tableResults.external_deductions = { data: [{ id: 'd1' }], error: null };
+      const res = await violationService.getExistingFineDeductions(['e1'], '2026-03-01', '2026-03');
+      expect(res).toEqual([{ id: 'd1' }]);
+    });
   });
 
-  it('deleteViolation throws on Supabase error', async () => {
-    tableResults.external_deductions = { data: null, error: new Error('fk') };
+  describe('createFineDeduction', () => {
+    it('creates fine deduction', async () => {
+      tableResults.external_deductions = { data: { id: 'd1' }, error: null };
+      const res = await violationService.createFineDeduction({});
+      expect(res).toEqual({ id: 'd1' });
+    });
+  });
 
-    await expect(violationService.deleteViolation('d1')).rejects.toThrow('violationService.deleteViolation: fk');
+  describe('updateViolation', () => {
+    it('updates violation', async () => {
+      tableResults.external_deductions = { data: null, error: null };
+      await violationService.updateViolation('1', {});
+      expect(fromMock).toHaveBeenCalledWith('external_deductions');
+    });
+  });
+
+  describe('deleteViolation', () => {
+    it('resolves when delete succeeds', async () => {
+      tableResults.external_deductions = { data: null, error: null };
+      await expect(violationService.deleteViolation('d1')).resolves.toBeUndefined();
+    });
+
+    it('throws on Supabase error', async () => {
+      tableResults.external_deductions = { data: null, error: new Error('fk') };
+      await expect(violationService.deleteViolation('d1')).rejects.toThrow('violationService.deleteViolation: fk');
+    });
+  });
+
+  describe('findMatchingAdvanceForFine', () => {
+    it('returns matching advance', async () => {
+      tableResults.advances = { data: [{ id: 'a1' }], error: null };
+      const res = await violationService.findMatchingAdvanceForFine('e1', '2026-03', 10, 100);
+      expect(res).toEqual([{ id: 'a1' }]);
+    });
+  });
+
+  describe('createAdvanceFromFine', () => {
+    it('creates advance', async () => {
+      tableResults.advances = { data: { id: 'a1' }, error: null };
+      const res = await violationService.createAdvanceFromFine({});
+      expect(res).toEqual({ id: 'a1' });
+    });
+  });
+
+  describe('createSingleInstallment', () => {
+    it('creates single installment', async () => {
+      tableResults.advance_installments = { data: null, error: null };
+      await violationService.createSingleInstallment({});
+      expect(fromMock).toHaveBeenCalledWith('advance_installments');
+    });
   });
 });
