@@ -37,7 +37,6 @@ describe('salaryService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     invokeMock.mockReset();
-    global.fetch = vi.fn();
     tableMocks = {};
     fromMock.mockImplementation((table: string) => {
       const mockObj = tableMocks[table] ?? { data: null, error: null };

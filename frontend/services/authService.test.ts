@@ -18,7 +18,6 @@ const { getSessionMock, invokeMock, tableResults, fromMock, rpcMock, channelMock
     getUserMock: vi.fn(),
     updateUserMock: vi.fn(),
     refreshSessionMock: vi.fn(),
-    invokeMock: vi.fn(),
   };
 });
 
@@ -54,13 +53,10 @@ vi.mock('./serviceError', () => ({
 import { authService } from './authService';
 
 describe('authService', () => {
-  afterEach(() => {
+  beforeEach(() => {
     vi.clearAllMocks();
     invokeMock.mockReset();
     resetMockTableResults(tableResults);
-  });
-
-  beforeEach(() => {
     fromMock.mockImplementation((table: string) => createQueryBuilder(tableResults[table] ?? { data: null, error: null }));
     getSessionMock.mockResolvedValue({
       data: { session: { access_token: 'test-access-token' } },
@@ -202,13 +198,24 @@ describe('authService', () => {
   });
 
   describe('subscribeToProfileActiveChanges', () => {
-    it('sets up channel', () => {
-      const mockChannel = { on: vi.fn().mockReturnThis(), subscribe: vi.fn().mockReturnThis() };
+    it('fires the callback when the profile active status changes', () => {
+      let capturedHandler: ((payload: unknown) => void) | null = null;
+      const mockChannel = {
+        on: vi.fn().mockImplementation((_event: string, _filter: unknown, handler: (payload: unknown) => void) => {
+          capturedHandler = handler;
+          return mockChannel;
+        }),
+        subscribe: vi.fn().mockReturnThis(),
+      };
       channelMock.mockReturnValue(mockChannel);
-      authService.subscribeToProfileActiveChanges('u1', vi.fn());
+
+      const cb = vi.fn();
+      authService.subscribeToProfileActiveChanges('u1', cb);
+
       expect(channelMock).toHaveBeenCalledWith('profile-active-u1');
-      expect(mockChannel.on).toHaveBeenCalled();
-      expect(mockChannel.subscribe).toHaveBeenCalled();
+      // Simulate a realtime event arriving
+      capturedHandler?.({ new: { is_active: false } });
+      expect(cb).toHaveBeenCalledWith(expect.objectContaining({ is_active: false }));
     });
   });
 
@@ -248,7 +255,7 @@ describe('authService', () => {
   });
 
   describe('createManagedUser', () => {
-    it('createManagedUser sends create_user payload and returns the created user id', async () => {
+    it('new user created via admin edge function returns assigned user id', async () => {
       invokeMock.mockResolvedValue({
         data: { user_id: 'user-99' },
         error: null,
@@ -273,7 +280,7 @@ describe('authService', () => {
       });
     });
 
-    it('createManagedUser rejects responses that omit the new user id', async () => {
+    it('missing user_id in admin response throws to prevent silent failure', async () => {
       invokeMock.mockResolvedValue({
         data: {},
         error: null,
@@ -291,7 +298,7 @@ describe('authService', () => {
   });
 
   describe('deleteManagedUser', () => {
-    it('deleteManagedUser sends delete_user payload', async () => {
+    it('delete_user action sent with correct user_id to admin edge function', async () => {
       invokeMock.mockResolvedValue({ data: null, error: null });
 
       await authService.deleteManagedUser('u-99');
@@ -300,7 +307,7 @@ describe('authService', () => {
         body: { action: 'delete_user', user_id: 'u-99' },
       });
     });
-    
+
     it('throws if no userId', async () => {
       await expect(authService.deleteManagedUser(null)).rejects.toThrow('userId is required');
     });

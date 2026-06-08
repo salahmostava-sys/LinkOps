@@ -183,26 +183,42 @@ describe('fuelService', () => {
   });
 
   describe('exportDailyMileage', () => {
-    it('fetches and chunks all records', async () => {
-      // Mock fuelService.getDailyMileagePaged by spying on it
-      const spy = vi.spyOn(fuelService, 'getDailyMileagePaged');
-      
-      // Page 1: returns 2 items
-      spy.mockResolvedValueOnce({
-        rows: [{ id: '1' }, { id: '2' }],
-        total: 3, page: 1, pageSize: 2, totalPages: 2,
-      });
-      // Page 2: returns 1 item
-      spy.mockResolvedValueOnce({
-        rows: [{ id: '3' }],
-        total: 3, page: 2, pageSize: 2, totalPages: 2,
+    it('collects all pages and returns combined row set', async () => {
+      // Page 1: full chunk of 2 rows (count=3 signals more data)
+      const page1Builder = (() => {
+        const result = Promise.resolve({ data: [{ id: '1' }, { id: '2' }], error: null, count: 3 });
+        const b: any = {
+          select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(),
+          gte: vi.fn().mockReturnThis(), lte: vi.fn().mockReturnThis(),
+          order: vi.fn().mockReturnThis(), range: vi.fn().mockReturnThis(),
+          ilike: vi.fn().mockReturnThis(),
+          then: (res: any) => result.then(res),
+        };
+        return b;
+      })();
+      // Page 2: partial chunk (< chunkSize) so pagination stops
+      const page2Builder = (() => {
+        const result = Promise.resolve({ data: [{ id: '3' }], error: null, count: 3 });
+        const b: any = {
+          select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(),
+          gte: vi.fn().mockReturnThis(), lte: vi.fn().mockReturnThis(),
+          order: vi.fn().mockReturnThis(), range: vi.fn().mockReturnThis(),
+          ilike: vi.fn().mockReturnThis(),
+          then: (res: any) => result.then(res),
+        };
+        return b;
+      })();
+
+      fromMock
+        .mockReturnValueOnce(page1Builder)
+        .mockReturnValueOnce(page2Builder);
+
+      const res = await fuelService.exportDailyMileage({
+        monthStart: '2026-03-01', monthEnd: '2026-03-31', chunkSize: 2, maxRows: 10,
       });
 
-      const res = await fuelService.exportDailyMileage({ monthStart: '2026-03-01', monthEnd: '2026-03-31', chunkSize: 2, maxRows: 10 });
       expect(res).toHaveLength(3);
-      expect(spy).toHaveBeenCalledTimes(2);
-
-      spy.mockRestore();
+      expect(fromMock).toHaveBeenCalledWith('vehicle_mileage_daily');
     });
   });
 
@@ -231,13 +247,13 @@ describe('fuelService', () => {
     it('updates when editId is provided', async () => {
       tableResults.vehicle_mileage_daily = { data: null, error: null };
       await fuelService.upsertDailyMileage(validPayload, 'edit-1');
-      expect(true).toBe(true);
+      expect(fromMock).toHaveBeenCalledWith('vehicle_mileage_daily');
     });
 
     it('upserts when editId is not provided', async () => {
       tableResults.vehicle_mileage_daily = { data: null, error: null };
       await fuelService.upsertDailyMileage(validPayload);
-      expect(true).toBe(true);
+      expect(fromMock).toHaveBeenCalledWith('vehicle_mileage_daily');
     });
 
     it('throws on error', async () => {
@@ -267,7 +283,7 @@ describe('fuelService', () => {
     it('deletes successfully', async () => {
       tableResults.vehicle_mileage_daily = { data: null, error: null };
       await fuelService.deleteDailyMileage('1');
-      expect(true).toBe(true);
+      expect(fromMock).toHaveBeenCalledWith('vehicle_mileage_daily');
     });
     it('throws on error', async () => {
       tableResults.vehicle_mileage_daily = {
@@ -285,7 +301,7 @@ describe('fuelService', () => {
     it('upserts with overwrite', async () => {
       tableResults.vehicle_mileage = { data: null, error: null };
       await fuelService.saveMonthlyMileageImport([{ employee_id: 'e1', month_year: '2026-03', km_total: 100, fuel_cost: 50, notes: null }], true);
-      expect(true).toBe(true);
+      expect(fromMock).toHaveBeenCalledWith('vehicle_mileage');
     });
     it('throws on overwrite error', async () => {
       tableResults.vehicle_mileage = { data: null, error: new Error('upsert err') };
@@ -295,7 +311,7 @@ describe('fuelService', () => {
     it('inserts ignoring duplicates', async () => {
       tableResults.vehicle_mileage = { data: null, error: null };
       await fuelService.saveMonthlyMileageImport([{ employee_id: 'e1', month_year: '2026-03', km_total: 100, fuel_cost: 50, notes: null }], false);
-      expect(true).toBe(true);
+      expect(fromMock).toHaveBeenCalledWith('vehicle_mileage');
     });
     it('throws on insert error', async () => {
       tableResults.vehicle_mileage = { data: null, error: new Error('insert err') };

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createQueryBuilder, type MockQueryResult } from '@shared/test/mocks/supabaseClientMock';
-import { formatServiceError, resetMockTableResults } from '@shared/test/mocks/serviceLayerTestUtils';
+import { resetMockTableResults } from '@shared/test/mocks/serviceLayerTestUtils';
 
 const { tableResults, fromMock, rpcMock } = vi.hoisted(() => {
   const tableResultsLocal: Record<string, MockQueryResult> = {};
@@ -110,7 +110,7 @@ describe('performanceService', () => {
     it('deletes successfully', async () => {
       tableResults.order_import_batches = { data: null, error: null };
       await performanceService.deleteImportBatch('b1');
-      expect(true).toBe(true);
+      expect(fromMock).toHaveBeenCalledWith('order_import_batches');
     });
     it('throws on error', async () => {
       tableResults.order_import_batches = { data: null, error: new Error('del err') };

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createQueryBuilder, type MockQueryResult } from '@shared/test/mocks/supabaseClientMock';
+import { throwFormattedServiceError } from '@shared/test/mocks/serviceLayerTestUtils';
 
 const { tableResults, fromMock, authMock } = vi.hoisted(() => {
   const tableResultsLocal: Record<string, MockQueryResult> = {};
@@ -20,10 +21,7 @@ vi.mock('@services/supabase/client', () => ({
 }));
 
 vi.mock('@services/serviceError', () => ({
-  handleSupabaseError: vi.fn((error: unknown, context: string) => {
-    const message = error instanceof Error ? error.message : 'service error';
-    throw new Error(`${context}: ${message}`);
-  }),
+  handleSupabaseError: vi.fn(throwFormattedServiceError),
   toServiceError: vi.fn((error: unknown, context: string) => {
     const message = error instanceof Error ? error.message : 'service error';
     return new Error(`${context}: ${message}`);
@@ -108,7 +106,7 @@ describe('maintenanceService', () => {
       tableResults.maintenance_parts = { data: null, error: null, count: 0 };
       tableResults.spare_parts = { data: null, error: null };
       await maintenanceService.deleteSparePart('sp1');
-      expect(true).toBe(true);
+      expect(fromMock).toHaveBeenCalledWith('spare_parts');
     });
 
     it('throws when part is referenced in maintenance', async () => {
@@ -227,7 +225,7 @@ describe('maintenanceService', () => {
     it('deletes successfully', async () => {
       tableResults.maintenance_logs = { data: null, error: null };
       await maintenanceService.deleteMaintenanceLog('log1');
-      expect(true).toBe(true);
+      expect(fromMock).toHaveBeenCalledWith('maintenance_logs');
     });
     it('throws on error', async () => {
       tableResults.maintenance_logs = { data: null, error: new Error('del err') };

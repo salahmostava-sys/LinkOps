@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { fromMock, upsertMock, rpcMock, tableResults } = vi.hoisted(() => {
+const { fromMock, upsertMock, rpcMock, tableResults, getUserMock } = vi.hoisted(() => {
   const tableResultsLocal: Record<string, any> = {};
   const upsertMockLocal = vi.fn();
+  const getUserMockLocal = vi.fn();
   return {
     tableResults: tableResultsLocal,
     fromMock: vi.fn((table: string) => {
@@ -27,7 +28,6 @@ const { fromMock, upsertMock, rpcMock, tableResults } = vi.hoisted(() => {
         upsert: vi.fn((...args: any[]) => {
           const val = upsertMockLocal(...args);
           if (val !== undefined) {
-             // if val is a promise, return it directly for bulkUpsert, but also attach chain methods just in case
              if (val instanceof Promise) {
                const prom = val as any;
                prom.select = () => prom;
@@ -43,6 +43,7 @@ const { fromMock, upsertMock, rpcMock, tableResults } = vi.hoisted(() => {
     }),
     upsertMock: upsertMockLocal,
     rpcMock: vi.fn(),
+    getUserMock: getUserMockLocal,
   };
 });
 
@@ -50,12 +51,9 @@ vi.mock('@services/supabase/client', () => ({
   supabase: {
     from: fromMock,
     rpc: rpcMock,
-  },
-}));
-
-vi.mock('@services/authService', () => ({
-  authService: {
-    getCurrentUser: vi.fn().mockResolvedValue({ id: 'user1' }),
+    auth: {
+      getUser: (...args: any[]) => getUserMock(...args),
+    },
   },
 }));
 
@@ -73,6 +71,8 @@ describe('orderService', () => {
     vi.clearAllMocks();
     for (const k of Object.keys(tableResults)) delete tableResults[k];
     rpcMock.mockResolvedValue({ data: null, error: null });
+    // Provide an authenticated user by default so lockMonth tests work
+    getUserMock.mockResolvedValue({ data: { user: { id: 'user1' } }, error: null });
   });
 
   describe('bulkUpsert and replaceMonthData', () => {
