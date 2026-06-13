@@ -525,7 +525,7 @@ def detect_anomalies(data: dict) -> dict:
     employee_name = data.get("employee_name", "الموظف")
 
     checks = [
-        _detect_salary_anomaly(employee_name, data.get("current_salary", 0), data.get("expected_salary_range", (0, 0))),
+        _detect_salary_anomaly(employee_name, data.get("current_salary", 0), (data.get("expected_salary_min", 0), data.get("expected_salary_max", 0))),
         _detect_order_anomaly(employee_name, data.get("monthly_orders", 0), data.get("previous_month_orders", 0)),
         _detect_deduction_anomaly(employee_name, data.get("current_salary", 0), data.get("deductions", 0)),
     ]
