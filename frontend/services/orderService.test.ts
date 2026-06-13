@@ -8,37 +8,32 @@ const { fromMock, upsertMock, rpcMock, tableResults, getUserMock } = vi.hoisted(
     tableResults: tableResultsLocal,
     fromMock: vi.fn((table: string) => {
       const result = tableResultsLocal[table] ?? { data: null, error: null };
-      const chainObj = {
-        select: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockReturnThis(),
-        in: vi.fn().mockReturnThis(),
-        gte: vi.fn().mockReturnThis(),
-        lte: vi.fn().mockReturnThis(),
-        order: vi.fn().mockReturnThis(),
-        limit: vi.fn().mockReturnThis(),
-        range: vi.fn().mockReturnThis(),
-        ilike: vi.fn().mockReturnThis(),
-        delete: vi.fn().mockReturnThis(),
-        maybeSingle: vi.fn().mockReturnValue(Promise.resolve(result)),
-        single: vi.fn().mockReturnValue(Promise.resolve(result)),
-        then: (resolve: any) => Promise.resolve(result).then(resolve),
-      };
-      const queryBuilder = {
-        ...chainObj,
-        upsert: vi.fn((...args: any[]) => {
-          const val = upsertMockLocal(...args);
-          if (val !== undefined) {
-             if (val instanceof Promise) {
-               const prom = val as any;
-               prom.select = () => prom;
-               prom.single = () => prom;
-               return prom;
-             }
-             return val;
-          }
-          return chainObj;
-        }),
-      };
+      const queryBuilder: any = Promise.resolve(result);
+      queryBuilder.select = vi.fn().mockReturnValue(queryBuilder);
+      queryBuilder.eq = vi.fn().mockReturnValue(queryBuilder);
+      queryBuilder.in = vi.fn().mockReturnValue(queryBuilder);
+      queryBuilder.gte = vi.fn().mockReturnValue(queryBuilder);
+      queryBuilder.lte = vi.fn().mockReturnValue(queryBuilder);
+      queryBuilder.order = vi.fn().mockReturnValue(queryBuilder);
+      queryBuilder.limit = vi.fn().mockReturnValue(queryBuilder);
+      queryBuilder.range = vi.fn().mockReturnValue(queryBuilder);
+      queryBuilder.ilike = vi.fn().mockReturnValue(queryBuilder);
+      queryBuilder.delete = vi.fn().mockReturnValue(queryBuilder);
+      queryBuilder.maybeSingle = vi.fn().mockResolvedValue(result);
+      queryBuilder.single = vi.fn().mockResolvedValue(result);
+      queryBuilder.upsert = vi.fn((...args: any[]) => {
+        const val = upsertMockLocal(...args);
+        if (val !== undefined) {
+           if (val instanceof Promise) {
+             const prom = val as any;
+             prom.select = () => prom;
+             prom.single = () => prom;
+             return prom;
+           }
+           return val;
+        }
+        return queryBuilder;
+      });
       return queryBuilder;
     }),
     upsertMock: upsertMockLocal,
