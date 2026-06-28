@@ -64,7 +64,7 @@ export async function extractTextFromImage(
   onProgress?: (progress: OcrProgress) => void,
 ): Promise<string> {
   try {
-    const worker = await createWorker('ara+eng', 1, {
+    const worker = await Tesseract.createWorker('ara+eng', 1, {
       logger: (m: { status: string; progress: number }) => {
         if (onProgress) {
           onProgress({ status: m.status, progress: m.progress ?? 0 });
