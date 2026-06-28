@@ -85,67 +85,67 @@ END $$;
 
 -- Get order status: cancelled
 CREATE OR REPLACE FUNCTION _const_order_cancelled() RETURNS TEXT AS $$
-  SELECT _const_order_cancelled()::TEXT;
+  SELECT 'cancelled'::TEXT;
 $$ LANGUAGE SQL IMMUTABLE SET search_path = public;
 
 -- Get installment statuses: pending, deferred
 CREATE OR REPLACE FUNCTION _const_installment_pending() RETURNS TEXT AS $$
-  SELECT _const_installment_pending()::TEXT;
+  SELECT 'pending'::TEXT;
 $$ LANGUAGE SQL IMMUTABLE SET search_path = public;
 
 CREATE OR REPLACE FUNCTION _const_installment_deferred() RETURNS TEXT AS $$
-  SELECT _const_installment_deferred()::TEXT;
+  SELECT 'deferred'::TEXT;
 $$ LANGUAGE SQL IMMUTABLE SET search_path = public;
 
 -- Get approval status: approved
 CREATE OR REPLACE FUNCTION _const_approval_approved() RETURNS TEXT AS $$
-  SELECT _const_approval_approved()::TEXT;
+  SELECT 'approved'::TEXT;
 $$ LANGUAGE SQL IMMUTABLE SET search_path = public;
 
 -- Get work types
 CREATE OR REPLACE FUNCTION _const_work_orders() RETURNS TEXT AS $$
-  SELECT _const_work_orders()::TEXT;
+  SELECT 'orders'::TEXT;
 $$ LANGUAGE SQL IMMUTABLE SET search_path = public;
 
 CREATE OR REPLACE FUNCTION _const_work_shift() RETURNS TEXT AS $$
-  SELECT _const_work_shift()::TEXT;
+  SELECT 'shift'::TEXT;
 $$ LANGUAGE SQL IMMUTABLE SET search_path = public;
 
 CREATE OR REPLACE FUNCTION _const_work_hybrid() RETURNS TEXT AS $$
-  SELECT _const_work_hybrid()::TEXT;
+  SELECT 'hybrid'::TEXT;
 $$ LANGUAGE SQL IMMUTABLE SET search_path = public;
 
 -- Get days per month constant
 CREATE OR REPLACE FUNCTION _const_days_per_month() RETURNS NUMERIC AS $$
-  SELECT _const_days_per_month()::NUMERIC;
+  SELECT 30.0::NUMERIC;
 $$ LANGUAGE SQL IMMUTABLE SET search_path = public;
 
 -- Get employee status: active
 CREATE OR REPLACE FUNCTION _const_employee_active() RETURNS TEXT AS $$
-  SELECT _const_employee_active()::TEXT;
+  SELECT 'active'::TEXT;
 $$ LANGUAGE SQL IMMUTABLE SET search_path = public;
 
 -- Get payment methods
 CREATE OR REPLACE FUNCTION _const_payment_cash() RETURNS TEXT AS $$
-  SELECT _const_payment_cash()::TEXT;
+  SELECT 'cash'::TEXT;
 $$ LANGUAGE SQL IMMUTABLE SET search_path = public;
 
 CREATE OR REPLACE FUNCTION _const_payment_bank() RETURNS TEXT AS $$
-  SELECT _const_payment_bank()::TEXT;
+  SELECT 'bank'::TEXT;
 $$ LANGUAGE SQL IMMUTABLE SET search_path = public;
 
 -- Get calculation status
 CREATE OR REPLACE FUNCTION _const_calc_calculated() RETURNS TEXT AS $$
-  SELECT _const_calc_calculated()::TEXT;
+  SELECT 'calculated'::TEXT;
 $$ LANGUAGE SQL IMMUTABLE SET search_path = public;
 
 -- Get calculation sources
 CREATE OR REPLACE FUNCTION _const_calc_source_v6() RETURNS TEXT AS $$
-  SELECT _const_calc_source_v6()::TEXT;
+  SELECT 'engine_v6_shift_fallback'::TEXT;
 $$ LANGUAGE SQL IMMUTABLE SET search_path = public;
 
 CREATE OR REPLACE FUNCTION _const_calc_source_v7() RETURNS TEXT AS $$
-  SELECT _const_calc_source_v7()::TEXT;
+  SELECT 'engine_v7_shift_fixed'::TEXT;
 $$ LANGUAGE SQL IMMUTABLE SET search_path = public;
 
 -- Get calculation methods
@@ -158,28 +158,28 @@ CREATE OR REPLACE FUNCTION _const_calc_method_shift() RETURNS TEXT AS $$
 $$ LANGUAGE SQL IMMUTABLE SET search_path = public;
 
 CREATE OR REPLACE FUNCTION _const_calc_method_shift_fixed() RETURNS TEXT AS $$
-  SELECT _const_calc_method_shift_fixed()::TEXT;
+  SELECT 'shift_fixed'::TEXT;
 $$ LANGUAGE SQL IMMUTABLE SET search_path = public;
 
 CREATE OR REPLACE FUNCTION _const_calc_method_shift_full_month() RETURNS TEXT AS $$
-  SELECT _const_calc_method_shift_full_month()::TEXT;
+  SELECT 'shift_full_month'::TEXT;
 $$ LANGUAGE SQL IMMUTABLE SET search_path = public;
 
 CREATE OR REPLACE FUNCTION _const_calc_method_mixed() RETURNS TEXT AS $$
-  SELECT _const_calc_method_mixed()::TEXT;
+  SELECT 'mixed'::TEXT;
 $$ LANGUAGE SQL IMMUTABLE SET search_path = public;
 
 CREATE OR REPLACE FUNCTION _const_calc_method_orders_fallback() RETURNS TEXT AS $$
-  SELECT _const_calc_method_orders_fallback()::TEXT;
+  SELECT 'orders_fallback'::TEXT;
 $$ LANGUAGE SQL IMMUTABLE SET search_path = public;
 
 -- Get tier types
 CREATE OR REPLACE FUNCTION _const_tier_fixed() RETURNS TEXT AS $$
-  SELECT _const_tier_fixed()::TEXT;
+  SELECT 'fixed_amount'::TEXT;
 $$ LANGUAGE SQL IMMUTABLE SET search_path = public;
 
 CREATE OR REPLACE FUNCTION _const_tier_incremental() RETURNS TEXT AS $$
-  SELECT _const_tier_incremental()::TEXT;
+  SELECT 'base_plus_incremental'::TEXT;
 $$ LANGUAGE SQL IMMUTABLE SET search_path = public;
 
 COMMENT ON FUNCTION _const_order_cancelled() IS 'Constant: cancelled order status';
@@ -1532,7 +1532,7 @@ DO $$
 BEGIN
   IF (SELECT count(*) FROM salary_slip_templates WHERE is_default IS TRUE) > 1 THEN
     UPDATE salary_slip_templates
-    SET is_default IS FALSE
+    SET is_default = FALSE
     WHERE is_default IS TRUE
       AND id != (
         SELECT id FROM salary_slip_templates

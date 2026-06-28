@@ -1,6 +1,6 @@
-﻿
+
 -- Fix storage: make employee-documents private and fix UPDATE policy
-UPDATE storage.buckets SET public IS FALSE WHERE id = 'employee-documents'; -- NOSONAR
+UPDATE storage.buckets SET public = FALSE WHERE id = 'employee-documents'; -- NOSONAR
 
 DROP POLICY IF EXISTS "HR/admin can update employee documents" ON storage.objects;
 DROP POLICY IF EXISTS "HR/admin/finance can view employee documents" ON storage.objects;
