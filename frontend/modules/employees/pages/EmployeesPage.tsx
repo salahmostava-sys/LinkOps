@@ -107,7 +107,6 @@ const Employees = () => {
   } | null>(null);
   const [statusDate, setStatusDate] = useState<string>(todayISO());
   const [statusDateSaving, setStatusDateSaving] = useState(false);
-  const uploadIntervalRef = useRef<number | null>(null);
   const tableRef = useRef<HTMLTableElement>(null);
 
   useRealtimePostgresChanges('employees-page-realtime', REALTIME_TABLES_DASHBOARD, () => {

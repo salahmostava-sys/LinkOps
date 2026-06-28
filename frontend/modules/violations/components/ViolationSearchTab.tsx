@@ -1,4 +1,4 @@
-import type React from 'react';
+ï»¿import type React from 'react';
 import { Search, AlertTriangle, XCircle, CheckCircle, CheckCircle2, RefreshCw, ListChecks, Trash2 } from 'lucide-react';
 import { Button } from '@shared/components/ui/button';
 import { Input } from '@shared/components/ui/input';
@@ -94,7 +94,7 @@ export default function ViolationSearchTab({
                     <span className="font-semibold text-foreground">{v.plate_number}</span>
                     <span className="text-xs text-muted-foreground">
                       {v.plate_number_en && <span className="ms-2 text-muted-foreground/60">{v.plate_number_en}</span>}
-                      {v.brand && <span>{v.brand} · </span>}
+                      {v.brand && <span>{v.brand} Â· </span>}
                       <span>{v.type === 'motorcycle' ? '?????' : '?????'}</span>
                     </span>
                   </button>
@@ -212,7 +212,7 @@ export default function ViolationSearchTab({
         <div className="bg-card border border-border -2xl shadow-sm overflow-hidden rounded-2xl">
           <div className="px-5 py-3 border-b border-border flex flex-wrap items-center justify-between gap-2">
             <h2 className="text-sm font-semibold text-foreground">
-              ????? ????????? · {results.length} ???
+              ????? ????????? Â· {results.length} ???
             </h2>
             <p className="text-xs text-muted-foreground">
               ??? ??????? ???? <strong className="text-foreground">???</strong> ????? ?? <strong className="text-foreground">????? ???????</strong> ???????? ?? ??????? ??????.
@@ -234,7 +234,7 @@ export default function ViolationSearchTab({
                 {results.map((row, idx) => (
                   <tr key={row.assignment_id} className={`border-b border-border/40 hover:bg-muted/20 transition-colors ${idx % 2 === 0 ? '' : 'bg-muted/10'}`}>
                     <td className="ta-td font-semibold text-foreground">{row.employee_name}</td>
-                    <td className="ta-td text-muted-foreground">{row.violation_details || '—'}</td>
+                    <td className="ta-td text-muted-foreground">{row.violation_details || 'â€”'}</td>
                     <td className="ta-td text-muted-foreground">{row.violation_date}</td>
                     <td className="ta-td font-medium text-foreground">
                       {row.amount.toLocaleString('en-US')} ?.?
@@ -246,7 +246,7 @@ export default function ViolationSearchTab({
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border/50">
-                          — ??? ??????
+                          â€” ??? ??????
                         </span>
                       )}
                     </td>
