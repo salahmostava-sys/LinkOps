@@ -56,30 +56,28 @@ const LICENSE_CLASS_RE = /\b([A-Z])\s*(CLASS|CATEGORY|فئة)?\b|\bفئة\s*([أ
 // ─── استخراج النص من الصورة ───────────────────────────────────────────────────
 
 /**
- * يحوّل ملف صورة إلى نص باستخدام Tesseract.js.
- * يدعم اللغتين العربية والإنجليزية معاً.
- *
- * @param imageFile - ملف الصورة (JPG / PNG / WebP)
- * @param onProgress - callback اختياري يُستدعى أثناء المعالجة
- * @returns النص المستخرج
+ * دالة: استخراج النص من الصورة (client-side)
+ * تقوم بتحميل محرك Tesseract وقراءة النص من الصورة محلياً.
  */
 export async function extractTextFromImage(
   imageFile: File,
   onProgress?: (progress: OcrProgress) => void,
 ): Promise<string> {
-  const worker = await Tesseract.createWorker(['ara', 'eng'], 1, {
-    logger: (m: { status: string; progress: number }) => {
-      if (onProgress) {
-        onProgress({ status: m.status, progress: m.progress ?? 0 });
-      }
-    },
-  });
-
   try {
+    const worker = await createWorker('ara+eng', 1, {
+      logger: (m: { status: string; progress: number }) => {
+        if (onProgress) {
+          onProgress({ status: m.status, progress: m.progress ?? 0 });
+        }
+      },
+    });
+
     const { data } = await worker.recognize(imageFile);
-    return data.text;
-  } finally {
     await worker.terminate();
+    return data.text;
+  } catch (err: any) {
+    console.error('OCR Error Details:', err);
+    throw new Error(err?.message || typeof err === 'string' ? err : 'حدث خطأ غير معروف في Tesseract');
   }
 }
 

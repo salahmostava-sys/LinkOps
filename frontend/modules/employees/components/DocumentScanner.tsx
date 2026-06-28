@@ -98,6 +98,7 @@ export function DocumentScanner({ employeeId, employeeName, onSaved }: Readonly<
   const [scanStatus, setScanStatus] = useState('');
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [extractedFields, setExtractedFields] = useState<ScannedFields | null>(null);
+  const [scanError, setScanError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [savedMode, setSavedMode] = useState<ScanMode | null>(null);
 
@@ -114,11 +115,9 @@ export function DocumentScanner({ employeeId, employeeName, onSaved }: Readonly<
     setScanning(true);
     setScanProgress(0);
     setScanStatus('تهيئة محرك قراءة الوثائق...');
+    setPreviewUrl(URL.createObjectURL(file));
     setSavedMode(null);
-
-    // معاينة الصورة
-    const url = URL.createObjectURL(file);
-    setPreviewUrl(url);
+    setScanError(null);
 
     try {
       const text = await extractTextFromImage(file, ({ status, progress }) => {
@@ -140,7 +139,9 @@ export function DocumentScanner({ employeeId, employeeName, onSaved }: Readonly<
         const data = parseLicenseData(text);
         setExtractedFields(mapLicenseToEmployee(data));
       }
-    } catch (err) {
+    } catch (err: any) {
+      const errDetail = err?.stack || err?.message || JSON.stringify(err) || 'Unknown error';
+      setScanError(errDetail);
       toast({
         title: 'فشل قراءة الوثيقة',
         description: err instanceof Error ? err.message : 'حدث خطأ أثناء معالجة الصورة',
