@@ -16,27 +16,25 @@ const DEFAULT_ALLOWED_ORIGINS = [
   "http://127.0.0.1:5000",
 ];
 
-function getAllowedOrigins(): string[] {
+function getAllowedOrigins(): Set<string> {
   const envOrigins = Deno.env.get("CORS_ALLOWED_ORIGINS");
   if (envOrigins) {
-    return envOrigins.split(",").map(o => o.trim()).filter(Boolean);
+    return new Set(envOrigins.split(",").map(o => o.trim()).filter(Boolean));
   }
-  return DEFAULT_ALLOWED_ORIGINS;
+  return new Set(DEFAULT_ALLOWED_ORIGINS);
 }
 
 function isOriginAllowed(origin: string): boolean {
   const allowed = getAllowedOrigins();
   // Always require exact match — never allow wildcard localhost patterns.
   // Add your dev origins to CORS_ALLOWED_ORIGINS env var when needed.
-  return allowed.includes(origin);
+  return allowed.has(origin);
 }
 
 export function getCorsHeaders(requestOrigin: string | null): Record<string, string> {
-  const allowedOrigins = getAllowedOrigins();
-
   // Only reflect the origin if it is in the explicit allow-list.
-  // If the requestOrigin is null or not allowed, default to the first
-  // allowed origin. Never echo back an unlisted origin.
+  // If the requestOrigin is null or not allowed, default to null.
+  // Never echo back an unlisted origin.
   const origin = (requestOrigin && isOriginAllowed(requestOrigin))
     ? requestOrigin
     : null;

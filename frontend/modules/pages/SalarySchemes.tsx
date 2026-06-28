@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Settings, Plus, Pencil, Trash2, Check, X, Pin, Loader2, Lock, Link2 } from 'lucide-react';
 import { Button } from '@shared/components/ui/button';
@@ -182,7 +182,8 @@ function SchemeSnapshotPinPanel({
                 !pinned && !selected && 'bg-background text-muted-foreground border-border/70 hover:border-primary/40 hover:text-foreground',
               )}
             >
-              {pinned ? <Lock size={11} className="shrink-0" /> : selected ? <Pin size={11} className="shrink-0" /> : null}
+              {pinned && <Lock size={11} className="shrink-0" />}
+              {!pinned && selected && <Pin size={11} className="shrink-0" />}
               <span className="whitespace-nowrap">{monthNameOnly(my)}</span>
             </button>
           );

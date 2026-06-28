@@ -1,14 +1,14 @@
-# Phase 1c-j: Remaining mechanical fixes
+﻿# Phase 1c-j: Remaining mechanical fixes
 $root = "d:\MuhimmatAltawseel\frontend"
 $tsFiles = Get-ChildItem -Path $root -Recurse -Include "*.ts","*.tsx" | Where-Object { $_.FullName -notmatch "node_modules|dist" }
 
-# --- Phase 1c: .replace(/pattern/g, ...) → .replaceAll(...) ---
+# --- Phase 1c: .replace(/pattern/g, ...) â†’ .replaceAll(...) ---
 $replaceAllCount = 0
 foreach ($file in $tsFiles) {
     $content = Get-Content $file.FullName -Raw
     $original = $content
 
-    # Pattern: .replace(/pattern/g, replacement) → .replaceAll(/pattern/g, replacement)
+    # Pattern: .replace(/pattern/g, replacement) â†’ .replaceAll(/pattern/g, replacement)
     # Only fix when /g flag is used (global replace)
     $content = $content -replace '\.replace\((/[^/]+/g)\s*,', '.replaceAll($1,'
 
@@ -20,7 +20,7 @@ foreach ($file in $tsFiles) {
 }
 Write-Output "Phase 1c: Fixed $replaceAllCount files with replaceAll"
 
-# --- Phase 1d: window → globalThis ---
+# --- Phase 1d: window â†’ globalThis ---
 $globalThisCount = 0
 foreach ($file in $tsFiles) {
     $content = Get-Content $file.FullName -Raw
@@ -49,7 +49,7 @@ foreach ($file in $tsFiles) {
 }
 Write-Output "Phase 1d: Fixed $globalThisCount files with globalThis"
 
-# --- Phase 1e: parentNode.removeChild(childNode) → childNode.remove() ---
+# --- Phase 1e: parentNode.removeChild(childNode) â†’ childNode.remove() ---
 # This needs careful manual handling per-file, skip automated
 
 Write-Output "`n=== Phase 1c-d Done ==="

@@ -1,5 +1,5 @@
 const { execSync } = require('child_process');
-const fs = require('fs');
+const fs = require('node:fs');
 
 const query = `
 SELECT

@@ -1,4 +1,4 @@
-# Phase 2+: Remaining SonarQube fixes
+﻿# Phase 2+: Remaining SonarQube fixes
 # This script handles:
 # - Remaining void operators
 # - Nested ternaries in specific patterns
@@ -9,7 +9,7 @@ $root = "d:\MuhimmatAltawseel\frontend"
 $tsFiles = Get-ChildItem -Path $root -Recurse -Include "*.ts","*.tsx" | Where-Object { $_.FullName -notmatch "node_modules|dist" }
 
 # --- Mark props as readonly ---
-# Pattern: `{ children, ... }: { children: ...}` → `{ children, ... }: Readonly<{ children: ...}>`
+# Pattern: `{ children, ... }: { children: ...}` â†’ `{ children, ... }: Readonly<{ children: ...}>`
 # Only fix explicit prop types in function components
 $readonlyCount = 0
 foreach ($file in $tsFiles) {
@@ -19,8 +19,8 @@ foreach ($file in $tsFiles) {
     # Fix: `}: { ... }` patterns for component props - add Readonly<>
     # This pattern matches function params like `}: { prop1: type1; prop2: type2 })`
     # We need to be very careful - only wrap if not already Readonly
-    # Pattern: `}: {` at start of a type annotation → `}: Readonly<{`
-    # And the matching `})` → `}>)`
+    # Pattern: `}: {` at start of a type annotation â†’ `}: Readonly<{`
+    # And the matching `})` â†’ `}>)`
     # This is too complex for regex safely - skip automated
 
     if ($content -ne $original) {
@@ -31,13 +31,13 @@ foreach ($file in $tsFiles) {
 }
 Write-Output "Phase readonly: Fixed $readonlyCount files"
 
-# --- Fix .filter()[0] → .find() ---
+# --- Fix .filter()[0] â†’ .find() ---
 $findCount = 0
 foreach ($file in $tsFiles) {
     $content = Get-Content $file.FullName -Raw
     $original = $content
 
-    # Pattern: .filter(fn)[0] → .find(fn)
+    # Pattern: .filter(fn)[0] â†’ .find(fn)
     $content = $content -replace '\.filter\(([^)]+)\)\[0\]', '.find($1)'
 
     if ($content -ne $original) {
@@ -48,8 +48,8 @@ foreach ($file in $tsFiles) {
 }
 Write-Output "Fixed $findCount files with .find()"
 
-# --- Fix .match() → RegExp.exec() ---
-# Pattern: str.match(regex) → regex.exec(str)
+# --- Fix .match() â†’ RegExp.exec() ---
+# Pattern: str.match(regex) â†’ regex.exec(str)
 # Too risky for automated replacement, skip
 
 # --- Fix ??= operator ---

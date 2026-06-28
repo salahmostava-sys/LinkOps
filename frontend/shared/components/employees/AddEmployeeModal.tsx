@@ -257,7 +257,9 @@ function StepIndicator({ step }: Readonly<{ step: number }>) {
       {STEPS.map((s, i) => {
         const isDone = i < step;
         const isCurrent = i === step;
-        const stateClass = isDone ? 'bg-success text-success-foreground' : isCurrent ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground';
+        let stateClass = 'bg-muted text-muted-foreground';
+        if (isDone) stateClass = 'bg-success text-success-foreground';
+        else if (isCurrent) stateClass = 'bg-primary text-primary-foreground';
         return (
           <div key={s} className="flex items-center flex-1 last:flex-none">
             <div className="flex items-center gap-2">

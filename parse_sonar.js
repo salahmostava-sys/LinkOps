@@ -1,4 +1,4 @@
-const fs = require('fs');
+const fs = require('node:fs');
 let data = fs.readFileSync('sonar_issues_utf8.json', 'utf8');
 if (data.charCodeAt(0) === 0xFEFF) data = data.slice(1);
 const issues = JSON.parse(data).issues;
