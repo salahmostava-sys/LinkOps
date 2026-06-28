@@ -168,7 +168,9 @@ class AiBackendSmokeTests(unittest.TestCase):
             SalaryForecastRequest(current_orders=10, days_passed=0)
 
     def test_api_handlers_accept_pydantic_requests(self) -> None:
-        orders_result = api_predict_orders(PredictOrdersRequest(history=self.history, forecast_days=2))
+        class MockRequest:
+            headers = {}
+        orders_result = api_predict_orders(MockRequest(), PredictOrdersRequest(history=self.history, forecast_days=2))
         self.assertEqual(len(orders_result["daily_forecast"]), 2)
 
         driver_result = api_best_driver(BestDriverRequest(history=self.history, top_n=2))
