@@ -34,12 +34,6 @@ export interface OcrProgress {
 
 // ─── أنماط regex للبيانات السعودية ───────────────────────────────────────────
 
-/** رقم الإقامة: 10 أرقام تبدأ بـ 2 */
-const IQAMA_NUMBER_RE = /(?:^|\D)(2\d{9})(?:\D|$)/g;
-
-/** تاريخ هجري أو ميلادي بأشكاله الشائعة (مع تسامح مع المسافات) */
-const DATE_RE = new RegExp('\\b(\\d{2}\\s*[/\\-.]\\s*\\d{2}\\s*[/\\-.]\\s*\\d{4}|\\d{4}\\s*[/\\-.]\\s*\\d{2}\\s*[/\\-.]\\s*\\d{2}|\\d{4}\\s*[/\\-.]\\s*\\d{2})\\b', 'g');
-
 /** الجنسيات العربية الشائعة في الإقامات السعودية */
 const KNOWN_NATIONALITIES = [
   'EGYPTIAN', 'PAKISTANI', 'INDIAN', 'YEMENI', 'SUDANESE', 'SYRIAN',
@@ -118,7 +112,7 @@ export function parseIqamaData(rawText: string): IqamaData {
   }
 
   // 3. التواريخ — أول تاريخ = تاريخ الميلاد، آخر تاريخ = انتهاء الصلاحية
-  const dateRegex = /(\d{2}[/\-.]\d{2}[/\-.]\d{4}|\d{4}[/\-.]\d{2}[/\-.]\d{2}|\d{4}[/\-.]\d{2})/g;
+  const dateRegex = /(\d{2}[/.-]\d{2}[/.-]\d{4}|\d{4}[/.-]\d{2}[/.-]\d{2}|\d{4}[/.-]\d{2})/g;
   const dateMatches = [...possibleNumberText.matchAll(dateRegex)].map(m => m[1]);
   if (dateMatches.length >= 1) {
     result.dateOfBirth = normalizeDateStr(dateMatches[0]);
@@ -137,7 +131,14 @@ export function parseIqamaData(rawText: string): IqamaData {
   }
 
   const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  extractNamesFromLines(lines, result);
 
+  return result;
+}
+
+// ─── تحليل بيانات رخصة القيادة ───────────────────────────────────────────────
+
+function extractNamesFromLines(lines: string[], result: { name?: string; nameEn?: string }) {
   const EXCLUDED_AR_WORDS = [
     'المملكة', 'العربية', 'السعودية', 'وزارة', 'الداخلية', 'المرور', 
     'بطاقة', 'مقيم', 'هوية', 'رخصة', 'سياقة', 'رقم', 'تاريخ', 'فئة', 'قيادة',
@@ -149,7 +150,6 @@ export function parseIqamaData(rawText: string): IqamaData {
     'LICENSE', 'DRIVING', 'IQAMA', 'ID', 'NUMBER', 'NAME', 'DATE', 'EXPIRY', 'BLOOD', 'TYPE'
   ];
 
-  // الاسم الإنجليزي: سطر يحتوي على أحرف لاتينية أساساً (مع تسامح مع الأرقام/الرموز بسبب أخطاء OCR)
   const englishNameIdx = lines.findIndex(line =>
     /^[A-Za-z0-9\s.,-]{5,}$/.test(line) &&
     /[A-Za-z]{3,}/.test(line) &&
@@ -160,7 +160,6 @@ export function parseIqamaData(rawText: string): IqamaData {
 
   if (englishNameIdx !== -1) {
     result.nameEn = lines[englishNameIdx].replace(/\s+/g, ' ').trim();
-    // الاسم العربي غالباً يكون السطر الذي يسبق الاسم الإنجليزي مباشرة في الهوية السعودية
     if (englishNameIdx > 0) {
       const possibleArName = lines[englishNameIdx - 1];
       if (!EXCLUDED_AR_WORDS.some(w => possibleArName.includes(w))) {
@@ -169,10 +168,8 @@ export function parseIqamaData(rawText: string): IqamaData {
     }
   }
 
-  // fallback للاسم العربي إذا لم يتم العثور عليه
   if (!result.name) {
     const arabicNameLine = lines.find(line =>
-      // فحص مخفف: يحتوي على أحرف عربية ومسافات كافية بعد إزالة الرموز
       /^[\u0600-\u06FF\s]{5,}$/.test(line.replace(/[^\u0600-\u06FF\s]/g, '')) &&
       line.split(/\s+/).length >= 2 &&
       !EXCLUDED_AR_WORDS.some(w => line.includes(w))
@@ -181,11 +178,7 @@ export function parseIqamaData(rawText: string): IqamaData {
       result.name = arabicNameLine.replace(/[A-Za-z0-9=_\-]/g, '').replace(/\s+/g, ' ').trim();
     }
   }
-
-  return result;
 }
-
-// ─── تحليل بيانات رخصة القيادة ───────────────────────────────────────────────
 
 /**
  * يستخرج بيانات رخصة القيادة السعودية من النص.
@@ -213,13 +206,13 @@ export function parseLicenseData(rawText: string): LicenseData {
   }
 
   // 3. التواريخ — آخر تاريخ = انتهاء الصلاحية
-  const dateRegex = /(\d{2}[/\-.]\d{2}[/\-.]\d{4}|\d{4}[/\-.]\d{2}[/\-.]\d{2}|\d{4}[/\-.]\d{2})/g;
+  const dateRegex = /(\d{2}[/.-]\d{2}[/.-]\d{4}|\d{4}[/.-]\d{2}[/.-]\d{2}|\d{4}[/.-]\d{2})/g;
   const dateMatches = [...possibleNumberText.matchAll(dateRegex)].map(m => m[1]);
   if (dateMatches.length > 0) {
     result.expiryDate = normalizeDateStr(dateMatches[dateMatches.length - 1]);
   }
 
-  // 3. فئة الرخصة
+  // 4. فئة الرخصة
   const classMatch = [...text.matchAll(LICENSE_CLASS_RE)];
   if (classMatch.length > 0) {
     const cls = classMatch[0][1] || classMatch[0][3];
@@ -233,46 +226,7 @@ export function parseLicenseData(rawText: string): LicenseData {
   }
 
   const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
-
-  const EXCLUDED_AR_WORDS = [
-    'المملكة', 'العربية', 'السعودية', 'وزارة', 'الداخلية', 'المرور', 
-    'بطاقة', 'مقيم', 'هوية', 'رخصة', 'سياقة', 'رقم', 'تاريخ', 'فئة', 'قيادة',
-    'الاصدار', 'الانتهاء', 'الاسم', 'الجنسية', 'الديانة', 'المهنة', 'صاحب', 'العمل', 'يجب', 'التحقق', 'الرمز', 'السريع', 'قبل', 'اعتماد', 'التعامل'
-  ];
-  
-  const EXCLUDED_EN_WORDS = [
-    'KINGDOM', 'SAUDI', 'ARABIA', 'MINISTRY', 'INTERIOR', 'TRAFFIC', 
-    'LICENSE', 'DRIVING', 'IQAMA', 'ID', 'NUMBER', 'NAME', 'DATE', 'EXPIRY', 'BLOOD', 'TYPE'
-  ];
-
-  const englishNameIdx = lines.findIndex(line =>
-    /^[A-Za-z0-9\s.,-]{5,}$/.test(line) &&
-    /[A-Za-z]{3,}/.test(line) &&
-    line.split(/\s+/).length >= 2 &&
-    !KNOWN_NATIONALITIES.some(n => line.toUpperCase().includes(n.toUpperCase())) &&
-    !EXCLUDED_EN_WORDS.some(w => line.toUpperCase().includes(w))
-  );
-
-  if (englishNameIdx !== -1) {
-    result.nameEn = lines[englishNameIdx].replace(/\s+/g, ' ').trim();
-    if (englishNameIdx > 0) {
-      const possibleArName = lines[englishNameIdx - 1];
-      if (!EXCLUDED_AR_WORDS.some(w => possibleArName.includes(w))) {
-        result.name = possibleArName.replace(/[A-Za-z0-9=_\-]/g, '').replace(/\s+/g, ' ').trim();
-      }
-    }
-  }
-
-  if (!result.name) {
-    const arabicNameLine = lines.find(line =>
-      /^[\u0600-\u06FF\s]{5,}$/.test(line.replace(/[^\u0600-\u06FF\s]/g, '')) &&
-      line.split(/\s+/).length >= 2 &&
-      !EXCLUDED_AR_WORDS.some(w => line.includes(w))
-    );
-    if (arabicNameLine) {
-      result.name = arabicNameLine.replace(/[A-Za-z0-9=_\-]/g, '').replace(/\s+/g, ' ').trim();
-    }
-  }
+  extractNamesFromLines(lines, result);
 
   return result;
 }
