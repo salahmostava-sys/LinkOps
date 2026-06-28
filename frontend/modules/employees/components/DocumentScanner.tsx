@@ -107,6 +107,7 @@ export function DocumentScanner({ employeeId, employeeName, onSaved }: Readonly<
   const [scanError, setScanError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [savedMode, setSavedMode] = useState<ScanMode | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   // ─── تحديث حقل محرر ─────────────────────────────────────────────────────
 
@@ -166,6 +167,7 @@ export function DocumentScanner({ employeeId, employeeName, onSaved }: Readonly<
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, mode: ScanMode) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setSelectedFile(file);
     void processImage(file, mode);
     // reset input so same file can be re-selected
     e.target.value = '';
@@ -189,9 +191,30 @@ export function DocumentScanner({ employeeId, employeeName, onSaved }: Readonly<
         if (fields.birth_date) payload.birth_date = fields.birth_date;
         if (fields.residency_expiry) payload.residency_expiry = fields.residency_expiry;
       } else {
+        if (fields.name) payload.name = fields.name;
         if (fields.license_expiry) payload.license_expiry = fields.license_expiry;
-        // license_number / license_class stored as notes in national_id for now
-        // extend if schema supports it
+      }
+
+      if (selectedFile) {
+        try {
+          const ext = selectedFile.name.split('.').pop()?.toLowerCase() || 'jpg';
+          const storagePath = `${employeeId}/${activeMode}_${Date.now()}.${ext}`;
+          const uploadResult = await employeeService.uploadEmployeeDocument(storagePath, selectedFile);
+          if (uploadResult?.path) {
+            if (activeMode === 'iqama') {
+              payload.iqama_photo_url = uploadResult.path;
+            } else {
+              payload.license_photo_url = uploadResult.path;
+            }
+          }
+        } catch (uploadErr) {
+          console.error('Failed to upload document image:', uploadErr);
+          toast({
+            title: 'تحذير',
+            description: 'تم استخراج البيانات ولكن فشل إرفاق صورة الوثيقة بالملف الشخصي.',
+            variant: 'destructive',
+          });
+        }
       }
 
       await employeeService.updateEmployee(employeeId, payload);
