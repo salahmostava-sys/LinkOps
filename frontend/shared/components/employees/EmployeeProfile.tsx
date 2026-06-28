@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowRight, User, FileText, Wallet, CreditCard, Clock, Package, DollarSign, ExternalLink, Loader2, ChevronDown, ChevronUp, TrendingUp } from 'lucide-react';
+import { ArrowRight, User, FileText, Wallet, CreditCard, Clock, Package, DollarSign, ExternalLink, Loader2, ChevronDown, ChevronUp, TrendingUp, ScanLine } from 'lucide-react';
 import { Button } from '@shared/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/components/ui/select';
@@ -21,6 +21,7 @@ import {
   type EmployeeProfileSalaryRecord,
 } from '@services/employeeProfileService';
 import { EmployeePerformanceTab } from '@shared/components/employees/EmployeePerformanceTab';
+import { DocumentScanner } from '@modules/employees/components/DocumentScanner';
 import { getErrorMessage } from '@services/serviceError';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -346,6 +347,7 @@ const EmployeeProfile = ({ employee, onBack }: Readonly<Props>) => {
           <TabsTrigger value="salaries" className="gap-1.5"><DollarSign size={14} /> الرواتب الشهرية</TabsTrigger>
           <TabsTrigger value="orders" className="gap-1.5"><TrendingUp size={14} /> الطلبات الشهرية</TabsTrigger>
           <TabsTrigger value="performance" className="gap-1.5"><TrendingUp size={14} /> الأداء</TabsTrigger>
+          <TabsTrigger value="ocr-scan" className="gap-1.5"><ScanLine size={14} /> مسح الوثائق</TabsTrigger>
         </TabsList>
 
         {/* Tab 1: Basic Data */}
@@ -851,6 +853,27 @@ const EmployeeProfile = ({ employee, onBack }: Readonly<Props>) => {
                 </div>
               );
             })()}
+          </div>
+        </TabsContent>
+
+        {/* Tab 9: OCR Document Scanner */}
+        <TabsContent value="ocr-scan">
+          <div className="space-y-4">
+            <div className="bg-card border border-border/50 shadow-sm p-4 rounded-2xl">
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                📌 <strong>كيفية الاستخدام:</strong> اضغط على زر رفع صورة الإقامة أو الرخصة، 
+                وسيقوم النظام بقراءة البيانات تلقائياً باستخدام تقنية OCR.&nbsp;
+                راجع البيانات المستخرجة وعدّل ما يلزم، ثم اضغط <strong>تأكيد وحفظ</strong>.
+              </p>
+            </div>
+            <DocumentScanner
+              employeeId={employee.id}
+              employeeName={employee.name}
+              onSaved={() => {
+                void queryClient.invalidateQueries({ queryKey: ['employees'] });
+                void queryClient.invalidateQueries({ queryKey: ['employee-profile'] });
+              }}
+            />
           </div>
         </TabsContent>
       </Tabs>
