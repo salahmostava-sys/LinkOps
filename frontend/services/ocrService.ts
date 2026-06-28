@@ -88,13 +88,18 @@ export async function extractTextFromImage(
 
 // ─── تحليل بيانات الإقامة ─────────────────────────────────────────────────────
 
+function normalizeArabicNumerals(text: string): string {
+  return text.replace(/[٠١٢٣٤٥٦٧٨٩]/g, (d) => '0123456789'['٠١٢٣٤٥٦٧٨٩'.indexOf(d)]);
+}
+
 /**
  * يستخرج بيانات الإقامة السعودية من النص المستخرج.
  *
- * @param text - النص الخام من OCR
+ * @param rawText - النص الخام من OCR
  * @returns بيانات الإقامة المُهيكلة
  */
-export function parseIqamaData(text: string): IqamaData {
+export function parseIqamaData(rawText: string): IqamaData {
+  const text = normalizeArabicNumerals(rawText);
   const result: IqamaData = {};
 
   // 1. رقم الإقامة (10 أرقام تبدأ بـ 2)
@@ -121,13 +126,12 @@ export function parseIqamaData(text: string): IqamaData {
     }
   }
 
-  // 4. الاسم — يحاول استخراج السطر الذي يحتوي على كلمات عربية فقط
   const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
 
   const EXCLUDED_AR_WORDS = [
     'المملكة', 'العربية', 'السعودية', 'وزارة', 'الداخلية', 'المرور', 
     'بطاقة', 'مقيم', 'هوية', 'رخصة', 'سياقة', 'رقم', 'تاريخ', 'فئة', 'قيادة',
-    'الاصدار', 'الانتهاء', 'الاسم', 'الجنسية', 'الديانة', 'المهنة', 'صاحب', 'العمل'
+    'الاصدار', 'الانتهاء', 'الاسم', 'الجنسية', 'الديانة', 'المهنة', 'صاحب', 'العمل', 'يجب', 'التحقق', 'الرمز', 'السريع', 'قبل', 'اعتماد', 'التعامل'
   ];
   
   const EXCLUDED_EN_WORDS = [
@@ -135,26 +139,36 @@ export function parseIqamaData(text: string): IqamaData {
     'LICENSE', 'DRIVING', 'IQAMA', 'ID', 'NUMBER', 'NAME', 'DATE', 'EXPIRY', 'BLOOD', 'TYPE'
   ];
 
-  // الاسم العربي: سطر يحتوي على 2+ كلمات عربية فقط وليس من الكلمات المستبعدة
-  const arabicNameLine = lines.find(line =>
-    /^[\u0600-\u06FF\s]{5,}$/.test(line) &&
-    line.split(/\s+/).length >= 2 &&
-    !/\d/.test(line) &&
-    !EXCLUDED_AR_WORDS.some(w => line.includes(w))
-  );
-  if (arabicNameLine) {
-    result.name = arabicNameLine.replace(/\s+/g, ' ').trim();
-  }
-
   // الاسم الإنجليزي: سطر يحتوي على أحرف لاتينية كبيرة فقط
-  const englishNameLine = lines.find(line =>
+  const englishNameIdx = lines.findIndex(line =>
     /^[A-Z\s]{5,}$/.test(line) &&
     line.split(/\s+/).length >= 2 &&
     !KNOWN_NATIONALITIES.some(n => line.toUpperCase().includes(n.toUpperCase())) &&
     !EXCLUDED_EN_WORDS.some(w => line.toUpperCase().includes(w))
   );
-  if (englishNameLine) {
-    result.nameEn = englishNameLine.replace(/\s+/g, ' ').trim();
+
+  if (englishNameIdx !== -1) {
+    result.nameEn = lines[englishNameIdx].replace(/\s+/g, ' ').trim();
+    // الاسم العربي غالباً يكون السطر الذي يسبق الاسم الإنجليزي مباشرة في الهوية السعودية
+    if (englishNameIdx > 0) {
+      const possibleArName = lines[englishNameIdx - 1];
+      if (!EXCLUDED_AR_WORDS.some(w => possibleArName.includes(w))) {
+        result.name = possibleArName.replace(/\s+/g, ' ').trim();
+      }
+    }
+  }
+
+  // fallback للاسم العربي إذا لم يتم العثور عليه
+  if (!result.name) {
+    const arabicNameLine = lines.find(line =>
+      // فحص مخفف: يحتوي على أحرف عربية ومسافات كافية بعد إزالة الرموز
+      /^[\u0600-\u06FF\s]{5,}$/.test(line.replace(/[^\u0600-\u06FF\s]/g, '')) &&
+      line.split(/\s+/).length >= 2 &&
+      !EXCLUDED_AR_WORDS.some(w => line.includes(w))
+    );
+    if (arabicNameLine) {
+      result.name = arabicNameLine.replace(/\s+/g, ' ').trim();
+    }
   }
 
   return result;
@@ -165,10 +179,11 @@ export function parseIqamaData(text: string): IqamaData {
 /**
  * يستخرج بيانات رخصة القيادة السعودية من النص.
  *
- * @param text - النص الخام من OCR
+ * @param rawText - النص الخام من OCR
  * @returns بيانات الرخصة المُهيكلة
  */
-export function parseLicenseData(text: string): LicenseData {
+export function parseLicenseData(rawText: string): LicenseData {
+  const text = normalizeArabicNumerals(rawText);
   const result: LicenseData = {};
 
   // 1. رقم الرخصة: عادةً 10 أرقام
@@ -196,13 +211,12 @@ export function parseLicenseData(text: string): LicenseData {
     if (classLine) result.licenseClass = classLine[1].toUpperCase();
   }
 
-  // 4. الاسم
   const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
 
   const EXCLUDED_AR_WORDS = [
     'المملكة', 'العربية', 'السعودية', 'وزارة', 'الداخلية', 'المرور', 
     'بطاقة', 'مقيم', 'هوية', 'رخصة', 'سياقة', 'رقم', 'تاريخ', 'فئة', 'قيادة',
-    'الاصدار', 'الانتهاء', 'الاسم', 'الجنسية', 'الديانة', 'المهنة', 'صاحب', 'العمل'
+    'الاصدار', 'الانتهاء', 'الاسم', 'الجنسية', 'الديانة', 'المهنة', 'صاحب', 'العمل', 'يجب', 'التحقق', 'الرمز', 'السريع', 'قبل', 'اعتماد', 'التعامل'
   ];
   
   const EXCLUDED_EN_WORDS = [
@@ -210,24 +224,32 @@ export function parseLicenseData(text: string): LicenseData {
     'LICENSE', 'DRIVING', 'IQAMA', 'ID', 'NUMBER', 'NAME', 'DATE', 'EXPIRY', 'BLOOD', 'TYPE'
   ];
 
-  const arabicNameLine = lines.find(line =>
-    /^[\u0600-\u06FF\s]{5,}$/.test(line) &&
-    line.split(/\s+/).length >= 2 &&
-    !/\d/.test(line) &&
-    !EXCLUDED_AR_WORDS.some(w => line.includes(w))
-  );
-  if (arabicNameLine) {
-    result.name = arabicNameLine.replace(/\s+/g, ' ').trim();
-  }
-
-  const englishNameLine = lines.find(line =>
+  const englishNameIdx = lines.findIndex(line =>
     /^[A-Z\s]{5,}$/.test(line) &&
     line.split(/\s+/).length >= 2 &&
     !KNOWN_NATIONALITIES.some(n => line.toUpperCase().includes(n.toUpperCase())) &&
     !EXCLUDED_EN_WORDS.some(w => line.toUpperCase().includes(w))
   );
-  if (englishNameLine) {
-    result.nameEn = englishNameLine.replace(/\s+/g, ' ').trim();
+
+  if (englishNameIdx !== -1) {
+    result.nameEn = lines[englishNameIdx].replace(/\s+/g, ' ').trim();
+    if (englishNameIdx > 0) {
+      const possibleArName = lines[englishNameIdx - 1];
+      if (!EXCLUDED_AR_WORDS.some(w => possibleArName.includes(w))) {
+        result.name = possibleArName.replace(/\s+/g, ' ').trim();
+      }
+    }
+  }
+
+  if (!result.name) {
+    const arabicNameLine = lines.find(line =>
+      /^[\u0600-\u06FF\s]{5,}$/.test(line.replace(/[^\u0600-\u06FF\s]/g, '')) &&
+      line.split(/\s+/).length >= 2 &&
+      !EXCLUDED_AR_WORDS.some(w => line.includes(w))
+    );
+    if (arabicNameLine) {
+      result.name = arabicNameLine.replace(/\s+/g, ' ').trim();
+    }
   }
 
   return result;
