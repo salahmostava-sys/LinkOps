@@ -157,7 +157,6 @@ export function DocumentScanner({ employeeId, employeeName, onSaved }: Readonly<
 
   // ─── رفع الصورة وبدء المسح ────────────────────────────────────────────────
 
-  // eslint-disable-next-line sonarjs/cognitive-complexity
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, mode: ScanMode) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -168,6 +167,7 @@ export function DocumentScanner({ employeeId, employeeName, onSaved }: Readonly<
 
   // ─── حفظ البيانات في Supabase ─────────────────────────────────────────────
 
+  // eslint-disable-next-line sonarjs/cognitive-complexity
   const handleSave = async () => {
     if (!extractedFields || !activeMode) return;
     setSaving(true);
