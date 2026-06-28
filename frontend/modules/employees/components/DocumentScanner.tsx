@@ -252,7 +252,10 @@ export function DocumentScanner({ employeeId, employeeName, onSaved }: Readonly<
 
   const fieldLabels = activeMode === 'iqama' ? IQAMA_FIELD_LABELS : LICENSE_FIELD_LABELS;
   const fieldsEntries = extractedFields
-    ? Object.entries(extractedFields as Record<string, string | undefined>).filter(([, v]) => v)
+    ? Object.entries(fieldLabels).map(([key]) => [
+        key,
+        (extractedFields as Record<string, string | undefined>)[key] || '',
+      ])
     : [];
 
   // ─── Render ───────────────────────────────────────────────────────────────
