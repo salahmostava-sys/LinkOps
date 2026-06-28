@@ -54,7 +54,7 @@ BEGIN
     WHERE ur.user_id = auth.uid()
       AND (
         ur.role = _const_role_admin()
-        OR lower(COALESCE(r.title, '')) = 'admin'
+        OR lower(COALESCE(r.title, '')) = _const_role_admin()::text
       )
   ) THEN
     RETURN true;
@@ -154,7 +154,7 @@ SET permissions = jsonb_build_object /* NOSONAR */(
   'roles',      jsonb_build_object /* NOSONAR */('view', true, 'write', true, 'delete', true),
   'audit',      jsonb_build_object /* NOSONAR */('view', true, 'write', true)
 )
-WHERE title = 'admin';
+WHERE title = _const_role_admin()::text;
 
 UPDATE public.roles
 SET permissions = jsonb_build_object /* NOSONAR */(
@@ -202,7 +202,7 @@ SET permissions = jsonb_build_object /* NOSONAR */(
   'roles',      jsonb_build_object /* NOSONAR */('view', false, 'write', false, 'delete', false),
   'audit',      jsonb_build_object /* NOSONAR */('view', false, 'write', false)
 )
-WHERE title = 'viewer';
+WHERE title = _const_role_viewer()::text;
 
 -- --------------------------------------------------------------------------
 -- 3) Explicit RLS (core tables only, no branch/company row isolation)

@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import compression from 'compression';
 import { salaryEngineHandler, adminUpdateUserHandler, groqChatHandler, aiChatHandler } from './lib/handlers.js';
 
 const app = express();
@@ -40,6 +41,7 @@ app.use(cors({
 // Referrer-Policy, Strict-Transport-Security, and basic CSP.
 // This protects against clickjacking, MIME-sniffing, and XSS reflected attacks.
 app.use(helmet());
+app.use(compression());
 // FIX #12: 2mb is too large for most endpoints (salary IDs, chat fields).
 // Reduced to 256kb globally; AI endpoints override this per-route.
 // This prevents memory exhaustion from large payloads before auth is checked.
