@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 type DeleteResult = { error: unknown; count: number | null };
 
 function makeDeleteBuilder(result: DeleteResult) {
-  const settled = Promise.resolve(result);
+  const _settled = Promise.resolve(result);
   const p: any = Promise.resolve(result);
     p.delete = vi.fn(() => p);
     p.eq = vi.fn(() => p);

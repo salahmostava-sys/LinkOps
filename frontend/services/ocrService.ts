@@ -38,8 +38,7 @@ export interface OcrProgress {
 const IQAMA_NUMBER_RE = /\b(2\d{9})\b/g;
 
 /** تاريخ هجري أو ميلادي بأشكاله الشائعة */
-const DATE_RE =
-  /\b(\d{2}[\/\-\.]\d{2}[\/\-\.]\d{4}|\d{4}[\/\-\.]\d{2}[\/\-\.]\d{2}|\d{4}[\/\-\.]\d{2})\b/g;
+const DATE_RE = new RegExp('\\b(\\d{2}[/\\-.]\\d{2}[/\\-.]\\d{4}|\\d{4}[/\\-.]\\d{2}[/\\-.]\\d{2}|\\d{4}[/\\-.]\\d{2})\\b', 'g');
 
 /** الجنسيات العربية الشائعة في الإقامات السعودية */
 const KNOWN_NATIONALITIES = [
@@ -75,7 +74,7 @@ export async function extractTextFromImage(
     const { data } = await worker.recognize(imageFile);
     await worker.terminate();
     return data.text;
-  } catch (err: any) {
+  } catch (err: unknown) {
     const errString = err ? JSON.stringify(err, Object.getOwnPropertyNames(err)) : String(err);
     console.error('OCR Error Details:', err);
     throw new Error(`Tesseract Error: ${errString}`);
@@ -187,7 +186,7 @@ export function parseLicenseData(text: string): LicenseData {
 /** تحوّل التاريخ إلى صيغة YYYY-MM-DD إن أمكن */
 function normalizeDateStr(raw: string): string {
   // محاولة الإصلاح: DD/MM/YYYY → YYYY-MM-DD
-  const parts = raw.split(/[\/\-\.]/);
+  const parts = raw.split(/[/\-.]/);
   if (parts.length === 3) {
     const [a, b, c] = parts;
     if (c && c.length === 4) {

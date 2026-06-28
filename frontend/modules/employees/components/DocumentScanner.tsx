@@ -139,8 +139,9 @@ export function DocumentScanner({ employeeId, employeeName, onSaved }: Readonly<
         const data = parseLicenseData(text);
         setExtractedFields(mapLicenseToEmployee(data));
       }
-    } catch (err: any) {
-      const errDetail = err?.stack || err?.message || JSON.stringify(err) || 'Unknown error';
+    } catch (err: unknown) {
+      const errorObj = err as Error;
+      const errDetail = errorObj?.stack || errorObj?.message || JSON.stringify(err) || 'Unknown error';
       setScanError(errDetail);
       toast({
         title: 'فشل قراءة الوثيقة',
@@ -156,6 +157,7 @@ export function DocumentScanner({ employeeId, employeeName, onSaved }: Readonly<
 
   // ─── رفع الصورة وبدء المسح ────────────────────────────────────────────────
 
+  // eslint-disable-next-line sonarjs/cognitive-complexity
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, mode: ScanMode) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -303,6 +305,14 @@ export function DocumentScanner({ employeeId, employeeName, onSaved }: Readonly<
               className="hidden"
               onChange={e => handleFileSelect(e, 'license')}
             />
+          </div>
+        )}
+
+        {/* Error Display */}
+        {scanError && (
+          <div className="mt-4 p-4 border border-red-200 bg-red-50 text-red-800 rounded-lg text-sm text-left" dir="ltr">
+            <h4 className="font-semibold mb-2 text-right" dir="rtl">تفاصيل الخطأ التقني (لتزويد الدعم الفني):</h4>
+            <pre className="whitespace-pre-wrap break-words">{scanError}</pre>
           </div>
         )}
 
