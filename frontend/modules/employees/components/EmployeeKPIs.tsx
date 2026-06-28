@@ -297,7 +297,7 @@ function BarRow({ label, value, max, total, color }: Readonly<{ label: string; v
       <div className="flex-1 h-5 bg-muted rounded-full overflow-hidden">
         <div className={`h-full rounded-full transition-all ${color}`} style={{ width: `${pct}%` }} />
       </div>
-      <div className="text-xs font-semibold tabular-nums w-8 text-right">{value}</div>
+      <div className="text-xs font-semibold tabular-nums w-8 text-start">{value}</div>
       <div className="text-xs text-muted-foreground w-10 text-start">{share}%</div>
     </div>
   );

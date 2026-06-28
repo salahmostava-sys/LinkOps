@@ -36,7 +36,7 @@ import type { SalaryRow, SchemeData, SortDir } from '@modules/salaries/types/sal
 import { getSalaryRowActivityTotals, hasPlatformActivity } from '@modules/salaries/model/salaryUtils';
 
 // ── Style constants ───────────────────────────────────────────────────────────
-const thFrozenBase = "px-3 py-2 text-xs font-semibold text-muted-foreground whitespace-nowrap border border-border/40 bg-card text-right sticky z-20";
+const thFrozenBase = "px-3 py-2 text-xs font-semibold text-muted-foreground whitespace-nowrap border border-border/40 bg-card text-start sticky z-20";
 const thBase = "px-3 py-2 text-xs font-semibold text-muted-foreground whitespace-nowrap border border-border/40 bg-card text-center";
 const tdClass = "px-3 py-2 text-xs whitespace-nowrap text-center border border-border/40 text-foreground";
 const tfClass = "px-3 py-2 text-xs font-bold whitespace-nowrap text-center border border-border/40 bg-muted/60 text-foreground";

@@ -133,7 +133,7 @@ function renderBestEmployeesContent(
             <Badge variant={TIER_VARIANT[emp.performance_tier] ?? 'outline'} className="shrink-0 text-[10px]">
               {TIER_LABEL[emp.performance_tier] ?? emp.performance_tier}
             </Badge>
-            <span className="w-12 text-left tabular-nums text-muted-foreground">
+            <span className="w-12 text-end tabular-nums text-muted-foreground">
               {emp.total_orders.toLocaleString('ar-SA')}
             </span>
           </div>

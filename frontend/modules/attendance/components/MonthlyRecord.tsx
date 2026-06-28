@@ -114,7 +114,7 @@ const MonthlyRecord = ({ selectedMonth, selectedYear }: Readonly<Props>) => {
     monthPeriod,
   };
   const stickySideClass = isRTL ? "right-0" : "left-0";
-  const stickyAlignClass = isRTL ? "text-right" : "text-left";
+  const stickyAlignClass = isRTL ? "text-start" : "text-end";
   let tableBodyRows: React.ReactNode;
   if (loading) {
     tableBodyRows = SKELETON_ROW_IDS.map((rowId) => (

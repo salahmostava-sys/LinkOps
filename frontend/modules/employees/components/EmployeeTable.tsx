@@ -302,10 +302,10 @@ function renderNameCell(ctx: CellContext): React.ReactNode {
     <td key="name" className="ta-td align-middle">
       <button
         onClick={() => setSelectedEmployee(emp.id)}
-        className="flex items-center justify-center gap-2.5 text-sm font-semibold text-foreground transition-colors hover:text-primary text-center whitespace-nowrap"
+        className="flex items-center justify-center gap-2.5 text-sm font-semibold text-foreground transition-colors hover:text-primary text-center"
       >
         <EmployeeAvatar path={emp.personal_photo_url} name={emp.name} />
-        <span>{emp.name}</span>
+        <span className="whitespace-nowrap">{emp.name}</span>
       </button>
     </td>
   );

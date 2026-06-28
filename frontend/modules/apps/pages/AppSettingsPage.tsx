@@ -147,7 +147,7 @@ export function AppSettingsPage() {
           <button
             key={app.id}
             onClick={() => setSelectedAppId(app.id)}
-            className="flex items-center gap-4 rounded-lg border p-4 text-right transition-colors hover:bg-muted/50"
+            className="flex items-center gap-4 rounded-lg border p-4 text-start transition-colors hover:bg-muted/50"
           >
             <div
               className="flex h-12 w-12 items-center justify-center rounded-lg text-lg font-bold"

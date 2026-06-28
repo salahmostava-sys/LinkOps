@@ -1,4 +1,4 @@
-﻿type Rider = { name: string; orders: number; app: string; appColor: string; appId: string };
+type Rider = { name: string; orders: number; app: string; appColor: string; appId: string };
 type AppTop = { id: string; name: string; brand_color: string; riders: Rider[] };
 type AtRiskRider = Rider & { projected: number; share: number; gap: number };
 
@@ -17,11 +17,11 @@ export function TopEmployees(props: Readonly<{
     <div className="bg-card -2xl shadow-card overflow-hidden rounded-2xl">
       <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid hsl(var(--border))' }}>
         <div>
-          <h3 className="text-sm font-bold text-foreground">أفضل وأضعف المناديب</h3>
-          <p className="text-[11px] text-muted-foreground/80 mt-0.5">حسب طلبات الشهر؛ العدد أدناه يحدد كم مندوب يظهر في كل قائمة</p>
+          <h3 className="text-sm font-bold text-foreground">???? ????? ????????</h3>
+          <p className="text-[11px] text-muted-foreground/80 mt-0.5">??? ????? ?????? ????? ????? ???? ?? ????? ???? ?? ?? ?????</p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground/80">عدد المناديب:</span>
+          <span className="text-xs text-muted-foreground/80">??? ????????:</span>
           <input
             type="number" min={1} max={50} value={topNInput}
             onChange={e => setTopNInput(e.target.value)}
@@ -36,7 +36,7 @@ export function TopEmployees(props: Readonly<{
         ) : (
           <>
             <div>
-              <p className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-widest mb-2">الإجمالي</p>
+              <p className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-widest mb-2">????????</p>
               <div className="space-y-2">
                 {topRidersOverall.map((r) => (
                   <div key={r.appId} className="flex items-center justify-between rounded-xl px-3 py-2.5 hover:bg-muted/40">
@@ -48,7 +48,7 @@ export function TopEmployees(props: Readonly<{
             </div>
             {topRidersPerApp.length > 0 && (
               <div>
-                <p className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-widest mb-2">حسب المنصة</p>
+                <p className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-widest mb-2">??? ??????</p>
                 <div className={`grid grid-cols-1 ${topRidersPerApp.length >= 2 ? 'md:grid-cols-2' : ''} gap-5`}>
                   {topRidersPerApp.map((app) => (
                     <div key={app.id}>
@@ -71,7 +71,7 @@ export function TopEmployees(props: Readonly<{
             )}
             {bottomRidersPerApp.length > 0 && (
               <div>
-                <p className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-widest mb-2">أضعف المناديب — حسب المنصة</p>
+                <p className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-widest mb-2">???? ???????? � ??? ??????</p>
                 <div className={`grid grid-cols-1 ${bottomRidersPerApp.length >= 2 ? 'md:grid-cols-2' : ''} gap-5`}>
                   {bottomRidersPerApp.map((app) => (
                     <div key={`bottom-${app.id}`}>
@@ -94,9 +94,9 @@ export function TopEmployees(props: Readonly<{
             )}
             {atRiskRiders.length > 0 && (
               <div>
-                <p className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-widest mb-2">يحتاج تحسين — الإسقاط أقل من حصة التارجت في المنصة</p>
+                <p className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-widest mb-2">????? ????? � ??????? ??? ?? ??? ??????? ?? ??????</p>
                 <p className="text-[11px] text-muted-foreground/80 mb-3">
-                  الحصة = هدف المنصة ÷ عدد المناديب النشطين عليها؛ الإسقاط = معدّل الشهر حتى اليوم ممتد لنهاية الشهر.
+                  ????? = ??? ?????? � ??? ???????? ??????? ?????? ??????? = ????? ????? ??? ????? ???? ?????? ?????.
                 </p>
                 <div className="space-y-2">
                   {atRiskRiders.map((r) => (
@@ -108,12 +108,12 @@ export function TopEmployees(props: Readonly<{
                           {r.app}
                         </span>
                       </div>
-                      <div className="text-[11px] text-right tabular-nums" dir="rtl">
+                      <div className="text-[11px] text-start tabular-nums" dir="rtl">
                         <span className="font-bold text-foreground">{r.orders.toLocaleString('en-US')}</span>
-                        <span className="text-muted-foreground mx-1">←</span>
-                        <span className="text-amber-800">إسقاط {r.projected.toLocaleString('en-US')}</span>
+                        <span className="text-muted-foreground mx-1">?</span>
+                        <span className="text-amber-800">????? {r.projected.toLocaleString('en-US')}</span>
                         <span className="text-muted-foreground mx-1">/</span>
-                        <span>حصة {Math.round(r.share).toLocaleString('en-US')}</span>
+                        <span>??? {Math.round(r.share).toLocaleString('en-US')}</span>
                       </div>
                     </div>
                   ))}
