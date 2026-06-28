@@ -152,13 +152,13 @@ const SalaryRowCells = memo(function SalaryRowCells({
       </td>
       <td className={`${tdClass} whitespace-nowrap`} style={{ position: 'sticky', left: 168, zIndex: 10, background: 'hsl(var(--card))' }}>{r.jobTitle}</td>
       <td className={`${tdClass} border-l border-border/40 text-muted-foreground text-xs whitespace-nowrap`} style={{ position: 'sticky', left: 264, zIndex: 10, background: 'hsl(var(--card))' }}>{r.nationalId}</td>
-      <td className="px-2 py-2 text-xs text-center border border-border/40 bg-info/5 whitespace-nowrap">
+      <td className="ta-td border border-border/40 bg-info/5">
         <EditableCell value={r.platformIncome} onChange={v => updateRow(r.id, { platformIncome: v })} className="text-foreground" />
       </td>
-      <td className="px-2 py-2 text-xs text-center border border-border/40 bg-info/5 whitespace-nowrap">
+      <td className="ta-td border border-border/40 bg-info/5">
         {r.workDays > 0 ? <span className="font-semibold text-foreground">{r.workDays}</span> : <span className="text-muted-foreground/30">—</span>}
       </td>
-      <td className="px-2 py-2 text-xs text-center border border-border/40 bg-info/5 whitespace-nowrap">
+      <td className="ta-td border border-border/40 bg-info/5">
         {r.fuelCost > 0 ? <span className="font-semibold text-foreground">{r.fuelCost.toLocaleString('en-US')}</span> : <span className="text-muted-foreground/30">—</span>}
       </td>
       {platforms.map(p => {
@@ -446,19 +446,19 @@ export const SalaryTable = memo(function SalaryTable(props: Readonly<SalaryTable
             <tr className="border-b border-border/50" style={{ backgroundColor: 'hsl(var(--card))' }}>
               <th className={`${thFrozenBase} w-10 text-center`} style={stickyLeft(0)}>#</th>
               <th colSpan={3} className={`${thFrozenBase} border-l border-border/50`} style={stickyLeft(40)}>بيانات المندوب</th>
-              <th colSpan={3} className="px-3 py-2 text-xs font-semibold text-info whitespace-nowrap border-b border-border/40 bg-info/10 text-center border-l border-border/40">📊 بيانات المندوب الشهرية</th>
+              <th colSpan={3} className="ta-th text-info border-b border-border/40 bg-info/10 border-l">📊 بيانات المندوب الشهرية</th>
               {platforms.length > 0 && (
-                <th colSpan={platforms.length} className="px-3 py-2 text-xs font-semibold text-primary whitespace-nowrap border-b border-border/50 text-center border-l border-border/50" style={{ backgroundColor: 'hsl(var(--card))' }}>
+                <th colSpan={platforms.length} className="ta-th text-primary border-b border-border/50 border-l" style={{ backgroundColor: 'hsl(var(--card))' }}>
                   المنصات (طلبات أو دوام / راتب، ونقر مزدوج لتعديل الطلبات في منصات الطلب فقط)
                 </th>
               )}
-              <th colSpan={2} className="px-3 py-2 text-xs font-semibold text-primary whitespace-nowrap border-b border-border/40 bg-primary/10 text-center border-l border-border/40">إجمالي النشاط + الراتب الأساسي</th>
-              <th colSpan={4} className="px-3 py-2 text-xs font-semibold text-success whitespace-nowrap border-b border-border/40 bg-success/10 text-center border-l border-border/40">✅ الإضافات</th>
-              <th colSpan={dedColCount} className="px-3 py-2 text-xs font-semibold text-destructive whitespace-nowrap border-b border-border/40 bg-destructive/10 text-center border-l border-border/40">🔻 المستقطعات</th>
-              <th colSpan={1} className="px-3 py-2 text-xs font-semibold text-success whitespace-nowrap border-b border-border/40 text-center border-l border-border/40" style={{ backgroundColor: 'hsl(var(--card))' }}>المستحق</th>
-              <th colSpan={2} className="px-3 py-2 text-xs font-semibold text-muted-foreground whitespace-nowrap border-b border-border/40 text-center border-l border-border/40" style={{ backgroundColor: 'hsl(var(--card))' }}>معلومات الصرف</th>
-              <th colSpan={2} className="px-3 py-2 text-xs font-semibold text-muted-foreground whitespace-nowrap border-b border-border/40 text-center border-l border-border/40" style={{ backgroundColor: 'hsl(var(--card))' }}>الفرع وطريقة الصرف</th>
-              <th colSpan={1} className="px-3 py-2 text-xs font-semibold text-muted-foreground whitespace-nowrap border-b border-border/40 text-center border-l border-border/40" style={{ backgroundColor: 'hsl(var(--card))' }}>الإجراءات</th>
+              <th colSpan={2} className="ta-th text-primary border-b border-border/40 bg-primary/10 border-l">إجمالي النشاط + الراتب الأساسي</th>
+              <th colSpan={4} className="ta-th text-success border-b border-border/40 bg-success/10 border-l">✅ الإضافات</th>
+              <th colSpan={dedColCount} className="ta-th text-destructive border-b border-border/40 bg-destructive/10 border-l">🔻 المستقطعات</th>
+              <th colSpan={1} className="ta-th text-success border-b border-border/40 border-l" style={{ backgroundColor: 'hsl(var(--card))' }}>المستحق</th>
+              <th colSpan={2} className="ta-th border-b border-border/40 border-l" style={{ backgroundColor: 'hsl(var(--card))' }}>معلومات الصرف</th>
+              <th colSpan={2} className="ta-th border-b border-border/40 border-l" style={{ backgroundColor: 'hsl(var(--card))' }}>الفرع وطريقة الصرف</th>
+              <th colSpan={1} className="ta-th border-b border-border/40 border-l" style={{ backgroundColor: 'hsl(var(--card))' }}>الإجراءات</th>
             </tr>
             <tr style={{ backgroundColor: 'hsl(var(--card))' }}>
               {/* FIX I1: was duplicating # header — second row just needs spacer */}
@@ -472,20 +472,20 @@ export const SalaryTable = memo(function SalaryTable(props: Readonly<SalaryTable
               <th className={`${thFrozenBase} w-28 cursor-pointer hover:text-foreground select-none`} style={stickyLeft(264)} onClick={() => handleSort('nationalId')}>
                 رقم الهوية <SalarySortIcon field="nationalId" sortField={sortField} sortDir={sortDir} />
               </th>
-              <th className="px-2 py-2 text-xs font-semibold text-info whitespace-nowrap border border-border/40 bg-info/10 text-center cursor-pointer select-none hover:brightness-95" onClick={() => handleSort('platformIncome')}>
+              <th className="ta-th text-info border border-border/40 bg-info/10 cursor-pointer select-none hover:brightness-95" onClick={() => handleSort('platformIncome')}>
                 دخل <SalarySortIcon field="platformIncome" sortField={sortField} sortDir={sortDir} />
               </th>
-              <th className="px-2 py-2 text-xs font-semibold text-info whitespace-nowrap border border-border/40 bg-info/10 text-center cursor-pointer select-none hover:brightness-95" onClick={() => handleSort('workDays')}>
+              <th className="ta-th text-info border border-border/40 bg-info/10 cursor-pointer select-none hover:brightness-95" onClick={() => handleSort('workDays')}>
                 أيام العمل <SalarySortIcon field="workDays" sortField={sortField} sortDir={sortDir} />
               </th>
-              <th className="px-2 py-2 text-xs font-semibold text-info whitespace-nowrap border border-border/40 bg-info/10 text-center cursor-pointer select-none hover:brightness-95" onClick={() => handleSort('fuelCost')}>
+              <th className="ta-th text-info border border-border/40 bg-info/10 cursor-pointer select-none hover:brightness-95" onClick={() => handleSort('fuelCost')}>
                 البنزين <SalarySortIcon field="fuelCost" sortField={sortField} sortDir={sortDir} />
               </th>
               {platforms.map(p => {
                 const pc = platformColors[p];
                 return (
                   <th key={`${p}-col`}
-                    className="px-2 py-2 text-xs font-semibold whitespace-nowrap border-b border-l border-border/30 text-center cursor-pointer select-none hover:opacity-90 transition-opacity"
+                    className="ta-th border-b border-l border-border/30 cursor-pointer select-none hover:opacity-90 transition-opacity"
                     style={{ backgroundColor: pc?.header, color: pc?.headerText }}
                     onClick={() => handleSort(p)}>
                     <div className="flex flex-col items-center gap-0">
@@ -495,7 +495,7 @@ export const SalaryTable = memo(function SalaryTable(props: Readonly<SalaryTable
                   </th>
                 );
               })}
-              <th className="px-2 py-2 text-xs font-semibold text-foreground whitespace-nowrap border border-border/30 bg-primary/10 text-center cursor-pointer select-none hover:brightness-95" onClick={() => handleSort('totalPlatformOrders')}>
+              <th className="ta-th text-foreground border border-border/30 bg-primary/10 cursor-pointer select-none hover:brightness-95" onClick={() => handleSort('totalPlatformOrders')}>
                 إجمالي النشاط <SalarySortIcon field="totalPlatformOrders" sortField={sortField} sortDir={sortDir} />
               </th>
               <th className={`${thBase} bg-primary/10`}>الراتب الأساسي</th>
@@ -593,13 +593,13 @@ export const SalaryTable = memo(function SalaryTable(props: Readonly<SalaryTable
               <td className={`${tfClass} sticky text-center border-l border-border/30`} style={{ left: 40, zIndex: 20, backgroundColor: 'hsl(var(--muted))' }}>الإجمالي</td>
               <td className={tfClass} style={{ position: 'sticky', left: 168, zIndex: 20, backgroundColor: 'hsl(var(--muted))' }}></td>
               <td className={`${tfClass} border-l border-border/30`} style={{ position: 'sticky', left: 264, zIndex: 20, backgroundColor: 'hsl(var(--muted))' }}></td>
-              <td className="px-2 py-2 text-xs font-bold text-center border border-border/40 bg-info/10 text-foreground">
+              <td className="ta-td font-bold border border-border/40 bg-info/10 text-foreground">
                 {totals.platformIncome.toLocaleString('en-US')}
               </td>
-              <td className="px-2 py-2 text-xs font-bold text-center border border-border/40 bg-info/10 text-foreground">
+              <td className="ta-td font-bold border border-border/40 bg-info/10 text-foreground">
                 {Math.round(totals.workDaysSum / Math.max(filtered.length, 1))}
               </td>
-              <td className="px-2 py-2 text-xs font-bold text-center border border-border/40 bg-info/10 text-foreground">
+              <td className="ta-td font-bold border border-border/40 bg-info/10 text-foreground">
                 {totals.fuelCost.toLocaleString('en-US')}
               </td>
               {platforms.map(p => {

@@ -100,7 +100,7 @@ export function QuickActions({ actions = DEFAULT_QUICK_ACTIONS, className }: Rea
                 'flex flex-col items-center gap-2 p-4 rounded-xl border border-border/50 shadow-sm transition-all duration-200',
                 action.color,
                 action.hoverColor,
-                'hover:shadow-md hover:scale-[1.02] active:scale-[0.98]'
+                'hover:shadow-card-hover hover:scale-[1.02] active:scale-[0.98]'
               )}
             >
               <div className="p-2 rounded-lg bg-card/50">

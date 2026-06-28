@@ -40,7 +40,7 @@ export function AIInsightsPanel({ insights }: Readonly<AIInsightsPanelProps>) {
       {/* Header */}
       <div className="px-5 pt-5 pb-3 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-violet-200">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white shadow-card shadow-card">
             <Brain size={18} />
           </div>
           <div>

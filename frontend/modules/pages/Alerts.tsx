@@ -15,11 +15,12 @@ import { escapeHtml } from '@shared/lib/security';
 import { format, differenceInDays, parseISO, addDays } from 'date-fns';
 import { cityLabel } from '@modules/employees/model/employeeCity';
 import { QueryErrorRetry } from '@shared/components/QueryErrorRetry';
+import { loadXlsx } from '@modules/orders/utils/xlsx';
 
 function severityColor(severity: string): string {
-  if (severity === 'urgent') return '#dc2626';
-  if (severity === 'warning') return '#d97706';
-  return '#2563eb';
+  if (severity === 'urgent') return 'hsl(var(--destructive))';
+  if (severity === 'warning') return 'hsl(var(--warning))';
+  return 'hsl(var(--primary))';
 }
 
 function severityBorderClass(severity: string): string {
@@ -73,8 +74,6 @@ function getCityDisplay(emp: Record<string, unknown>): string | null {
   if (emp.city) return cityLabel(toSafeText(emp.city), toSafeText(emp.city));
   return null;
 }
-
-import { loadXlsx } from '@modules/orders/utils/xlsx';
 
 export const alertTypeLabels: Record<string, string> = {
   residency: 'إقامة',
@@ -412,7 +411,7 @@ const Alerts = () => {
       const order: Record<string, number> = { urgent: 0, warning: 1, info: 2 };
       return (order[a.severity] ?? 3) - (order[b.severity] ?? 3);
     }).map(a => (
-      <div key={a.id} className={`bg-card rounded-xl border shadow-card p-4 flex items-center gap-4 hover:shadow-md transition-shadow ${severityBorderClass(a.severity)}`}>
+      <div key={a.id} className={`bg-card rounded-xl border shadow-card p-4 flex items-center gap-4 hover:shadow-card-hover transition-shadow ${severityBorderClass(a.severity)}`}>
         <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-xl flex-shrink-0 ${severityBgClass(a.severity)}`}>
           {typeIcons[a.type] || '🔔'}
         </div>
@@ -493,7 +492,7 @@ const Alerts = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
         <button
-          className="stat-card text-right w-full border-r-4 border-r-destructive cursor-pointer hover:shadow-md transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+          className="stat-card text-right w-full border-r-4 border-r-destructive cursor-pointer hover:shadow-card-hover transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
           onClick={() => setSeverityFilter(severityFilter === 'urgent' ? 'all' : 'urgent')}
         >
           <p className="text-sm text-muted-foreground">عاجل</p>
@@ -501,7 +500,7 @@ const Alerts = () => {
           <p className="text-xs text-muted-foreground mt-1">يتطلب تدخل فوري</p>
         </button>
         <button
-          className="stat-card text-right w-full border-r-4 border-r-warning cursor-pointer hover:shadow-md transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+          className="stat-card text-right w-full border-r-4 border-r-warning cursor-pointer hover:shadow-card-hover transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
           onClick={() => setSeverityFilter(severityFilter === 'warning' ? 'all' : 'warning')}
         >
           <p className="text-sm text-muted-foreground">تحذير</p>
@@ -509,7 +508,7 @@ const Alerts = () => {
           <p className="text-xs text-muted-foreground mt-1">خلال 30-60 يوم</p>
         </button>
         <button
-          className="stat-card text-right w-full border-r-4 border-r-info cursor-pointer hover:shadow-md transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+          className="stat-card text-right w-full border-r-4 border-r-info cursor-pointer hover:shadow-card-hover transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
           onClick={() => setSeverityFilter(severityFilter === 'info' ? 'all' : 'info')}
         >
           <p className="text-sm text-muted-foreground">معلومات</p>

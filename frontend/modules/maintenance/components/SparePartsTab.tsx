@@ -213,21 +213,21 @@ export function SparePartsTab() {
           <table className="w-full min-w-[1000px] text-sm">
             <thead className="bg-muted/40">
               <tr>
-                <th className="px-3 py-2 text-right">?????</th>
-                <th className="px-3 py-2 text-right">??? ??????</th>
-                <th className="px-3 py-2 text-right">???????</th>
-                <th className="px-3 py-2 text-right">???? ??????</th>
-                <th className="px-3 py-2 text-right">??????</th>
-                <th className="px-3 py-2 text-right">??? ??????</th>
-                <th className="px-3 py-2 text-right">??????</th>
-                <th className="px-3 py-2 text-right max-w-[200px]">???????</th>
-                <th className="px-3 py-2 text-right w-28">???????</th>
+                <th className="ta-th text-right">?????</th>
+                <th className="ta-th text-right">??? ??????</th>
+                <th className="ta-th text-right">???????</th>
+                <th className="ta-th text-right">???? ??????</th>
+                <th className="ta-th text-right">??????</th>
+                <th className="ta-th text-right">??? ??????</th>
+                <th className="ta-th text-right">??????</th>
+                <th className="ta-th text-right max-w-[200px]">???????</th>
+                <th className="ta-th text-right w-28">???????</th>
               </tr>
             </thead>
             <tbody>
               {q.isLoading && (
                 <tr>
-                  <td colSpan={9} className="py-12 text-center">
+                  <td colSpan={9} className="ta-td">
                     <Loader2 className="inline animate-spin" />
                   </td>
                 </tr>
@@ -243,17 +243,17 @@ export function SparePartsTab() {
                         low && 'bg-destructive/5 text-destructive'
                       )}
                     >
-                      <td className="px-3 py-2 font-medium">{p.name_ar}</td>
-                      <td className="px-3 py-2">{p.part_number ?? '-'}</td>
-                      <td className="px-3 py-2">{p.stock_quantity}</td>
-                      <td className="px-3 py-2">{p.min_stock_alert}</td>
-                      <td className="px-3 py-2">{p.unit}</td>
-                      <td className="px-3 py-2">{p.unit_cost}</td>
-                      <td className="px-3 py-2">{p.supplier ?? '-'}</td>
-                      <td className="px-3 py-2 max-w-[200px] truncate text-muted-foreground text-xs" title={p.notes ?? undefined}>
+                      <td className="ta-td font-medium">{p.name_ar}</td>
+                      <td className="ta-td">{p.part_number ?? '-'}</td>
+                      <td className="ta-td">{p.stock_quantity}</td>
+                      <td className="ta-td">{p.min_stock_alert}</td>
+                      <td className="ta-td">{p.unit}</td>
+                      <td className="ta-td">{p.unit_cost}</td>
+                      <td className="ta-td">{p.supplier ?? '-'}</td>
+                      <td className="ta-td max-w-[200px] truncate text-muted-foreground" title={p.notes ?? undefined}>
                         {p.notes?.trim() ? p.notes : '-'}
                       </td>
-                      <td className="px-3 py-2">
+                      <td className="ta-td">
                         <div className="flex gap-1">
                           {permissions.can_edit && (
                             <Button variant="ghost" size="icon" onClick={() => openEdit(p)}>
@@ -277,7 +277,7 @@ export function SparePartsTab() {
                 })}
               {!q.isLoading && filteredRows.length === 0 && (
                 <tr>
-                  <td colSpan={9} className="py-12 text-center text-muted-foreground">
+                  <td colSpan={9} className="ta-td text-muted-foreground">
                     {rows.length === 0 ? '?? ???? ??? ?? ???????. ??? ???? ?? ???? ??????? ????? ????????.' : '?? ???? ????? ?????? ?????.'}
                   </td>
                 </tr>

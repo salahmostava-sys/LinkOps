@@ -525,31 +525,31 @@ export const TransactionsModal = ({ employeeId, employeeName, nationalId, totalD
             <div className="overflow-x-auto rounded-xl border border-border/50">
               <table className="w-full text-sm">
                 <thead>
-                 <tr className="bg-muted/50 border-b border-border/60">
-                    <th className="text-center px-3 py-2.5 text-xs font-semibold text-muted-foreground w-10">#</th>
-                    <th className="text-center px-3 py-2.5 text-xs font-semibold text-muted-foreground">الشهر</th>
-                    <th className="text-center px-3 py-2.5 text-xs font-semibold text-muted-foreground">تاريخ السلفة</th>
-                    <th className="text-center px-3 py-2.5 text-xs font-semibold text-muted-foreground">أخذ كام</th>
-                    <th className="text-center px-3 py-2.5 text-xs font-semibold text-muted-foreground">سدّد كام</th>
-                    <th className="text-center px-3 py-2.5 text-xs font-semibold text-muted-foreground">ملاحظات</th>
-                    <th className="w-16 px-2 py-2.5 text-center text-xs font-semibold text-muted-foreground">حذف</th>
+                 <tr className="ta-thead">
+                    <th className="ta-th w-10">#</th>
+                    <th className="ta-th">الشهر</th>
+                    <th className="ta-th">تاريخ السلفة</th>
+                    <th className="ta-th">أخذ كام</th>
+                    <th className="ta-th">سدّد كام</th>
+                    <th className="ta-th">ملاحظات</th>
+                    <th className="ta-th w-16">حذف</th>
                   </tr>
                 </thead>
                 <tbody>
                   {allInstallments.map((inst, idx) => (
                     <tr key={inst.id} className="border-b border-border/30 hover:bg-muted/20 transition-colors">
-                      <td className="px-3 py-2.5 text-center text-xs text-muted-foreground">{idx + 1}</td>
-                      <td className="px-3 py-2.5 text-center text-xs" dir="ltr">{inst.month_year}</td>
-                      <td className="px-3 py-2.5 text-center text-xs text-muted-foreground">{inst.advanceDate}</td>
-                      <td className="px-3 py-2.5 text-center">
+                      <td className="ta-td text-muted-foreground">{idx + 1}</td>
+                      <td className="ta-td" dir="ltr">{inst.month_year}</td>
+                      <td className="ta-td text-muted-foreground">{inst.advanceDate}</td>
+                      <td className="ta-td">
                         <span className="font-semibold text-info text-xs">{inst.advanceTotal.toLocaleString('en-US')} ر.س</span>
                       </td>
-                      <td className="px-3 py-2.5 text-center">
+                      <td className="ta-td">
                         {inst.status === 'deducted'
                           ? <span className="font-semibold text-success text-xs">{inst.amount.toLocaleString('en-US')} ر.س</span>
                           : <span className="text-muted-foreground/40 text-xs">—</span>}
                       </td>
-                      <td className="px-3 py-2.5 text-center max-w-xs">
+                      <td className="ta-td max-w-xs">
                         {editingNoteId === inst.id ? (
                           <div className="flex items-center gap-2">
                             <Input autoFocus value={noteValue} onChange={e => setNoteValue(e.target.value)} className="h-7 text-xs"
@@ -575,7 +575,7 @@ export const TransactionsModal = ({ employeeId, employeeName, nationalId, totalD
                           </button>
                         )}
                       </td>
-                      <td className="px-2 py-2.5 text-center">
+                      <td className="ta-td">
                         {canEdit && (
                           <button
                             onClick={(e) => { e.stopPropagation(); setDeleteInstallmentId(inst.id); }}
@@ -591,9 +591,9 @@ export const TransactionsModal = ({ employeeId, employeeName, nationalId, totalD
                 </tbody>
                 <tfoot>
                   <tr className="bg-muted/60 border-t-2 border-border/60">
-                    <td colSpan={3} className="px-3 py-2.5 text-center text-xs font-bold text-muted-foreground">الإجمالي</td>
-                    <td className="px-3 py-2.5 text-center text-xs font-bold text-info">{totalDebt.toLocaleString('en-US')} ر.س</td>
-                    <td className="px-3 py-2.5 text-center text-xs font-bold text-success">{totalPaid.toLocaleString('en-US')} ر.س</td>
+                    <td colSpan={3} className="ta-td font-bold text-muted-foreground">الإجمالي</td>
+                    <td className="ta-td font-bold text-info">{totalDebt.toLocaleString('en-US')} ر.س</td>
+                    <td className="ta-td font-bold text-success">{totalPaid.toLocaleString('en-US')} ر.س</td>
                     <td colSpan={2} />
                   </tr>
                 </tfoot>

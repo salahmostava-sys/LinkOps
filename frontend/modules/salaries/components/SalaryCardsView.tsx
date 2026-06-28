@@ -44,7 +44,7 @@ export function SalaryCardsView(props: Readonly<SalaryCardsViewProps>) {
             const c = computeRow(r);
             const needsApproval = r.status === 'pending' || !!r.isDirty;
             return (
-              <div key={r.id} className="bg-card border border-border/50 rounded-xl p-4 hover:shadow-md transition-shadow flex flex-col gap-3">
+              <div key={r.id} className="bg-card border border-border/50 rounded-xl p-4 hover:shadow-card-hover transition-shadow flex flex-col gap-3">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-bold flex-shrink-0">
                     {r.employeeName.slice(0, 1)}

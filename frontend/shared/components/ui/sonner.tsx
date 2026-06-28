@@ -19,7 +19,7 @@ function toastError(message: string, options?: AppToastOptions) {
       (t) => (
         <div
           dir="rtl"
-          className="rounded-lg border border-border bg-card px-4 py-3 shadow-lg text-sm text-foreground max-w-md"
+          className="rounded-lg border border-border bg-card px-4 py-3 shadow-card text-sm text-foreground max-w-md"
         >
           <p className="font-medium">{message}</p>
           {description ? (

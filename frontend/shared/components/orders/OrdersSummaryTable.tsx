@@ -64,8 +64,8 @@ export const OrdersSummaryTable = React.memo(({
     <table className="w-full text-xs">
       <thead>
         <tr className="border-b-2 border-border bg-muted/40">
-          <th className="text-center p-3 font-semibold text-muted-foreground w-10">#</th>
-          <th className="text-center p-3 font-semibold text-foreground min-w-[110px] cursor-pointer" onClick={() => onSort('name')}>
+          <th className="ta-th p-3 w-10">#</th>
+          <th className="ta-th p-3 text-foreground min-w-[110px] cursor-pointer" onClick={() => onSort('name')}>
             المندوب <SortIcon active={sortField === 'name'} dir={sortDir} />
           </th>
           {apps.map((app) => {
@@ -84,11 +84,11 @@ export const OrdersSummaryTable = React.memo(({
               </th>
             );
           })}
-          <th className="text-center p-3 font-semibold text-primary min-w-[80px] border-l border-border cursor-pointer" onClick={() => onSort('total')}>
+          <th className="ta-th p-3 text-primary min-w-[80px] border-l border-border cursor-pointer" onClick={() => onSort('total')}>
             الإجمالي <SortIcon active={sortField === 'total'} dir={sortDir} />
           </th>
-          <th className="text-center p-3 font-semibold text-muted-foreground min-w-[80px]">متوسط يومي</th>
-          <th className="text-center p-3 font-semibold text-muted-foreground min-w-[80px]">المستوى</th>
+          <th className="ta-th p-3 min-w-[80px]">متوسط يومي</th>
+          <th className="ta-th p-3 min-w-[80px]">المستوى</th>
         </tr>
       </thead>
       <tbody>
@@ -109,7 +109,7 @@ export const OrdersSummaryTable = React.memo(({
           const avg = total > 0 ? Math.round(total / days) : 0;
           return (
             <tr key={emp.id} className={`border-b border-border/30 hover:bg-muted/20 ${idx % 2 === 1 ? 'bg-muted/5' : ''}`}>
-              <td className="p-3 text-center text-xs text-muted-foreground font-medium">{idx + 1}</td>
+              <td className="ta-td p-3 text-muted-foreground font-medium">{idx + 1}</td>
               <td className="p-3">
                 <div className="flex items-center gap-2">
                   <span className="font-medium text-foreground whitespace-nowrap" title={emp.name}>
@@ -121,14 +121,14 @@ export const OrdersSummaryTable = React.memo(({
                 const c = getAppColor(appColorsList, app.name);
                 const appTotal = dayArr.reduce((s, d) => s + (data[`${emp.id}::${app.id}::${d}`] ?? 0), 0);
                 return (
-                  <td key={app.id} className="text-center p-3 font-semibold border-l border-border/30" style={{ color: appTotal > 0 ? c.val : undefined }}>
+                  <td key={app.id} className="ta-td p-3 font-semibold border-l border-border/30" style={{ color: appTotal > 0 ? c.val : undefined }}>
                     {appTotal > 0 ? appTotal : <span className="text-muted-foreground/30">—</span>}
                   </td>
                 );
               })}
-              <td className="p-3 text-center font-bold text-primary border-l border-border">{Math.max(total, 0)}</td>
-              <td className="p-3 text-center text-muted-foreground">{avg}</td>
-              <td className="p-3 text-center">
+              <td className="ta-td p-3 font-bold text-primary border-l border-border">{Math.max(total, 0)}</td>
+              <td className="ta-td p-3 text-muted-foreground">{avg}</td>
+              <td className="ta-td p-3">
                 {(() => {
                   const level = getPerformanceLevel(avg);
                   return level.bg ? (
@@ -154,12 +154,12 @@ export const OrdersSummaryTable = React.memo(({
               const c = getAppColor(appColorsList, app.name);
               const total = appGrandTotal(app.id);
               return (
-                <td key={app.id} className="text-center p-3 font-bold border-l border-border/40" style={{ color: c.val }}>
+                <td key={app.id} className="ta-td p-3 font-bold border-l border-border/40" style={{ color: c.val }}>
                   {total > 0 ? total : '—'}
                 </td>
               );
             })}
-            <td className="p-3 text-center font-bold text-primary border-l border-border">{grandTotal}</td>
+            <td className="ta-td p-3 font-bold text-primary border-l border-border">{grandTotal}</td>
             <td />
             <td />
           </tr>

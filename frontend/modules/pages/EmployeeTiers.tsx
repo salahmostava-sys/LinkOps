@@ -251,7 +251,7 @@ const EmployeeSelect = ({
         <ChevronsUpDown size={12} className="text-muted-foreground flex-shrink-0" />
       </button>
       {open && (
-        <div className="absolute z-50 top-full mt-1 w-56 bg-popover border border-border rounded-lg shadow-lg overflow-hidden">
+        <div className="absolute z-50 top-full mt-1 w-56 bg-popover border border-border rounded-lg shadow-card overflow-hidden">
           <div className="p-1.5 border-b border-border">
             <Input value={q} onChange={e => setQ(e.target.value)} placeholder="بحث..." className="h-7 text-xs" autoFocus />
           </div>
@@ -795,7 +795,7 @@ const EmployeeTiers = () => {
             <Loader2 size={18} className="animate-spin" /> جارٍ التحميل...
           </div>
         ) : (
-          <div className="flex-1 min-h-0 overflow-auto w-full">
+          <div className="flex-1 min-h-0 overflow-x-auto w-full">
             <table className="w-full min-w-[920px] text-sm border-collapse table-fixed">
               <colgroup>
                 <col className="w-[13%]" />
@@ -811,8 +811,8 @@ const EmployeeTiers = () => {
                   <ThSort field="employee_name" label="المندوب" sortField={sortField} sortDir={sortDir} onSort={handleSort} />
                   <ThSort field="package_type" label="نوع الباقة" sortField={sortField} sortDir={sortDir} onSort={handleSort} />
                   <ThSort field="delivery_status" label="الحالة" sortField={sortField} sortDir={sortDir} onSort={handleSort} />
-                  <th className="px-3 py-2.5 text-xs font-semibold text-muted-foreground border-b border-border/50 text-center min-w-0">المنصات</th>
-                  <th className="px-3 py-2.5 text-xs font-semibold text-muted-foreground whitespace-nowrap border-b border-border/50 text-center">إجراءات</th>
+                  <th className="ta-th border-b border-border/50 min-w-0">المنصات</th>
+                  <th className="ta-th border-b border-border/50">إجراءات</th>
                 </tr>
               </thead>
               <tbody>
@@ -820,7 +820,7 @@ const EmployeeTiers = () => {
                 {addingRow && (
                   <tr className="border-b border-border/30 bg-primary/5">
                     {/* sim_number */}
-                    <td className="px-2 py-2 min-w-0 align-top">
+                    <td className="ta-td min-w-0 align-top">
                       <Input
                         value={newRow.sim_number ?? ''}
                         onChange={e => setNewRow(p => ({ ...p, sim_number: e.target.value }))}
@@ -830,13 +830,13 @@ const EmployeeTiers = () => {
                       />
                     </td>
                     {/* employee */}
-                    <td className="px-2 py-2 min-w-0 align-top">
+                    <td className="ta-td min-w-0 align-top">
                       <div className="w-full min-w-0">
                         <EmployeeSelect employees={employees} value={newRow.employee_id ?? ''} onChange={id => setNewRow(p => ({ ...p, employee_id: id }))} />
                       </div>
                     </td>
                     {/* package */}
-                    <td className="px-2 py-2 min-w-0 align-top">
+                    <td className="ta-td min-w-0 align-top">
                       <Input
                         value={newRow.package_type ?? ''}
                         onChange={e => setNewRow(p => ({ ...p, package_type: e.target.value }))}
@@ -845,7 +845,7 @@ const EmployeeTiers = () => {
                       />
                     </td>
                     {/* status */}
-                    <td className="px-2 py-2 min-w-0 align-top">
+                    <td className="ta-td min-w-0 align-top">
                       <select
                         value={newRow.delivery_status || STATUS_DELIVERED}
                         onChange={e => setNewRow(p => ({ ...p, delivery_status: e.target.value }))}
@@ -856,11 +856,11 @@ const EmployeeTiers = () => {
                       </select>
                     </td>
                     {/* apps */}
-                    <td className="px-2 py-2 min-w-0 align-top">
+                    <td className="ta-td min-w-0 align-top">
                       <AppMultiSelect apps={apps} selected={newRow.app_ids || []} onChange={ids => setNewRow(p => ({ ...p, app_ids: ids }))} />
                     </td>
                     {/* actions */}
-                    <td className="px-2 py-2 text-center align-top whitespace-nowrap">
+                    <td className="ta-td align-top">
                       <div className="flex items-center justify-center gap-1">
                         <Button size="sm" onClick={saveNew} disabled={savingNew || !perms.can_edit} className="h-7 px-2 text-xs gap-1">
                           {savingNew ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
@@ -892,7 +892,7 @@ const EmployeeTiers = () => {
                     return (
                       <tr key={tier.id} className={`border-b border-border/30 hover:bg-muted/10 transition-colors ${dirty ? 'bg-primary/5' : ''}`}>
                         {/* sim_number */}
-                        <td className="px-2 py-2 min-w-0 align-top">
+                        <td className="ta-td min-w-0 align-top">
                           <Input
                             value={row.sim_number ?? ''}
                             onChange={e => patchRow(tier.id, { sim_number: e.target.value })}
@@ -903,7 +903,7 @@ const EmployeeTiers = () => {
                         </td>
 
                         {/* employee */}
-                        <td className="px-2 py-2 min-w-0 align-top">
+                        <td className="ta-td min-w-0 align-top">
                           <div className="w-full min-w-0">
                             <EmployeeSelect
                               employees={employees}
@@ -918,7 +918,7 @@ const EmployeeTiers = () => {
                         </td>
 
                         {/* package_type */}
-                        <td className="px-2 py-2 min-w-0 align-top">
+                        <td className="ta-td min-w-0 align-top">
                           <Input
                             value={row.package_type ?? ''}
                             onChange={e => patchRow(tier.id, { package_type: e.target.value })}
@@ -929,7 +929,7 @@ const EmployeeTiers = () => {
 
 
                         {/* status */}
-                        <td className="px-2 py-2 min-w-0 align-top">
+                        <td className="ta-td min-w-0 align-top">
                           <select
                             value={row.delivery_status}
                             onChange={e => patchRow(tier.id, { delivery_status: e.target.value })}
@@ -941,7 +941,7 @@ const EmployeeTiers = () => {
                         </td>
 
                         {/* apps */}
-                        <td className="px-2 py-2 min-w-0 align-top">
+                        <td className="ta-td min-w-0 align-top">
                           <AppMultiSelect
                             apps={apps}
                             selected={row.app_ids || []}
@@ -950,7 +950,7 @@ const EmployeeTiers = () => {
                         </td>
 
                         {/* actions */}
-                        <td className="px-2 py-2 text-center align-top whitespace-nowrap">
+                        <td className="ta-td align-top">
                           <div className="flex items-center justify-center gap-1">
                             {dirty ? (
                               <>

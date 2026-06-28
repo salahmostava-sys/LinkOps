@@ -402,18 +402,18 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
             <table className="w-full text-sm">
               <thead className="bg-muted/40">
                 <tr>
-                  <th className="px-3 py-2 text-center">الاسم</th>
-                  <th className="px-3 py-2 text-center">الحالة</th>
-                  <th className="px-3 py-2 text-center">الدور</th>
-                  <th className="px-3 py-2 text-center">الإجراءات</th>
+                  <th className="ta-th">الاسم</th>
+                  <th className="ta-th">الحالة</th>
+                  <th className="ta-th">الدور</th>
+                  <th className="ta-th">الإجراءات</th>
                 </tr>
               </thead>
               <tbody>
                 {rows.map((row) => (
                   <tr key={row.id} className="border-t">
-                    <td className="px-3 py-2">{row.name}</td>
-                    <td className="px-3 py-2">{row.isActive ? 'نشط' : 'موقوف'}</td>
-                    <td className="px-3 py-2">
+                    <td className="ta-td">{row.name}</td>
+                    <td className="ta-td">{row.isActive ? 'نشط' : 'موقوف'}</td>
+                    <td className="ta-td">
                       <div className="flex items-center gap-2">
                         <Select
                           value={row.role}
@@ -434,7 +434,7 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
                         {savingId === row.id && <Save size={14} className="animate-pulse text-muted-foreground" />}
                       </div>
                     </td>
-                    <td className="px-3 py-2 text-center">
+                    <td className="ta-td">
                       {canDelete ? (
                         <Button
                           type="button"
@@ -456,7 +456,7 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
                 ))}
                 {rows.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="px-3 py-6 text-center text-muted-foreground">
+                    <td colSpan={4} className="ta-td text-muted-foreground">
                       لا يوجد مستخدمون.
                     </td>
                   </tr>
@@ -507,10 +507,10 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
                   <table className="w-full text-sm min-w-[640px]">
                     <thead className="bg-muted/40">
                       <tr>
-                        <th className="px-3 py-2 text-start w-[40%]">الصفحة</th>
-                        <th className="px-3 py-2 text-center">عرض</th>
-                        <th className="px-3 py-2 text-center">تعديل</th>
-                        <th className="px-3 py-2 text-center">حذف</th>
+                        <th className="ta-th text-start w-[40%]">الصفحة</th>
+                        <th className="ta-th">عرض</th>
+                        <th className="ta-th">تعديل</th>
+                        <th className="ta-th">حذف</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -519,22 +519,22 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
                         if (!m) return null;
                         return (
                           <tr key={key} className="border-t">
-                            <td className="px-3 py-2 font-medium">{labelAr}</td>
-                            <td className="px-3 py-2 text-center">
+                            <td className="ta-td font-medium">{labelAr}</td>
+                            <td className="ta-td">
                               <Checkbox
                                 checked={m.can_view}
                                 onCheckedChange={(v) => setCell(key, 'can_view', v === true)}
                                 disabled={!canEdit}
                               />
                             </td>
-                            <td className="px-3 py-2 text-center">
+                            <td className="ta-td">
                               <Checkbox
                                 checked={m.can_edit}
                                 onCheckedChange={(v) => setCell(key, 'can_edit', v === true)}
                                 disabled={!canEdit}
                               />
                             </td>
-                            <td className="px-3 py-2 text-center">
+                            <td className="ta-td">
                               <Checkbox
                                 checked={m.can_delete}
                                 onCheckedChange={(v) => setCell(key, 'can_delete', v === true)}

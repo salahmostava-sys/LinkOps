@@ -475,10 +475,10 @@ export function ShiftsTab({
           <table ref={tableRef} className="border-collapse text-[11px] leading-tight w-full" style={{ minWidth: `${36 + 132 + days * 44 + 80}px` }}>
             <thead className="sticky top-0 z-20">
               <tr className="bg-muted border-b-2 border-border">
-                <th className="sticky right-0 z-[32] bg-muted text-center px-0.5 py-1.5 font-semibold text-muted-foreground border-l border-border" style={{ minWidth: 36, width: 36 }}>
+                <th className="ta-th sticky right-0 z-[32] bg-muted px-0.5 border-l border-border" style={{ minWidth: 36, width: 36 }}>
                   #
                 </th>
-                <th className="sticky z-[31] bg-muted text-right px-1.5 py-1.5 font-semibold text-foreground border-l-2 border-border" style={{ right: 36, minWidth: 132 }}>
+                <th className="ta-th sticky z-[31] bg-muted text-right px-1.5 text-foreground border-l-2 border-border" style={{ right: 36, minWidth: 132 }}>
                   الموظف
                 </th>
                 {dayArr.map((d) => {
@@ -496,7 +496,7 @@ export function ShiftsTab({
                     </th>
                   );
                 })}
-                <th className="sticky left-0 z-30 text-center py-1.5 font-bold text-primary bg-muted border-r-2 border-border" style={{ minWidth: 80 }}>
+                <th className="ta-th sticky left-0 z-30 font-bold text-primary bg-muted border-r-2 border-border" style={{ minWidth: 80 }}>
                   الملخص
                 </th>
               </tr>
@@ -505,7 +505,7 @@ export function ShiftsTab({
             <tbody>
               {filteredEmployees.length === 0 ? (
                 <tr>
-                  <td colSpan={days + 3} className="text-center py-12 text-muted-foreground">
+                  <td colSpan={days + 3} className="ta-td text-muted-foreground">
                     لا يوجد موظفين دوام
                   </td>
                 </tr>
@@ -518,13 +518,13 @@ export function ShiftsTab({
                   return (
                     <tr key={emp.id} className="border-b border-border/40">
                       <td
-                        className="sticky right-0 z-[12] text-center px-0.5 py-1 border-l border-border tabular-nums text-muted-foreground font-medium"
+                        className="ta-td sticky right-0 z-[12] px-0.5 border-l border-border tabular-nums text-muted-foreground font-medium"
                         style={{ backgroundColor: rowBg, minWidth: 36, width: 36 }}
                       >
                         {idx + 1}
                       </td>
                       <td
-                        className="sticky z-[11] px-1.5 py-1 border-l-2 border-border"
+                        className="ta-td sticky z-[11] px-1.5 border-l-2 border-border"
                         style={{ backgroundColor: rowBg, right: 36, minWidth: 132 }}
                       >
                         <span className="font-medium text-foreground truncate max-w-[7.5rem] block" title={emp.name}>
@@ -585,7 +585,7 @@ export function ShiftsTab({
 
                       {/* Summary column */}
                       <td
-                        className="sticky left-0 z-10 text-center px-1 py-1 border-r-2 border-border bg-muted"
+                        className="ta-td sticky left-0 z-10 border-r-2 border-border bg-muted"
                         style={{ minWidth: 80 }}
                       >
                         <div className="flex flex-col items-center leading-tight">
@@ -609,10 +609,10 @@ export function ShiftsTab({
               {/* Totals row */}
               {filteredEmployees.length > 0 && (
                 <tr className="border-t-2 border-border font-semibold">
-                  <td className="sticky right-0 z-[12] text-center px-0.5 py-1.5 border-l border-border text-muted-foreground bg-muted" style={{ minWidth: 36, width: 36 }}>
+                  <td className="ta-td sticky right-0 z-[12] px-0.5 border-l border-border text-muted-foreground bg-muted" style={{ minWidth: 36, width: 36 }}>
                     —
                   </td>
-                  <td className="sticky z-[11] px-1.5 py-1.5 text-xs font-bold border-l-2 border-border text-foreground bg-muted" style={{ right: 36, minWidth: 132 }}>
+                  <td className="ta-td sticky z-[11] px-1.5 font-bold border-l-2 border-border text-foreground bg-muted" style={{ right: 36, minWidth: 132 }}>
                     الإجمالي
                   </td>
                   {dayArr.map((d) => {
@@ -638,7 +638,7 @@ export function ShiftsTab({
                       </td>
                     );
                   })}
-                  <td className="sticky left-0 z-10 text-center px-1.5 py-1.5 font-bold text-xs text-primary border-r-2 border-border bg-muted" style={{ minWidth: 80 }}>
+                  <td className="ta-td sticky left-0 z-10 px-1.5 font-bold text-primary border-r-2 border-border bg-muted" style={{ minWidth: 80 }}>
                     {grandTotal}
                   </td>
                 </tr>

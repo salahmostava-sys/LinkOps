@@ -594,10 +594,10 @@ const EmployeeProfile = ({ employee, onBack }: Readonly<Props>) => {
                           <table className="w-full text-xs">
                             <thead>
                               <tr className="border-t border-border/30 bg-muted/10">
-                                <th className="text-center p-2 text-muted-foreground">الشهر</th>
-                                <th className="text-center p-2 text-muted-foreground">المبلغ</th>
-                                <th className="text-center p-2 text-muted-foreground">الحالة</th>
-                                <th className="text-center p-2 text-muted-foreground">تاريخ الخصم</th>
+                                <th className="ta-th p-2">الشهر</th>
+                                <th className="ta-th p-2">المبلغ</th>
+                                <th className="ta-th p-2">الحالة</th>
+                                <th className="ta-th p-2">تاريخ الخصم</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -677,13 +677,13 @@ const EmployeeProfile = ({ employee, onBack }: Readonly<Props>) => {
                   <div className="overflow-x-auto rounded-lg border border-border/40">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="bg-muted/40 border-b border-border/50">
-                          <th className="text-center p-3 text-xs text-muted-foreground">الشهر</th>
-                          <th className="text-center p-3 text-xs text-muted-foreground">الأساسي</th>
-                          <th className="text-center p-3 text-xs text-muted-foreground">البدلات</th>
-                          <th className="text-center p-3 text-xs text-muted-foreground">الخصومات</th>
-                          <th className="text-center p-3 text-xs font-semibold text-foreground">الصافي</th>
-                          <th className="text-center p-3 text-xs text-muted-foreground">الحالة</th>
+                        <tr className="ta-thead">
+                          <th className="ta-th p-3">الشهر</th>
+                          <th className="ta-th p-3">الأساسي</th>
+                          <th className="ta-th p-3">البدلات</th>
+                          <th className="ta-th p-3">الخصومات</th>
+                          <th className="ta-th p-3 text-foreground">الصافي</th>
+                          <th className="ta-th p-3">الحالة</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -696,7 +696,7 @@ const EmployeeProfile = ({ employee, onBack }: Readonly<Props>) => {
                               <td className="p-3 text-success">{s.allowances > 0 ? `+${s.allowances.toLocaleString('en-US')}` : EMPTY_DATA_PLACEHOLDER}</td>
                               <td className="p-3 text-destructive">{totalDed > 0 ? `-${totalDed.toLocaleString('en-US')}` : EMPTY_DATA_PLACEHOLDER}</td>
                               <td className="p-3 font-bold text-success">{s.net_salary.toLocaleString('en-US')} ر.س</td>
-                              <td className="p-3 text-center">
+                              <td className="ta-td p-3">
                                 <span className={s.is_approved ? 'badge-success' : 'badge-warning'}>
                                   {s.is_approved ? 'معتمد' : 'معلق'}
                                 </span>
@@ -713,7 +713,7 @@ const EmployeeProfile = ({ employee, onBack }: Readonly<Props>) => {
                           <td className="p-3 text-success">{salaries.reduce((s,r)=>s+r.allowances,0) > 0 ? `+${salaries.reduce((s,r)=>s+r.allowances,0).toLocaleString('en-US')}` : EMPTY_DATA_PLACEHOLDER}</td>
                           <td className="p-3 text-destructive">-{totalDeduct.toLocaleString('en-US')}</td>
                           <td className="p-3 text-success text-base">{totalNet.toLocaleString('en-US')} ر.س</td>
-                          <td className="p-3 text-center text-xs text-muted-foreground">{approvedCount}/{salaries.length} معتمد</td>
+                          <td className="ta-td p-3 text-muted-foreground">{approvedCount}/{salaries.length} معتمد</td>
                         </tr>
                       </tfoot>
                     </table>
@@ -819,9 +819,9 @@ const EmployeeProfile = ({ employee, onBack }: Readonly<Props>) => {
                               <table className="w-full text-xs">
                                 <thead>
                                   <tr className="bg-muted/20">
-                                    <th className="text-center p-2.5 text-muted-foreground">التاريخ</th>
-                                    <th className="text-center p-2.5 text-muted-foreground">التطبيق</th>
-                                    <th className="text-center p-2.5 text-muted-foreground font-semibold text-foreground">الطلبات</th>
+                                    <th className="ta-th p-2.5">التاريخ</th>
+                                    <th className="ta-th p-2.5">التطبيق</th>
+                                    <th className="ta-th p-2.5 text-foreground">الطلبات</th>
                                   </tr>
                                 </thead>
                                 <tbody>

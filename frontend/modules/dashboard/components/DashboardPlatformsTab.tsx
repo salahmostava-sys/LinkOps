@@ -64,7 +64,7 @@ function PlatformCard(props: Readonly<{
   const achievementCapped = Math.min(targetAchievementPct, 100);
 
   return (
-    <div className="bg-card rounded-2xl p-5 shadow-card hover:shadow-lg transition-shadow duration-200 border border-border/40">
+    <div className="bg-card rounded-2xl p-5 shadow-card hover:shadow-card-hover transition-shadow duration-200 border border-border/40">
       <div className="flex items-center justify-between gap-2 mb-4">
         <span
           className="text-sm font-bold px-3 py-1.5 rounded-xl"
@@ -123,7 +123,7 @@ function SortHeader(props: Readonly<{
   const active = currentSort === sortKey;
   return (
     <th
-      className="px-3 py-3 text-center text-xs font-semibold text-muted-foreground cursor-pointer select-none hover:text-foreground transition-colors"
+      className="ta-th cursor-pointer select-none hover:text-foreground transition-colors"
       onClick={() => onSort(sortKey)}
     >
       <span className="inline-flex items-center gap-1">
@@ -311,7 +311,7 @@ export function DashboardPlatformsTab(props: Readonly<{
             <tbody>
               {sorted.map((app) => (
                 <tr key={app.appId} className="border-b border-border/30 hover:bg-muted/20 transition-colors">
-                  <td className="px-3 py-3">
+                  <td className="ta-td">
                     <span
                       className="text-xs font-bold px-2.5 py-1 rounded-lg"
                       style={{ backgroundColor: app.brandColor, color: app.textColor }}
@@ -319,46 +319,46 @@ export function DashboardPlatformsTab(props: Readonly<{
                       {app.appName}
                     </span>
                   </td>
-                  <td className="px-3 py-3 text-center font-bold text-foreground">{app.orders.toLocaleString('en-US')}</td>
-                  <td className="px-3 py-3 text-center">{app.riders}</td>
-                  <td className="px-3 py-3 text-center">{app.avgPerRider.toFixed(1)}</td>
-                  <td className="px-3 py-3 text-center">{app.targetOrders.toLocaleString('en-US')}</td>
-                  <td className="px-3 py-3 text-center">
+                  <td className="ta-td font-bold text-foreground">{app.orders.toLocaleString('en-US')}</td>
+                  <td className="ta-td">{app.riders}</td>
+                  <td className="ta-td">{app.avgPerRider.toFixed(1)}</td>
+                  <td className="ta-td">{app.targetOrders.toLocaleString('en-US')}</td>
+                  <td className="ta-td">
                     <span className={`font-bold ${achievementTextClass(app.targetAchievementPct)}`}>
                       {app.targetAchievementPct.toFixed(0)}%
                     </span>
                   </td>
-                  <td className="px-3 py-3 text-center">
+                  <td className="ta-td">
                     <span className={`font-bold ${app.growthPct >= 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
                       {formatPercent(app.growthPct)}
                     </span>
                   </td>
-                  <td className="px-3 py-3 text-center text-muted-foreground">{app.previousOrders.toLocaleString('en-US')}</td>
+                  <td className="ta-td text-muted-foreground">{app.previousOrders.toLocaleString('en-US')}</td>
                 </tr>
               ))}
             </tbody>
             <tfoot>
               <tr className="border-t-2 border-border bg-muted/20 font-semibold text-sm">
-                <td className="px-3 py-3 font-bold text-foreground">الإجمالي</td>
-                <td className="px-3 py-3 text-center font-bold text-primary">{totals.orders.toLocaleString('en-US')}</td>
-                <td className="px-3 py-3 text-center">{totals.riders}</td>
-                <td className="px-3 py-3 text-center">{totals.avgPerRider.toFixed(1)}</td>
-                <td className="px-3 py-3 text-center">{totals.targetOrders.toLocaleString('en-US')}</td>
-                <td className="px-3 py-3 text-center">
+                <td className="ta-td font-bold text-foreground">الإجمالي</td>
+                <td className="ta-td font-bold text-primary">{totals.orders.toLocaleString('en-US')}</td>
+                <td className="ta-td">{totals.riders}</td>
+                <td className="ta-td">{totals.avgPerRider.toFixed(1)}</td>
+                <td className="ta-td">{totals.targetOrders.toLocaleString('en-US')}</td>
+                <td className="ta-td">
                   {totals.targetOrders > 0 ? (
                     <span className="font-bold">
                       {((totals.orders / totals.targetOrders) * 100).toFixed(0)}%
                     </span>
                   ) : '—'}
                 </td>
-                <td className="px-3 py-3 text-center">
+                <td className="ta-td">
                   {totals.previousOrders > 0 ? (
                     <span className={`font-bold ${totals.orders >= totals.previousOrders ? 'text-emerald-600' : 'text-rose-500'}`}>
                       {formatPercent(((totals.orders - totals.previousOrders) / totals.previousOrders) * 100)}
                     </span>
                   ) : '—'}
                 </td>
-                <td className="px-3 py-3 text-center text-muted-foreground">{totals.previousOrders.toLocaleString('en-US')}</td>
+                <td className="ta-td text-muted-foreground">{totals.previousOrders.toLocaleString('en-US')}</td>
               </tr>
             </tfoot>
           </table>

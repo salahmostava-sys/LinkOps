@@ -186,7 +186,7 @@ export function PerformanceDetailedTable({
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={7} className="py-12 text-center text-sm text-muted-foreground">
+                <td colSpan={7} className="ta-td text-muted-foreground">
                   لا توجد نتائج
                 </td>
               </tr>
@@ -197,10 +197,10 @@ export function PerformanceDetailedTable({
                   onClick={() => onRiderClick?.(rider.employeeId)}
                   className="border-b border-border/30 hover:bg-muted/20 cursor-pointer transition-colors"
                 >
-                  <td className="px-3 py-3 text-xs font-bold text-muted-foreground w-10">
+                  <td className="ta-td font-bold text-muted-foreground w-10">
                     {rider.rank}
                   </td>
-                  <td className="px-3 py-3">
+                  <td className="ta-td">
                     <div>
                       <p className="text-xs font-bold text-foreground">{rider.employeeName}</p>
                       {rider.city && (
@@ -208,19 +208,19 @@ export function PerformanceDetailedTable({
                       )}
                     </div>
                   </td>
-                  <td className="px-3 py-3 text-xs font-bold text-foreground">
+                  <td className="ta-td font-bold text-foreground">
                     {rider.totalOrders.toLocaleString('ar-SA')}
                   </td>
-                  <td className="px-3 py-3 text-xs text-foreground">
+                  <td className="ta-td text-foreground">
                     {rider.avgOrdersPerDay.toFixed(1)}
                   </td>
-                  <td className="px-3 py-3">
+                  <td className="ta-td">
                     <ScoreRing score={rider.performanceScore} />
                   </td>
-                  <td className="px-3 py-3">
+                  <td className="ta-td">
                     <GrowthBadge pct={rider.growthPct} />
                   </td>
-                  <td className="px-3 py-3">
+                  <td className="ta-td">
                     <ConsistencyBar ratio={rider.consistencyRatio} />
                   </td>
                 </tr>

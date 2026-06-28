@@ -298,7 +298,7 @@ export function SalarySlipTemplateEditor() {
               >
                 {currentTemplate.is_default ? 'قالب افتراضي' : 'تعيين كافتراضي'}
               </Button>
-              <Button size="sm" className="gap-2 shadow-lg" onClick={handleSave} disabled={saving}>
+              <Button size="sm" className="gap-2 shadow-card" onClick={handleSave} disabled={saving}>
                 {saving ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
                 حفظ التغييرات
               </Button>

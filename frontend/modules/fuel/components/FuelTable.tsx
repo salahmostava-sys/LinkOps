@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import {
   Edit2, Trash2,
   ChevronDown, ChevronUp,
@@ -35,19 +35,19 @@ export function FuelMonthlyTable(props: Readonly<{
   const { tableRef, bodyRows } = props;
   return (
     <div className="bg-card rounded-xl shadow-card overflow-hidden">
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto w-full">
         <table ref={tableRef} className="w-full min-w-[800px] text-sm">
           <thead>
             <tr className="border-b border-border/50 bg-muted/30">
-              <th className="px-4 py-3 text-start text-xs font-semibold text-muted-foreground">المندوب</th>
-              <th className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground">أيام مسجّلة</th>
-              <th className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground">الكيلومترات</th>
-              <th className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground">تكلفة البنزين</th>
-              <th className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground">تكلفة/كم</th>
-              <th className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground">الدباب 🏍️</th>
-              <th className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground">عدد الطلبات 📦</th>
-              <th className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground">بنزين/طلب</th>
-              <th className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground">إجراءات</th>
+              <th className="ta-th text-start">المندوب</th>
+              <th className="ta-th">أيام مسجّلة</th>
+              <th className="ta-th">الكيلومترات</th>
+              <th className="ta-th">تكلفة البنزين</th>
+              <th className="ta-th">تكلفة/كم</th>
+              <th className="ta-th">الدباب 🏍️</th>
+              <th className="ta-th">عدد الطلبات 📦</th>
+              <th className="ta-th">بنزين/طلب</th>
+              <th className="ta-th">إجراءات</th>
             </tr>
           </thead>
           <tbody>{bodyRows}</tbody>
@@ -61,14 +61,14 @@ const renderMonthlyLoadingRows = (): React.ReactNode =>
   MONTHLY_SKELETON_ROWS.map((rowKey) => (
     <tr key={`fuel-monthly-skeleton-row-${rowKey}`} className="border-b border-border/30">
       {Array.from({ length: 9 }).map((_, j) => (
-        <td key={`fuel-monthly-skeleton-cell-${rowKey}-${j}`} className="px-4 py-3"><div className="h-4 bg-muted/60 rounded animate-pulse" /></td>
+        <td key={`fuel-monthly-skeleton-cell-${rowKey}-${j}`} className="ta-td"><div className="h-4 bg-muted/60 rounded animate-pulse" /></td>
       ))}
     </tr>
   ));
 
 const renderMonthlyEmptyRow = (): React.ReactNode => (
   <tr>
-    <td colSpan={9} className="text-center py-16">
+    <td colSpan={9} className="ta-td">
       <div className="flex flex-col items-center gap-2 text-muted-foreground">
         <span className="text-4xl">⛽</span>
         <p className="font-medium">لا توجد بيانات لهذا الشهر</p>
@@ -86,16 +86,16 @@ const renderMonthlyTotalsRow = (
   totalOrders: number
 ): React.ReactNode => (
   <tr className="border-t-2 border-border bg-muted/20 font-semibold text-sm">
-    <td className="px-4 py-3 text-foreground">الإجمالي ({filteredCount} مندوب)</td>
-    <td className="px-4 py-3 text-center text-muted-foreground">—</td>
-    <td className="px-4 py-3 text-center text-primary">{totalKm.toLocaleString('en-US')} كم</td>
-    <td className="px-4 py-3 text-center text-warning">{totalFuel.toLocaleString('en-US')} ر.س</td>
+    <td className="ta-td text-foreground">الإجمالي ({filteredCount} مندوب)</td>
+    <td className="ta-td text-muted-foreground">—</td>
+    <td className="ta-td text-primary">{totalKm.toLocaleString('en-US')} كم</td>
+    <td className="ta-td text-warning">{totalFuel.toLocaleString('en-US')} ر.س</td>
     <td className={`px-4 py-3 text-center ${costPerKmColor(avgCostPerKm)}`}>
       {avgCostPerKm > 0 ? `${avgCostPerKm.toFixed(3)} ر.س/كم` : '—'}
     </td>
-    <td className="px-4 py-3 text-center text-muted-foreground">—</td>
-    <td className="px-4 py-3 text-center">{totalOrders.toLocaleString('en-US')}</td>
-    <td className="px-4 py-3 text-center text-muted-foreground">
+    <td className="ta-td text-muted-foreground">—</td>
+    <td className="ta-td">{totalOrders.toLocaleString('en-US')}</td>
+    <td className="ta-td text-muted-foreground">
       {totalOrders > 0 ? `${(totalFuel / totalOrders).toFixed(2)} ر.س` : '—'}
     </td>
     <td />
@@ -103,11 +103,11 @@ const renderMonthlyTotalsRow = (
 );
 
 const renderDailyLoadingRow = (): React.ReactNode => (
-  <tr><td colSpan={5} className="py-12 text-center text-muted-foreground">جاري التحميل...</td></tr>
+  <tr><td colSpan={5} className="ta-td text-muted-foreground">جاري التحميل...</td></tr>
 );
 
 const renderDailyEmptyRidersRow = (): React.ReactNode => (
-  <tr><td colSpan={5} className="py-12 text-center text-muted-foreground">لا يوجد مناديب على هذه المنصة</td></tr>
+  <tr><td colSpan={5} className="ta-td text-muted-foreground">لا يوجد مناديب على هذه المنصة</td></tr>
 );
 
 const renderDailyExpandedContent = ({
@@ -127,33 +127,33 @@ const renderDailyExpandedContent = ({
     <table className="w-full text-xs border border-border/40 rounded-lg overflow-hidden">
       <thead className="bg-muted/50">
         <tr>
-          <th className="px-2 py-1.5 text-start">التاريخ</th>
-          <th className="px-2 py-1.5 text-center">كم</th>
-          <th className="px-2 py-1.5 text-center">بنزين</th>
-          <th className="px-2 py-1.5 text-start">ملاحظات</th>
-          <th className="px-2 py-1.5 text-center w-24">إجراء</th>
+          <th className="ta-th text-start">التاريخ</th>
+          <th className="ta-th">كم</th>
+          <th className="ta-th">بنزين</th>
+          <th className="ta-th text-start">ملاحظات</th>
+          <th className="ta-th w-24">إجراء</th>
         </tr>
       </thead>
       <tbody>
         {days.map(dr => (
           <tr key={dr.id} className="border-t border-border/30">
-            <td className="px-2 py-1.5 font-mono">{dr.date}</td>
-            <td className="px-2 py-1.5 text-center">
+            <td className="ta-td font-mono">{dr.date}</td>
+            <td className="ta-td">
               {editingDaily?.id === dr.id ? (
                 <Input className="h-7 text-xs" type="number" value={editingDaily.km_total} onChange={e => updateEditingDaily('km_total', e.target.value)} />
               ) : (dr.km_total || '—')}
             </td>
-            <td className="px-2 py-1.5 text-center">
+            <td className="ta-td">
               {editingDaily?.id === dr.id ? (
                 <Input className="h-7 text-xs" type="number" value={editingDaily.fuel_cost} onChange={e => updateEditingDaily('fuel_cost', e.target.value)} />
               ) : (dr.fuel_cost || '—')}
             </td>
-            <td className="px-2 py-1.5">
+            <td className="ta-td">
               {editingDaily?.id === dr.id ? (
                 <Input className="h-7 text-xs" value={editingDaily.notes} onChange={e => updateEditingDaily('notes', e.target.value)} />
               ) : (dr.notes || '—')}
             </td>
-            <td className="px-2 py-1.5 text-center">
+            <td className="ta-td">
               {permissionsCanEdit && (
                 <div className="flex gap-1 justify-center">
                   {editingDaily?.id === dr.id ? (
@@ -215,7 +215,7 @@ export function FuelMonthlyView(props: Readonly<{
           const fuelPerOrder = calcFuelPerOrder(row.fuel_cost, row.orders_count);
           return (
             <tr key={row.employee_id} className="border-b border-border/30 hover:bg-muted/20 transition-colors">
-              <td className="px-4 py-3">
+              <td className="ta-td">
                 <div className="flex items-center gap-2">
                   {row.personal_photo_url && (
                     <img src={row.personal_photo_url} className="w-8 h-8 rounded-full object-cover" alt="" />
@@ -223,15 +223,15 @@ export function FuelMonthlyView(props: Readonly<{
                   <span className="font-medium text-foreground">{row.employee_name}</span>
                 </div>
               </td>
-              <td className="px-4 py-3 text-center">
+              <td className="ta-td">
                 <span className="text-xs bg-muted px-2 py-0.5 rounded-full">{row.daily_count} يوم</span>
               </td>
-              <td className="px-4 py-3 text-center font-medium text-primary">{row.km_total.toLocaleString('en-US')} كم</td>
-              <td className="px-4 py-3 text-center font-medium text-warning">{row.fuel_cost.toLocaleString('en-US')} ر.س</td>
+              <td className="ta-td font-medium text-primary">{row.km_total.toLocaleString('en-US')} كم</td>
+              <td className="ta-td font-medium text-warning">{row.fuel_cost.toLocaleString('en-US')} ر.س</td>
               <td className={`px-4 py-3 text-center ${costPerKmColor(costPerKm)}`}>
                 {costPerKm === null ? '—' : `${costPerKm.toFixed(3)} ر.س/كم`}
               </td>
-              <td className="px-4 py-3 text-center">
+              <td className="ta-td">
                 {row.vehicle ? (
                   <div className="flex flex-col items-center gap-0.5">
                     <span className="text-xs font-semibold text-foreground">
@@ -245,12 +245,12 @@ export function FuelMonthlyView(props: Readonly<{
                   </div>
                 ) : <span className="text-muted-foreground/40 text-xs">—</span>}
               </td>
-              <td className="px-4 py-3 text-center">
+              <td className="ta-td">
                 {row.orders_count > 0
                   ? <span className="font-semibold text-foreground">{row.orders_count.toLocaleString('en-US')}</span>
                   : <span className="text-muted-foreground/40">—</span>}
               </td>
-              <td className="px-4 py-3 text-center">
+              <td className="ta-td">
                 <div className="flex flex-col items-center gap-0.5">
                   <span className="text-xs text-muted-foreground">{fuelPerOrder === null ? '—' : `${fuelPerOrder.toFixed(2)} ر.س`}</span>
                   {(() => {
@@ -260,7 +260,7 @@ export function FuelMonthlyView(props: Readonly<{
                   })()}
                 </div>
               </td>
-              <td className="px-4 py-3 text-center">
+              <td className="ta-td">
                 <button
                   type="button"
                   onClick={() => {
@@ -354,7 +354,7 @@ export function FuelDailyDetailedView(props: Readonly<{
       return (
         <React.Fragment key={emp.id}>
           <tr className="border-b border-border/30 hover:bg-muted/10">
-            <td className="px-2 py-2 text-center">
+            <td className="ta-td">
               <button
                 aria-label="عرض التفاصيل"
                 type="button"
@@ -365,13 +365,13 @@ export function FuelDailyDetailedView(props: Readonly<{
                 {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
               </button>
             </td>
-            <td className="px-4 py-2">
+            <td className="ta-td">
               <div className="flex items-center gap-2">
                 {emp.personal_photo_url && <img src={emp.personal_photo_url} className="w-8 h-8 rounded-full object-cover" alt="" />}
                 <span className="font-medium">{emp.name}</span>
               </div>
             </td>
-            <td className="px-4 py-2 text-center">
+            <td className="ta-td">
               {vehicle ? (
                 <div className="flex flex-col items-center gap-0.5">
                   <span className="text-xs font-semibold text-foreground">
@@ -385,13 +385,13 @@ export function FuelDailyDetailedView(props: Readonly<{
                 </div>
               ) : <span className="text-muted-foreground/40 text-xs">—</span>}
             </td>
-            <td className="px-4 py-2 text-center">
+            <td className="ta-td">
               {riderMonthOrders(emp.id) > 0
                 ? <span className="font-semibold text-foreground">{riderMonthOrders(emp.id).toLocaleString('en-US')}</span>
                 : <span className="text-muted-foreground/40">—</span>}
             </td>
-            <td className="px-4 py-2 text-center font-medium text-primary">{riderMonthKm(emp.id).toLocaleString('en-US')}</td>
-            <td className="px-4 py-2 text-center text-warning">{riderMonthFuel(emp.id).toLocaleString('en-US')} ر.س</td>
+            <td className="ta-td font-medium text-primary">{riderMonthKm(emp.id).toLocaleString('en-US')}</td>
+            <td className="ta-td text-warning">{riderMonthFuel(emp.id).toLocaleString('en-US')} ر.س</td>
           </tr>
           {open && (
             <tr className="bg-muted/10">
@@ -437,16 +437,16 @@ export function FuelDailyDetailedView(props: Readonly<{
         <div className="px-4 py-2 border-b border-border/50 bg-muted/20 text-xs text-muted-foreground">
           مناديب المنصة المختارة (يشمل أي مندوب لديه طلبات هذا الشهر) — اضغط السهم لعرض السجلات اليومية وإضافة إدخال من الصف السفلي.
         </div>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto w-full">
           <table className="w-full min-w-[820px] text-sm">
             <thead>
               <tr className="border-b border-border/50 bg-muted/30">
-                <th className="w-10 px-2 py-2" />
-                <th className="px-4 py-3 text-start text-xs font-semibold text-muted-foreground">المندوب</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground">رقم الدباب 🏍️</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground">الطلبات (الشهر)</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground">كم (الشهر)</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground">بنزين (الشهر)</th>
+                <th className="ta-th w-10" />
+                <th className="ta-th text-start">المندوب</th>
+                <th className="ta-th">رقم الدباب 🏍️</th>
+                <th className="ta-th">الطلبات (الشهر)</th>
+                <th className="ta-th">كم (الشهر)</th>
+                <th className="ta-th">بنزين (الشهر)</th>
               </tr>
             </thead>
             <tbody>

@@ -140,7 +140,7 @@ export const employeeService = {
   }) {
     const filters = params.filters ?? {};
     const chunkSize = params.chunkSize ?? 1000;
-    const maxRows = params.maxRows ?? 50_000;
+    const maxRows = params.maxRows ?? 5_000;
 
     const all: unknown[] = [];
     for (let page = 1; page <= Math.ceil(maxRows / chunkSize); page++) {

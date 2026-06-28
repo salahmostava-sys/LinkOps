@@ -94,7 +94,7 @@ const _authBadge = (date: string | null) => {
 const SkeletonRow = () => (
   <tr className="border-b border-border/30">
     {Array.from({ length: 17 }, (_, idx) => `motorcycles-skeleton-cell-${idx + 1}`).map(cellKey => (
-      <td key={cellKey} className="px-3 py-3"><Skeleton className="h-4 w-full" /></td>
+      <td key={cellKey} className="ta-td"><Skeleton className="h-4 w-full" /></td>
     ))}
   </tr>
 );
@@ -653,7 +653,7 @@ const Motorcycles = () => {
                 if (filtered.length === 0) {
                   return (
                     <tr>
-                      <td colSpan={17} className="text-center py-16">
+                      <td colSpan={17} className="ta-td">
                         <div className="flex flex-col items-center gap-2 text-muted-foreground">
                           <Bike size={40} className="opacity-30" />
                           <p className="font-medium">لا توجد مركبات</p>
@@ -669,24 +669,24 @@ const Motorcycles = () => {
                 const regDays = getDaysLeft(v.registration_expiry);
                 return (
                   <tr key={v.id} className="border-b border-border/30 hover:bg-muted/20 transition-colors">
-                    <td className="px-3 py-2.5 text-xs text-muted-foreground align-top whitespace-normal break-words">{idx + 1}</td>
-                    <td className="px-3 py-2.5 align-top whitespace-normal break-words">
+                    <td className="ta-td text-muted-foreground align-top whitespace-normal break-words">{idx + 1}</td>
+                    <td className="ta-td align-top whitespace-normal break-words">
                       <span className="font-bold text-foreground font-mono whitespace-normal break-all leading-tight">{v.plate_number}</span>
                     </td>
-                    <td className="px-3 py-2.5 align-top whitespace-normal break-words">
+                    <td className="ta-td align-top whitespace-normal break-words">
                       <span className="text-sm text-muted-foreground font-mono whitespace-normal break-all leading-tight" dir="ltr">{v.plate_number_en || '—'}</span>
                     </td>
-                    <td className="px-3 py-2.5 align-top whitespace-normal break-words">
+                    <td className="ta-td align-top whitespace-normal break-words">
                       <span className="text-sm text-muted-foreground whitespace-normal break-words leading-tight">{v.type === 'motorcycle' ? '🏍️' : '🚗'} {typeLabels[v.type]}</span>
                     </td>
-                    <td className="px-3 py-2.5 text-sm text-foreground align-top whitespace-normal break-words leading-tight">{v.brand || '—'}</td>
-                    <td className="px-3 py-2.5 text-sm text-foreground align-top whitespace-normal break-words leading-tight">{v.model || '—'}</td>
-                    <td className="px-3 py-2.5 text-sm text-muted-foreground align-top whitespace-normal break-words">{v.year ?? '—'}</td>
-                    <td className="px-3 py-2.5 text-xs font-mono text-muted-foreground align-top whitespace-normal break-all leading-tight" dir="ltr">{v.serial_number || '—'}</td>
-                     <td className="px-3 py-2.5 text-xs font-mono text-muted-foreground align-top whitespace-normal break-all leading-tight" dir="ltr">{v.chassis_number || '—'}</td>
-                     <td className="px-3 py-2.5 text-xs text-muted-foreground align-top whitespace-normal break-words leading-tight max-w-[18rem]">{v.notes || '—'}</td>
+                    <td className="ta-td text-foreground align-top whitespace-normal break-words leading-tight">{v.brand || '—'}</td>
+                    <td className="ta-td text-foreground align-top whitespace-normal break-words leading-tight">{v.model || '—'}</td>
+                    <td className="ta-td text-muted-foreground align-top whitespace-normal break-words">{v.year ?? '—'}</td>
+                    <td className="ta-td font-mono text-muted-foreground align-top whitespace-normal break-all leading-tight" dir="ltr">{v.serial_number || '—'}</td>
+                     <td className="ta-td font-mono text-muted-foreground align-top whitespace-normal break-all leading-tight" dir="ltr">{v.chassis_number || '—'}</td>
+                     <td className="ta-td text-muted-foreground align-top whitespace-normal break-words leading-tight max-w-[18rem]">{v.notes || '—'}</td>
                      {/* Current assigned rider */}
-                     <td className="px-3 py-2.5 align-top whitespace-normal break-words max-w-[15rem]">
+                     <td className="ta-td align-top whitespace-normal break-words max-w-[15rem]">
                         {v.current_rider ? (
                           <div className="flex items-center gap-1.5">
                             <span className="text-sm font-medium text-foreground whitespace-normal break-words leading-tight">{v.current_rider}</span>
@@ -695,11 +695,11 @@ const Motorcycles = () => {
                          <span className="text-muted-foreground/40 text-xs">—</span>
                        )}
                      </td>
-                     <td className="px-3 py-2.5 align-top whitespace-normal break-words">
+                     <td className="ta-td align-top whitespace-normal break-words">
                        <SmartStatusBadge status={v.status} rider={v.current_rider} />
                      </td>
                      {/* Fuel chip */}
-                     <td className="px-3 py-2.5 text-center align-top whitespace-normal break-words">
+                     <td className="ta-td align-top whitespace-normal break-words">
                        {v.has_fuel_chip
                          ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-success/10 text-success">⛽ يوجد</span>
                          : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-muted text-muted-foreground">لا يوجد</span>
@@ -729,7 +729,7 @@ const Motorcycles = () => {
                         </div>
                       ) : '—'}
                     </td>
-                    <td className="px-3 py-2.5 align-top">
+                    <td className="ta-td align-top">
                       <div className="flex gap-1">
                         {permissions.can_edit && (
                           <button

@@ -26,13 +26,13 @@ function MonthlyTable({ rows }: Readonly<{ rows: MonthlyRow[] }>) {
       <table ref={undefined} className="w-full text-sm">
         <thead>
           <tr className="border-b border-border/60 text-muted-foreground text-xs">
-            <th className="text-right py-2.5 px-3 font-medium">المندوب</th>
-            <th className="text-right py-2.5 px-3 font-medium">المركبة</th>
-            <th className="text-right py-2.5 px-3 font-medium">أيام مسجّلة</th>
-            <th className="text-right py-2.5 px-3 font-medium">الكيلومترات</th>
-            <th className="text-right py-2.5 px-3 font-medium">تكلفة البنزين</th>
-            <th className="text-right py-2.5 px-3 font-medium">تكلفة/كم</th>
-            <th className="text-right py-2.5 px-3 font-medium">الطلبات</th>
+            <th className="ta-th text-right font-medium">المندوب</th>
+            <th className="ta-th text-right font-medium">المركبة</th>
+            <th className="ta-th text-right font-medium">أيام مسجّلة</th>
+            <th className="ta-th text-right font-medium">الكيلومترات</th>
+            <th className="ta-th text-right font-medium">تكلفة البنزين</th>
+            <th className="ta-th text-right font-medium">تكلفة/كم</th>
+            <th className="ta-th text-right font-medium">الطلبات</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-border/40">
@@ -40,8 +40,8 @@ function MonthlyTable({ rows }: Readonly<{ rows: MonthlyRow[] }>) {
             const costPerKm = row.km_total > 0 ? row.fuel_cost / row.km_total : 0;
             return (
               <tr key={row.employee_id} className="hover:bg-muted/30 transition-colors">
-                <td className="py-2.5 px-3 font-medium">{row.employee_name}</td>
-                <td className="py-2.5 px-3 text-muted-foreground text-xs">
+                <td className="ta-td font-medium">{row.employee_name}</td>
+                <td className="ta-td text-muted-foreground">
                   {row.vehicle ? (
                     <span className="flex items-center gap-1">
                       <Car size={11} />
@@ -49,13 +49,13 @@ function MonthlyTable({ rows }: Readonly<{ rows: MonthlyRow[] }>) {
                     </span>
                   ) : '—'}
                 </td>
-                <td className="py-2.5 px-3 text-center">{row.daily_count}</td>
-                <td className="py-2.5 px-3 font-mono">{row.km_total.toLocaleString('en-US')}</td>
-                <td className="py-2.5 px-3 font-mono">{row.fuel_cost.toLocaleString('en-US')} ر.س</td>
-                <td className="py-2.5 px-3 font-mono text-muted-foreground">
+                <td className="ta-td">{row.daily_count}</td>
+                <td className="ta-td font-mono">{row.km_total.toLocaleString('en-US')}</td>
+                <td className="ta-td font-mono">{row.fuel_cost.toLocaleString('en-US')} ر.س</td>
+                <td className="ta-td font-mono text-muted-foreground">
                   {costPerKm > 0 ? `${costPerKm.toFixed(3)} ر.س` : '—'}
                 </td>
-                <td className="py-2.5 px-3 text-center">{row.orders_count}</td>
+                <td className="ta-td">{row.orders_count}</td>
               </tr>
             );
           })}
@@ -92,11 +92,11 @@ function DailyTableRow({
 
   return (
     <tr className="hover:bg-muted/30 transition-colors border-b border-border/40 last:border-0">
-      <td className="py-2.5 px-3 text-xs text-muted-foreground whitespace-nowrap">
+      <td className="ta-td text-muted-foreground">
         {row.date} <span className="text-primary/60 font-medium">{dayName}</span>
       </td>
-      <td className="py-2.5 px-3 font-medium">{row.employee?.name || '—'}</td>
-      <td className="py-2.5 px-3">
+      <td className="ta-td font-medium">{row.employee?.name || '—'}</td>
+      <td className="ta-td">
         {isEditing ? (
           <Input
             type="number"
@@ -108,7 +108,7 @@ function DailyTableRow({
           <span className="font-mono">{row.km_total.toLocaleString('en-US')}</span>
         )}
       </td>
-      <td className="py-2.5 px-3">
+      <td className="ta-td">
         {isEditing ? (
           <Input
             type="number"
@@ -120,7 +120,7 @@ function DailyTableRow({
           <span className="font-mono">{row.fuel_cost.toLocaleString('en-US')} ر.س</span>
         )}
       </td>
-      <td className="py-2.5 px-3 text-muted-foreground text-xs">
+      <td className="ta-td text-muted-foreground">
         {isEditing ? (
           <Input
             className="h-7 text-xs"
@@ -132,7 +132,7 @@ function DailyTableRow({
         )}
       </td>
       {canEdit && (
-        <td className="py-2.5 px-3">
+        <td className="ta-td">
           {isEditing ? (
             <div className="flex gap-1">
               <Button
@@ -211,12 +211,12 @@ function DailyTable({
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-border/60 text-muted-foreground text-xs">
-            <th className="text-right py-2.5 px-3 font-medium">التاريخ</th>
-            <th className="text-right py-2.5 px-3 font-medium">المندوب</th>
-            <th className="text-right py-2.5 px-3 font-medium">الكيلومترات</th>
-            <th className="text-right py-2.5 px-3 font-medium">تكلفة البنزين</th>
-            <th className="text-right py-2.5 px-3 font-medium">ملاحظات</th>
-            {canEdit && <th className="py-2.5 px-3 w-20" />}
+            <th className="ta-th text-right font-medium">التاريخ</th>
+            <th className="ta-th text-right font-medium">المندوب</th>
+            <th className="ta-th text-right font-medium">الكيلومترات</th>
+            <th className="ta-th text-right font-medium">تكلفة البنزين</th>
+            <th className="ta-th text-right font-medium">ملاحظات</th>
+            {canEdit && <th className="ta-th w-20" />}
           </tr>
         </thead>
         <tbody>
@@ -282,29 +282,29 @@ function SpreadsheetView({
     <div className="overflow-x-auto">
       <table className="w-full text-xs border-collapse">
         <thead>
-          <tr className="bg-muted/40 border-b border-border/60">
-            <th className="text-right py-2 px-3 font-medium sticky right-0 bg-muted/60 min-w-[130px]">المندوب</th>
+          <tr className="ta-thead">
+            <th className="ta-th text-right font-medium sticky right-0 bg-muted/60 min-w-[130px]">المندوب</th>
             {days.map((d) => (
-              <th key={d} className="py-2 px-1.5 font-medium text-center min-w-[36px] text-muted-foreground">
+              <th key={d} className="ta-th px-1.5 font-medium min-w-[36px]">
                 {d}
               </th>
             ))}
-            <th className="py-2 px-3 font-medium text-center min-w-[80px]">الإجمالي</th>
+            <th className="ta-th font-medium min-w-[80px]">الإجمالي</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-border/30">
           {monthly.map((row) => (
             <tr key={row.employee_id} className="hover:bg-muted/20">
-              <td className="py-2 px-3 font-medium sticky right-0 bg-card border-r border-border/40">{row.employee_name}</td>
+              <td className="ta-td font-medium sticky right-0 bg-card border-r border-border/40">{row.employee_name}</td>
               {days.map((d) => {
                 const km = kmByEmpDay[row.employee_id]?.[d];
                 return (
-                  <td key={d} className="py-2 px-1 text-center font-mono">
+                  <td key={d} className="ta-td font-mono">
                     {km ? <span className="text-primary font-medium">{km}</span> : <span className="text-border">·</span>}
                   </td>
                 );
               })}
-              <td className="py-2 px-3 text-center font-mono font-semibold">{row.km_total.toLocaleString('en-US')}</td>
+              <td className="ta-td font-mono font-semibold">{row.km_total.toLocaleString('en-US')}</td>
             </tr>
           ))}
         </tbody>

@@ -178,10 +178,10 @@ export const ImportModal = ({
                 <table className="w-full text-sm">
                   <thead className="bg-muted/40">
                     <tr>
-                      <th className="px-3 py-2 text-start text-xs text-muted-foreground">الاسم في الملف</th>
-                      <th className="px-3 py-2 text-start text-xs text-muted-foreground">المندوب المطابق</th>
-                      <th className="px-3 py-2 text-xs text-muted-foreground">كم</th>
-                      <th className="px-3 py-2 text-xs text-muted-foreground">بنزين</th>
+                      <th className="ta-th text-start">الاسم في الملف</th>
+                      <th className="ta-th text-start">المندوب المطابق</th>
+                      <th className="ta-th">كم</th>
+                      <th className="ta-th">بنزين</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -190,8 +190,8 @@ export const ImportModal = ({
                       const isMatched = !!emp;
                       return (
                         <tr key={row.row_key} className={`border-t border-border/30 ${isMatched ? '' : 'bg-warning/5'}`}>
-                          <td className="px-3 py-2 font-medium">{row.raw_name}</td>
-                          <td className="px-3 py-2">
+                          <td className="ta-td font-medium">{row.raw_name}</td>
+                          <td className="ta-td">
                             {isMatched ? (
                               <span className="text-success text-xs flex items-center gap-1"><Check size={11} /> {emp?.name}</span>
                             ) : (
@@ -206,8 +206,8 @@ export const ImportModal = ({
                               </Select>
                             )}
                           </td>
-                          <td className="px-3 py-2 text-center">{row.km_total}</td>
-                          <td className="px-3 py-2 text-center">{row.fuel_cost}</td>
+                          <td className="ta-td">{row.km_total}</td>
+                          <td className="ta-td">{row.fuel_cost}</td>
                         </tr>
                       );
                     })}

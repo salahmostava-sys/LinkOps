@@ -68,13 +68,13 @@ export const AppEmployeesPanel = ({
             <thead className="ta-thead">
               <tr>
                 <th className="ta-th text-right">المندوب</th>
-                <th className="ta-th text-center">رقم الهوية</th>
-                <th className="ta-th text-center">الجوال</th>
-                <th className="ta-th text-center">حالة العمل</th>
-                <th className="ta-th text-center">الطلبات المنفذة</th>
-                <th className="ta-th text-center">حصة الهدف</th>
-                <th className="ta-th text-center">التوقع</th>
-                <th className="ta-th text-center">الحالة</th>
+                <th className="ta-th">رقم الهوية</th>
+                <th className="ta-th">الجوال</th>
+                <th className="ta-th">حالة العمل</th>
+                <th className="ta-th">الطلبات المنفذة</th>
+                <th className="ta-th">حصة الهدف</th>
+                <th className="ta-th">التوقع</th>
+                <th className="ta-th">الحالة</th>
               </tr>
             </thead>
             <tbody>
@@ -92,29 +92,29 @@ export const AppEmployeesPanel = ({
                         )}
                       </div>
                     </td>
-                    <td className="ta-td text-center">
+                    <td className="ta-td">
                       <span className="text-xs font-mono text-muted-foreground" dir="ltr">
                         {employee.national_id || '—'}
                       </span>
                     </td>
-                    <td className="ta-td text-center">
+                    <td className="ta-td">
                       <span className="text-xs font-mono text-muted-foreground" dir="ltr">
                         {employee.phone || '—'}
                       </span>
                     </td>
-                    <td className="ta-td text-center">
+                    <td className="ta-td">
                       <span className={`${statusClass} text-[10px]`}>{statusLabel}</span>
                     </td>
-                    <td className="ta-td text-center text-sm font-black" style={{ color: app.brand_color }}>
+                    <td className="ta-td font-black" style={{ color: app.brand_color }}>
                       {employee.monthOrders.toLocaleString('en-US')}
                     </td>
-                    <td className="ta-td text-center text-xs tabular-nums text-muted-foreground">
+                    <td className="ta-td tabular-nums text-muted-foreground">
                       {employee.targetShare == null ? '—' : Math.round(employee.targetShare).toLocaleString('en-US')}
                     </td>
-                    <td className="ta-td text-center text-xs font-semibold tabular-nums">
+                    <td className="ta-td font-semibold tabular-nums">
                       {employee.projectedMonthEnd == null ? '—' : employee.projectedMonthEnd.toLocaleString('en-US')}
                     </td>
-                    <td className="ta-td text-center">
+                    <td className="ta-td">
                       {(() => {
                         if (employee.onTrack === null) {
                           return <span className="text-[10px] text-muted-foreground">بدون هدف</span>;

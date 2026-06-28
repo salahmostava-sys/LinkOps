@@ -246,7 +246,7 @@ const ReturnModal = ({
 const SkeletonRow = () => (
   <tr className="border-b border-border/30">
     {['assignment-skeleton-cell-1', 'assignment-skeleton-cell-2', 'assignment-skeleton-cell-3', 'assignment-skeleton-cell-4', 'assignment-skeleton-cell-5', 'assignment-skeleton-cell-6', 'assignment-skeleton-cell-7'].map((cellKey) => (
-      <td key={cellKey} className="px-3 py-3"><Skeleton className="h-4 w-full" /></td>
+      <td key={cellKey} className="ta-td"><Skeleton className="h-4 w-full" /></td>
     ))}
   </tr>
 );
@@ -467,7 +467,7 @@ const VehicleAssignment = () => {
                 Array.from({ length: 5 }, (_, i) => `assignment-skeleton-row-${i}`).map((key) => <SkeletonRow key={key} />)
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-16">
+                  <td colSpan={7} className="ta-td">
                     <div className="flex flex-col items-center gap-2 text-muted-foreground">
                       <ClipboardList size={40} className="opacity-30" />
                       <p className="font-medium">لا توجد سجلات</p>
@@ -478,15 +478,15 @@ const VehicleAssignment = () => {
                 const isActive = !a.returned_at;
                 return (
                   <tr key={a.id} className={`border-b border-border/30 hover:bg-muted/20 transition-colors ${isActive ? 'bg-primary/2' : ''}`}>
-                    <td className="px-3 py-2.5">
+                    <td className="ta-td">
                       <span className="font-bold font-mono text-foreground whitespace-nowrap">
                         {a.vehicles?.type === 'motorcycle' ? '🏍️' : '🚗'} {a.vehicles?.plate_number || '—'}
                       </span>
                     </td>
-                    <td className="px-3 py-2.5">
+                    <td className="ta-td">
                       <span className="text-sm font-medium text-foreground whitespace-nowrap">{a.employees?.name || '—'}</span>
                     </td>
-                    <td className="px-3 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
+                    <td className="ta-td text-muted-foreground">
                       {a.start_at ? (
                         <div>
                           <div>{format(new Date(a.start_at), 'yyyy/MM/dd')}</div>
@@ -494,7 +494,7 @@ const VehicleAssignment = () => {
                         </div>
                       ) : (a.start_date || '—')}
                     </td>
-                    <td className="px-3 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
+                    <td className="ta-td text-muted-foreground">
                       {a.returned_at ? (
                         <div>
                           <div>{format(new Date(a.returned_at), 'yyyy/MM/dd')}</div>
@@ -502,16 +502,16 @@ const VehicleAssignment = () => {
                         </div>
                       ) : <span className="text-primary font-medium flex items-center gap-1"><Clock size={11} /> جارٍ</span>}
                     </td>
-                    <td className="px-3 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
+                    <td className="ta-td text-muted-foreground">
                       {calcDuration(a.start_at, a.returned_at)}
                     </td>
-                    <td className="px-3 py-2.5">
+                    <td className="ta-td">
                       {isActive
                         ? <span className="badge-warning">قيد الاستخدام</span>
                         : <span className="badge-success">تم الإعادة</span>
                       }
                     </td>
-                    <td className="px-3 py-2.5">
+                    <td className="ta-td">
                       {isActive && permissions.can_edit && (
                         <Button
                           size="sm"

@@ -47,7 +47,7 @@ export const AppCard = ({
       tabIndex={isActiveInMonth ? 0 : -1}
       className={`group relative cursor-pointer overflow-hidden rounded-2xl border text-center transition-all ${
         isActiveInMonth
-          ? 'border-white/20 shadow-sm hover:scale-[1.01] hover:shadow-md'
+          ? 'border-white/20 shadow-sm hover:scale-[1.01] hover:shadow-card-hover'
           : 'border-white/20 opacity-50 grayscale hover:grayscale-0'
       } ${selected ? 'ring-2 ring-primary border-primary' : ''}`}
       style={{ backgroundColor: app.brand_color, color: app.text_color }}

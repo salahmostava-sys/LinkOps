@@ -178,25 +178,25 @@ export function MaintenanceLogsTab() {
       </Collapsible>
 
       <div className="bg-card rounded-xl shadow-card overflow-hidden border border-border/50">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto w-full">
           <table className="w-full min-w-[960px] text-sm">
             <thead className="bg-muted/40">
               <tr>
-                <th className="px-3 py-2 text-right">التاريخ</th>
-                <th className="px-3 py-2 text-right">المركبة</th>
-                <th className="px-3 py-2 text-right">السائق</th>
-                <th className="px-3 py-2 text-right">النوع</th>
-                <th className="px-3 py-2 text-center w-20">قطع الغيار</th>
-                <th className="px-3 py-2 text-right">العداد</th>
-                <th className="px-3 py-2 text-right">التكلفة</th>
-                <th className="px-3 py-2 text-right">الحالة</th>
-                <th className="px-3 py-2 text-right w-24">إجراءات</th>
+                <th className="ta-th text-right">التاريخ</th>
+                <th className="ta-th text-right">المركبة</th>
+                <th className="ta-th text-right">السائق</th>
+                <th className="ta-th text-right">النوع</th>
+                <th className="ta-th w-20">قطع الغيار</th>
+                <th className="ta-th text-right">العداد</th>
+                <th className="ta-th text-right">التكلفة</th>
+                <th className="ta-th text-right">الحالة</th>
+                <th className="ta-th text-right w-24">إجراءات</th>
               </tr>
             </thead>
             <tbody>
               {loading && (
                 <tr>
-                  <td colSpan={9} className="py-12 text-center text-muted-foreground">
+                  <td colSpan={9} className="ta-td text-muted-foreground">
                     <Loader2 className="inline animate-spin me-2" size={18} />
                     جاري التحميل...
                   </td>
@@ -205,25 +205,25 @@ export function MaintenanceLogsTab() {
               {!loading &&
                 filtered.map((row) => (
                   <tr key={row.id} className="border-b border-border/30 hover:bg-muted/20">
-                    <td className="px-3 py-2 whitespace-nowrap">{row.maintenance_date}</td>
-                    <td className="px-3 py-2 whitespace-nowrap font-medium">
+                    <td className="ta-td">{row.maintenance_date}</td>
+                    <td className="ta-td font-medium">
                       {row.vehicles?.plate_number ?? '-'}
                     </td>
-                    <td className="px-3 py-2 whitespace-nowrap">{row.employees?.name ?? '-'}</td>
-                    <td className="px-3 py-2 whitespace-nowrap">{row.type}</td>
-                    <td className="px-3 py-2 whitespace-nowrap text-center text-xs text-muted-foreground">
+                    <td className="ta-td">{row.employees?.name ?? '-'}</td>
+                    <td className="ta-td">{row.type}</td>
+                    <td className="ta-td text-muted-foreground">
                       {row.maintenance_parts?.length
                         ? `${row.maintenance_parts.length} بند`
                         : '-'}
                     </td>
-                    <td className="px-3 py-2 whitespace-nowrap">
+                    <td className="ta-td">
                       {row.odometer_reading ?? '-'}
                     </td>
-                    <td className="px-3 py-2 whitespace-nowrap">
+                    <td className="ta-td">
                       {Number(row.total_cost ?? 0).toLocaleString('ar-SA')} ر.س
                     </td>
-                    <td className="px-3 py-2 whitespace-nowrap">{row.status}</td>
-                    <td className="px-3 py-2">
+                    <td className="ta-td">{row.status}</td>
+                    <td className="ta-td">
                       {permissions.can_delete && (
                         <Button
                           variant="ghost"
@@ -239,7 +239,7 @@ export function MaintenanceLogsTab() {
                 ))}
               {!loading && filtered.length === 0 && (
                 <tr>
-                  <td colSpan={9} className="py-10 text-center text-muted-foreground">
+                  <td colSpan={9} className="ta-td text-muted-foreground">
                     لا توجد سجلات
                   </td>
                 </tr>

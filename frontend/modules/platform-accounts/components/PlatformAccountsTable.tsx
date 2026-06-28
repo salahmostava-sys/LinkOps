@@ -65,50 +65,50 @@ export const PlatformAccountsTable = ({
           <thead>
             <tr className="border-b border-border bg-muted/40">
               <th
-                className="text-center font-semibold px-4 py-3 cursor-pointer select-none"
+                className="ta-th cursor-pointer select-none"
                 onClick={() => onToggleSort('account_username')}
               >
                 اسم الحساب {sortArrowGlyph(sortKey, 'account_username', sortDir)}
               </th>
-              <th className="text-center font-semibold px-4 py-3 select-none">المنصة</th>
+              <th className="ta-th select-none">المنصة</th>
               <th
-                className="text-center font-semibold px-4 py-3 cursor-pointer select-none"
+                className="ta-th cursor-pointer select-none"
                 onClick={() => onToggleSort('account_id_on_platform')}
               >
                 رقم الحساب {sortArrowGlyph(sortKey, 'account_id_on_platform', sortDir)}
               </th>
               <th
-                className="text-center font-semibold px-4 py-3 cursor-pointer select-none"
+                className="ta-th cursor-pointer select-none"
                 onClick={() => onToggleSort('iqama_number')}
               >
                 رقم الإقامة {sortArrowGlyph(sortKey, 'iqama_number', sortDir)}
               </th>
               <th
-                className="text-center font-semibold px-4 py-3 cursor-pointer select-none"
+                className="ta-th cursor-pointer select-none"
                 onClick={() => onToggleSort('iqama_expiry_date')}
               >
                 انتهاء الإقامة {sortArrowGlyph(sortKey, 'iqama_expiry_date', sortDir)}
               </th>
               <th
-                className="text-center font-semibold px-4 py-3 cursor-pointer select-none"
+                className="ta-th cursor-pointer select-none"
                 onClick={() => onToggleSort('current_employee')}
               >
                 المندوب الحالي {sortArrowGlyph(sortKey, 'current_employee', sortDir)}
               </th>
               <th
-                className="text-center font-semibold px-4 py-3 cursor-pointer select-none max-w-[7rem]"
+                className="ta-th cursor-pointer select-none max-w-[7rem]"
                 onClick={() => onToggleSort('assignments_month')}
                 title="عدد مرات تسجيل التعيين على الشهر الحالي (تعاقب عدة مناديب)"
               >
                 تعيينات الشهر {sortArrowGlyph(sortKey, 'assignments_month', sortDir)}
               </th>
               <th
-                className="text-center font-semibold px-4 py-3 cursor-pointer select-none"
+                className="ta-th cursor-pointer select-none"
                 onClick={() => onToggleSort('status')}
               >
                 الحالة {sortArrowGlyph(sortKey, 'status', sortDir)}
               </th>
-              <th className="px-4 py-3" />
+              <th className="ta-th" />
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -116,19 +116,19 @@ export const PlatformAccountsTable = ({
               const badge = getIqamaBadge(account.iqama_expiry_date, alertDays);
               return (
                 <tr key={account.id} className="hover:bg-muted/30 transition-colors">
-                  <td className="px-4 py-3 font-semibold">{account.account_username}</td>
-                  <td className="px-4 py-3">
+                  <td className="ta-td font-semibold">{account.account_username}</td>
+                  <td className="ta-td">
                     <ColorBadge
                       label={account.app_name ?? '-'}
                       bg={account.app_color ?? '#6366f1'}
                       fg={account.app_text_color ?? '#ffffff'}
                     />
                   </td>
-                  <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
+                  <td className="ta-td font-mono text-muted-foreground">
                     {account.account_id_on_platform ?? '-'}
                   </td>
-                  <td className="px-4 py-3 font-mono text-xs">{account.iqama_number ?? '-'}</td>
-                  <td className="px-4 py-3">
+                  <td className="ta-td font-mono">{account.iqama_number ?? '-'}</td>
+                  <td className="ta-td">
                     {badge ? (
                       <span
                         className={`text-[11px] px-2 py-0.5 rounded-full border ${badge.cls}`}
@@ -139,7 +139,7 @@ export const PlatformAccountsTable = ({
                       '-'
                     )}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="ta-td">
                     {account.current_employee ? (
                       <span className="text-xs font-medium text-foreground">
                         {account.current_employee.name}
@@ -148,7 +148,7 @@ export const PlatformAccountsTable = ({
                       <span className="text-xs text-muted-foreground">لا يوجد</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-center">
+                  <td className="ta-td">
                     <span
                       className={`text-xs font-semibold tabular-nums ${
                         (account.assignments_this_month_count ?? 0) > 1
@@ -160,7 +160,7 @@ export const PlatformAccountsTable = ({
                       {account.assignments_this_month_count ?? 0}
                     </span>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="ta-td">
                     <span
                       className={`text-[11px] px-2 py-0.5 rounded-full border ${
                         account.status === 'active'
@@ -171,7 +171,7 @@ export const PlatformAccountsTable = ({
                       {account.status === 'active' ? 'نشط' : 'غير نشط'}
                     </span>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="ta-td">
                     <div className="flex items-center gap-1 justify-end">
                       <Button
                         size="sm"

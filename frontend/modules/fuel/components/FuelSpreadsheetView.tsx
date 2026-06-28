@@ -366,7 +366,7 @@ export default function FuelSpreadsheetView(props: Readonly<{
                 <tr className="bg-muted/90 backdrop-blur-sm">
                   <th
                     rowSpan={2}
-                    className="sticky right-0 z-30 bg-muted min-w-[170px] px-3 py-1 text-start text-[11px] font-bold text-foreground border-b border-l border-border/50 align-bottom"
+                    className="ta-th sticky right-0 z-30 bg-muted min-w-[170px] text-start text-[11px] font-bold text-foreground border-b border-l border-border/50 align-bottom"
                   >
                     المندوب
                   </th>
@@ -382,7 +382,7 @@ export default function FuelSpreadsheetView(props: Readonly<{
                   ))}
                   <th
                     rowSpan={2}
-                    className="min-w-[85px] px-2 py-1 text-center text-[11px] font-bold text-primary border-l border-border/50 bg-primary/5 align-bottom"
+                    className="ta-th min-w-[85px] text-[11px] font-bold text-primary border-l border-border/50 bg-primary/5 align-bottom"
                   >
                     المجموع
                   </th>
@@ -406,7 +406,7 @@ export default function FuelSpreadsheetView(props: Readonly<{
                 {riderRows.map((row) => (
                   <tr key={row.employee.id} className="border-b border-border/20 hover:bg-muted/5">
                     {/* ── Sticky rider name ────────────────────── */}
-                    <td className="sticky right-0 z-10 bg-card border-l border-border/50 px-2 py-1.5 min-w-[170px]">
+                    <td className="ta-td sticky right-0 z-10 bg-card border-l border-border/50 min-w-[170px]">
                       <div className="flex items-center gap-2">
                         {row.employee.personal_photo_url && (
                           <img
@@ -471,7 +471,7 @@ export default function FuelSpreadsheetView(props: Readonly<{
                     })}
 
                     {/* ── Row total ────────────────────────────── */}
-                    <td className="border-l border-border/50 px-1.5 py-1 text-center bg-primary/5 min-w-[85px]">
+                    <td className="ta-td border-l border-border/50 px-1.5 bg-primary/5 min-w-[85px]">
                       <div className="space-y-[1px] leading-none">
                         {row.totalOrders > 0 && (
                           <p className="font-bold text-blue-600 text-[10px]">📦 {row.totalOrders.toLocaleString('en-US')}</p>
@@ -494,7 +494,7 @@ export default function FuelSpreadsheetView(props: Readonly<{
               {/* ── Column totals footer ──────────────────────────── */}
               <tfoot className="sticky bottom-0 z-20">
                 <tr className="border-t-2 border-border bg-muted/70 backdrop-blur-sm">
-                  <td className="sticky right-0 z-30 bg-muted px-2 py-2 text-[11px] font-bold text-foreground border-l border-border/50">
+                  <td className="ta-td sticky right-0 z-30 bg-muted text-[11px] font-bold text-foreground border-l border-border/50">
                     المجموع اليومي
                   </td>
                   {dayHeaders.map((dh) => {
@@ -525,7 +525,7 @@ export default function FuelSpreadsheetView(props: Readonly<{
                       </td>
                     );
                   })}
-                  <td className="border-l border-border/50 px-1.5 py-2 text-center bg-primary/10">
+                  <td className="ta-td border-l border-border/50 px-1.5 bg-primary/10">
                     <div className="space-y-[2px] leading-none">
                       <p className="font-black text-blue-600 text-[10px]">📦 {grandTotals.orders.toLocaleString('en-US')}</p>
                       <p className="font-bold text-emerald-600 text-[9px]">{grandTotals.km.toLocaleString('en-US')} كم</p>

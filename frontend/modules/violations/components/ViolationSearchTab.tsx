@@ -84,7 +84,7 @@ export default function ViolationSearchTab({
             />
             {/* Suggestions dropdown */}
             {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute z-50 top-full mt-1 w-full bg-card border border-border rounded-xl shadow-lg overflow-hidden">
+              <div className="absolute z-50 top-full mt-1 w-full bg-card border border-border rounded-xl shadow-card overflow-hidden">
                 {suggestions.map(v => (
                   <button
                     key={v.id}
@@ -222,24 +222,24 @@ export default function ViolationSearchTab({
             <table className="w-full min-w-[760px] text-sm">
               <thead className="bg-muted/40 border-b border-border">
                 <tr>
-                  <th className="px-4 py-2.5 text-center text-xs font-semibold text-muted-foreground">اسم الموظف</th>
-                  <th className="px-4 py-2.5 text-center text-xs font-semibold text-muted-foreground">تفاصيل المخالفة</th>
-                  <th className="px-4 py-2.5 text-center text-xs font-semibold text-muted-foreground">التاريخ</th>
-                  <th className="px-4 py-2.5 text-center text-xs font-semibold text-muted-foreground">المبلغ</th>
-                  <th className="px-4 py-2.5 text-center text-xs font-semibold text-muted-foreground">الحالة</th>
-                  <th className="px-4 py-2.5 text-center text-xs font-semibold text-muted-foreground min-w-[200px]">إجراءات</th>
+                  <th className="ta-th">اسم الموظف</th>
+                  <th className="ta-th">تفاصيل المخالفة</th>
+                  <th className="ta-th">التاريخ</th>
+                  <th className="ta-th">المبلغ</th>
+                  <th className="ta-th">الحالة</th>
+                  <th className="ta-th min-w-[200px]">إجراءات</th>
                 </tr>
               </thead>
               <tbody>
                 {results.map((row, idx) => (
                   <tr key={row.assignment_id} className={`border-b border-border/40 hover:bg-muted/20 transition-colors ${idx % 2 === 0 ? '' : 'bg-muted/10'}`}>
-                    <td className="px-4 py-3 font-semibold text-foreground whitespace-nowrap">{row.employee_name}</td>
-                    <td className="px-4 py-3 text-muted-foreground whitespace-nowrap text-xs">{row.violation_details || '—'}</td>
-                    <td className="px-4 py-3 text-muted-foreground whitespace-nowrap text-xs">{row.violation_date}</td>
-                    <td className="px-4 py-3 text-center font-medium text-foreground whitespace-nowrap">
+                    <td className="ta-td font-semibold text-foreground">{row.employee_name}</td>
+                    <td className="ta-td text-muted-foreground">{row.violation_details || '—'}</td>
+                    <td className="ta-td text-muted-foreground">{row.violation_date}</td>
+                    <td className="ta-td font-medium text-foreground">
                       {row.amount.toLocaleString('en-US')} ر.س
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground whitespace-nowrap text-xs">
+                    <td className="ta-td text-muted-foreground">
                       {row.status === 'recorded' ? (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-success/10 text-success border border-success/20">
                           <CheckCircle2 size={12} /> مسجّلة
@@ -250,7 +250,7 @@ export default function ViolationSearchTab({
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="ta-td">
                       <div className="flex flex-wrap items-center justify-center gap-1.5">
                         <Button
                           size="sm"

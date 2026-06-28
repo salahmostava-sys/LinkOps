@@ -170,8 +170,8 @@ export const usePermissions = (pageKey: string) => {
   // a permissive fallback. Default to deny-all until the query resolves.
   let permissions: PagePermission = DENY_ALL;
   if (user && role && !query.isLoading) {
-    // On DB error: fall back to role-based defaults instead of DENY_ALL so pages remain accessible.
-    permissions = query.isError ? fallbackPermission : (query.data ?? fallbackPermission);
+    // On DB error: Deny access to prevent unauthorized actions.
+    permissions = query.isError ? DENY_ALL : (query.data ?? fallbackPermission);
   }
 
   const loading = roleStillLoading || (Boolean(user && role) && query.isLoading);

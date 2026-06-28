@@ -65,27 +65,27 @@ export const AdvanceTable = ({
       <div className="overflow-x-auto">
         <table ref={tableRef} className="w-full text-sm">
           <thead>
-            <tr className="bg-muted/50 border-b border-border/60">
-              <th className="px-3 py-3 text-center text-xs font-semibold text-muted-foreground w-12">#</th>
-              <th className="px-3 py-3 text-center text-xs font-semibold text-muted-foreground cursor-pointer hover:text-foreground select-none" onClick={() => handleSort('employeeName')}>
+            <tr className="ta-thead">
+              <th className="ta-th w-12">#</th>
+              <th className="ta-th cursor-pointer hover:text-foreground select-none" onClick={() => handleSort('employeeName')}>
                 اسم المندوب <SortIcon field="employeeName" sortField={sortField} sortDir={sortDir} />
               </th>
-              <th className="px-3 py-3 text-center text-xs font-semibold text-muted-foreground cursor-pointer hover:text-foreground select-none" onClick={() => handleSort('nationalId')}>
+              <th className="ta-th cursor-pointer hover:text-foreground select-none" onClick={() => handleSort('nationalId')}>
                 رقم الإقامة <SortIcon field="nationalId" sortField={sortField} sortDir={sortDir} />
               </th>
-              <th className="px-3 py-3 text-center text-xs font-semibold text-info cursor-pointer hover:text-foreground select-none" onClick={() => handleSort('totalDebt')}>
+              <th className="ta-th text-info cursor-pointer hover:text-foreground select-none" onClick={() => handleSort('totalDebt')}>
                 المديونية <SortIcon field="totalDebt" sortField={sortField} sortDir={sortDir} />
               </th>
-              <th className="px-3 py-3 text-center text-xs font-semibold text-success cursor-pointer hover:text-foreground select-none" onClick={() => handleSort('totalPaid')}>
+              <th className="ta-th text-success cursor-pointer hover:text-foreground select-none" onClick={() => handleSort('totalPaid')}>
                 المسدّد <SortIcon field="totalPaid" sortField={sortField} sortDir={sortDir} />
               </th>
-              <th className="px-3 py-3 text-center text-xs font-semibold text-destructive cursor-pointer hover:text-foreground select-none" onClick={() => handleSort('remaining')}>
+              <th className="ta-th text-destructive cursor-pointer hover:text-foreground select-none" onClick={() => handleSort('remaining')}>
                 المتبقي <SortIcon field="remaining" sortField={sortField} sortDir={sortDir} />
               </th>
-              {permissions.can_edit && <th className="w-20 px-2 py-3 text-center text-xs font-semibold text-muted-foreground">إجراء</th>}
+              {permissions.can_edit && <th className="ta-th w-20">إجراء</th>}
             </tr>
             <tr className="no-print-table-export bg-muted/25 border-b border-border/50">
-              <td colSpan={colCount} className="px-3 py-2.5">
+              <td colSpan={colCount} className="ta-td">
                 <div className="flex flex-wrap items-center gap-3 justify-end">
                   <span className="text-xs text-muted-foreground font-medium">فلتر تاريخ الصرف (آخر صرف للمندوب):</span>
                   <div className="flex flex-wrap items-center gap-2">
@@ -122,28 +122,28 @@ export const AdvanceTable = ({
               <React.Fragment key={s.employeeId}>
                 <tr className={`border-b border-border/30 hover:bg-muted/20 transition-colors cursor-pointer ${s.isWrittenOff ? 'opacity-60' : ''}`}
                   onClick={() => setTransactionsEmployee({ id: s.employeeId, name: s.employeeName, nationalId: s.nationalId, totalDebt: s.totalDebt, totalPaid: s.totalPaid, remaining: s.remaining, isWrittenOff: s.isWrittenOff, allAdvances: s.allAdvances })}>
-                  <td className="px-3 py-3 text-center text-xs text-muted-foreground font-mono">{idx + 1}</td>
-                  <td className="px-3 py-3 text-center">
+                  <td className="ta-td text-muted-foreground font-mono">{idx + 1}</td>
+                  <td className="ta-td">
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-primary text-sm">{s.employeeName}</span>
                       {s.isWrittenOff && <span className="text-[10px] bg-destructive/10 text-destructive px-1.5 py-0.5 rounded-full font-semibold">معدوم</span>}
                     </div>
                   </td>
-                  <td className="px-3 py-3 text-center text-sm font-mono text-foreground" dir="ltr">{s.nationalId}</td>
-                  <td className="px-3 py-3 text-center">
+                  <td className="ta-td font-mono text-foreground" dir="ltr">{s.nationalId}</td>
+                  <td className="ta-td">
                     <span className="font-bold text-info text-sm">{s.totalDebt.toLocaleString('en-US')}</span>
                     <span className="text-[10px] text-muted-foreground ms-0.5">ر.س</span>
                   </td>
-                  <td className="px-3 py-3 text-center">
+                  <td className="ta-td">
                     <span className="font-bold text-success text-sm">{s.totalPaid.toLocaleString('en-US')}</span>
                     <span className="text-[10px] text-muted-foreground ms-0.5">ر.س</span>
                   </td>
-                  <td className="px-3 py-3 text-center">
+                  <td className="ta-td">
                     <span className={`font-bold text-sm ${s.remaining > 0 ? 'text-destructive' : 'text-success'}`}>{s.remaining.toLocaleString('en-US')}</span>
                     <span className="text-[10px] text-muted-foreground ms-0.5">ر.س</span>
                   </td>
                   {permissions.can_edit && (
-                    <td className="px-2 py-3 text-center" onClick={e => e.stopPropagation()}>
+                    <td className="ta-td" onClick={e => e.stopPropagation()}>
                       <div className="flex items-center justify-center gap-1">
                         <button
                           onClick={() => setTransactionsEmployee({ id: s.employeeId, name: s.employeeName, nationalId: s.nationalId, totalDebt: s.totalDebt, totalPaid: s.totalPaid, remaining: s.remaining, isWrittenOff: s.isWrittenOff, allAdvances: s.allAdvances })}
@@ -168,19 +168,19 @@ export const AdvanceTable = ({
           </tbody>
           <tfoot>
             <tr className="bg-muted/70 border-t-2 border-border/60">
-              <td colSpan={2} className="px-3 py-3 text-center text-xs font-bold text-muted-foreground">
+              <td colSpan={2} className="ta-td font-bold text-muted-foreground">
                 الإجمالي ({grandTotals.count} مندوب)
               </td>
-              <td className="px-3 py-3 text-center text-xs text-muted-foreground">—</td>
-              <td className="px-3 py-3 text-center">
+              <td className="ta-td text-muted-foreground">—</td>
+              <td className="ta-td">
                 <span className="font-bold text-info text-sm">{grandTotals.totalDebt.toLocaleString('en-US')}</span>
                 <span className="text-[10px] text-muted-foreground ms-0.5">ر.س</span>
               </td>
-              <td className="px-3 py-3 text-center">
+              <td className="ta-td">
                 <span className="font-bold text-success text-sm">{grandTotals.totalPaid.toLocaleString('en-US')}</span>
                 <span className="text-[10px] text-muted-foreground ms-0.5">ر.س</span>
               </td>
-              <td className="px-3 py-3 text-center">
+              <td className="ta-td">
                 <span className="font-bold text-destructive text-sm">{grandTotals.remaining.toLocaleString('en-US')}</span>
                 <span className="text-[10px] text-muted-foreground ms-0.5">ر.س</span>
               </td>

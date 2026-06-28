@@ -225,7 +225,7 @@ export default function ProfileSettingsContent({ omitPageHeading = false }: Read
             <button
               type="button"
               onClick={() => fileRef.current?.click()}
-              className="absolute bottom-0 end-0 w-7 h-7 rounded-full text-white flex items-center justify-center shadow-md transition-opacity hover:opacity-90"
+              className="absolute bottom-0 end-0 w-7 h-7 rounded-full text-white flex items-center justify-center shadow-card transition-opacity hover:opacity-90"
               style={{ background: 'linear-gradient(135deg, #2642e6, #465fff)' }}
             >
               <Camera size={12} />

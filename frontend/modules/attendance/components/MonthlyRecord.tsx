@@ -129,7 +129,7 @@ const MonthlyRecord = ({ selectedMonth, selectedYear }: Readonly<Props>) => {
   } else if (tableData.length === 0) {
     tableBodyRows = (
       <tr>
-        <td colSpan={9} className="p-10 text-center text-muted-foreground">
+        <td colSpan={9} className="ta-td p-10 text-muted-foreground">
           {t.noData}
         </td>
       </tr>
@@ -142,7 +142,7 @@ const MonthlyRecord = ({ selectedMonth, selectedYear }: Readonly<Props>) => {
             <span className="font-medium text-foreground whitespace-nowrap">{row.name}</span>
           </div>
         </td>
-        <td className="ta-td text-muted-foreground font-mono text-xs" dir="ltr">
+        <td className="ta-td text-muted-foreground font-mono" dir="ltr">
           {row.national_id || "—"}
         </td>
         <td className="ta-td-center font-semibold text-green-600 dark:text-green-400">{row.presentDays}</td>

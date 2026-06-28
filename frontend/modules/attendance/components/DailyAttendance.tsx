@@ -274,7 +274,7 @@ const DailyAttendance = ({ selectedMonth, selectedYear }: Readonly<Props>) => {
   } else if (employees.length === 0) {
     tableBodyRows = (
       <tr>
-        <td colSpan={5} className="ta-td text-center py-12 text-muted-foreground">
+        <td colSpan={5} className="ta-td text-muted-foreground">
           {selectedAppId ? 'لا يوجد مناديب مسجّلون في هذه المنصة' : 'لا يوجد مناديب نشطون'}
         </td>
       </tr>

@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthQueryGate, authQueryUserId } from '@shared/hooks/useAuthQueryGate';
 import { useTemporalContext } from '@app/providers/TemporalContext';
 import { financeService, type CreateTransactionInput } from '@services/financeService';
+import { salaryService } from '@services/salaryService';
 import { supabase } from '@services/supabase/client';
 import { useToast } from '@shared/hooks/use-toast';
 import { getErrorMessage } from '@services/serviceError';
@@ -113,9 +114,7 @@ export function useFinance() {
       });
 
       // Get salary breakdown per platform from salary engine preview
-      const { data: previewData } = await supabase.functions.invoke('salary-engine', {
-        body: { mode: 'month_preview', month_year: selectedMonth },
-      });
+      const previewData = await salaryService.getSalaryPreviewForMonth(selectedMonth);
       const preview = ((previewData as { data?: unknown[] })?.data ?? previewData ?? []) as Array<{
         platform_breakdown?: Array<{ app_name: string; earnings: number }>;
         net_salary?: number;

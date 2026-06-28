@@ -75,7 +75,7 @@ export default function ViolationTable({
             <th onClick={() => toggleVSort('advance_status')} className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground whitespace-nowrap cursor-pointer hover:text-foreground select-none" title="مربوط بجدول السلف في قاعدة البيانات أو سجل قديم في الملاحظة">
               حالة السلفة {sortArrowOrNeutral(vSortField, 'advance_status', vSortDir, '⇅')}
             </th>
-            <th className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground whitespace-nowrap">إجراءات</th>
+            <th className="ta-th">إجراءات</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-border/40">
@@ -85,21 +85,21 @@ export default function ViolationTable({
 
             return (
               <tr key={v.id} className="hover:bg-muted/20 transition-colors">
-                <td className="px-4 py-3 font-semibold whitespace-nowrap">{v.employee_name}</td>
-                <td className="px-4 py-3 text-muted-foreground text-xs align-top">
+                <td className="ta-td font-semibold">{v.employee_name}</td>
+                <td className="ta-td text-muted-foreground align-top">
                   <div className="max-w-[520px] whitespace-pre-wrap break-words">{v.violation_details || '—'}</div>
                 </td>
-                <td className="px-4 py-3 text-muted-foreground whitespace-nowrap text-xs">{v.incident_date || '—'}</td>
-                <td className="px-4 py-3 text-center font-medium whitespace-nowrap">{v.amount?.toLocaleString('en-US')} ر.س</td>
-                <td className="px-4 py-3 whitespace-nowrap">
+                <td className="ta-td text-muted-foreground">{v.incident_date || '—'}</td>
+                <td className="ta-td font-medium">{v.amount?.toLocaleString('en-US')} ر.س</td>
+                <td className="ta-td">
                   <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[11px] ${statusBadge}`}>
                     {violationApprovalStatusLabel(v.status)}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-center whitespace-nowrap align-top">
+                <td className="ta-td align-top">
                   <ViolationAdvanceStatusCell v={v} convertedAdv={convertedAdv} />
                 </td>
-                <td className="px-4 py-3">
+                <td className="ta-td">
                   <div className="flex items-center justify-center gap-2">
                     <Button
                       size="sm"

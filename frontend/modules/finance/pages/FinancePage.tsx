@@ -147,17 +147,17 @@ function TransactionTable(props: Readonly<TransactionTableProps>) {
     <table className="w-full text-sm">
       <thead>
         <tr className="bg-muted/30">
-          <th className="px-3 py-2 text-center text-[11px] font-semibold text-muted-foreground w-36">المبلغ (ر.س)</th>
-          <th className="px-3 py-2 text-start text-[11px] font-semibold text-muted-foreground">الوصف</th>
-          <th className="px-3 py-2 w-10"></th>
+          <th className="ta-th text-[11px] w-36">المبلغ (ر.س)</th>
+          <th className="ta-th text-start text-[11px]">الوصف</th>
+          <th className="ta-th w-10"></th>
         </tr>
       </thead>
       <tbody>
         {loading && (
-          <tr><td colSpan={3} className="text-center py-8 text-muted-foreground text-xs">جاري التحميل...</td></tr>
+          <tr><td colSpan={3} className="ta-td text-muted-foreground">جاري التحميل...</td></tr>
         )}
         {!loading && items.length === 0 && (
-          <tr><td colSpan={3} className="text-center py-8 text-muted-foreground text-xs">{emptyText}</td></tr>
+          <tr><td colSpan={3} className="ta-td text-muted-foreground">{emptyText}</td></tr>
         )}
         {!loading && items.length > 0 && (
           [...items].sort((a, b) => b.date.localeCompare(a.date)).map(t => {
@@ -178,7 +178,7 @@ function TransactionTable(props: Readonly<TransactionTableProps>) {
                     </button>
                   )}
                 </td>
-                <td className="px-3 py-2.5 text-sm text-foreground">
+                <td className="ta-td text-foreground">
                   {editingId === t.id && editField === 'description' ? (
                     <Input autoFocus value={editText} onChange={e => setEditText(e.target.value)}
                       onBlur={() => { saveEdit(t.id); }} onKeyDown={handleKeyDown}
@@ -190,7 +190,7 @@ function TransactionTable(props: Readonly<TransactionTableProps>) {
                     </button>
                   )}
                 </td>
-                <td className="px-3 py-2.5 text-center">
+                <td className="ta-td">
                   {t.is_auto && isRev ? <Lock size={12} className="mx-auto text-muted-foreground/40" /> : (
                     (!t.is_auto || isRev) && (
                       <button aria-label="حذف" type="button" onClick={() => { deleteTransaction(t.id); }} disabled={isDeleting} className="p-1 rounded hover:bg-destructive/10 text-destructive/60 hover:text-destructive"><Trash2 size={13} /></button>
@@ -202,13 +202,13 @@ function TransactionTable(props: Readonly<TransactionTableProps>) {
           })
         )}
         <tr className={`border-t-2 ${rowBorder}`}>
-          <td className="px-2 py-2">
+          <td className="ta-td">
             <Input type="number" min="0" step="0.01" placeholder="0" value={newItem.amount} onChange={e => setNewItem(r => ({ ...r, amount: e.target.value }))} className="h-9 text-sm text-center font-bold w-full" dir="ltr" />
           </td>
-          <td className="px-2 py-2">
+          <td className="ta-td">
             <Input placeholder={descPlaceholder} value={newItem.description} onChange={e => setNewItem(r => ({ ...r, description: e.target.value }))} className="h-9 text-sm w-full" dir="rtl" />
           </td>
-          <td className="px-2 py-2 text-center">
+          <td className="ta-td">
             <Button size="sm" onClick={onAddRow} disabled={isSaving || !newItem.amount} className={`h-9 w-9 p-0 text-white ${colorBg}`}>
               <Plus size={16} />
             </Button>

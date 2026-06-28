@@ -61,10 +61,6 @@ const tableLabels: Record<string, { ar: string; en: string }> = {
   salary_records:         { ar: 'الرواتب', en: 'Salaries' },
   salary_deductions:      { ar: 'خصومات الرواتب', en: 'Salary Deductions' },
   external_deductions:    { ar: 'الخصومات الخارجية', en: 'External Deductions' },
-  leave_requests:         { ar: 'طلبات الإجازة', en: 'Leave Requests' },
-  performance_reviews:    { ar: 'تقييم الأداء', en: 'Performance Reviews' },
-  employee_documents:     { ar: 'وثائق الموظفين', en: 'Employee Documents' },
-  documents:              { ar: 'الوثائق', en: 'Documents' },
   // Orders
   daily_orders:           { ar: 'الطلبات', en: 'Orders' },
   apps:                   { ar: 'التطبيقات', en: 'Apps' },
@@ -434,7 +430,7 @@ export default function ActivityLogContent() {
               {/* Empty state */}
               {!loading && logs.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="p-12 text-center">
+                  <td colSpan={5} className="ta-td p-12">
                     <Activity size={32} className="mx-auto mb-3 opacity-20" style={{ color: 'var(--ds-on-surface-variant)' }} />
                     <p className="text-sm" style={{ color: 'var(--ds-on-surface-variant)' }}>لا توجد سجلات</p>
                   </td>
@@ -457,7 +453,7 @@ export default function ActivityLogContent() {
                     }}
                   >
                     {/* Date / Time */}
-                    <td className="p-3 whitespace-nowrap">
+                    <td className="ta-td p-3">
                       <p className="text-xs font-medium" style={{ color: 'var(--ds-on-surface)' }} dir="ltr">
                         {format(new Date(log.created_at), 'yyyy-MM-dd')}
                       </p>

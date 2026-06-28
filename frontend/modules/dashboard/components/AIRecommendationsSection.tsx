@@ -85,7 +85,7 @@ export function AIRecommendationsSection({
   return (
     <div className="bg-card rounded-2xl p-5 shadow-card">
       <div className="flex items-center gap-2.5 mb-4">
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white shadow-lg shadow-amber-200">
+        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white shadow-card shadow-card">
           <Lightbulb size={18} />
         </div>
         <div>

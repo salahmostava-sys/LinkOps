@@ -40,15 +40,15 @@ export function DashboardSupervisorTargetsCard({ loading, rows }: Readonly<Props
           </p>
         )}
         {!loading && rows.length > 0 && (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto w-full">
             <table className="w-full text-sm min-w-[560px]" dir="rtl">
               <thead className="bg-muted/40">
                 <tr>
-                  <th className="px-3 py-2 text-right">المشرف</th>
-                  <th className="px-3 py-2 text-right">التارجت</th>
-                  <th className="px-3 py-2 text-right">الفعلي</th>
-                  <th className="px-3 py-2 text-right">الفرق</th>
-                  <th className="px-3 py-2 text-right">نسبة الإنجاز</th>
+                  <th className="ta-th text-right">المشرف</th>
+                  <th className="ta-th text-right">التارجت</th>
+                  <th className="ta-th text-right">الفعلي</th>
+                  <th className="ta-th text-right">الفرق</th>
+                  <th className="ta-th text-right">نسبة الإنجاز</th>
                 </tr>
               </thead>
               <tbody>
@@ -56,9 +56,9 @@ export function DashboardSupervisorTargetsCard({ loading, rows }: Readonly<Props
                   const gap = r.actual_orders - r.target_orders;
                   return (
                     <tr key={r.supervisor_id} className="border-b border-border/40">
-                      <td className="px-3 py-2 font-semibold text-foreground">{r.supervisor_name}</td>
-                      <td className="px-3 py-2">{r.target_orders.toLocaleString('en-US')}</td>
-                      <td className="px-3 py-2">{r.actual_orders.toLocaleString('en-US')}</td>
+                      <td className="ta-td font-semibold text-foreground">{r.supervisor_name}</td>
+                      <td className="ta-td">{r.target_orders.toLocaleString('en-US')}</td>
+                      <td className="ta-td">{r.actual_orders.toLocaleString('en-US')}</td>
                       <td className={`px-3 py-2 font-semibold ${gap >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
                         {gap >= 0 ? '+' : ''}{gap.toLocaleString('en-US')}
                       </td>

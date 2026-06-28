@@ -78,7 +78,7 @@ export function AiChatWidget() {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 left-6 z-50 w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-600 to-purple-700 text-white shadow-2xl shadow-violet-300 hover:shadow-violet-400 hover:scale-105 transition-all duration-300 flex items-center justify-center animate-in fade-in slide-in-from-bottom-4"
+          className="fixed bottom-6 left-6 z-50 w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-600 to-purple-700 text-white shadow-2xl shadow-card hover:shadow-card-hover hover:scale-105 transition-all duration-300 flex items-center justify-center animate-in fade-in slide-in-from-bottom-4"
           title="محادثة ذكية"
         >
           <MessageCircle size={24} />

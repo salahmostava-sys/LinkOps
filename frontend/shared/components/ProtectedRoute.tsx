@@ -1,4 +1,4 @@
-import { useLocation } from 'react-router-dom';
+import { useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '@app/providers/AuthContext';
 import { ReactNode, useEffect, useState } from 'react';
 import Loading from '@shared/components/Loading';
@@ -26,8 +26,7 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   }
 
   if (!session) {
-    const resetKey = `${location.pathname}${location.search}`;
-    return <Loading minHeightClassName="min-h-screen" className="bg-background" resetKey={resetKey} />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   return <>{children}</>;

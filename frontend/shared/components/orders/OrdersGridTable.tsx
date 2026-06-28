@@ -91,12 +91,12 @@ export const OrdersGridTable = React.memo(({
           <thead className="sticky top-0 z-20">
             <tr className="bg-muted border-b-2 border-border">
               <th
-                className="sticky right-0 z-[32] bg-muted text-center px-0.5 py-1.5 font-semibold text-muted-foreground border-l border-border"
+                className="ta-th sticky right-0 z-[32] bg-muted px-0.5 border-l border-border"
                 style={{ minWidth: seqColMin, width: seqColMin }}>
                 #
               </th>
               <th
-                className="sticky z-[31] bg-muted text-right px-1.5 py-1.5 font-semibold text-foreground border-l-2 border-border"
+                className="ta-th sticky z-[31] bg-muted text-right px-1.5 text-foreground border-l-2 border-border"
                 style={{ right: seqColMin, minWidth: repColMin }}>
                 المندوب / المنصة
               </th>
@@ -115,7 +115,7 @@ export const OrdersGridTable = React.memo(({
                 );
               })}
               <th
-                className="sticky left-0 z-30 text-center py-1.5 font-bold text-primary bg-muted border-r-2 border-border"
+                className="ta-th sticky left-0 z-30 font-bold text-primary bg-muted border-r-2 border-border"
                 style={{ minWidth: 64 }}>
                 المجموع
               </th>
@@ -124,7 +124,7 @@ export const OrdersGridTable = React.memo(({
 
           <tbody>
             {filteredEmployees.length === 0 ? (
-              <tr><td colSpan={days + 3} className="text-center py-12 text-muted-foreground">لا يوجد مناديب</td></tr>
+              <tr><td colSpan={days + 3} className="ta-td text-muted-foreground">لا يوجد مناديب</td></tr>
             ) : filteredEmployees.map((emp, idx) => {
               const activeApps = getActiveApps(emp.id);
               const isExpanded = expandedEmp.has(emp.id);
@@ -135,7 +135,7 @@ export const OrdersGridTable = React.memo(({
                 <React.Fragment key={emp.id}>
                   <tr className={`border-b border-border/40 select-none ${isExpanded ? 'border-b-0' : ''}`}>
                     <td
-                      className="sticky right-0 z-[12] text-center px-0.5 py-1 border-l border-border tabular-nums text-muted-foreground font-medium"
+                      className="ta-td sticky right-0 z-[12] px-0.5 border-l border-border tabular-nums text-muted-foreground font-medium"
                       style={{
                         backgroundColor: isExpanded ? 'hsl(var(--muted))' : rowBg,
                         minWidth: seqColMin,
@@ -145,7 +145,7 @@ export const OrdersGridTable = React.memo(({
                       {idx + 1}
                     </td>
                     <td
-                      className="sticky z-[11] px-1.5 py-1 border-l-2 border-border cursor-pointer hover:brightness-[0.98] transition-[filter] dark:hover:brightness-110"
+                      className="ta-td sticky z-[11] px-1.5 border-l-2 border-border cursor-pointer hover:brightness-[0.98] transition-[filter] dark:hover:brightness-110"
                       style={{
                         backgroundColor: isExpanded ? 'hsl(var(--muted))' : rowBg,
                         right: seqColMin,
@@ -214,7 +214,7 @@ export const OrdersGridTable = React.memo(({
                     })}
 
                     <td
-                      className="sticky left-0 z-10 text-center px-1 py-1 font-bold text-primary border-r-2 border-border bg-muted"
+                      className="ta-td sticky left-0 z-10 font-bold text-primary border-r-2 border-border bg-muted"
                       style={{ minWidth: 64 }}
                     >
                       {total > 0 ? total : <span className="text-muted-foreground/30">0</span>}
@@ -232,7 +232,7 @@ export const OrdersGridTable = React.memo(({
                         style={rowStyle}
                       >
                         <td className="sticky right-0 z-[12] border-l border-border bg-[var(--rowbg)]" style={{ minWidth: seqColMin, width: seqColMin }} aria-hidden />
-                        <td className="sticky z-[11] px-1.5 py-1 border-l-2 border-border bg-[var(--rowbg)]" style={{ right: seqColMin, minWidth: repColMin }}>
+                        <td className="ta-td sticky z-[11] px-1.5 border-l-2 border-border bg-[var(--rowbg)]" style={{ right: seqColMin, minWidth: repColMin }}>
                           <div className="flex items-center gap-2 pr-8">
                             <ColorBadge label={app.name} bg={c.solid} fg={c.solidText} className="text-[10px]" />
                           </div>
@@ -251,7 +251,7 @@ export const OrdersGridTable = React.memo(({
                             </td>
                           );
                         })}
-                        <td className="sticky left-0 z-10 text-center px-1 py-1 font-bold border-r-2 border-border text-[10px] bg-muted text-[var(--cval)]" style={{ minWidth: 64 }}>
+                        <td className="ta-td sticky left-0 z-10 font-bold border-r-2 border-border text-[10px] bg-muted text-[var(--cval)]" style={{ minWidth: 64 }}>
                           {appTotal > 0 ? appTotal : '—'}
                         </td>
                       </tr>
@@ -262,11 +262,11 @@ export const OrdersGridTable = React.memo(({
             })}
 
             <tr className="border-t-2 border-border font-semibold">
-              <td className="sticky right-0 z-[12] text-center px-0.5 py-1.5 border-l border-border text-muted-foreground bg-muted"
+              <td className="ta-td sticky right-0 z-[12] px-0.5 border-l border-border text-muted-foreground bg-muted"
                 style={{ minWidth: seqColMin, width: seqColMin }}>
                 —
               </td>
-              <td className="sticky z-[11] px-1.5 py-1.5 text-xs font-bold border-l-2 border-border text-foreground bg-muted"
+              <td className="ta-td sticky z-[11] px-1.5 font-bold border-l-2 border-border text-foreground bg-muted"
                 style={{ right: seqColMin, minWidth: repColMin }}>
                 الإجمالي
               </td>
@@ -280,7 +280,7 @@ export const OrdersGridTable = React.memo(({
                   </td>
                 );
               })}
-              <td className="sticky left-0 z-10 text-center px-1.5 py-1.5 font-bold text-xs text-primary border-r-2 border-border bg-muted"
+              <td className="ta-td sticky left-0 z-10 px-1.5 font-bold text-primary border-r-2 border-border bg-muted"
                 style={{ minWidth: 64 }}>
                 {filteredEmployees.reduce((s, e) => s + empMonthTotal(e.id), 0)}
               </td>
