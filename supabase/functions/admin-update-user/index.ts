@@ -164,6 +164,14 @@ function resolveErrorStatus(rawMessage: string): number {
 
 Deno.serve(async (req) => {
   const requestOrigin = req.headers.get('origin');
+  const allowedOrigins = Deno.env.get('CORS_ALLOWED_ORIGINS')?.split(',') || [];
+  if (requestOrigin && !allowedOrigins.includes(requestOrigin)) {
+    return new Response(JSON.stringify({ error: 'Origin not allowed' }), {
+      status: 403,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
   if (req.method === 'OPTIONS') return handleCorsPreflight(requestOrigin);
 
   const requestId = crypto.randomUUID();

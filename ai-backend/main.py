@@ -115,20 +115,41 @@ def _cleanup_rate_store(now: float) -> None:
     _last_rate_cleanup = now
 
 
+import redis
+
+REDIS_URL = os.getenv("REDIS_URL")
+if REDIS_URL:
+    rate_store = redis.Redis.from_url(REDIS_URL)
+else:
+    rate_store = None
+
 def check_rate_limit(request: Request) -> None:
     """Raise 429 if the caller exceeds the configured rate limit."""
     ip = _get_client_ip(request)
-    # Hash IP so we never store raw PII in memory.
-    ip_key = hashlib.sha256(ip.encode()).hexdigest()[:16]  # NOSONAR
+    
+    if rate_store:
+        try:
+            key = f"rate_limit:{ip}"
+            count = rate_store.incr(key)
+            if count == 1:
+                rate_store.expire(key, RATE_LIMIT_WINDOW_SECS)
+            if count > MAX_REQUESTS_PER_WINDOW:
+                raise HTTPException(
+                    status_code=429,
+                    detail=f"Too many requests. Limit: {MAX_REQUESTS_PER_WINDOW} per {RATE_LIMIT_WINDOW_SECS}s.",
+                    headers={"Retry-After": str(RATE_LIMIT_WINDOW_SECS)},
+                )
+            return
+        except redis.RedisError:
+            pass # Fallback to in-memory on Redis error
 
+    # In-memory fallback
+    ip_key = hashlib.sha256(ip.encode()).hexdigest()[:16]
     now = time.monotonic()
     with _rate_lock:
         _cleanup_rate_store(now)
-        # FIX #14: Use .get() with default instead of defaultdict subscript.
-        # defaultdict[key] creates a new entry even for read-only access.
         window_start, count = _rate_store.get(ip_key, (0.0, 0))
         if now - window_start >= RATE_LIMIT_WINDOW_SECS:
-            # New window
             _rate_store[ip_key] = (now, 1)
         else:
             count += 1
@@ -376,7 +397,15 @@ def health():
 
 
 @app.post("/predict-orders", response_model=PredictOrdersResponse, dependencies=[Depends(_security)])
-def api_predict_orders(req: PredictOrdersRequest):
+def api_predict_orders(request: Request, req: PredictOrdersRequest):
+    content_length = request.headers.get('content-length')
+    if content_length and int(content_length) > 100_000:
+        raise HTTPException(status_code=413, detail="Payload too large")
+
+    total_chars = sum(len(str(r.model_dump())) for r in req.history)
+    if total_chars > 50_000:
+        raise HTTPException(status_code=413, detail="Input history too large")
+
     rows = [d.model_dump() for d in req.history]
     return predict_orders(rows, req.forecast_days)
 

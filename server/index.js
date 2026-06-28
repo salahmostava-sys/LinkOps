@@ -56,7 +56,16 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // ── Health check ─────────────────────────────────────────────────────────────
-app.get('/health', (req, res) => res.json({ status: 'ok' }));
+app.get('/health', limiter, (req, res) => res.json({ status: 'ok' }));
+
+// ── Authentication Middleware ────────────────────────────────────────────────
+app.use('/api/functions/*', (req, res, next) => {
+  const authHeader = req.headers['authorization'] || req.headers['Authorization'];
+  if (!authHeader) {
+    return res.status(401).json({ error: 'No authorization header provided' });
+  }
+  next();
+});
 
 // ── Salary Engine (replaces salary-engine edge function) ─────────────────────
 app.post('/api/functions/salary-engine', salaryEngineHandler);

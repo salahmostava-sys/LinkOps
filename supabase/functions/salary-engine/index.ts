@@ -157,8 +157,17 @@ function resolveSalaryEngineStatus(message: string): number {
 Deno.serve(async (req) => {
   const requestId = crypto.randomUUID();
 
+  const requestOrigin = req.headers.get('origin');
+  const allowedOrigins = Deno.env.get('CORS_ALLOWED_ORIGINS')?.split(',') || [];
+  if (requestOrigin && !allowedOrigins.includes(requestOrigin)) {
+    return new Response(JSON.stringify({ error: 'Origin not allowed' }), {
+      status: 403,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
   if (req.method === 'OPTIONS') {
-    return handleCorsPreflight(req.headers.get('origin'));
+    return handleCorsPreflight(requestOrigin);
   }
 
   try {
@@ -169,6 +178,13 @@ Deno.serve(async (req) => {
 
     if (!payload?.month_year || !isValidMonth(payload.month_year)) {
       throw new Error('Invalid month_year format. Expected YYYY-MM');
+    }
+
+    if (!Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')) {
+      return new Response(JSON.stringify({ error: 'Service unavailable' }), {
+        headers: { ...getCorsHeaders(req.headers.get('origin')), 'Content-Type': 'application/json' },
+        status: 503
+      });
     }
 
     const adminClient = createClient(getEnvVar('SUPABASE_URL'), getEnvVar('SUPABASE_SERVICE_ROLE_KEY'));
