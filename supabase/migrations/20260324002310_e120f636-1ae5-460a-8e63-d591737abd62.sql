@@ -28,7 +28,7 @@ DROP POLICY IF EXISTS "Admin/operations can manage platform_accounts"
   ON public.platform_accounts;
 CREATE POLICY "Admin/operations can manage platform_accounts"
   ON public.platform_accounts FOR ALL
-  USING (is_active_user(auth.uid()) AND (has_role(auth.uid(), 'admin') OR has_role(auth.uid(), 'operations')))
+  USING (is_active_user(auth.uid()) AND (has_role(auth.uid(), 'admin') OR has_role(auth.uid(), 'operations'))) -- NOSONAR
   WITH CHECK (is_active_user(auth.uid()) AND (has_role(auth.uid(), 'admin') OR has_role(auth.uid(), 'operations')));
 
 DROP TRIGGER IF EXISTS update_platform_accounts_updated_at

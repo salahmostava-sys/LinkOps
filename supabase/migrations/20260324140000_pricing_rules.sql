@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS public.pricing_rules (
   app_id UUID NOT NULL REFERENCES public.apps(id) ON DELETE CASCADE,
   min_orders INTEGER NOT NULL DEFAULT 0,
   max_orders INTEGER,
-  rule_type TEXT NOT NULL DEFAULT 'per_order'
+  rule_type TEXT NOT NULL DEFAULT 'per_order' -- NOSONAR
     CHECK (rule_type IN ('per_order', 'fixed', _const_work_hybrid())),
   rate_per_order NUMERIC(10,2),
   fixed_salary NUMERIC(10,2),

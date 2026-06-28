@@ -21,36 +21,35 @@ for (const file of files) {
 
   const regex = /return \{\s+select: vi\.fn\(\)\.mockReturnThis\(\),([\s\S]*?)then:\s*(.*?),\s*\};/gm;
   
-  content = content.replace(regex, (match, methodsStr, thenLine) => {
-    // Extract the promise part
-    let promiseContent = '';
+  const getPromiseContent = (thenLine) => {
     const m1 = thenLine.match(/Promise\.resolve\((.*?)\)\.then/);
-    if (m1) {
-      promiseContent = m1[1];
-    } else if (thenLine.includes('result.then')) {
-      promiseContent = 'result';
-    } else {
-      return match; // fallback
-    }
+    if (m1) return m1[1];
+    if (thenLine.includes('result.then')) return 'result';
+    return null;
+  };
 
-    // Process methods
+  const processMethods = (methodsStr) => {
     const methods = [];
     const lines = methodsStr.split('\n');
     for (let l of lines) {
       const parts = l.match(/(\w+):\s*vi\.fn\(\)\.mockReturnThis\(\),?/g);
       if (parts) {
         for (let p of parts) {
-          const fnName = p.split(':')[0].trim();
-          methods.push(fnName);
+          methods.push(p.split(':')[0].trim());
         }
       } else {
-          // Look for maybeSingle: vi.fn().mockReturnValue(Promise.resolve(result)),
-          const otherMatch = l.match(/(\w+):\s*vi\.fn\(\)\.mockResolvedValue\((.*?)\),?/);
-          if (otherMatch) {
-             methods.push({name: otherMatch[1], value: otherMatch[2]});
-          }
+        const otherMatch = l.match(/(\w+):\s*vi\.fn\(\)\.mockResolvedValue\((.*?)\),?/);
+        if (otherMatch) methods.push({name: otherMatch[1], value: otherMatch[2]});
       }
     }
+    return methods;
+  };
+
+  content = content.replace(regex, (match, methodsStr, thenLine) => {
+    const promiseContent = getPromiseContent(thenLine);
+    if (!promiseContent) return match;
+
+    const methods = processMethods(methodsStr);
 
     let out = `const p: any = Promise.resolve(${promiseContent});\n`;
     out += `        p.select = vi.fn().mockReturnValue(p);\n`;

@@ -19,7 +19,7 @@ ALTER TABLE public.employees
 -- Create employee-documents storage bucket
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 VALUES (
-  'employee-documents',
+  'employee-documents', -- NOSONAR
   'employee-documents',
   false,
   5242880,

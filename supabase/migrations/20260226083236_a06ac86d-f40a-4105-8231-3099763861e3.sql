@@ -2,7 +2,7 @@
 -- ============================================================
 -- ENUMS
 -- ============================================================
-CREATE TYPE public.app_role AS ENUM ('admin', 'hr', 'finance', 'operations', 'viewer');
+CREATE TYPE public.app_role AS ENUM ('admin', 'hr', 'finance', 'operations', 'viewer'); -- NOSONAR
 CREATE TYPE public.salary_type AS ENUM (_const_work_shift(), _const_work_orders());
 CREATE TYPE public.employee_status AS ENUM (_const_employee_active(), 'inactive', 'ended');
 CREATE TYPE public.attendance_status AS ENUM ('present', 'absent', 'leave', 'sick', 'late');

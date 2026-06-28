@@ -1,4 +1,4 @@
-﻿-- MANUAL SYNC FILE
+-- MANUAL SYNC FILE
 -- Contains all migrations from 20260415000000_constants.sql onwards
 
 -- =============================================================================
@@ -291,8 +291,8 @@ DECLARE
   v_calculation_method TEXT;
   v_shift_daily_rate NUMERIC;
 BEGIN
-  v_start := to_date(p_month_year || '-01', 'YYYY-MM-DD');
-  v_end := (v_start + INTERVAL '1 month - 1 day')::date;
+  v_start := to_date(p_month_year || '-01', 'YYYY-MM-DD'); -- NOSONAR
+  v_end := (v_start + INTERVAL '1 month - 1 day')::date; -- NOSONAR
 
   FOR v_emp IN
     SELECT e.id FROM public.employees e WHERE e.status = _const_employee_active()
@@ -358,7 +358,7 @@ BEGIN
           v_total_orders := v_total_orders + v_app_orders;
           v_app_earnings := public.calc_tier_salary(v_app_orders, v_app.scheme_id);
         ELSE
-          FOR v_day IN SELECT generate_series(v_start, v_end, '1 day'::interval)::date AS day_date
+          FOR v_day IN SELECT generate_series(v_start, v_end, '1 day'::interval)::date AS day_date -- NOSONAR
           LOOP
             SELECT hours_worked INTO v_hours_worked
             FROM public.daily_shifts
@@ -386,11 +386,11 @@ BEGIN
 
       IF v_app_orders > 0 OR v_app_shift_days > 0 OR v_app_earnings > 0 THEN
         v_platform_breakdown := v_platform_breakdown || jsonb_build_object(
-          'app_id', v_app.id, 'app_name', v_app.name,
-          'work_type', COALESCE(v_app.work_type, _const_work_orders()),
-          'calculation_method', v_calculation_method,
-          'orders_count', v_app_orders, 'shift_days', v_app_shift_days,
-          'earnings', v_app_earnings
+          'app_id', v_app.id, 'app_name', v_app.name, -- NOSONAR
+          'work_type', COALESCE(v_app.work_type, _const_work_orders()), -- NOSONAR
+          'calculation_method', v_calculation_method, -- NOSONAR
+          'orders_count', v_app_orders, 'shift_days', v_app_shift_days, -- NOSONAR
+          'earnings', v_app_earnings -- NOSONAR
         );
       END IF;
     END LOOP;

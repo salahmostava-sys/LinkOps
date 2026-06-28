@@ -15,42 +15,32 @@ def fix_file(filepath):
     # We will find blocks that start with `return {` and end with `};`
     # inside those blocks, if there is a `then: `, we replace it.
     
+    def get_promise_target(block):
+        m = re.search(r"Promise\.resolve\((.*?)\)\.then", block)
+        if m: return m.group(1)
+        m2 = re.search(r"then: \(.*?\)\s*=>\s*(.*?)\.then", block)
+        if m2: return m2.group(1)
+        m3 = re.search(r"then:\s*settled\.then\.bind\(settled\)", block)
+        if m3: return "result"
+        return None
+
     def replacer(match):
         block = match.group(0)
         if "then: " not in block:
             return block
             
-        # Extract the promise target
-        promise_target = None
-        # look for `then: (resolve: any) => Promise.resolve(mockObj).then(resolve),`
-        m = re.search(r"Promise\.resolve\((.*?)\)\.then", block)
-        if m:
-            promise_target = m.group(1)
-        else:
-            m2 = re.search(r"then: \(.*?\)\s*=>\s*(.*?)\.then", block)
-            if m2:
-                promise_target = m2.group(1)
-            else:
-                m3 = re.search(r"then:\s*settled\.then\.bind\(settled\)", block)
-                if m3:
-                    promise_target = "result"
-                else:
-                    return block # couldn't figure out promise
+        promise_target = get_promise_target(block)
+        if not promise_target:
+            return block
                 
-        # Extract methods
         methods = []
         for line in block.split('\n'):
             line = line.strip()
-            if not line or line == 'return {' or line == '};' or line.startswith('//'):
+            if not line or line in ('return {', '};') or line.startswith('//'):
                 continue
-            if line.startswith('then:') or line.startswith('catch:') or line.startswith('finally:'):
+            if line.startswith(('then:', 'catch:', 'finally:')):
                 continue
                 
-            # e.g. `select: vi.fn().mockReturnThis(),`
-            # or `single: vi.fn().mockResolvedValue(mockObj),`
-            # we want to transform this to `p.select = vi.fn().mockReturnValue(p);`
-            
-            # extract key and the value
             parts = line.split(":", 1)
             if len(parts) == 2:
                 key = parts[0].strip()
@@ -58,12 +48,15 @@ def fix_file(filepath):
                 if val.endswith(','):
                     val = val[:-1]
                 
-                # if value uses mockReturnThis(), replace with mockReturnValue(p)
-                if 'mockReturnThis()' in val:
-                    val = val.replace('mockReturnThis()', 'mockReturnValue(p)')
-                # if value uses `() => b` (bulkDeleteService)
-                elif '() => b' in val:
-                    val = val.replace('() => b', '() => p')
+                MOCK_RETURN_THIS = 'mockReturnThis()'
+                MOCK_RETURN_P = 'mockReturnValue(p)'
+                ARROW_B = '() => b'
+                ARROW_P = '() => p'
+
+                if MOCK_RETURN_THIS in val:
+                    val = val.replace(MOCK_RETURN_THIS, MOCK_RETURN_P)
+                elif ARROW_B in val:
+                    val = val.replace(ARROW_B, ARROW_P)
                     
                 methods.append(f"p.{key} = {val};")
                 

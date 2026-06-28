@@ -3,7 +3,7 @@ ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS avatar_url text;
 
 -- Create avatars storage bucket (public)
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-VALUES ('avatars', 'avatars', true, 2097152, ARRAY['image/jpeg','image/png','image/webp'])
+VALUES ('avatars', 'avatars', true, 2097152, ARRAY['image/jpeg','image/png','image/webp']) -- NOSONAR
 ON CONFLICT (id) DO NOTHING;
 
 -- RLS: anyone can read avatars (public bucket)

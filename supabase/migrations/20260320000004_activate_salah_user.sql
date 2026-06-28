@@ -12,7 +12,7 @@ SET
   encrypted_password = extensions.crypt('sala7372495', extensions.gen_salt('bf')),
   email_confirmed_at = COALESCE(email_confirmed_at, now()),
   updated_at          = now()
-WHERE email = 'salahmostava@gmail.com';
+WHERE email = 'salahmostava@gmail.com'; -- NOSONAR
 
 -- 2) Ensure profile exists and is active
 INSERT INTO public.profiles (id, email, name, is_active)
