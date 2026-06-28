@@ -286,8 +286,16 @@ const SortIcon = ({ field, sortField, sortDir }: { field: string; sortField: str
 ═══════════════════════════════════════════════════════════════ */
 const ThSort = ({ field, label, className, sortField, sortDir, onSort }: { field: string; label: string; className?: string; sortField: string | null; sortDir: SortDir; onSort: (field: string) => void }) => (
   <th
+    role="button"
+    tabIndex={0}
     className={`px-3 py-2.5 text-xs font-semibold text-muted-foreground whitespace-nowrap cursor-pointer select-none hover:text-foreground transition-colors border-b border-border/50 text-center ${className ?? ''}`}
     onClick={() => onSort(field)}
+    onKeyDown={(e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        onSort(field);
+      }
+    }}
   >
     {label} <SortIcon field={field} sortField={sortField} sortDir={sortDir} />
   </th>

@@ -330,10 +330,13 @@ export const buildAdvanceInstallmentMaps = async (
   for (const advance of allAdvances) advIdToEmpMap[advance.id] = advance.employee_id;
 
   // FIX C5: run both queries in parallel — independent, no ordering requirement
-  const [advInstData, allPendingInsts] = await Promise.all([
+  // Use Promise.allSettled to prevent single-query failure from breaking everything
+  const [advInstDataResult, allPendingInstsResult] = await Promise.allSettled([
     salaryDataService.getMonthInstallmentsForAdvances(selectedMonth, advanceIds),
     salaryDataService.getPendingInstallmentsForAdvances(advanceIds),
   ]);
+  const advInstData = advInstDataResult.status === 'fulfilled' ? advInstDataResult.value : null;
+  const allPendingInsts = allPendingInstsResult.status === 'fulfilled' ? allPendingInstsResult.value : null;
 
   allPendingInsts?.forEach((inst) => {
     const empId = advIdToEmpMap[inst.advance_id];

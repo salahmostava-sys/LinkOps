@@ -777,9 +777,21 @@ function EmployeeDetailedTableInner({
                 return (
                   <th
                     key={col.key}
+                    role={col.sortable ? "button" : undefined}
+                    tabIndex={col.sortable ? 0 : undefined}
                     className={`ta-th select-none whitespace-nowrap text-center text-black ${col.key === "seq" ? "w-10 px-2" : ""} ${col.sortable ? "cursor-pointer hover:text-gray-800" : ""}`}
                     onClick={
                       col.sortable ? () => handleSort(col.key) : undefined
+                    }
+                    onKeyDown={
+                      col.sortable
+                        ? (e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              handleSort(col.key);
+                            }
+                          }
+                        : undefined
                     }
                   >
                     <div className="flex items-center justify-center gap-1">

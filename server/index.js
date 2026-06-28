@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import { salaryEngineHandler, adminUpdateUserHandler, groqChatHandler, aiChatHandler } from './lib/handlers.js';
 
 const app = express();
@@ -13,17 +14,17 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const AI_INTERNAL_KEY = process.env.AI_INTERNAL_KEY;
 
 // Allowed CORS origins — comma-separated list via env var
-const ALLOWED_ORIGINS = (
+const ALLOWED_ORIGINS = new Set((
   process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://localhost:5000,http://localhost:3000' // NOSONAR
 )
   .split(',')
   .map((o) => o.trim())
-  .filter(Boolean);
+  .filter(Boolean));
 
 app.use(cors({
   origin: (origin, callback) => {
     // Allow server-to-server calls (no Origin header) and listed origins
-    if (!origin || ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+    if (!origin || ALLOWED_ORIGINS.has(origin)) return callback(null, true);
     // FIX #10: Return false (silent deny) instead of throwing an Error.
     // callback(new Error(...)) causes Express to emit a 500 with stack trace in logs.
     // The browser will see a network error, which is the correct CORS behavior.
@@ -41,6 +42,15 @@ app.use(helmet());
 // This prevents memory exhaustion from large payloads before auth is checked.
 app.use(express.json({ limit: '256kb' }));
 
+// Apply a general rate limiter to all requests to prevent abuse before route-specific handlers
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 1000, // Limit each IP to 1000 requests per `window` (here, per 15 minutes)
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later.' }
+});
+app.use(limiter);
 
 // ── Health check ─────────────────────────────────────────────────────────────
 app.get('/health', (req, res) => res.json({ status: 'ok' }));

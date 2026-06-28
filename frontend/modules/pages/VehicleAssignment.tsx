@@ -106,7 +106,7 @@ const AssignmentFormModal = ({
         <div className="space-y-3">
           {/* Vehicle selector — ONLY free (active + no current assignment) vehicles */}
           <div>
-            <label className="text-sm font-medium mb-1 block">
+            <label htmlFor="vehicle-select" className="text-sm font-medium mb-1 block">
               المركبة *
               <span className="text-xs text-muted-foreground font-normal ms-2">
                 (المركبات الفاضية فقط — {freeVehicles.length} متاحة)
@@ -119,7 +119,7 @@ const AssignmentFormModal = ({
               </div>
             ) : (
               <Select value={form.vehicle_id} onValueChange={v => setForm(p => ({ ...p, vehicle_id: v }))}>
-                <SelectTrigger><SelectValue placeholder="اختر المركبة الفاضية" /></SelectTrigger>
+                <SelectTrigger id="vehicle-select"><SelectValue placeholder="اختر المركبة الفاضية" /></SelectTrigger>
                 <SelectContent>
                   {freeVehicles.map(v => (
                     <SelectItem key={v.id} value={v.id}>
