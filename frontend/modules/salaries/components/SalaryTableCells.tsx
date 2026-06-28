@@ -95,7 +95,7 @@ export const SalaryBreakdown = ({ orders, scheme, salary, children }: Readonly<S
       {children}
       {show && (
         <div
-          className="absolute bottom-full mb-1 right-0 z-50 bg-popover border border-border rounded-xl shadow-xl p-3 text-xs w-64 text-right"
+          className="absolute bottom-full mb-1 right-0 z-50 bg-popover border border-border rounded-xl shadow-xl p-3 text-xs w-64 text-start"
           dir="rtl"
           // Prevent the tooltip's own mouse events from bubbling to parent onMouseLeave
           onMouseEnter={() => setShow(true)}

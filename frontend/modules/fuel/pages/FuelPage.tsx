@@ -26,13 +26,13 @@ function MonthlyTable({ rows }: Readonly<{ rows: MonthlyRow[] }>) {
       <table ref={undefined} className="w-full text-sm">
         <thead>
           <tr className="border-b border-border/60 text-muted-foreground text-xs">
-            <th className="ta-th text-right font-medium">المندوب</th>
-            <th className="ta-th text-right font-medium">المركبة</th>
-            <th className="ta-th text-right font-medium">أيام مسجّلة</th>
-            <th className="ta-th text-right font-medium">الكيلومترات</th>
-            <th className="ta-th text-right font-medium">تكلفة البنزين</th>
-            <th className="ta-th text-right font-medium">تكلفة/كم</th>
-            <th className="ta-th text-right font-medium">الطلبات</th>
+            <th className="ta-th text-start font-medium">المندوب</th>
+            <th className="ta-th text-start font-medium">المركبة</th>
+            <th className="ta-th text-start font-medium">أيام مسجّلة</th>
+            <th className="ta-th text-start font-medium">الكيلومترات</th>
+            <th className="ta-th text-start font-medium">تكلفة البنزين</th>
+            <th className="ta-th text-start font-medium">تكلفة/كم</th>
+            <th className="ta-th text-start font-medium">الطلبات</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-border/40">
@@ -211,11 +211,11 @@ function DailyTable({
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-border/60 text-muted-foreground text-xs">
-            <th className="ta-th text-right font-medium">التاريخ</th>
-            <th className="ta-th text-right font-medium">المندوب</th>
-            <th className="ta-th text-right font-medium">الكيلومترات</th>
-            <th className="ta-th text-right font-medium">تكلفة البنزين</th>
-            <th className="ta-th text-right font-medium">ملاحظات</th>
+            <th className="ta-th text-start font-medium">التاريخ</th>
+            <th className="ta-th text-start font-medium">المندوب</th>
+            <th className="ta-th text-start font-medium">الكيلومترات</th>
+            <th className="ta-th text-start font-medium">تكلفة البنزين</th>
+            <th className="ta-th text-start font-medium">ملاحظات</th>
             {canEdit && <th className="ta-th w-20" />}
           </tr>
         </thead>
@@ -283,7 +283,7 @@ function SpreadsheetView({
       <table className="w-full text-xs border-collapse">
         <thead>
           <tr className="ta-thead">
-            <th className="ta-th text-right font-medium sticky right-0 bg-muted/60 min-w-[130px]">المندوب</th>
+            <th className="ta-th text-start font-medium sticky right-0 bg-muted/60 min-w-[130px]">المندوب</th>
             {days.map((d) => (
               <th key={d} className="ta-th px-1.5 font-medium min-w-[36px]">
                 {d}

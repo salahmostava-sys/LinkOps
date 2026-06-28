@@ -44,11 +44,11 @@ export function DashboardSupervisorTargetsCard({ loading, rows }: Readonly<Props
             <table className="w-full text-sm min-w-[560px]" dir="rtl">
               <thead className="bg-muted/40">
                 <tr>
-                  <th className="ta-th text-right">المشرف</th>
-                  <th className="ta-th text-right">التارجت</th>
-                  <th className="ta-th text-right">الفعلي</th>
-                  <th className="ta-th text-right">الفرق</th>
-                  <th className="ta-th text-right">نسبة الإنجاز</th>
+                  <th className="ta-th text-start">المشرف</th>
+                  <th className="ta-th text-start">التارجت</th>
+                  <th className="ta-th text-start">الفعلي</th>
+                  <th className="ta-th text-start">الفرق</th>
+                  <th className="ta-th text-start">نسبة الإنجاز</th>
                 </tr>
               </thead>
               <tbody>

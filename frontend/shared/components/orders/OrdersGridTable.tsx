@@ -96,7 +96,7 @@ export const OrdersGridTable = React.memo(({
                 #
               </th>
               <th
-                className="ta-th sticky z-[31] bg-muted text-right px-1.5 text-foreground border-l-2 border-border"
+                className="ta-th sticky z-[31] bg-muted text-start px-1.5 text-foreground border-l-2 border-border"
                 style={{ right: seqColMin, minWidth: repColMin }}>
                 المندوب / المنصة
               </th>

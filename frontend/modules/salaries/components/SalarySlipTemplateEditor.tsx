@@ -215,7 +215,7 @@ export function SalarySlipTemplateEditor() {
               <button
                 key={t.id}
                 type="button"
-                className={`w-full flex items-center justify-between p-2 rounded-md transition-colors text-right focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 ${
+                className={`w-full flex items-center justify-between p-2 rounded-md transition-colors text-start focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 ${
                   currentTemplate.id === t.id ? 'bg-primary/10 text-primary font-semibold' : 'hover:bg-muted'
                 }`}
                 onClick={() => setCurrentTemplate(t)}

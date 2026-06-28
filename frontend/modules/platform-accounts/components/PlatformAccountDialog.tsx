@@ -60,7 +60,7 @@ export const PlatformAccountDialog = ({
         className="max-w-lg flex flex-col max-h-[min(90vh,44rem)] gap-0 overflow-hidden p-0 sm:max-w-lg"
         dir="rtl"
       >
-        <DialogHeader className="space-y-1.5 px-6 pt-6 pb-2 shrink-0 pr-14 text-right">
+        <DialogHeader className="space-y-1.5 px-6 pt-6 pb-2 shrink-0 pr-14 text-start">
           <DialogTitle>{editingAccount ? 'تعديل الحساب' : 'إضافة حساب جديد'}</DialogTitle>
         </DialogHeader>
         <div className="flex-1 overflow-y-auto min-h-0 px-6 py-2 space-y-4">

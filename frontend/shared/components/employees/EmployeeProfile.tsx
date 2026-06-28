@@ -321,7 +321,7 @@ const EmployeeProfile = ({ employee, onBack }: Readonly<Props>) => {
               ))}
             </div>
           </div>
-          <div className="text-left">
+          <div className="text-end">
             {residencyDays !== null && (
               <div className={`text-sm font-medium ${residencyHeaderUrgencyClass(residencyDays)}`}>
                 الإقامة: {residencyDays < 0 ? 'منتهية' : `${residencyDays} يوم`}

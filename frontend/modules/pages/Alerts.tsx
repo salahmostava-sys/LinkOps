@@ -492,7 +492,7 @@ const Alerts = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
         <button
-          className="stat-card text-right w-full border-r-4 border-r-destructive cursor-pointer hover:shadow-card-hover transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 rounded-2xl"
+          className="stat-card text-start w-full border-r-4 border-r-destructive cursor-pointer hover:shadow-card-hover transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 rounded-2xl"
           onClick={() => setSeverityFilter(severityFilter === 'urgent' ? 'all' : 'urgent')}
         >
           <p className="text-sm text-muted-foreground">عاجل</p>
@@ -500,7 +500,7 @@ const Alerts = () => {
           <p className="text-xs text-muted-foreground mt-1">يتطلب تدخل فوري</p>
         </button>
         <button
-          className="stat-card text-right w-full border-r-4 border-r-warning cursor-pointer hover:shadow-card-hover transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 rounded-2xl"
+          className="stat-card text-start w-full border-r-4 border-r-warning cursor-pointer hover:shadow-card-hover transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 rounded-2xl"
           onClick={() => setSeverityFilter(severityFilter === 'warning' ? 'all' : 'warning')}
         >
           <p className="text-sm text-muted-foreground">تحذير</p>
@@ -508,7 +508,7 @@ const Alerts = () => {
           <p className="text-xs text-muted-foreground mt-1">خلال 30-60 يوم</p>
         </button>
         <button
-          className="stat-card text-right w-full border-r-4 border-r-info cursor-pointer hover:shadow-card-hover transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 rounded-2xl"
+          className="stat-card text-start w-full border-r-4 border-r-info cursor-pointer hover:shadow-card-hover transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 rounded-2xl"
           onClick={() => setSeverityFilter(severityFilter === 'info' ? 'all' : 'info')}
         >
           <p className="text-sm text-muted-foreground">معلومات</p>

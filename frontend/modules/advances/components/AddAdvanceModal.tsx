@@ -567,7 +567,7 @@ export const TransactionsModal = ({ employeeId, employeeName, nationalId, totalD
                         ) : (
                           <button
                             type="button"
-                            className="text-xs text-muted-foreground hover:text-foreground transition-colors text-right w-full"
+                            className="text-xs text-muted-foreground hover:text-foreground transition-colors text-start w-full"
                             onClick={() => startEditNote(inst)}
                             title="اضغط للتعديل"
                           >

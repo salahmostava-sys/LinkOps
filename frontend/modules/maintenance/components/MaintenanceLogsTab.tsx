@@ -182,15 +182,15 @@ export function MaintenanceLogsTab() {
           <table className="w-full min-w-[960px] text-sm">
             <thead className="bg-muted/40">
               <tr>
-                <th className="ta-th text-right">التاريخ</th>
-                <th className="ta-th text-right">المركبة</th>
-                <th className="ta-th text-right">السائق</th>
-                <th className="ta-th text-right">النوع</th>
+                <th className="ta-th text-start">التاريخ</th>
+                <th className="ta-th text-start">المركبة</th>
+                <th className="ta-th text-start">السائق</th>
+                <th className="ta-th text-start">النوع</th>
                 <th className="ta-th w-20">قطع الغيار</th>
-                <th className="ta-th text-right">العداد</th>
-                <th className="ta-th text-right">التكلفة</th>
-                <th className="ta-th text-right">الحالة</th>
-                <th className="ta-th text-right w-24">إجراءات</th>
+                <th className="ta-th text-start">العداد</th>
+                <th className="ta-th text-start">التكلفة</th>
+                <th className="ta-th text-start">الحالة</th>
+                <th className="ta-th text-start w-24">إجراءات</th>
               </tr>
             </thead>
             <tbody>

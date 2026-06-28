@@ -478,7 +478,7 @@ export function ShiftsTab({
                 <th className="ta-th sticky right-0 z-[32] bg-muted px-0.5 border-l border-border" style={{ minWidth: 36, width: 36 }}>
                   #
                 </th>
-                <th className="ta-th sticky z-[31] bg-muted text-right px-1.5 text-foreground border-l-2 border-border" style={{ right: 36, minWidth: 132 }}>
+                <th className="ta-th sticky z-[31] bg-muted text-start px-1.5 text-foreground border-l-2 border-border" style={{ right: 36, minWidth: 132 }}>
                   الموظف
                 </th>
                 {dayArr.map((d) => {

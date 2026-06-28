@@ -213,15 +213,15 @@ export function SparePartsTab() {
           <table className="w-full min-w-[1000px] text-sm">
             <thead className="bg-muted/40">
               <tr>
-                <th className="ta-th text-right">?????</th>
-                <th className="ta-th text-right">??? ??????</th>
-                <th className="ta-th text-right">???????</th>
-                <th className="ta-th text-right">???? ??????</th>
-                <th className="ta-th text-right">??????</th>
-                <th className="ta-th text-right">??? ??????</th>
-                <th className="ta-th text-right">??????</th>
-                <th className="ta-th text-right max-w-[200px]">???????</th>
-                <th className="ta-th text-right w-28">???????</th>
+                <th className="ta-th text-start">?????</th>
+                <th className="ta-th text-start">??? ??????</th>
+                <th className="ta-th text-start">???????</th>
+                <th className="ta-th text-start">???? ??????</th>
+                <th className="ta-th text-start">??????</th>
+                <th className="ta-th text-start">??? ??????</th>
+                <th className="ta-th text-start">??????</th>
+                <th className="ta-th text-start max-w-[200px]">???????</th>
+                <th className="ta-th text-start w-28">???????</th>
               </tr>
             </thead>
             <tbody>

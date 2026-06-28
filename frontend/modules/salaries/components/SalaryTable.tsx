@@ -133,7 +133,7 @@ const SalaryRowCells = memo(function SalaryRowCells({
       <td className={`${tdClass} sticky text-center text-xs text-muted-foreground font-mono`} style={{ left: 0, zIndex: 10, background: 'hsl(var(--card))' }}>{rowIdx + 1}</td>
       <td className={`${tdClass} sticky font-medium whitespace-nowrap`} style={{ left: 40, zIndex: 10, background: 'hsl(var(--card))' }}>
         <div className="flex items-center gap-1.5">
-          <button className="whitespace-nowrap text-primary hover:underline font-medium text-right" onClick={() => openEmployeeDetail(r)}>
+          <button className="whitespace-nowrap text-primary hover:underline font-medium text-start" onClick={() => openEmployeeDetail(r)}>
             {shortEmployeeName(r.employeeName)}
           </button>
           {r.isDirty && (

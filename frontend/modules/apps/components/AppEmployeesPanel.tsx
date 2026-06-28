@@ -67,7 +67,7 @@ export const AppEmployeesPanel = ({
           <table className="w-full">
             <thead className="ta-thead">
               <tr>
-                <th className="ta-th text-right">المندوب</th>
+                <th className="ta-th text-start">المندوب</th>
                 <th className="ta-th">رقم الهوية</th>
                 <th className="ta-th">الجوال</th>
                 <th className="ta-th">حالة العمل</th>
@@ -84,7 +84,7 @@ export const AppEmployeesPanel = ({
                 
                 return (
                   <tr key={employee.id} className="ta-tr group">
-                    <td className="ta-td text-right">
+                    <td className="ta-td text-start">
                       <div>
                         <p className="font-bold text-foreground">{employee.name}</p>
                         {employee.job_title && (
