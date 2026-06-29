@@ -4,5 +4,8 @@
   },
   "scripts": {
     "prepare": "husky"
+  },
+  "dependencies": {
+    "pg-dump-restore-nodejs": "^0.0.10"
   }
 }
