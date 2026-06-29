@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import * as XLSX from 'xlsx';
+import { loadXlsx } from '@modules/orders/utils/xlsx';
 import { createDefaultGlobalFilters } from '@shared/components/table/GlobalTableFilters';
 import type { DailyRow, MonthlyRow } from '@modules/fuel/types/fuel.types';
 import { DAY_NAMES } from '@modules/fuel/types/fuel.types';
@@ -23,7 +23,7 @@ export function useFuelTable(args: {
   const [fastDailyPageSize] = useState(50);
   const [fastDailyFilters, setFastDailyFilters] = useState(() => createDefaultGlobalFilters());
 
-  const handleExportMonthly = () => {
+  const handleExportMonthly = async () => {
     const data = filteredMonthly.map(r => ({
       'الاسم': r.employee_name,
       'أيام مسجلة': r.daily_count,
@@ -32,13 +32,14 @@ export function useFuelTable(args: {
       'تكلفة/كم (ر.س)': r.km_total > 0 ? (r.fuel_cost / r.km_total).toFixed(3) : '',
       'عدد الطلبات': r.orders_count,
     }));
+    const XLSX = await loadXlsx();
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'ملخص شهري');
     XLSX.writeFile(wb, `ملخص_الاستهلاك_${selectedMonth}_${selectedYear}.xlsx`);
   };
 
-  const handleExportDaily = () => {
+  const handleExportDaily = async () => {
     const data = filteredDaily.map(r => ({
       'التاريخ': r.date,
       'اليوم': DAY_NAMES[new Date(r.date + 'T12:00:00').getDay()],
@@ -47,6 +48,7 @@ export function useFuelTable(args: {
       'تكلفة البنزين (ر.س)': r.fuel_cost,
       'ملاحظات': r.notes ?? '',
     }));
+    const XLSX = await loadXlsx();
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'إدخالات يومية');

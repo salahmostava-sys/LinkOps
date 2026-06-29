@@ -1,6 +1,6 @@
 import type React from 'react';
 import { useState, useRef } from 'react';
-import * as XLSX from 'xlsx';
+import { loadXlsx } from '@modules/orders/utils/xlsx';
 import { X, Check } from 'lucide-react';
 import { Button } from '@shared/components/ui/button';
 import { Label } from '@shared/components/ui/label';
@@ -35,6 +35,7 @@ export const ImportModal = ({
     const file = e.target.files?.[0];
     if (!file) return;
     const fileBuffer = await file.arrayBuffer();
+    const XLSX = await loadXlsx();
     const wb = XLSX.read(fileBuffer, { type: 'array' });
     const ws = wb.Sheets[wb.SheetNames[0]];
     const data: Record<string, unknown>[] = XLSX.utils.sheet_to_json(ws, { defval: '' });
