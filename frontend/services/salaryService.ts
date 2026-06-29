@@ -378,7 +378,7 @@ export const salaryService = {
       return [] as SalaryPreviewRow[];
     }
 
-    // --- Try Express server first ---
+    // --- Try Express server first (Fallback to direct RPC if Express backend is down) ---
     try {
       const data = await callServerFunction<SalaryPreviewRow[]>('salary-engine', {
         mode: 'month_preview',

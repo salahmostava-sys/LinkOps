@@ -8,16 +8,13 @@ import { throwIfError } from "./serviceError";
  * Detects unreachable server and throws a clear Arabic message.
  */
 async function callAdminApi(
-  token: string,
   body: Record<string, unknown>
 ): Promise<void>;
 async function callAdminApi<T>(
-  token: string,
   body: Record<string, unknown>,
   expectData: true
 ): Promise<T>;
 async function callAdminApi<T = void>(
-  _token: string,
   body: Record<string, unknown>,
   expectData?: boolean
 ): Promise<T | void> {
@@ -189,7 +186,7 @@ export const authService = {
     const { data: sessionData } = await supabase.auth.getSession();
     const token = sessionData.session?.access_token;
     if (!token) throw new Error("authService.revokeSession: not authenticated");
-    await callAdminApi(token, { user_id: userId, action: "revoke_session" });
+    await callAdminApi({ user_id: userId, action: "revoke_session" });
   },
 
   createManagedUser: async (input: AdminCreateUserInput): Promise<AdminCreateUserResult> => {
@@ -197,8 +194,13 @@ export const authService = {
     const token = sessionData.session?.access_token;
     if (!token) throw new Error("authService.createManagedUser: not authenticated");
     const result = await callAdminApi<AdminCreateUserResult & { user_id?: string }>(
-      token,
-      { action: "create_user", email: input.email, password: input.password, name: input.name, role: input.role },
+      {
+        action: "create_user",
+        email: input.email,
+        password: input.password,
+        name: input.name,
+        role: input.role,
+      },
       true
     );
     if (!result?.user_id) throw new Error("authService.createManagedUser: missing user_id");
@@ -210,6 +212,6 @@ export const authService = {
     const { data: sessionData } = await supabase.auth.getSession();
     const token = sessionData.session?.access_token;
     if (!token) throw new Error("authService.deleteManagedUser: not authenticated");
-    await callAdminApi(token, { user_id: userId, action: "delete_user" });
+    await callAdminApi({ user_id: userId, action: "delete_user" });
   },
 };

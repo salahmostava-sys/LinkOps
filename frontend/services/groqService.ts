@@ -1,4 +1,4 @@
-import { supabase } from '@services/supabase/client';
+
 import { callServerFunction } from '@services/serverFunction';
 
 let _configured: boolean | null = null;
