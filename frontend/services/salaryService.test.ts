@@ -231,17 +231,21 @@ describe('salaryService', () => {
   });
 
   describe('getSalaryPreviewForMonth', () => {
-    it('returns salary preview data', async () => {
+    it('returns salary preview rows from a direct array response', async () => {
       callServerFunctionMock.mockResolvedValue([{ eId: 'e1' }]);
       const res = await salaryService.getSalaryPreviewForMonth('2024-05');
       expect(res).toEqual([{ eId: 'e1' }]);
     });
-    
-    it('falls back to RPC on fetch failure', async () => {
-      callServerFunctionMock.mockRejectedValueOnce(new Error('network error'));
-      rpcMock.mockResolvedValueOnce({ data: [{ id: '2' }], error: null });
+
+    it('unwraps salary-engine payloads wrapped in { data }', async () => {
+      callServerFunctionMock.mockResolvedValue({ data: [{ eId: 'e2' }] });
       const res = await salaryService.getSalaryPreviewForMonth('2026-03');
-      expect(res).toEqual([{ id: '2' }]);
+      expect(res).toEqual([{ eId: 'e2' }]);
+    });
+
+    it('propagates salary-engine failures', async () => {
+      callServerFunctionMock.mockRejectedValueOnce(new Error('network error'));
+      await expect(salaryService.getSalaryPreviewForMonth('2026-03')).rejects.toThrow('network error');
     });
   });
 

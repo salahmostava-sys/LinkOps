@@ -87,19 +87,38 @@ async function executeMonthMode(adminClient, payload) {
   return { status: 200, data };
 }
 
-import { LRUCache } from 'lru-cache';
-const previewCache = new LRUCache({ max: 500, ttl: 1000 * 60 * 5 }); // 5 minutes cache
+const PREVIEW_CACHE_TTL_MS = 5 * 60 * 1000;
+const previewCache = new Map<string, { data: unknown; expiresAt: number }>();
+
+function readPreviewCache(key: string): unknown | undefined {
+  const entry = previewCache.get(key);
+  if (!entry) return undefined;
+  if (Date.now() > entry.expiresAt) {
+    previewCache.delete(key);
+    return undefined;
+  }
+  return entry.data;
+}
+
+function writePreviewCache(key: string, data: unknown) {
+  previewCache.set(key, { data, expiresAt: Date.now() + PREVIEW_CACHE_TTL_MS });
+  if (previewCache.size > 500) {
+    const oldestKey = previewCache.keys().next().value;
+    if (oldestKey) previewCache.delete(oldestKey);
+  }
+}
 
 async function executeMonthPreviewMode(adminClient, payload) {
   const cacheKey = payload.month_year;
-  if (previewCache.has(cacheKey)) {
-    return { status: 200, data: previewCache.get(cacheKey), cached: true };
+  const cached = readPreviewCache(cacheKey);
+  if (cached !== undefined) {
+    return { status: 200, data: cached, cached: true };
   }
   const { data, error } = await adminClient.rpc('preview_salary_for_month', {
     p_month_year: payload.month_year,
   });
   if (error) throw new Error(error.message);
-  previewCache.set(cacheKey, data);
+  writePreviewCache(cacheKey, data);
   return { status: 200, data };
 }
 

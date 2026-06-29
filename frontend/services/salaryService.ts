@@ -378,25 +378,13 @@ export const salaryService = {
       return [] as SalaryPreviewRow[];
     }
 
-    // --- Try Express server first (Fallback to direct RPC if Express backend is down) ---
-    try {
-      const data = await callServerFunction<SalaryPreviewRow[]>('salary-engine', {
-        mode: 'month_preview',
-        month_year: my,
-      });
-      if (data) return data || [];
-    } catch (err) {
-      logError('salary-engine server route threw, falling back to RPC', {
-        error: err instanceof Error ? err.message : String(err),
-      });
-    }
-
-    // --- Fallback: call preview_salary_for_month RPC directly ---
-    const { data: rpcData, error: rpcError } = await supabase.rpc('preview_salary_for_month', {
-      p_month_year: my,
+    // salary-engine wraps payloads as { data: ... }; other routes return the body directly.
+    const data = await callServerFunction<SalaryPreviewRow[] | { data?: SalaryPreviewRow[] }>('salary-engine', {
+      mode: 'month_preview',
+      month_year: my,
     });
-    if (rpcError) handleSupabaseError(rpcError, 'salaryService.getSalaryPreviewForMonth.rpc_fallback');
-    return (rpcData as SalaryPreviewRow[] | null) || [];
+    const rows = Array.isArray(data) ? data : data?.data;
+    return rows ?? [];
   },
 
   getByMonth: async (monthYear: string) => {
