@@ -1,10 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { fromMock, rpcMock, getSessionMock, invokeMock } = vi.hoisted(() => ({
+const { fromMock, rpcMock, getSessionMock, invokeMock, callServerFunctionMock } = vi.hoisted(() => ({
   fromMock: vi.fn(),
   rpcMock: vi.fn(),
   getSessionMock: vi.fn(),
   invokeMock: vi.fn(),
+  callServerFunctionMock: vi.fn(),
 }));
 
 vi.mock('@services/supabase/client', () => ({
@@ -20,6 +21,9 @@ vi.mock('@services/supabase/client', () => ({
   },
 }));
 
+vi.mock('@services/serverFunction', () => ({
+  callServerFunction: callServerFunctionMock,
+}));
 
 import { salaryService, getTierSalaryExplanationLines } from './salaryService';
 import type { SalarySchemeTier } from './salaryService';
@@ -185,8 +189,7 @@ describe('salaryService', () => {
 
   describe('calculateSalaryForEmployeeMonth', () => {
     it('returns salary calculation for employee month', async () => {
-      getSessionMock.mockResolvedValue({ data: { session: { access_token: 'fake-token' } } });
-      invokeMock.mockResolvedValue({ data: { net_salary: 1000 }, error: null });
+      callServerFunctionMock.mockResolvedValue({ net_salary: 1000 });
 
       const result = await salaryService.calculateSalaryForEmployeeMonth(
         '123e4567-e89b-12d3-a456-426614174000',
@@ -196,13 +199,18 @@ describe('salaryService', () => {
         'Penalty'
       );
       expect(result).toEqual({ net_salary: 1000 });
-      expect(invokeMock).toHaveBeenCalledWith('salary-engine', {
-        body: { mode: 'employee', employee_id: '123e4567-e89b-12d3-a456-426614174000', month_year: '2026-03', payment_method: 'cash', manual_deduction: 100, manual_deduction_note: 'Penalty' },
+      expect(callServerFunctionMock).toHaveBeenCalledWith('salary-engine', {
+        mode: 'employee',
+        employee_id: '123e4567-e89b-12d3-a456-426614174000',
+        month_year: '2026-03',
+        payment_method: 'cash',
+        manual_deduction: 100,
+        manual_deduction_note: 'Penalty',
       });
     });
     
     it('throws error when auth fails', async () => {
-      getSessionMock.mockResolvedValueOnce({ data: { session: null } });
+      callServerFunctionMock.mockRejectedValueOnce(new Error('Not authenticated'));
       await expect(
         salaryService.calculateSalaryForEmployeeMonth('123e4567-e89b-12d3-a456-426614174000', '2026-03')
       ).rejects.toThrow();
@@ -211,27 +219,26 @@ describe('salaryService', () => {
 
   describe('calculateSalaryForMonth', () => {
     it('returns monthly salary calculation', async () => {
-      getSessionMock.mockResolvedValue({ data: { session: { access_token: 'tk' } } });
-      invokeMock.mockResolvedValue({ data: { success: true }, error: null });
+      callServerFunctionMock.mockResolvedValue({ success: true });
       const res = await salaryService.calculateSalaryForMonth({ monthYear: '2024-05', paymentMethod: 'bank' });
       expect(res).toEqual({ success: true });
-      expect(invokeMock).toHaveBeenCalledWith('salary-engine', {
-        body: { mode: 'month', month_year: '2024-05', payment_method: 'bank' },
+      expect(callServerFunctionMock).toHaveBeenCalledWith('salary-engine', {
+        mode: 'month',
+        month_year: '2024-05',
+        payment_method: 'bank',
       });
     });
   });
 
   describe('getSalaryPreviewForMonth', () => {
     it('returns salary preview data', async () => {
-      getSessionMock.mockResolvedValue({ data: { session: { access_token: 'tk' } } });
-      invokeMock.mockResolvedValue({ data: [{ eId: 'e1' }], error: null });
+      callServerFunctionMock.mockResolvedValue([{ eId: 'e1' }]);
       const res = await salaryService.getSalaryPreviewForMonth('2024-05');
       expect(res).toEqual([{ eId: 'e1' }]);
     });
     
     it('falls back to RPC on fetch failure', async () => {
-      getSessionMock.mockResolvedValueOnce({ data: { session: { access_token: 'fake-token' } } });
-      invokeMock.mockResolvedValueOnce({ data: null, error: new Error('bad') });
+      callServerFunctionMock.mockRejectedValueOnce(new Error('network error'));
       rpcMock.mockResolvedValueOnce({ data: [{ id: '2' }], error: null });
       const res = await salaryService.getSalaryPreviewForMonth('2026-03');
       expect(res).toEqual([{ id: '2' }]);
