@@ -3780,7 +3780,7 @@ BEGIN
             'appName', app_name,
             'brandColor', brand_color,
             'textColor', text_color,
-            _const_work_orders(), total_orders,
+            _const_work_orders()::TEXT, total_orders,
             'riders', rider_count,
             'targetOrders', target_orders,
             'targetAchievementPct', target_achievement_pct,
@@ -3795,7 +3795,7 @@ BEGIN
         SELECT jsonb_agg(
           jsonb_build_object(
             'city', city,
-            _const_work_orders(), orders
+            _const_work_orders()::TEXT, orders
           )
           ORDER BY orders DESC, city
         )
@@ -3805,7 +3805,7 @@ BEGIN
         SELECT jsonb_agg(
           jsonb_build_object(
             'date', date,
-            _const_work_orders(), orders
+            _const_work_orders()::TEXT, orders
           )
           ORDER BY date
         )
