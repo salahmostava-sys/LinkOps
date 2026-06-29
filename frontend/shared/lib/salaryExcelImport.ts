@@ -1,5 +1,5 @@
-import * as XLSX from 'xlsx';
 import type { WorkBook } from 'xlsx';
+import { loadXlsx } from '@modules/orders/utils/xlsx';
 import { isEmployeeIdUuid, isValidSalaryMonthYear, parseSalaryAmount } from '@shared/lib/salaryValidation';
 
 export const SALARY_IO_COLUMNS = [
@@ -149,11 +149,12 @@ export type SalaryImportRowResult = {
  * Parse first sheet using strict header order from `SALARY_IO_COLUMNS`.
  * `defaultMonthYear` applies only when `month_year` cell is empty.
  */
-export function parseSalaryImportWorkbook(
+export async function parseSalaryImportWorkbook(
   buffer: ArrayBuffer,
   options: { defaultMonthYear?: string }
-): { rows: SalaryImportRowResult[]; parseErrors: string[] } {
+): Promise<{ rows: SalaryImportRowResult[]; parseErrors: string[] }> {
   const parseErrors: string[] = [];
+  const XLSX = await loadXlsx();
   let wb: WorkBook;
   try {
     wb = XLSX.read(buffer, { type: 'array', cellDates: false });
