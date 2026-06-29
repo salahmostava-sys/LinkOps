@@ -11,7 +11,7 @@ export const processBulkImportRows = async (
 ): Promise<{ report: UploadReport; headerWarnings: number }> => {
   onProgress(10);
   const { parseEmployeeArabicWorkbook } = await loadImportModule();
-  const { rows, headerErrors } = parseEmployeeArabicWorkbook(buffer);
+  const { rows, headerErrors } = await parseEmployeeArabicWorkbook(buffer);
   if (rows.length === 0) {
     return {
       report: {

@@ -1,5 +1,7 @@
 import { http, HttpResponse } from 'msw';
 
+const REST_ENDPOINT = '*/rest/v1/*';
+
 export const handlers = [
   // Mock Supabase Auth
   http.post('*/auth/v1/token', () => {
@@ -18,21 +20,21 @@ export const handlers = [
   }),
 
   // Mock Supabase PostgREST
-  http.get('*/rest/v1/*', () => {
+  http.get(REST_ENDPOINT, () => {
     return HttpResponse.json([
       { id: 1, name: 'Mock Data' }
     ]);
   }),
 
-  http.post('*/rest/v1/*', () => {
+  http.post(REST_ENDPOINT, () => {
     return HttpResponse.json({ success: true }, { status: 201 });
   }),
 
-  http.patch('*/rest/v1/*', () => {
+  http.patch(REST_ENDPOINT, () => {
     return HttpResponse.json({ success: true }, { status: 200 });
   }),
 
-  http.delete('*/rest/v1/*', () => {
+  http.delete(REST_ENDPOINT, () => {
     return HttpResponse.json(null, { status: 204 });
   }),
 ];

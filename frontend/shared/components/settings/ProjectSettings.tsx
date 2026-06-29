@@ -19,7 +19,7 @@ import { settingsHubService } from '@services/settingsHubService';
 import { brandLogoSrc } from '@shared/lib/brandLogo';
 import { getErrorMessage } from '@shared/lib/query';
 import { logError } from '@shared/lib/logger';
-import * as XLSX from 'xlsx';
+import { loadXlsx } from '@modules/orders/utils/xlsx';
 
 async function uploadNewLogo(logoFile: File, userId: string | undefined, isRTL: boolean): Promise<string> {
   const sessionUserId = await settingsHubService.getCurrentUserId();
@@ -87,6 +87,7 @@ async function exportBackupFiles(): Promise<number> {
   jsonLink.click();
   URL.revokeObjectURL(jsonUrl);
 
+  const XLSX = await loadXlsx();
   const wb = XLSX.utils.book_new();
   for (const table of tables) {
     const sheetData = results[table];

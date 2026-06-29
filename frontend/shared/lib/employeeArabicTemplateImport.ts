@@ -1,6 +1,6 @@
-import * as XLSX from 'xlsx';
 import type { WorkBook } from 'xlsx';
 import { parseExcelDate } from '@shared/lib/excelDateParse';
+import { loadXlsx } from '@modules/orders/utils/xlsx';
 import { employeeService } from '@services/employeeService';
 import { EMPLOYEE_IMPORT_COLUMNS } from '@shared/constants/excelSchemas';
 import { normalizeEmployeeCities } from '@modules/employees/model/employeeCity';
@@ -151,12 +151,13 @@ function parseEmployeeDataRow(
  * Read first sheet: row 0 = headers (Arabic), following rows = data.
  * Maps Arabic headers to DB field keys.
  */
-export function parseEmployeeArabicWorkbook(buffer: ArrayBuffer): {
+export async function parseEmployeeArabicWorkbook(buffer: ArrayBuffer): Promise<{
   rows: EmployeeArabicRow[];
   headerErrors: string[];
-} {
+}> {
   const headerErrors: string[] = [];
   let wb: WorkBook;
+  const XLSX = await loadXlsx();
   try {
     wb = XLSX.read(buffer, { type: 'array', cellDates: false });
   } catch {
