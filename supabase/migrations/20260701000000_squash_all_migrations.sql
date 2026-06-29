@@ -1,6 +1,14 @@
 -- ============================================================
--- SQUASH MIGRATION: Full database state as of 2026-07-01
--- Consolidates 180 migrations into one clean baseline.
+-- FILE: 20260701000000_squash_all_migrations.sql
+-- PURPOSE: Squashed baseline schema - consolidation of 180 migration files
+-- CREATED: 2026-07-01
+-- NOTE: This file contains the complete schema (tables, functions, RLS, indexes)
+--       for a fresh database setup. DO NOT apply this to production!
+--       Production already has all migrations applied.
+-- USAGE: Use this file ONLY for:
+--        - Local development (fresh DB setup)
+--        - New developer onboarding
+--        - Disaster recovery (if needed)
 -- ============================================================
 
 -- SECTION 1: Extensions
