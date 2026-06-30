@@ -2,6 +2,7 @@ import { useState, useEffect, type Dispatch, type FormEvent, type SetStateAction
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@app/providers/AuthContext';
 import { ThemeToggle } from '@shared/components/ThemeToggle';
+import { LanguageToggle } from '@shared/components/LanguageToggle';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
 import { dashboardService } from '@services/dashboardService';
 import { loadRememberedEmail, persistRememberedEmail } from '@shared/lib/loginRememberStorage';
@@ -350,7 +351,10 @@ function LoginFormSection(props: LoginFormSectionProps) {
   return (
     <section className="w-full lg:w-[45%] flex flex-col justify-center items-center p-8 sm:p-12 lg:p-20 bg-background relative min-h-screen lg:min-h-0">
 
-      <ThemeToggle className="absolute top-5 left-5 w-10 h-10 hover:scale-105 active:scale-95" />
+      <div className="absolute top-5 left-5 flex gap-2">
+        <ThemeToggle className="w-10 h-10 hover:scale-105 active:scale-95" />
+        <LanguageToggle className="w-10 h-10 hover:scale-105 active:scale-95" />
+      </div>
 
       <div
         className="lg:hidden flex flex-col items-center mb-12"

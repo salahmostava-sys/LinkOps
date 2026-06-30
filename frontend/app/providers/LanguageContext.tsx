@@ -1,29 +1,40 @@
-import { createContext, useContext, useEffect, ReactNode, useMemo } from 'react';
+import { createContext, useContext, useEffect, ReactNode, useMemo, useState } from 'react';
+import { DirectionProvider } from '@radix-ui/react-direction';
 import i18n from '@app/i18n';
 
-type Lang = 'ar';
+type Lang = 'ar' | 'en';
 
 interface LanguageContextType {
   lang: Lang;
   isRTL: boolean;
+  setLang: (lang: Lang) => void;
 }
 
 const LanguageContext = createContext<LanguageContextType>({} as LanguageContextType);
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  useEffect(() => {
-    document.documentElement.dir = 'rtl';
-    document.documentElement.lang = 'ar';
-    document.documentElement.style.fontFamily = "'IBM Plex Sans Arabic', sans-serif";
-    i18n.changeLanguage('ar');
-  }, []);
+  const [lang, setLangState] = useState<Lang>(() => {
+    return (localStorage.getItem('app-lang') as Lang) || 'ar';
+  });
 
-  const value = useMemo<LanguageContextType>(() => ({ lang: 'ar', isRTL: true }), []);
+  const isRTL = lang === 'ar';
+
+  useEffect(() => {
+    document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
+    document.documentElement.lang = lang;
+    document.documentElement.style.fontFamily = isRTL ? "'IBM Plex Sans Arabic', 'Tajawal', sans-serif" : "'Inter', 'Roboto', sans-serif";
+    i18n.changeLanguage(lang);
+    localStorage.setItem('app-lang', lang);
+  }, [lang, isRTL]);
+
+  const value = useMemo<LanguageContextType>(() => ({ lang, isRTL, setLang: setLangState }), [lang, isRTL]);
 
   return (
-    <LanguageContext.Provider value={value}>
-      {children}
-    </LanguageContext.Provider>
+    <DirectionProvider dir={isRTL ? 'rtl' : 'ltr'}>
+      <LanguageContext.Provider value={value}>
+        {children}
+      </LanguageContext.Provider>
+    </DirectionProvider>
   );
 };
 

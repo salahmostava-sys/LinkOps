@@ -107,7 +107,7 @@ export function CommercialRecordsManager({
 
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
-      <DialogContent dir="rtl" className="max-w-3xl">
+      <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Building2 size={18} className="text-primary" />

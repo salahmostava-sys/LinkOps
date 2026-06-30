@@ -14,6 +14,7 @@ import {
 } from '@shared/components/ui/dropdown-menu';
 import { Menu, ChevronLeft, ChevronRight, LogOut, Settings, User, ChevronDown } from 'lucide-react';
 import { ThemeToggle } from '@shared/components/ThemeToggle';
+import { LanguageToggle } from '@shared/components/LanguageToggle';
 import NotificationCenter from '@shared/components/NotificationCenter';
 import GlobalSearch from '@shared/components/GlobalSearch';
 import { cn } from '@shared/lib/utils';
@@ -203,6 +204,7 @@ const AppLayoutInner = ({ children }: Readonly<AppLayoutProps>) => { // NOSONAR:
             <NotificationCenter />
 
             <ThemeToggle />
+            <LanguageToggle />
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
