@@ -4,6 +4,7 @@ import { Plus, Pencil, Trash2, Check, X, Loader2, Link2, Settings } from 'lucide
 import { Button } from '@shared/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@shared/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/components/ui/select';
+import { Label } from '@shared/components/ui/label';
 import { useToast } from '@shared/hooks/use-toast';
 import { usePermissions } from '@shared/hooks/usePermissions';
 import { format } from 'date-fns';
@@ -20,12 +21,13 @@ import {
   AppItem,
   SalarySchemeTierRow,
   TierType
-} from '../types/scheme.ui.types';
+} from '../salaries/types/scheme.ui.types';
 import {
   SchemeSnapshotPinPanel,
   buildMonthsOfYear,
   clampSnapshotYear,
   tierTypeLabels,
+  monthLabel,
 } from '../salaries/components/schemes/SchemeSnapshotPinPanel';
 import { SchemeFormModal } from '../salaries/components/schemes/SchemeFormModal';
 

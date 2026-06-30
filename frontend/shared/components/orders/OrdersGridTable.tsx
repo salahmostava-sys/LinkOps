@@ -32,7 +32,7 @@ type PopoverState = { empId: string; day: number; x: number; y: number };
 
 type Props = {
   loading: boolean;
-  tableRef: React.RefObject<HTMLTableElement | null>;
+  tableRef: React.RefObject<HTMLTableElement>;
   seqColMin: number;
   repColMin: number;
   days: number;

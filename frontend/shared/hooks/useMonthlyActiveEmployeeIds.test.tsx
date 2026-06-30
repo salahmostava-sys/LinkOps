@@ -90,7 +90,7 @@ describe('useMonthlyActiveEmployeeIds', () => {
   });
 
   it('does not run query when session is null', async () => {
-    mockAuth.session = null;
+    mockAuth.session = null as any;
 
     const { result } = renderHook(() => useMonthlyActiveEmployeeIds('2026-03'), { wrapper: createQueryClientWrapper() });
 

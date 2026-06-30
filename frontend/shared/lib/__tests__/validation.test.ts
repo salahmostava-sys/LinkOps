@@ -21,7 +21,7 @@ describe('validation', () => {
       const file = new File(['content'], 'test.exe', { type: 'application/x-msdownload' });
       const result = validateUploadFile(file);
       expect(result.valid).toBe(false);
-      expect(result.error).toBe('غير مسموح بهذا النوع');
+      expect((result as any).error).toBe('غير مسموح بهذا النوع');
     });
 
     it('should reject files exceeding max size', () => {
@@ -29,7 +29,7 @@ describe('validation', () => {
       Object.defineProperty(file, 'size', { value: 6 * 1024 * 1024 });
       const result = validateUploadFile(file);
       expect(result.valid).toBe(false);
-      expect(result.error).toBe('الملف كبير جدًا');
+      expect((result as any).error).toBe('الملف كبير جدًا');
     });
 
     it('should accept custom allowed types', () => {

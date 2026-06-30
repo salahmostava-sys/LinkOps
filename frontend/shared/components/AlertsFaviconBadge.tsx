@@ -19,7 +19,7 @@ export function AlertsFaviconBadge() {
     refetchOnWindowFocus: true,
     queryFn: async () => {
       const alerts = await alertsService.getAll();
-      return alerts.filter((a) => a.status === 'active' || a.status === 'pending').length;
+      return alerts.filter((a: { status: string }) => a.status === 'active' || a.status === 'pending').length;
     },
   });
 

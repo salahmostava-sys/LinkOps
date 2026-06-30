@@ -138,7 +138,7 @@ const AddEmployeeModal = ({ onClose, onSuccess, editEmployee }: Readonly<Props>)
     logError('[AddEmployeeModal] could not parse residency_expiry', error, { level: 'warn' });
   });
 
-  const availableCityOptions = DEFAULT_EMPLOYEE_CITY_OPTIONS.filter(({ value }) => !selectedCities.includes(value));
+  const availableCityOptions = DEFAULT_EMPLOYEE_CITY_OPTIONS.filter((city) => !selectedCities.includes(city));
 
   const validateStep = useCallback((s: number) => validateEmployeeStep(s, trigger), [trigger]);
 
@@ -329,8 +329,8 @@ const AddEmployeeModal = ({ onClose, onSuccess, editEmployee }: Readonly<Props>)
                       </SelectTrigger>
                       <SelectContent>
                         {availableCityOptions.length > 0 ? (
-                          availableCityOptions.map(({ value, label }) => (
-                            <SelectItem key={value} value={value}>{label}</SelectItem>
+                          availableCityOptions.map((city) => (
+                            <SelectItem key={city} value={city}>{cityLabel(city)}</SelectItem>
                           ))
                         ) : (
                           <div className="px-2 py-1.5 text-sm text-muted-foreground">{"\u062A\u0645\u062A \u0625\u0636\u0627\u0641\u0629 \u0643\u0644 \u0627\u0644\u0645\u062F\u0646 \u0627\u0644\u0623\u0633\u0627\u0633\u064A\u0629"}</div>
@@ -456,7 +456,7 @@ const AddEmployeeModal = ({ onClose, onSuccess, editEmployee }: Readonly<Props>)
                   onRemove={() => {
                     setFiles(p => ({ ...p, personal: null }));
                     setUploadState((s) => ({ ...s, personal: { status: 'idle', error: null } }));
-                    if (editEmployee?.personal_photo_url) setRemovedDocs(prev => [...prev, { storagePath: editEmployee?.personal_photo_url, field: 'personal_photo_url' }]);
+                    if (editEmployee?.personal_photo_url) setRemovedDocs(prev => [...prev, { storagePath: editEmployee.personal_photo_url as string, field: 'personal_photo_url' }]);
                   }}
                   status={uploadState.personal.status}
                   errorText={uploadState.personal.error}
@@ -468,7 +468,7 @@ const AddEmployeeModal = ({ onClose, onSuccess, editEmployee }: Readonly<Props>)
                   onRemove={() => {
                     setFiles(p => ({ ...p, id: null }));
                     setUploadState((s) => ({ ...s, id: { status: 'idle', error: null } }));
-                    if (editEmployee?.id_photo_url) setRemovedDocs(prev => [...prev, { storagePath: editEmployee?.id_photo_url, field: 'id_photo_url' }]);
+                    if (editEmployee?.id_photo_url) setRemovedDocs(prev => [...prev, { storagePath: editEmployee.id_photo_url as string, field: 'id_photo_url' }]);
                   }}
                   status={uploadState.id.status}
                   errorText={uploadState.id.error}
@@ -480,7 +480,7 @@ const AddEmployeeModal = ({ onClose, onSuccess, editEmployee }: Readonly<Props>)
                   onRemove={() => {
                     setFiles(p => ({ ...p, iqama: null }));
                     setUploadState((s) => ({ ...s, iqama: { status: 'idle', error: null } }));
-                    if (editEmployee?.iqama_photo_url) setRemovedDocs(prev => [...prev, { storagePath: editEmployee?.iqama_photo_url, field: 'iqama_photo_url' }]);
+                    if (editEmployee?.iqama_photo_url) setRemovedDocs(prev => [...prev, { storagePath: editEmployee.iqama_photo_url as string, field: 'iqama_photo_url' }]);
                   }}
                   status={uploadState.iqama.status}
                   errorText={uploadState.iqama.error}
@@ -492,7 +492,7 @@ const AddEmployeeModal = ({ onClose, onSuccess, editEmployee }: Readonly<Props>)
                   onRemove={() => {
                     setFiles(p => ({ ...p, license: null }));
                     setUploadState((s) => ({ ...s, license: { status: 'idle', error: null } }));
-                    if (editEmployee?.license_photo_url) setRemovedDocs(prev => [...prev, { storagePath: editEmployee?.license_photo_url, field: 'license_photo_url' }]);
+                    if (editEmployee?.license_photo_url) setRemovedDocs(prev => [...prev, { storagePath: editEmployee.license_photo_url as string, field: 'license_photo_url' }]);
                   }}
                   status={uploadState.license.status}
                   errorText={uploadState.license.error}

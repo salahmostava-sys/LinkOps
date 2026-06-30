@@ -14,6 +14,115 @@ export type Database = {
   }
   public: {
     Tables: {
+      hr_performance_reviews: {
+        Row: {
+          attendance_score: number
+          behavior_score: number
+          commitment_score: number
+          created_at: string | null
+          employee_id: string
+          id: string
+          month_year: string
+          notes: string | null
+          performance_score: number
+          reviewer_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          attendance_score?: number
+          behavior_score?: number
+          commitment_score?: number
+          created_at?: string | null
+          employee_id: string
+          id?: string
+          month_year: string
+          notes?: string | null
+          performance_score?: number
+          reviewer_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          attendance_score?: number
+          behavior_score?: number
+          commitment_score?: number
+          created_at?: string | null
+          employee_id?: string
+          id?: string
+          month_year?: string
+          notes?: string | null
+          performance_score?: number
+          reviewer_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_performance_reviews_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leave_requests: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          days_count: number
+          employee_id: string
+          end_date: string
+          id: string
+          reason: string | null
+          review_note: string | null
+          reviewed_at: string | null
+          reviewer_id: string | null
+          start_date: string
+          status: string
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          days_count: number
+          employee_id: string
+          end_date: string
+          id?: string
+          reason?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          start_date: string
+          status?: string
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          days_count?: number
+          employee_id?: string
+          end_date?: string
+          id?: string
+          reason?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          start_date?: string
+          status?: string
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_requests_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       account_assignments: {
         Row: {
           account_id: string

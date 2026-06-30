@@ -77,7 +77,7 @@ describe('useAppColors', () => {
   });
 
   it('does not fetch when session is missing', async () => {
-    mockAuth.session = null;
+    mockAuth.session = null as any;
 
     const { result } = renderHook(() => useAppColors(), { wrapper: createQueryClientWrapper() });
 

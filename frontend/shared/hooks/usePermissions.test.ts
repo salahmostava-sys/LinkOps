@@ -103,7 +103,7 @@ describe('DEFAULT_PERMISSIONS role matrix', () => {
     const roles = Object.keys(DEFAULT_PERMISSIONS) as Array<'admin' | 'hr' | 'finance' | 'operations' | 'viewer'>;
     for (const role of roles) {
       for (const pageKey of pageKeys) {
-        expect(DEFAULT_PERMISSIONS[role]).toHaveProperty(pageKey);
+        expect(DEFAULT_PERMISSIONS[role]).toHaveProperty(pageKey as string);
       }
     }
   });
@@ -114,7 +114,7 @@ describe('usePermissions hook', () => {
     mockAuthState.user = null;
     mockAuthState.role = null;
     vi.clearAllMocks();
-    permissionsServiceMock.getUserPermission.mockResolvedValue(null);
+    permissionsServiceMock.getUserPermission.mockResolvedValue(null as any);
   });
 
   it('deny-all مؤقتاً أثناء تحميل صلاحيات الصفحة', async () => {

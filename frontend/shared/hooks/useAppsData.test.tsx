@@ -53,7 +53,7 @@ describe('useAppsData', () => {
         is_active: true,
         custom_columns: [],
       },
-    ] as Awaited<ReturnType<typeof appService.getAll>>);
+    ] as any as Awaited<ReturnType<typeof appService.getAll>>);
     vi.mocked(appService.countActiveEmployeeApps).mockResolvedValue(3);
 
     const { result } = renderHook(() => useAppsData(), { wrapper: createQueryClientWrapper() });
@@ -75,7 +75,7 @@ describe('useAppsData', () => {
   });
 
   it('does not fetch when session is missing', async () => {
-    mockAuth.session = null;
+    mockAuth.session = null as any;
 
     const { result } = renderHook(() => useAppsData(), { wrapper: createQueryClientWrapper() });
 
