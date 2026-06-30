@@ -129,16 +129,16 @@ export const AppCard = ({
           )}
         </div>
 
-        <div className="mt-3 space-y-1">
-          <div className="flex items-center justify-between text-[11px]">
-            <span style={{ color: app.text_color, opacity: 0.8 }}>المناديب العاملين</span>
-            <span className="font-bold" style={{ color: app.text_color }}>
+        <div className="mt-3 space-y-1.5">
+          <div className="flex items-center justify-between text-xs">
+            <span style={{ color: app.text_color, opacity: 0.85 }}>المناديب العاملين</span>
+            <span className="font-black text-black text-[15px]">
               {app.employeeCount.toLocaleString('en-US')}
             </span>
           </div>
-          <div className="flex items-center justify-between text-[11px]">
-            <span style={{ color: app.text_color, opacity: 0.8 }}>إجمالي الطلبات</span>
-            <span className="font-bold" style={{ color: app.text_color }}>
+          <div className="flex items-center justify-between text-xs">
+            <span style={{ color: app.text_color, opacity: 0.85 }}>إجمالي الطلبات</span>
+            <span className="font-black text-black text-[15px]">
               {app.ordersCount.toLocaleString('en-US')}
             </span>
           </div>

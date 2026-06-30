@@ -1,10 +1,8 @@
 import type React from 'react';
-import { useRef, useCallback, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useRef } from 'react';
 import { Button } from '@shared/components/ui/button';
-import { ClipboardCheck, CalendarDays, FolderOpen, Loader2 } from 'lucide-react';
+import { CalendarDays, FolderOpen, Loader2 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@shared/components/ui/dropdown-menu';
-import DailyAttendance from '@modules/attendance/components/DailyAttendance';
 import MonthlyRecord from '@modules/attendance/components/MonthlyRecord';
 import { useLanguage } from '@app/providers/LanguageContext';
 import { useTranslation } from 'react-i18next';
@@ -20,10 +18,6 @@ const MONTHS_AR = [
   'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر',
 ];
 
-const ATT_TABS = ['daily', 'monthly'] as const;
-type AttTab = (typeof ATT_TABS)[number];
-const isAttTab = (v: string | null): v is AttTab =>
-  v !== null && ATT_TABS.includes(v as AttTab);
 
 const Attendance = () => {
   useAuthQueryGate();
@@ -31,9 +25,7 @@ const Attendance = () => {
   const { t } = useTranslation();
   const { selectedMonth: globalMonth } = useTemporalContext();
   const importRef = useRef<HTMLInputElement>(null);
-  const dailyTableRef = useRef<HTMLDivElement>(null);
   const monthlyTableRef = useRef<HTMLDivElement>(null);
-  const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
   const [importing, setImporting] = useState(false);
 
@@ -42,26 +34,7 @@ const Attendance = () => {
   const selectedYear = yearStr;
   const selectedMonth = String(Number(monthStr) - 1); // 0-indexed for existing components
 
-  const tab = useMemo(() => {
-    const v = searchParams.get('tab');
-    if (v === 'archive') return 'daily';
-    return isAttTab(v) ? v : 'daily';
-  }, [searchParams]);
 
-  const onTabChange = useCallback(
-    (v: string) => {
-      setSearchParams(
-        (prev) => {
-          const next = new URLSearchParams(prev);
-          if (v === 'daily') next.delete('tab');
-          else next.set('tab', v);
-          return next;
-        },
-        { replace: true },
-      );
-    },
-    [setSearchParams],
-  );
 
   const handleExportAttendance = async () => {
     try {
@@ -185,13 +158,12 @@ const Attendance = () => {
   };
 
   const handlePrintTable = () => {
-    const tableRef = tab === 'daily' ? dailyTableRef : monthlyTableRef;
-    const table = tableRef.current?.querySelector('table');
+    const table = monthlyTableRef.current?.querySelector('table');
     if (!table) {
       toast({ title: 'لا يوجد جدول للطباعة' });
       return;
     }
-    printHtmlTable(table, { title: tab === 'daily' ? 'سجل الحضور اليومي' : 'السجل الشهري' });
+    printHtmlTable(table, { title: 'سجل الحضور الشهري' });
   };
 
   return (
@@ -212,28 +184,7 @@ const Attendance = () => {
             <span>فترة: {MONTHS_AR[Number(selectedMonth)]} {selectedYear}</span>
           </div>
 
-          <div className="inline-flex items-center rounded-lg border border-border bg-muted/40 p-0.5" role="tablist">
-            <Button
-              type="button"
-              variant={tab === 'daily' ? 'default' : 'ghost'}
-              size="sm"
-              className="h-8 gap-1 px-2.5 text-xs"
-              onClick={() => onTabChange('daily')}
-            >
-              <ClipboardCheck size={14} />
-              التسجيل اليومي
-            </Button>
-            <Button
-              type="button"
-              variant={tab === 'monthly' ? 'default' : 'ghost'}
-              size="sm"
-              className="h-8 gap-1 px-2.5 text-xs"
-              onClick={() => onTabChange('monthly')}
-            >
-              <CalendarDays size={14} />
-              السجل الشهري
-            </Button>
-          </div>
+
 
           <input ref={importRef} type="file" accept=".xlsx,.xls" className="hidden" onChange={handleImportAttendance} disabled={importing} />
           <DropdownMenu>
@@ -261,15 +212,9 @@ const Attendance = () => {
       </div>
 
       <div className="space-y-2">
-        {tab === 'daily' ? (
-          <div ref={dailyTableRef}>
-            <DailyAttendance selectedMonth={Number(selectedMonth)} selectedYear={Number(selectedYear)} />
-          </div>
-        ) : (
-          <div ref={monthlyTableRef}>
-            <MonthlyRecord selectedMonth={Number(selectedMonth)} selectedYear={Number(selectedYear)} />
-          </div>
-        )}
+        <div ref={monthlyTableRef}>
+          <MonthlyRecord selectedMonth={Number(selectedMonth)} selectedYear={Number(selectedYear)} />
+        </div>
       </div>
     </div>
   );

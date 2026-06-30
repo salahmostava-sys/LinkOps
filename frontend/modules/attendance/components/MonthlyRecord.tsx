@@ -1,248 +1,294 @@
 import type React from 'react';
-import { ChevronDown } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@shared/components/ui/popover";
+import { useState, useMemo } from 'react';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Loader2, X, Check, FileText } from "lucide-react";
 import { useLanguage } from "@app/providers/LanguageContext";
+import { authQueryUserId, useAuthQueryGate } from "@shared/hooks/useAuthQueryGate";
 import attendanceService from "@services/attendanceService";
-import { useQuery } from "@tanstack/react-query";
-import { useAuthQueryGate, authQueryUserId } from "@shared/hooks/useAuthQueryGate";
+import { toast } from "@shared/components/ui/sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@shared/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@shared/components/ui/select";
+import { Input } from "@shared/components/ui/input";
+import { Label } from "@shared/components/ui/label";
+import { Textarea } from "@shared/components/ui/textarea";
+import { Button } from "@shared/components/ui/button";
+import { cn } from "@shared/lib/utils";
 
-const MONTHS_AR = [
-  "يناير",
-  "فبراير",
-  "مارس",
-  "أبريل",
-  "مايو",
-  "يونيو",
-  "يوليو",
-  "أغسطس",
-  "سبتمبر",
-  "أكتوبر",
-  "نوفمبر",
-  "ديسمبر",
-];
-const _MONTHS_EN = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
-const SKELETON_ROW_IDS = ["r1", "r2", "r3", "r4", "r5"];
-const SKELETON_CELL_IDS = ["c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8"];
+type AttendanceStatus = 'present' | 'absent' | 'leave' | 'sick' | 'late' | 'none';
 
+interface CellData {
+  employee_id: string;
+  status: AttendanceStatus;
+  note: string | null;
+  date: string;
+  check_in: string | null;
+  check_out: string | null;
+}
 
-interface Props {
+interface MonthlyRecordProps {
   selectedMonth: number;
   selectedYear: number;
 }
 
-const MonthlyRecord = ({ selectedMonth, selectedYear }: Readonly<Props>) => {
+const STATUS_MAP: Record<AttendanceStatus, { color: string; label: string; dot: string; icon?: React.ReactNode }> = {
+  present: { color: 'text-green-600 bg-green-100/50', label: 'حضور', dot: 'bg-green-500', icon: <Check size={12}/> },
+  absent: { color: 'text-destructive bg-destructive/10', label: 'غياب', dot: 'bg-destructive', icon: <X size={12}/> },
+  leave: { color: 'text-yellow-600 bg-yellow-100/50', label: 'إجازة', dot: 'bg-yellow-500' },
+  sick: { color: 'text-purple-600 bg-purple-100/50', label: 'مريض', dot: 'bg-purple-500' },
+  late: { color: 'text-orange-600 bg-orange-100/50', label: 'متأخر', dot: 'bg-orange-500' },
+  none: { color: 'text-muted-foreground bg-transparent', label: 'غير محدد', dot: 'bg-transparent' }
+};
+
+const CellEditorDialog = ({ 
+  open, 
+  onOpenChange, 
+  employeeName, 
+  dateStr, 
+  initialData, 
+  onSave,
+  isSaving
+}: { 
+  open: boolean, 
+  onOpenChange: (o: boolean) => void,
+  employeeName: string,
+  dateStr: string,
+  initialData: CellData | null,
+  onSave: (data: Partial<CellData>) => void,
+  isSaving: boolean
+}) => {
+  const [status, setStatus] = useState<AttendanceStatus>(initialData?.status && initialData.status !== 'none' ? initialData.status : 'present');
+  const [note, setNote] = useState(initialData?.note || '');
+  const [checkIn, setCheckIn] = useState(initialData?.check_in || '');
+  const [checkOut, setCheckOut] = useState(initialData?.check_out || '');
+  
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[425px]" dir="rtl">
+        <DialogHeader>
+          <DialogTitle className="text-start leading-relaxed text-foreground">
+            تعديل الحضور - {employeeName}
+            <div className="text-sm font-normal text-muted-foreground mt-1" dir="ltr">{dateStr}</div>
+          </DialogTitle>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="space-y-2">
+            <Label>الحالة</Label>
+            <Select value={status} onValueChange={(v) => setStatus(v as AttendanceStatus)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="present">✅ حضور</SelectItem>
+                <SelectItem value="absent">❌ غياب</SelectItem>
+                <SelectItem value="leave">🏝️ إجازة</SelectItem>
+                <SelectItem value="sick">🤒 مريض</SelectItem>
+                <SelectItem value="late">⏳ متأخر</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>وقت الحضور</Label>
+              <Input type="time" value={checkIn} onChange={e => setCheckIn(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>وقت الانصراف</Label>
+              <Input type="time" value={checkOut} onChange={e => setCheckOut(e.target.value)} />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label>ملاحظات</Label>
+            <Textarea value={note} onChange={e => setNote(e.target.value)} placeholder="أضف ملاحظة (اختياري)..." />
+          </div>
+        </div>
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSaving}>إلغاء</Button>
+          <Button onClick={() => onSave({ status, note, check_in: checkIn, check_out: checkOut })} disabled={isSaving}>
+            {isSaving ? <Loader2 className="w-4 h-4 animate-spin ms-2" /> : null}
+            حفظ السجل
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+const MonthlyRecord = ({ selectedMonth, selectedYear }: Readonly<MonthlyRecordProps>) => {
   const { isRTL } = useLanguage();
-  const MONTHS = MONTHS_AR;
   const { enabled, userId } = useAuthQueryGate();
   const uid = authQueryUserId(userId);
+  const queryClient = useQueryClient();
 
   const monthStr = String(selectedMonth + 1).padStart(2, "0");
   const startDate = `${selectedYear}-${monthStr}-01`;
   const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
-  const endDate = `${selectedYear}-${monthStr}-${String(daysInMonth).padStart(2, "0")}`;
+  const daysArray = useMemo(() => Array.from({ length: daysInMonth }, (_, i) => i + 1), [daysInMonth]);
 
-  const { data, isLoading: loading } = useQuery({
-    queryKey: ['attendance', 'monthly', uid, selectedYear, selectedMonth] as const,
+  const queryKey = ['attendance', 'monthly', uid, selectedYear, selectedMonth] as const;
+
+  const { data, isLoading } = useQuery({
+    queryKey,
     enabled,
     staleTime: 60_000,
-    retry: 1,
     queryFn: async () => {
       const result = await attendanceService.getMonthlyEmployeesAndAttendance(startDate, endDate);
       return {
-        employees: (result.employees || []),
-        attendanceRows: (result.attendanceRows || []),
+        employees: result.employees || [],
+        attendanceRows: result.attendanceRows || [],
       };
     },
   });
 
-  const employees = data?.employees ?? [];
-  const attendanceRows = data?.attendanceRows ?? [];
+  const [editingCell, setEditingCell] = useState<{
+    empId: string;
+    empName: string;
+    day: number;
+    record: CellData | null;
+  } | null>(null);
 
-  const tableData = employees.map((emp) => {
-    const rows = attendanceRows.filter((r) => r.employee_id === emp.id);
-    const presentDays = rows.filter((r) => r.status === "present").length;
-    const absentDays = rows.filter((r) => r.status === "absent").length;
-    const leaveDays = rows.filter((r) => r.status === "leave").length;
-    const sickDays = rows.filter((r) => r.status === "sick").length;
-    const lateDays = rows.filter((r) => r.status === "late").length;
-    const totalHours = (presentDays + lateDays) * 8;
-    const notes = rows
-      .filter((r) => r.note?.trim())
-      .map((r) => ({ date: r.date ?? '', note: r.note ?? '' }))
-      .sort((a, b) => a.date.localeCompare(b.date));
-    return { ...emp, presentDays, absentDays, leaveDays, sickDays, lateDays, totalHours, notes };
+  const mutation = useMutation({
+    mutationFn: async (payload: {
+      employee_id: string;
+      date: string;
+      status: 'present' | 'absent' | 'leave' | 'sick' | 'late';
+      check_in: string | null;
+      check_out: string | null;
+      note: string | null;
+    }) => {
+      await attendanceService.upsertDailyAttendance(payload);
+    },
+    onSuccess: () => {
+      toast("تم الحفظ بنجاح", { style: { background: "var(--ds-surface-container)", color: "var(--ds-on-surface)" } });
+      queryClient.invalidateQueries({ queryKey });
+      setEditingCell(null);
+    },
+    onError: () => {
+      toast("حدث خطأ أثناء الحفظ", { style: { background: "var(--destructive)", color: "white" } });
+    }
   });
 
-  const totals = tableData.reduce(
-    (acc, d) => ({
-      presentDays: acc.presentDays + d.presentDays,
-      absentDays: acc.absentDays + d.absentDays,
-      leaveDays: acc.leaveDays + d.leaveDays,
-      sickDays: acc.sickDays + d.sickDays,
-      lateDays: acc.lateDays + d.lateDays,
-      totalHours: acc.totalHours + d.totalHours,
-    }),
-    { presentDays: 0, absentDays: 0, leaveDays: 0, sickDays: 0, lateDays: 0, totalHours: 0 },
-  );
+  const gridData = useMemo(() => {
+    const employees = data?.employees ?? [];
+    const attendanceRows = data?.attendanceRows ?? [];
+    
+    return employees.map((emp) => {
+      const empRows = attendanceRows.filter((r) => r.employee_id === emp.id);
+      const recordByDay: Record<number, CellData> = {};
+      let p=0, a=0, l=0, s=0, lt=0;
+      empRows.forEach(r => {
+        const day = parseInt(r.date.split('-')[2], 10);
+        recordByDay[day] = r;
+        if (r.status === 'present') p++;
+        if (r.status === 'absent') a++;
+        if (r.status === 'leave') l++;
+        if (r.status === 'sick') s++;
+        if (r.status === 'late') lt++;
+      });
+      return { ...emp, recordByDay, summary: { p, a, l, s, lt, th: (p + lt) * 8 } };
+    });
+  }, [data]);
 
-  const monthPeriod = `${MONTHS[selectedMonth]} ${selectedYear}`;
-  const t = {
-    employee: "المندوب",
-    nationalId: "رقم الهوية",
-    present: "حضور",
-    absent: "غياب",
-    leave: "إجازة",
-    sick: "مريض",
-    late: "متأخر",
-    hours: "ساعات العمل",
-    total: "الإجمالي",
-    noData: "لا توجد بيانات لهذا الشهر",
-    hoursUnit: "س",
-    monthPeriod,
-  };
-  const stickySideClass = isRTL ? "right-0" : "left-0";
-  const stickyAlignClass = isRTL ? "text-start" : "text-end";
-  let tableBodyRows: React.ReactNode;
-  if (loading) {
-    tableBodyRows = SKELETON_ROW_IDS.map((rowId) => (
-      <tr key={`row-skeleton-${rowId}`} className="ta-tr">
-        {SKELETON_CELL_IDS.map((cellId) => (
-          <td key={`cell-skeleton-${rowId}-${cellId}`} className="ta-td">
-            <div className="h-4 bg-muted rounded animate-pulse" />
-          </td>
-        ))}
-      </tr>
-    ));
-  } else if (tableData.length === 0) {
-    tableBodyRows = (
-      <tr>
-        <td colSpan={9} className="ta-td p-10 text-muted-foreground">
-          {t.noData}
-        </td>
-      </tr>
+  if (isLoading) {
+    return <div className="flex items-center justify-center p-12 text-muted-foreground"><Loader2 className="animate-spin w-8 h-8" /></div>;
+  }
+
+  if (gridData.length === 0) {
+    return (
+      <div className="flex items-center justify-center p-12 text-muted-foreground bg-card rounded-xl border border-border">
+        لا توجد بيانات لهذا الشهر
+      </div>
     );
-  } else {
-    tableBodyRows = tableData.map((row) => (
-      <tr key={row.id} className="ta-tr">
-        <td className={`ta-td sticky ${stickySideClass} bg-card`}>
-          <div className="flex items-center gap-2">
-            <span className="font-medium text-foreground whitespace-nowrap">{row.name}</span>
-          </div>
-        </td>
-        <td className="ta-td text-muted-foreground font-mono" dir="ltr">
-          {row.national_id || "—"}
-        </td>
-        <td className="ta-td-center font-semibold text-green-600 dark:text-green-400">{row.presentDays}</td>
-        <td className="ta-td-center font-semibold text-destructive">{row.absentDays}</td>
-        <td className="ta-td-center font-semibold text-yellow-600 dark:text-yellow-400">{row.leaveDays}</td>
-        <td className="ta-td-center font-semibold text-purple-600 dark:text-purple-400">{row.sickDays}</td>
-        <td className="ta-td-center text-orange-600 dark:text-orange-400">{row.lateDays}</td>
-        <td className="ta-td-center text-muted-foreground">
-          {row.totalHours} {t.hoursUnit}
-        </td>
-        <td className="ta-td-center">
-          {row.notes.length > 0 ? (
-            <Popover>
-              <PopoverTrigger asChild>
-                <button className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
-                  📝 {row.notes.length} ملاحظة
-                  <ChevronDown size={10} />
-                </button>
-              </PopoverTrigger>
-              <PopoverContent className="w-72 max-h-60 overflow-y-auto p-3" align="center">
-                <p className="text-xs font-semibold text-foreground mb-2">ملاحظات {row.name}</p>
-                <div className="space-y-2">
-                  {row.notes.map((n) => (
-                    <div key={`${n.date}-${n.note}`} className="flex gap-2 text-xs border-b border-border/30 pb-1.5 last:border-0">
-                      <span className="text-muted-foreground font-mono whitespace-nowrap">{n.date.slice(5)}</span>
-                      <span className="text-foreground">{n.note}</span>
-                    </div>
-                  ))}
-                </div>
-              </PopoverContent>
-            </Popover>
-          ) : (
-            <span className="text-muted-foreground/30">—</span>
-          )}
-        </td>
-      </tr>
-    ));
   }
 
   return (
-    <div className="space-y-5">
-      <div className="ta-table-wrap shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm" dir={isRTL ? "rtl" : "ltr"}>
-            <thead className="ta-thead">
+    <div className="space-y-4">
+      <div className="rounded-xl border border-border shadow-sm overflow-hidden bg-card">
+        <div className="overflow-x-auto custom-sidebar-scroll pb-2">
+          <table className="w-full text-[13px] border-collapse" dir={isRTL ? "rtl" : "ltr"}>
+            <thead>
               <tr>
-                <th
-                  className={`ta-th sticky ${stickySideClass} ${stickyAlignClass} bg-muted/40`}
-                >
-                  {t.employee}
+                <th className="sticky right-0 z-20 bg-muted/90 p-3 min-w-[160px] text-start border-b border-l border-border backdrop-blur shadow-[1px_0_0_hsl(var(--border))] text-foreground">
+                  الموظف
                 </th>
-                <th className="ta-th">{t.nationalId}</th>
-                <th className="ta-th-center">
-                  <span className="badge-success">{t.present}</span>
-                </th>
-                <th className="ta-th-center">
-                  <span className="badge-urgent">{t.absent}</span>
-                </th>
-                <th className="ta-th-center">
-                  <span className="badge-warning">{t.leave}</span>
-                </th>
-                <th className="ta-th-center">
-                  <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
-                    {t.sick}
-                  </span>
-                </th>
-                <th className="ta-th-center">
-                  <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
-                    {t.late}
-                  </span>
-                </th>
-                <th className="ta-th-center">ساعات العمل</th>
-                <th className="ta-th-center">الملاحظات</th>
+                {daysArray.map(d => (
+                  <th key={d} className="p-2 min-w-[36px] text-center border-b border-l border-border bg-muted/40 font-semibold text-muted-foreground">
+                    {d}
+                  </th>
+                ))}
+                <th className="p-3 min-w-[60px] text-center border-b border-border bg-green-500/10 text-green-700 dark:text-green-400 font-bold">ح</th>
+                <th className="p-3 min-w-[60px] text-center border-b border-border bg-destructive/10 text-destructive font-bold">غ</th>
               </tr>
             </thead>
             <tbody>
-              {tableBodyRows}
-            </tbody>
-            {!loading && tableData.length > 0 && (
-              <tfoot>
-                <tr className="bg-muted/40 font-semibold border-t-2 border-border">
-                  <td className={`ta-td sticky ${stickySideClass} bg-muted/40 text-foreground`}>
-                    {t.total}
+              {gridData.map(row => (
+                <tr key={row.id} className="hover:bg-muted/30 transition-colors">
+                  <td className="sticky right-0 z-10 bg-card p-3 text-start border-b border-l border-border font-medium shadow-[1px_0_0_hsl(var(--border))] text-foreground">
+                    <div className="truncate w-full max-w-[140px]" title={row.name}>{row.name}</div>
                   </td>
-                  <td className="ta-td" />
-                  <td className="ta-td-center text-green-600 dark:text-green-400">{totals.presentDays}</td>
-                  <td className="ta-td-center text-destructive">{totals.absentDays}</td>
-                  <td className="ta-td-center text-yellow-600 dark:text-yellow-400">{totals.leaveDays}</td>
-                  <td className="ta-td-center text-purple-600 dark:text-purple-400">{totals.sickDays}</td>
-                  <td className="ta-td-center text-orange-600 dark:text-orange-400">{totals.lateDays}</td>
-                  <td className="ta-td-center text-muted-foreground">
-                    {totals.totalHours} {t.hoursUnit}
-                  </td>
-                  <td className="ta-td" />
+                  {daysArray.map(d => {
+                    const record = row.recordByDay[d];
+                    const status = record?.status || 'none';
+                    const config = STATUS_MAP[status];
+                    const hasNote = !!record?.note;
+
+                    return (
+                      <td key={d} className="p-0 border-b border-l border-border relative align-middle">
+                        <button
+                          onClick={() => setEditingCell({ empId: row.id, empName: row.name, day: d, record: record || null })}
+                          className={cn(
+                            "w-full h-[40px] flex items-center justify-center transition-colors relative hover:bg-muted/80 focus:outline-none",
+                            config.color
+                          )}
+                          title={`${row.name} - يوم ${d} - ${config.label}`}
+                        >
+                          {status !== 'none' ? (
+                            <div className="flex flex-col items-center justify-center gap-0.5">
+                              {config.icon ? config.icon : <div className={cn("w-1.5 h-1.5 rounded-full", config.dot)} />}
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground/30">-</span>
+                          )}
+                          
+                          {hasNote && (
+                            <div className="absolute top-0.5 right-0.5 text-primary">
+                              <FileText size={10} className="opacity-80" />
+                            </div>
+                          )}
+                        </button>
+                      </td>
+                    );
+                  })}
+                  <td className="p-3 text-center border-b border-border font-bold text-green-600 bg-green-500/5">{row.summary.p}</td>
+                  <td className="p-3 text-center border-b border-border font-bold text-destructive bg-destructive/5">{row.summary.a}</td>
                 </tr>
-              </tfoot>
-            )}
+              ))}
+            </tbody>
           </table>
         </div>
       </div>
+
+      {editingCell && (
+        <CellEditorDialog 
+          key={`${editingCell.empId}-${editingCell.day}`}
+          open={!!editingCell} 
+          onOpenChange={(open) => !open && setEditingCell(null)}
+          employeeName={editingCell.empName}
+          dateStr={`${selectedYear}-${monthStr}-${String(editingCell.day).padStart(2, "0")}`}
+          initialData={editingCell.record}
+          isSaving={mutation.isPending}
+          onSave={(data) => {
+             if (data.status === 'none') return; 
+             mutation.mutate({
+               employee_id: editingCell.empId,
+               date: `${selectedYear}-${monthStr}-${String(editingCell.day).padStart(2, "0")}`,
+               status: data.status as 'present' | 'absent' | 'leave' | 'sick' | 'late',
+               check_in: data.check_in || null,
+               check_out: data.check_out || null,
+               note: data.note || null
+             });
+          }}
+        />
+      )}
     </div>
   );
 };

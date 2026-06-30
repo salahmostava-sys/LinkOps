@@ -164,67 +164,70 @@ export function EmployeeKPIs({ allEmployees }: Readonly<Props>) {
         </div>
       </Section>
 
-      {/* ── القسم الخامس: توزيع المدن ── */}
-      {Object.keys(stats.cityCount).length > 0 && (
-        <Section title="توزيع الموظفين حسب المدينة" icon={<MapPin size={16} />}>
-          <div className="space-y-2">
-            {Object.entries(stats.cityCount)
-              .sort(([, a], [, b]) => b - a)
-              .map(([city, count]) => (
-                <BarRow
-                  key={city}
-                  label={CITY_LABELS[city] ?? city}
-                  value={count}
-                  max={cityMax}
-                  total={stats.activeCount}
-                  color="bg-primary"
-                />
-              ))}
-          </div>
-        </Section>
-      )}
+      {/* ── التوزيعات (مدن، جنسيات، مسميات) ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* ── القسم الخامس: توزيع المدن ── */}
+        {Object.keys(stats.cityCount).length > 0 && (
+          <Section title="توزيع الموظفين حسب المدينة" icon={<MapPin size={16} />}>
+            <div className="space-y-2">
+              {Object.entries(stats.cityCount)
+                .sort(([, a], [, b]) => b - a)
+                .map(([city, count]) => (
+                  <BarRow
+                    key={city}
+                    label={CITY_LABELS[city] ?? city}
+                    value={count}
+                    max={cityMax}
+                    total={stats.activeCount}
+                    color="bg-primary"
+                  />
+                ))}
+            </div>
+          </Section>
+        )}
 
-      {/* ── القسم السادس: توزيع الجنسيات ── */}
-      {Object.keys(stats.natCount).length > 0 && (
-        <Section title="توزيع الموظفين حسب الجنسية" icon={<Globe2 size={16} />}>
-          <div className="space-y-2">
-            {Object.entries(stats.natCount)
-              .sort(([, a], [, b]) => b - a)
-              .slice(0, 10)
-              .map(([nat, count]) => (
-                <BarRow
-                  key={nat}
-                  label={nat}
-                  value={count}
-                  max={natMax}
-                  total={stats.activeCount}
-                  color="bg-sky-500"
-                />
-              ))}
-          </div>
-        </Section>
-      )}
+        {/* ── القسم السادس: توزيع الجنسيات ── */}
+        {Object.keys(stats.natCount).length > 0 && (
+          <Section title="توزيع الموظفين حسب الجنسية" icon={<Globe2 size={16} />}>
+            <div className="space-y-2">
+              {Object.entries(stats.natCount)
+                .sort(([, a], [, b]) => b - a)
+                .slice(0, 10)
+                .map(([nat, count]) => (
+                  <BarRow
+                    key={nat}
+                    label={nat}
+                    value={count}
+                    max={natMax}
+                    total={stats.activeCount}
+                    color="bg-sky-500"
+                  />
+                ))}
+            </div>
+          </Section>
+        )}
 
-      {/* ── القسم السابع: توزيع المسميات الوظيفية ── */}
-      {Object.keys(stats.jobCount).length > 0 && (
-        <Section title="أكثر المسميات الوظيفية" icon={<Users size={16} />}>
-          <div className="space-y-2">
-            {Object.entries(stats.jobCount)
-              .sort(([, a], [, b]) => b - a)
-              .slice(0, 8)
-              .map(([job, count]) => (
-                <BarRow
-                  key={job}
-                  label={job}
-                  value={count}
-                  max={Math.max(1, ...Object.values(stats.jobCount))}
-                  total={stats.activeCount}
-                  color="bg-violet-500"
-                />
-              ))}
-          </div>
-        </Section>
-      )}
+        {/* ── القسم السابع: توزيع المسميات الوظيفية ── */}
+        {Object.keys(stats.jobCount).length > 0 && (
+          <Section title="أكثر المسميات الوظيفية" icon={<Users size={16} />}>
+            <div className="space-y-2">
+              {Object.entries(stats.jobCount)
+                .sort(([, a], [, b]) => b - a)
+                .slice(0, 8)
+                .map(([job, count]) => (
+                  <BarRow
+                    key={job}
+                    label={job}
+                    value={count}
+                    max={Math.max(1, ...Object.values(stats.jobCount))}
+                    total={stats.activeCount}
+                    color="bg-violet-500"
+                  />
+                ))}
+            </div>
+          </Section>
+        )}
+      </div>
     </div>
   );
 }
