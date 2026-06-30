@@ -1,5 +1,5 @@
-﻿import { useState, useRef } from 'react';
-import { Plus, Edit2, FileText, Printer, AlertTriangle, Check, X, RotateCcw, UserPlus, Search, Trash2 } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Plus, Edit2, FileText, Printer, AlertTriangle, Check, X, RotateCcw, UserPlus, Search, Trash2, Upload, Paperclip, ExternalLink } from 'lucide-react';
 import { Input } from '@shared/components/ui/input';
 import { Button } from '@shared/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@shared/components/ui/dialog';
@@ -8,6 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@shared/components/ui/p
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@shared/components/ui/command';
 import { advanceService } from '@services/advanceService';
 import type { AdvancePayload } from '@services/advanceService';
+import { storageService } from '@services/storageService';
 import { useToast } from '@shared/hooks/use-toast';
 import { format } from 'date-fns';
 import { logError } from '@shared/lib/logger';
@@ -32,6 +33,7 @@ export const InlineRowEntry = ({ employeeId, onSaved, onCancel }: Readonly<Inlin
     amount: '', disbursement_date: format(new Date(), 'yyyy-MM-dd'),
     first_deduction_month: format(new Date(), 'yyyy-MM'), note: '',
   });
+  const [file, setFile] = useState<File | null>(null);
 
   /** قسط واحد بكامل المبلغ (بدون حقل قسط شهري منفصل) */
   const projectedInstallments = 1;
@@ -44,11 +46,19 @@ export const InlineRowEntry = ({ employeeId, onSaved, onCancel }: Readonly<Inlin
       return toast({ title: 'أدخل مبلغاً صحيحاً', variant: 'destructive' });
     setSaving(true);
     try {
+      let attachment_url = null;
+      if (file) {
+        const ext = file.name.split('.').pop();
+        const fileName = `${employeeId}-${Date.now()}.${ext}`;
+        attachment_url = await storageService.uploadFile('advance-attachments', fileName, file);
+      }
+
       const payload: AdvancePayload = {
         employee_id: employeeId, amount: amt,
         monthly_amount: amt, total_installments: projectedInstallments,
         disbursement_date: form.disbursement_date, first_deduction_month: form.first_deduction_month,
         note: form.note || null, status: 'active',
+        attachment_url,
       };
       const adv = await advanceService.create(payload);
       if (!adv) return toast({ title: 'حدث خطأ', description: 'لم يُرجع الخادم بيانات السلفة', variant: 'destructive' });
@@ -89,6 +99,10 @@ export const InlineRowEntry = ({ employeeId, onSaved, onCancel }: Readonly<Inlin
         <div className="sm:col-span-3">
           <label htmlFor="quick-advance-note" className="text-[11px] text-muted-foreground mb-1 block">ملاحظات</label>
           <Input id="quick-advance-note" className="h-7 text-xs" value={form.note} onChange={e => setForm(p => ({ ...p, note: e.target.value }))} placeholder="سبب السلفة..." />
+        </div>
+        <div className="sm:col-span-3">
+          <label htmlFor="quick-advance-file" className="text-[11px] text-muted-foreground mb-1 block">المرفق (اختياري)</label>
+          <Input id="quick-advance-file" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" className="h-7 text-xs file:h-full file:bg-transparent file:text-foreground file:text-xs file:font-medium file:border-0" onChange={e => setFile(e.target.files?.[0] || null)} />
         </div>
       </div>
       <div className="flex gap-2 mt-3 justify-end">
@@ -206,6 +220,8 @@ export const EditAdvanceModal = ({ advance, onClose, onSaved }: Readonly<EditAdv
     note: advance.note ?? '',
   });
 
+  const [file, setFile] = useState<File | null>(null);
+
   const remaining = Number.parseFloat(form.amount) || 0;
   const monthly = advance.monthly_amount > 0 ? advance.monthly_amount : 1;
   const projectedInstallments = monthly > 0 ? Math.ceil(remaining / monthly) : 0;
@@ -213,6 +229,13 @@ export const EditAdvanceModal = ({ advance, onClose, onSaved }: Readonly<EditAdv
   const handleSave = async () => {
     setSaving(true);
     try {
+      let attachment_url = advance.attachment_url;
+      if (file) {
+        const ext = file.name.split('.').pop();
+        const fileName = `${advance.employee_id}-${Date.now()}.${ext}`;
+        attachment_url = await storageService.uploadFile('advance-attachments', fileName, file);
+      }
+
       const payload: Partial<AdvancePayload> = {
         amount: Number.parseFloat(form.amount),
         disbursement_date: form.disbursement_date,
@@ -221,6 +244,7 @@ export const EditAdvanceModal = ({ advance, onClose, onSaved }: Readonly<EditAdv
         first_deduction_month: form.first_deduction_month,
         status: form.status,
         note: form.note || null,
+        attachment_url,
       };
       await advanceService.update(advance.id, payload);
       await advanceService.deletePendingInstallments(advance.id);
@@ -278,6 +302,24 @@ export const EditAdvanceModal = ({ advance, onClose, onSaved }: Readonly<EditAdv
             <label htmlFor="edit-advance-note" className="text-sm font-medium mb-1 block">ملاحظات</label>
             <textarea id="edit-advance-note" value={form.note} onChange={e => setForm(p => ({ ...p, note: e.target.value }))} rows={2}
               className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-ring" />
+          </div>
+          <div className="col-span-2">
+            <label htmlFor="edit-advance-file" className="text-sm font-medium mb-1 block">المرفق الحالي / تعديل المرفق</label>
+            <div className="flex items-center gap-2">
+              <Input id="edit-advance-file" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" className="h-9 text-xs flex-1 file:h-full file:bg-transparent file:text-foreground file:text-xs file:font-medium file:border-0" onChange={e => setFile(e.target.files?.[0] || null)} />
+              {advance.attachment_url && !file && (
+                <Button type="button" variant="outline" size="sm" className="h-9 gap-1.5" onClick={async () => {
+                  try {
+                    const url = await storageService.createSignedUrl('advance-attachments', advance.attachment_url!);
+                    window.open(url, '_blank');
+                  } catch (e) {
+                    toast({ title: 'فشل فتح المرفق', variant: 'destructive' });
+                  }
+                }}>
+                  <ExternalLink size={14} /> عرض
+                </Button>
+              )}
+            </div>
           </div>
         </div>
         <DialogFooter className="mt-4 gap-2">
@@ -385,7 +427,7 @@ export const TransactionsModal = ({ employeeId, employeeName, nationalId, totalD
   const { toast } = useToast();
   const empAdvances = advances.filter(a => a.employee_id === employeeId);
   const allInstallments = empAdvances.flatMap(adv =>
-    (adv.advance_installments || []).map(i => ({ ...i, advanceDate: adv.disbursement_date, advanceTotal: adv.amount }))
+    (adv.advance_installments || []).map(i => ({ ...i, advanceDate: adv.disbursement_date, advanceTotal: adv.amount, attachmentUrl: adv.attachment_url }))
   ).sort((a, b) => a.month_year.localeCompare(b.month_year));
 
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
@@ -532,6 +574,7 @@ export const TransactionsModal = ({ employeeId, employeeName, nationalId, totalD
                     <th className="ta-th">أخذ كام</th>
                     <th className="ta-th">سدّد كام</th>
                     <th className="ta-th">ملاحظات</th>
+                    <th className="ta-th w-16">المرفق</th>
                     <th className="ta-th w-16">حذف</th>
                   </tr>
                 </thead>
@@ -576,6 +619,23 @@ export const TransactionsModal = ({ employeeId, employeeName, nationalId, totalD
                         )}
                       </td>
                       <td className="ta-td">
+                        {inst.attachmentUrl ? (
+                          <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground" onClick={async (e) => {
+                            e.stopPropagation();
+                            try {
+                              const url = await storageService.createSignedUrl('advance-attachments', inst.attachmentUrl!);
+                              window.open(url, '_blank');
+                            } catch (error) {
+                              toast({ title: 'فشل فتح المرفق', variant: 'destructive' });
+                            }
+                          }} title="عرض المرفق">
+                            <Paperclip size={14} />
+                          </Button>
+                        ) : (
+                          <span className="text-muted-foreground/30 text-xs">—</span>
+                        )}
+                      </td>
+                      <td className="ta-td">
                         {canEdit && (
                           <button
                             onClick={(e) => { e.stopPropagation(); setDeleteInstallmentId(inst.id); }}
@@ -594,7 +654,7 @@ export const TransactionsModal = ({ employeeId, employeeName, nationalId, totalD
                     <td colSpan={3} className="ta-td font-bold text-muted-foreground">الإجمالي</td>
                     <td className="ta-td font-bold text-info">{totalDebt.toLocaleString('en-US')} ر.س</td>
                     <td className="ta-td font-bold text-success">{totalPaid.toLocaleString('en-US')} ر.س</td>
-                    <td colSpan={2} />
+                    <td colSpan={3} />
                   </tr>
                 </tfoot>
               </table>

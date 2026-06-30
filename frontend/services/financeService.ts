@@ -1,5 +1,6 @@
 import { supabase } from '@services/supabase/client';
 import { handleSupabaseError } from '@services/serviceError';
+import { salaryService } from '@services/salaryService';
 
 export type TransactionType = 'revenue' | 'expense';
 
@@ -74,17 +75,12 @@ export const financeService = {
     if (error) handleSupabaseError(error, 'financeService.delete');
   },
 
-  /** Sync approved salaries as auto-expenses for a month */
+  /** Sync salaries as auto-expenses for a month based on actual engine preview */
   syncSalariesAsExpenses: async (monthYear: string) => {
-    // Get approved salary total
-    const { data: salaries, error: salErr } = await supabase
-      .from('salary_records')
-      .select('net_salary')
-      .eq('month_year', monthYear)
-      .eq('is_approved', true);
-    if (salErr) handleSupabaseError(salErr, 'financeService.syncSalariesAsExpenses.fetch');
-
-    const totalSalaries = (salaries ?? []).reduce((s, r) => s + (Number(r.net_salary) || 0), 0);
+    // Get all salaries computed by the salary engine
+    const previewData = await salaryService.getSalaryPreviewForMonth(monthYear);
+    const totalSalaries = previewData.reduce((s, r) => s + (Number(r.net_salary) || 0), 0);
+    
     if (totalSalaries <= 0) return;
 
     // Upsert auto salary expense
@@ -99,7 +95,7 @@ export const financeService = {
         date: `${monthYear}-28`,
         is_auto: true,
         reference_type: 'salaries',
-        notes: `${(salaries ?? []).length} موظف — تم المزامنة تلقائياً`,
+        notes: `${previewData.length} موظف — تم المزامنة تلقائياً بناءً على حاسبة الرواتب`,
       }, { onConflict: 'id' })
       .select('id')
       .single();
@@ -125,7 +121,7 @@ export const financeService = {
           date: `${monthYear}-28`,
           is_auto: true,
           reference_type: 'salaries',
-          notes: `${(salaries ?? []).length} موظف — تم المزامنة تلقائياً`,
+          notes: `${previewData.length} موظف — تم المزامنة تلقائياً بناءً على حاسبة الرواتب`,
         });
       if (insertErr) handleSupabaseError(insertErr, 'financeService.syncSalariesAsExpenses.insert');
     }

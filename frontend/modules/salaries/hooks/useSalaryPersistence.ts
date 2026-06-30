@@ -295,8 +295,7 @@ export function useSalaryPersistence(params: UseSalaryPersistenceParams) {
   const markAsPaid = useCallback(
     async (row: SalaryRow) => {
       if (!isEmployeeIdUuid(row.employeeId) || !isValidSalaryMonthYear(selectedMonth)) {
-          description: 'Ù…Ø¹Ø±Ù Ø§Ù„Ù…ÙˆØ¸Ù Ø£Ùˆ Ø§Ù„Ø´Ù‡Ø± ØºÙŠØ± ØµØ§Ù„Ø­',
-        });
+        toast.error('معرف الموظف أو الشهر غير صالح');
         return;
       }
       setMarkingPaid(row.id);

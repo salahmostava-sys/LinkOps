@@ -38,8 +38,8 @@ import { getSalaryRowActivityTotals, hasPlatformActivity } from '@modules/salari
 // ── Style constants ───────────────────────────────────────────────────────────
 const thFrozenBase = "px-3 py-2 text-xs font-semibold text-muted-foreground whitespace-nowrap border border-border/40 bg-card text-start sticky z-20";
 const thBase = "px-3 py-2 text-xs font-semibold text-muted-foreground whitespace-nowrap border border-border/40 bg-card text-center";
-const tdClass = "px-3 py-2 text-xs whitespace-nowrap text-center border border-border/40 text-foreground";
-const tfClass = "px-3 py-2 text-xs font-bold whitespace-nowrap text-center border border-border/40 bg-muted/60 text-foreground";
+const tdClass = "px-3 py-2 text-[13px] font-medium whitespace-nowrap text-center border border-border/40 text-foreground";
+const tfClass = "px-3 py-2 text-[13px] font-bold whitespace-nowrap text-center border border-border/40 bg-muted/60 text-foreground";
 const stickyLeft = (offset: number) => ({ left: offset });
 
 /** Height of each row in pixels — must be fixed for virtual list to work correctly */
@@ -133,7 +133,7 @@ const SalaryRowCells = memo(function SalaryRowCells({
 
   return (
     <>
-      <td className={`${tdClass} sticky text-center text-xs text-muted-foreground font-mono`} style={{ left: 0, zIndex: 10, background: 'hsl(var(--card))' }}>{rowIdx + 1}</td>
+      <td className={`${tdClass} sticky text-center text-muted-foreground font-mono`} style={{ left: 0, zIndex: 10, background: 'hsl(var(--card))' }}>{rowIdx + 1}</td>
       <td className={`${tdClass} sticky font-medium whitespace-nowrap`} style={{ left: 40, zIndex: 10, background: 'hsl(var(--card))' }}>
         <div className="flex items-center gap-1.5">
           <button className="whitespace-nowrap text-primary hover:underline font-medium text-start" onClick={() => openEmployeeDetail(r)}>
@@ -154,7 +154,7 @@ const SalaryRowCells = memo(function SalaryRowCells({
         </div>
       </td>
       <td className={`${tdClass} whitespace-nowrap`} style={{ position: 'sticky', left: 168, zIndex: 10, background: 'hsl(var(--card))' }}>{r.jobTitle}</td>
-      <td className={`${tdClass} border-l border-border/40 text-muted-foreground text-xs whitespace-nowrap`} style={{ position: 'sticky', left: 264, zIndex: 10, background: 'hsl(var(--card))' }}>{r.nationalId}</td>
+      <td className={`${tdClass} border-l border-border/40 text-muted-foreground whitespace-nowrap`} style={{ position: 'sticky', left: 264, zIndex: 10, background: 'hsl(var(--card))' }}>{r.nationalId}</td>
       <td className="ta-td border border-border/40 bg-info/5">
         <EditableCell value={r.platformIncome} onChange={v => updateRow(r.id, { platformIncome: v })} className="text-foreground" />
       </td>

@@ -1,4 +1,4 @@
-import { supabase } from '@shared/lib/supabaseClient';
+import { supabase } from '@services/supabase/client';
 
 export interface WalletBalance {
   employee_id: string;

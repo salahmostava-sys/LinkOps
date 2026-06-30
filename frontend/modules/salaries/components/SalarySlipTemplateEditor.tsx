@@ -62,6 +62,7 @@ const AVAILABLE_COLUMNS = [
 ];
 
 export function SalarySlipTemplateEditor() {
+  const [activeTab, setActiveTab] = useState('editor');
   const [templates, setTemplates] = useState<SalarySlipTemplate[]>([]);
   const [currentTemplate, setCurrentTemplate] = useState<Partial<SalarySlipTemplate>>({
     name: '',
@@ -186,11 +187,13 @@ export function SalarySlipTemplateEditor() {
   }, [currentTemplate.header_html, currentTemplate.footer_html, getSelectedColumns]);
 
   useEffect(() => {
-    updatePreview();
+    if (activeTab === 'preview') {
+      updatePreview();
+    }
     return () => {
       if (previewTimerRef.current) clearTimeout(previewTimerRef.current);
     };
-  }, [updatePreview]);
+  }, [updatePreview, activeTab]);
 
   if (loading) {
     return (
@@ -283,7 +286,7 @@ export function SalarySlipTemplateEditor() {
 
       {/* Main Content: Editor & Preview */}
       <div className="lg:col-span-9 space-y-4">
-        <Tabs defaultValue="editor" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="flex justify-between items-center bg-white p-2 rounded-t-lg border border-b-0">
             <TabsList className="grid w-[400px] grid-cols-2">
               <TabsTrigger value="editor" className="gap-2"><Settings2 size={16} /> المحرر</TabsTrigger>

@@ -9,6 +9,9 @@ import { useTemporalContext } from '@app/providers/TemporalContext';
 import { QueryErrorRetry } from '@shared/components/QueryErrorRetry';
 import { useFinance } from '@modules/finance/hooks/useFinance';
 import type { FinanceTransaction, TransactionType } from '@services/financeService';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/components/ui/tabs';
+import { TreasuryTab } from '../components/TreasuryTab';
+import { TreasurySettingsTab } from '../components/TreasurySettingsTab';
 
 /* ── Smart Recommendations sub-component ─────────────────────── */
 function PlatformProfitCard({ p }: Readonly<{ p: { name: string; revenue: number; salary: number; orders: number } }>) {
@@ -320,7 +323,15 @@ export default function FinancePage() {
         </div>
       </div>
 
-      {/* ── Summary ────────────────────────────────────── */}
+      <Tabs defaultValue="monthly" className="w-full">
+        <TabsList className="bg-muted">
+          <TabsTrigger value="monthly">التحليلات الشهرية</TabsTrigger>
+          <TabsTrigger value="treasury">حركة الخزينة والعهد</TabsTrigger>
+          <TabsTrigger value="settings">إعدادات الحسابات</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="monthly" className="mt-4 space-y-5">
+          {/* ── Summary ────────────────────────────────────── */}
       <div className="grid grid-cols-3 gap-4">
         <div className="bg-card -2xl shadow-card p-5 flex items-center gap-4 rounded-2xl">
           <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-950/40 flex items-center justify-center"><TrendingUp size={22} className="text-emerald-600" /></div>
@@ -392,6 +403,16 @@ export default function FinancePage() {
       {!loading && (revenue > 0 || expenses > 0) && (
         <SmartRecommendations revenue={revenue} expenses={expenses} balance={balance} platformStats={platformStats} />
       )}
+      </TabsContent>
+
+        <TabsContent value="treasury">
+          <TreasuryTab />
+        </TabsContent>
+
+        <TabsContent value="settings">
+          <TreasurySettingsTab />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

@@ -12,6 +12,7 @@ export interface AdvancePayload {
   first_deduction_month: string;
   note?: string | null;
   status?: string;
+  attachment_url?: string | null;
 }
 
 export interface InstallmentUpdate {

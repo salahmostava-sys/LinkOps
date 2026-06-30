@@ -27,4 +27,18 @@ export const storageService = {
 
     return data.signedUrl;
   },
+
+  uploadFile: async (bucket: string, path: string, file: File, options?: { upsert?: boolean }) => {
+    const safePath = storageService.sanitizePathOrThrow(path);
+    const { data, error } = await supabase.storage.from(bucket).upload(safePath, file, {
+      cacheControl: '3600',
+      upsert: options?.upsert ?? false,
+    });
+
+    if (error) {
+      throw toServiceError(error, 'storageService.uploadFile');
+    }
+
+    return data.path;
+  },
 };

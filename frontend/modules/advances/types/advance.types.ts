@@ -24,6 +24,7 @@ export type Advance = {
   created_at: string;
   is_written_off?: boolean;
   written_off_reason?: string | null;
+  attachment_url?: string | null;
   employees?: { name: string; national_id: string | null } | null;
   advance_installments?: Installment[];
 };

@@ -1,4 +1,4 @@
-﻿import { useState, useRef, useEffect, type KeyboardEvent, type ReactNode } from 'react';
+import { useState, useRef, useEffect, type KeyboardEvent, type ReactNode } from 'react';
 import { getOrdersCellBackground } from '@modules/salaries/lib/salaryConstants';
 import { getPlatformActivitySummary, getPrimaryPlatformActivityCount } from '@modules/salaries/model/salaryUtils';
 import type { PlatformSalaryMetric, SalaryRow, SchemeData } from '@modules/salaries/types/salary.types';
@@ -34,7 +34,7 @@ export const EditableCell = ({
           else if (e.key === 'Escape') setEditing(false);
         }}
         style={{ borderColor: accentColor }}
-        className={`w-16 text-center border rounded px-1 py-0.5 text-xs bg-background outline-none ${className}`}
+        className={`w-16 text-center border rounded px-1 py-0.5 text-[13px] font-medium bg-background outline-none ${className}`}
       />
     );
   }
@@ -42,7 +42,7 @@ export const EditableCell = ({
     <span
       onDoubleClick={() => { setLocal(String(value)); setEditing(true); }}
       style={accentColor && value > 0 ? { color: accentColor } : undefined}
-      className={`cursor-pointer hover:bg-primary/10 rounded px-1 py-0.5 text-xs min-w-[40px] inline-block text-center ${className}`}
+      className={`cursor-pointer hover:bg-primary/10 rounded px-1 py-0.5 text-[13px] font-medium min-w-[40px] inline-block text-center ${className}`}
       title="نقر مزدوج للتعديل"
     >
       {value === 0 ? <span className="text-muted-foreground/40">0</span> : value.toLocaleString('en-US')}
@@ -148,7 +148,7 @@ function platformOrdersSalaryMeta(
     );
   }
   return (
-    <span className="text-[10px] text-foreground font-medium">
+    <span className="text-[11px] text-foreground font-medium">
       {salary.toLocaleString('en-US')} ر.س
     </span>
   );
@@ -215,7 +215,7 @@ export const PlatformOrderCell = ({
           autoFocus
           type="number"
           defaultValue={ordersForScheme}
-          className="w-16 text-center border rounded px-1 py-0.5 text-xs bg-background"
+          className="w-16 text-center border rounded px-1 py-0.5 text-[13px] font-medium bg-background"
           style={{ borderColor: pc?.focusBorder }}
           onChange={e => { inputValueRef.current = Number(e.target.value); }}
           onBlur={handleBlur}
@@ -225,7 +225,7 @@ export const PlatformOrderCell = ({
         <SalaryBreakdown orders={ordersForScheme} scheme={scheme || null} salary={salary}>
           <div className="flex flex-col items-center leading-tight">
             <span
-              className={`font-semibold text-[11px] ${
+              className={`font-semibold text-[13px] ${
                 primaryCount === 0 && salary === 0 ? 'text-muted-foreground/30' : 'text-foreground'
               }`}
               title={isEditable ? 'نقر مزدوج للتعديل' : undefined}
