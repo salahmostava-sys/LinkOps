@@ -195,13 +195,7 @@ function LoginBrandingPanel({
           style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
       </div>
 
-      {settings?.logo_url && (
-        <img
-          src={brandLogoSrc(settings.logo_url, settings.updated_at)}
-          alt=""
-          className="absolute inset-0 w-full h-full opacity-[0.04] object-contain pointer-events-none select-none p-20"
-        />
-      )}
+
 
       <div className={`relative z-10 transition-all duration-700 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
         <div className="flex items-center gap-4 mb-8">
