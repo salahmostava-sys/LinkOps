@@ -54,7 +54,7 @@ CREATE POLICY "unified_delete_policy" ON public.employee_wallet_transactions FOR
   );
 
 -- Create a view for wallet balances
-CREATE OR REPLACE VIEW public.employee_wallet_balances AS
+CREATE OR REPLACE VIEW public.employee_wallet_balances WITH (security_invoker=on) AS
 SELECT 
     e.id AS employee_id,
     e.name AS employee_name,
