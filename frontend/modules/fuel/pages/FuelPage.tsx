@@ -55,21 +55,21 @@ function MegaSpreadsheetTable({
   return (
     <div className="overflow-x-auto relative scrollbar-thin pb-4">
       <table className="w-full text-[11px] border-collapse" style={{ minWidth: `${daysInMonth * 120 + 200}px` }}>
-        <thead>
-          <tr className="bg-muted/60 border-b border-border/40">
-            <th rowSpan={2} className="ta-th text-start font-medium sticky right-0 bg-muted z-20 min-w-[150px] border-l-2 border-border/50">
+        <thead className="sticky top-0 z-30">
+          <tr className="bg-muted border-b border-border/40">
+            <th rowSpan={2} className="ta-th text-start font-medium sticky right-0 bg-muted z-30 min-w-[150px] border-l-2 border-border/50">
               المندوب
             </th>
             {days.map((d) => (
-              <th key={d} colSpan={3} className="text-center py-1.5 border-l-2 border-border/40 font-bold bg-muted/40">
+              <th key={d} colSpan={3} className="text-center py-1.5 border-l-2 border-border/40 font-bold bg-muted">
                 اليوم {d}
               </th>
             ))}
-            <th colSpan={3} className="text-center py-1.5 border-border/40 font-bold bg-primary/10 text-primary">
+            <th colSpan={3} className="text-center py-1.5 border-border/40 font-bold bg-primary/10 text-primary shadow-sm">
               الإجمالي
             </th>
           </tr>
-          <tr className="bg-muted/40 border-b-2 border-border/60">
+          <tr className="bg-muted border-b-2 border-border/60">
             {days.map((d) => (
               <React.Fragment key={`sub-${d}`}>
                 <th className="ta-th px-1 py-1.5 font-medium text-center border-l border-border/20 min-w-[40px] text-orange-600 dark:text-orange-400">بنزين</th>

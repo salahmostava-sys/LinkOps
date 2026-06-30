@@ -337,6 +337,7 @@ const SalarySchemes = ({ embedded = false }: Readonly<SalarySchemesProps>) => {
     setMonthlyAmount(2000);
     setFormTiers([{ from: 1, to: 500, pricePerOrder: 5, tierType: 'total_multiplier' }]);
     setHasTarget(false); setTargetOrders(700); setTargetBonusVal(400);
+    setAssignAppId('');
     setShowModal(true);
   };
 
@@ -361,6 +362,7 @@ const SalarySchemes = ({ embedded = false }: Readonly<SalarySchemesProps>) => {
     setHasTarget(!!(s.target_bonus && s.target_orders));
     setTargetOrders(s.target_orders || 700);
     setTargetBonusVal(s.target_bonus || 400);
+    setAssignAppId('');
     setShowModal(true);
   };
 
@@ -412,6 +414,10 @@ const SalarySchemes = ({ embedded = false }: Readonly<SalarySchemesProps>) => {
             incremental_price: t.tierType === 'base_plus_incremental' ? t.incrementalPrice ?? 0 : null,
           }))
         );
+      }
+
+      if (!editing && assignAppId && schemeId) {
+        await appService.assignScheme(assignAppId, schemeId);
       }
 
       toast({ title: editing ? 'تم التعديل' : 'تمت الإضافة', description: editing ? 'تم تعديل السكيمة بنجاح' : 'تمت إضافة السكيمة بنجاح' });
@@ -740,6 +746,22 @@ const SalarySchemes = ({ embedded = false }: Readonly<SalarySchemesProps>) => {
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Platform Selection */}
+            {!editing && (
+              <div className="space-y-2">
+                <Label>ربط بمنصة (اختياري)</Label>
+                <Select value={assignAppId || "none"} onValueChange={v => setAssignAppId(v === "none" ? "" : v)}>
+                  <SelectTrigger><SelectValue placeholder="اختر المنصة (يمكنك الربط لاحقاً)" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">-- بدون ربط --</SelectItem>
+                    {apps.map(a => (
+                      <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             {/* Fixed Monthly Amount */}
             {schemeType === 'fixed_monthly' && (

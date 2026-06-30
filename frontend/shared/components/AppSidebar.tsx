@@ -153,7 +153,7 @@ const SidebarNavLink = memo(function SidebarNavLink({
       to={item.path}
       title={collapsed ? item.label : undefined}
       className={cn(
-        'relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 overflow-hidden',
+        'relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-[15px] font-medium transition-all duration-150 overflow-hidden',
         collapsed && 'justify-center px-0',
       )}
       style={
@@ -360,7 +360,10 @@ const AppSidebar = () => {
         </div>
 
         {/* ── Nav ──────────────────────────────────────────── */}
-        <nav className={cn('flex-1 overflow-y-auto py-3 space-y-0.5', collapsed ? 'px-2' : 'px-3')}>
+        <nav 
+          dir={isRTL ? 'rtl' : 'ltr'}
+          className={cn('flex-1 overflow-y-auto py-3 space-y-0.5 custom-sidebar-scroll', collapsed ? 'px-2' : 'px-3')}
+        >
 
           {navGroups.map((group, groupIdx) => {
             if (collapsed) {
@@ -421,7 +424,7 @@ const AppSidebar = () => {
                   )}
                 >
                   {group.groupIcon && <group.groupIcon size={16} className={cn("flex-shrink-0", isOpen ? "text-[var(--ds-primary)]" : "opacity-70")} />}
-                  <span className="min-w-0 flex-1 text-[13px] font-bold uppercase tracking-wider">
+                  <span className="min-w-0 flex-1 text-sm font-bold uppercase tracking-wider">
                     {group.sectionLabel}
                   </span>
                   <ChevronDown
