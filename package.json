@@ -9,7 +9,7 @@
   },
   "scripts": {
     "prepare": "husky || true",
-    "build": "cd frontend && npm run build && cp -r dist ../public || xcopy /E /I dist ..\\public"
+    "build": "cd frontend && npm run build && rm -rf ../public && cp -r dist ../public || (rmdir /s /q ..\\public & xcopy /E /I dist ..\\public)"
   },
   "dependencies": {
     "pg-dump-restore-nodejs": "^0.0.10",
