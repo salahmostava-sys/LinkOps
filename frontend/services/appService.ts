@@ -14,6 +14,16 @@ export interface AppUpsertPayload {
 }
 
 export const appService = {
+  getActiveApps: async () => {
+    const { data, error } = await supabase
+      .from('apps')
+      .select('id, name')
+      .eq('is_active', true)
+      .order('name');
+    if (error) handleSupabaseError(error, 'appService.getActiveApps');
+    return data ?? [];
+  },
+
   getAll: async () => {
     const { data, error } = await supabase
       .from('apps')

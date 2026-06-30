@@ -10,6 +10,7 @@ import { toServiceError } from '@services/serviceError';
 import { authService } from '@services/authService';
 import { createPagedResult } from '@shared/types/pagination';
 import { sanitizeLikeQuery } from '@shared/lib/security';
+import { fetchAllPages } from '@shared/lib/supabaseUtils';
 
 export interface DailyOrder {
   id: string;
@@ -133,6 +134,22 @@ function isMissingReplaceMonthRpc(error: unknown): boolean {
 }
 
 export const orderService = {
+  getMonthlyOrders: async (monthStart: string, monthEnd: string) => {
+    type Row = { employee_id: string; orders_count: number };
+    return await fetchAllPages<Row>(async (offset, limit) => {
+      const { data, error } = await supabase
+        .from('daily_orders')
+        .select('employee_id, orders_count')
+        .gte('date', monthStart)
+        .lte('date', monthEnd)
+        .order('date')
+        .order('employee_id')
+        .range(offset, offset + limit - 1);
+      
+      return { data, error };
+    });
+  },
+
   getAll: async () => {
     const { data, error } = await supabase
       .from('daily_orders')

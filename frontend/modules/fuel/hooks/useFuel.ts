@@ -1,12 +1,15 @@
 import { fuelService } from '@services/fuelService';
+import { employeeService } from '@services/employeeService';
+import { appService } from '@services/appService';
+import { orderService } from '@services/orderService';
 import { useMemo } from 'react';
 
 export function useFuel() {
   return useMemo(() => ({
-    getActiveEmployees: fuelService.getActiveEmployees,
-    getActiveApps: fuelService.getActiveApps,
-    getActiveEmployeeAppLinks: fuelService.getActiveEmployeeAppLinks,
-    getMonthlyOrders: fuelService.getMonthlyOrders,
+    getActiveEmployees: employeeService.getActiveEmployees,
+    getActiveApps: appService.getActiveApps,
+    getActiveEmployeeAppLinks: employeeService.getActiveEmployeeAppLinks,
+    getMonthlyOrders: orderService.getMonthlyOrders,
     getMonthlyDailyMileage: fuelService.getMonthlyDailyMileage,
     getActiveVehicleAssignments: fuelService.getActiveVehicleAssignments,
     getDailyMileageByMonth: fuelService.getDailyMileageByMonth,

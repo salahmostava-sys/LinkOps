@@ -1,8 +1,8 @@
 import { supabase } from '@services/supabase/client';
 import { handleSupabaseError } from '@services/serviceError';
 import { createPagedResult } from '@shared/types/pagination';
-
 import { sanitizeLikeQuery } from '@shared/lib/security';
+import { fetchAllPages } from '@shared/lib/supabaseUtils';
 export interface MileageDailyPayload {
   employee_id: string;
   date: string;
@@ -20,83 +20,9 @@ export interface MileageMonthlyPayload {
 }
 
 export const fuelService = {
-  getActiveEmployees: async () => {
-    const PAGE_SIZE = 1000;
-    type EmployeeRow = { id: string; name: string; personal_photo_url: string | null; city: string | null; sponsorship_status: string | null; probation_end_date: string | null; status: string | null };
-    const allRows: EmployeeRow[] = [];
-    let offset = 0;
-    let hasMore = true;
-
-    while (hasMore) {
-      const { data, error } = await supabase
-        .from('employees')
-        .select('id, name, personal_photo_url, city, sponsorship_status, probation_end_date, status')
-        .order('name')
-        .range(offset, offset + PAGE_SIZE - 1);
-
-      if (error) handleSupabaseError(error, 'fuelService.getActiveEmployees');
-      
-      const rows = data ?? [];
-      allRows.push(...rows);
-      
-      if (rows.length < PAGE_SIZE) {
-        hasMore = false;
-      } else {
-        offset += PAGE_SIZE;
-      }
-    }
-    
-    return allRows;
-  },
-
-  getActiveApps: async () => {
-    const { data, error } = await supabase
-      .from('apps')
-      .select('id, name')
-      .eq('is_active', true)
-      .order('name');
-    if (error) handleSupabaseError(error, 'fuelService.getActiveApps');
-    return data ?? [];
-  },
-
-  getActiveEmployeeAppLinks: async () => {
-    const PAGE_SIZE = 1000;
-    type AppLinkRow = { employee_id: string; app_id: string };
-    const allRows: AppLinkRow[] = [];
-    let offset = 0;
-    let hasMore = true;
-
-    while (hasMore) {
-      const { data, error } = await supabase
-        .from('employee_apps')
-        .select('employee_id, app_id')
-        .eq('status', 'active')
-        .order('employee_id')
-        .order('app_id')
-        .range(offset, offset + PAGE_SIZE - 1);
-        
-      if (error) handleSupabaseError(error, 'fuelService.getActiveEmployeeAppLinks');
-      
-      const rows = data ?? [];
-      allRows.push(...rows);
-      
-      if (rows.length < PAGE_SIZE) {
-        hasMore = false;
-      } else {
-        offset += PAGE_SIZE;
-      }
-    }
-    return allRows;
-  },
-
   getMonthlyDailyMileage: async (monthStart: string, monthEnd: string) => {
-    const PAGE_SIZE = 1000;
     type Row = { employee_id: string; km_total: number; fuel_cost: number; employees: { name: string; personal_photo_url: string | null } | null };
-    const allRows: Row[] = [];
-    let offset = 0;
-    let hasMore = true;
-
-    while (hasMore) {
+    return await fetchAllPages<Row>(async (offset, limit) => {
       const { data, error } = await supabase
         .from('vehicle_mileage_daily')
         .select('employee_id, km_total, fuel_cost, employees(name, personal_photo_url)')
@@ -104,121 +30,56 @@ export const fuelService = {
         .lte('date', monthEnd)
         .order('date')
         .order('employee_id')
-        .range(offset, offset + PAGE_SIZE - 1);
-      
+        .range(offset, offset + limit - 1);
       if (error) handleSupabaseError(error, 'fuelService.getMonthlyDailyMileage');
-      const rows = data ?? [];
-      allRows.push(...rows);
-      
-      if (rows.length < PAGE_SIZE) hasMore = false;
-      else offset += PAGE_SIZE;
-    }
-    return allRows;
-  },
-
-  getMonthlyOrders: async (monthStart: string, monthEnd: string) => {
-    const PAGE_SIZE = 1000;
-    type Row = { employee_id: string; orders_count: number };
-    const allRows: Row[] = [];
-    let offset = 0;
-    let hasMore = true;
-
-    while (hasMore) {
-      const { data, error } = await supabase
-        .from('daily_orders')
-        .select('employee_id, orders_count')
-        .gte('date', monthStart)
-        .lte('date', monthEnd)
-        .order('date')
-        .order('employee_id')
-        .range(offset, offset + PAGE_SIZE - 1);
-        
-      if (error) handleSupabaseError(error, 'fuelService.getMonthlyOrders');
-      const rows = data ?? [];
-      allRows.push(...rows);
-      
-      if (rows.length < PAGE_SIZE) hasMore = false;
-      else offset += PAGE_SIZE;
-    }
-    return allRows;
+      return { data, error };
+    });
   },
 
   getMonthlyFuelByMonthYear: async (monthYear: string) => {
-    const PAGE_SIZE = 1000;
     type Row = { employee_id: string; fuel_cost: number };
-    const allRows: Row[] = [];
-    let offset = 0;
-    let hasMore = true;
-
-    while (hasMore) {
+    return await fetchAllPages<Row>(async (offset, limit) => {
       const { data, error } = await supabase
         .from('vehicle_mileage')
         .select('employee_id, fuel_cost')
         .eq('month_year', monthYear)
         .order('employee_id')
-        .range(offset, offset + PAGE_SIZE - 1);
-        
+        .range(offset, offset + limit - 1);
       if (error) handleSupabaseError(error, 'fuelService.getMonthlyFuelByMonthYear');
-      const rows = data ?? [];
-      allRows.push(...rows);
-      
-      if (rows.length < PAGE_SIZE) hasMore = false;
-      else offset += PAGE_SIZE;
-    }
-    return allRows;
+      return { data, error };
+    });
   },
 
   getActiveVehicleAssignments: async () => {
-    const PAGE_SIZE = 1000;
     type Row = { employee_id: string; vehicles: { plate_number: string; type: string; brand: string; model: string } | null };
-    const allRows: Row[] = [];
-    let offset = 0;
-    let hasMore = true;
-
-    while (hasMore) {
+    return await fetchAllPages<Row>(async (offset, limit) => {
       const { data, error } = await supabase
         .from('vehicle_assignments')
         .select('employee_id, vehicles(plate_number, type, brand, model)')
         .is('end_date', null)
         .order('start_date', { ascending: false })
         .order('employee_id')
-        .range(offset, offset + PAGE_SIZE - 1);
-        
+        .range(offset, offset + limit - 1);
       if (error) handleSupabaseError(error, 'fuelService.getActiveVehicleAssignments');
-      const rows = data ?? [];
-      allRows.push(...rows);
-      
-      if (rows.length < PAGE_SIZE) hasMore = false;
-      else offset += PAGE_SIZE;
-    }
-    return allRows;
+      return { data, error };
+    });
   },
 
   getDailyMileageByMonth: async (monthStart: string, monthEnd: string) => {
-    const PAGE_SIZE = 1000;
     // select * returns many fields, using Record<string, unknown> as a base to avoid any
-    const allRows: Record<string, unknown>[] = [];
-    let offset = 0;
-    let hasMore = true;
-
-    while (hasMore) {
+    return await fetchAllPages<Record<string, unknown>>(async (offset, limit) => {
       const { data, error } = await supabase
         .from('vehicle_mileage_daily')
         .select('*, employees(name, personal_photo_url)')
         .gte('date', monthStart)
         .lte('date', monthEnd)
-        .order('date', { ascending: false })
+        .order('date')
         .order('employee_id')
-        .range(offset, offset + PAGE_SIZE - 1);
+        .range(offset, offset + limit - 1);
         
       if (error) handleSupabaseError(error, 'fuelService.getDailyMileageByMonth');
-      const rows = data ?? [];
-      allRows.push(...rows);
-      
-      if (rows.length < PAGE_SIZE) hasMore = false;
-      else offset += PAGE_SIZE;
-    }
-    return allRows;
+      return { data, error };
+    });
   },
 
   /**

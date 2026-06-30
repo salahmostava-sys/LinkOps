@@ -13,16 +13,22 @@ import { Label } from "@shared/components/ui/label";
 import { Textarea } from "@shared/components/ui/textarea";
 import { Button } from "@shared/components/ui/button";
 import { cn } from "@shared/lib/utils";
+import { buildAttendanceGridData } from "../lib/attendanceDomain";
 
-type AttendanceStatus = 'present' | 'absent' | 'leave' | 'sick' | 'late' | 'none';
+export type AttendanceStatus = 'present' | 'absent' | 'leave' | 'sick' | 'late' | 'none';
 
-interface CellData {
+export interface CellData {
   employee_id: string;
   status: AttendanceStatus;
   note: string | null;
   date: string;
   check_in: string | null;
   check_out: string | null;
+}
+
+export interface Employee {
+  id: string;
+  name: string;
 }
 
 interface MonthlyRecordProps {
@@ -169,24 +175,9 @@ const MonthlyRecord = ({ selectedMonth, selectedYear }: Readonly<MonthlyRecordPr
   });
 
   const gridData = useMemo(() => {
-    const employees = data?.employees ?? [];
-    const attendanceRows = data?.attendanceRows ?? [];
-    
-    return employees.map((emp) => {
-      const empRows = attendanceRows.filter((r) => r.employee_id === emp.id);
-      const recordByDay: Record<number, CellData> = {};
-      let p=0, a=0, l=0, s=0, lt=0;
-      empRows.forEach(r => {
-        const day = parseInt(r.date.split('-')[2], 10);
-        recordByDay[day] = r;
-        if (r.status === 'present') p++;
-        if (r.status === 'absent') a++;
-        if (r.status === 'leave') l++;
-        if (r.status === 'sick') s++;
-        if (r.status === 'late') lt++;
-      });
-      return { ...emp, recordByDay, summary: { p, a, l, s, lt, th: (p + lt) * 8 } };
-    });
+    const employees = (data?.employees ?? []) as Employee[];
+    const attendanceRows = (data?.attendanceRows ?? []) as CellData[];
+    return buildAttendanceGridData(employees, attendanceRows);
   }, [data]);
 
   if (isLoading) {

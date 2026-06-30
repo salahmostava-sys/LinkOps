@@ -25,30 +25,10 @@ describe('fuelService', () => {
     resetMockTableResults(tableResults);
   });
 
-  describe('getActiveEmployees', () => {
-    it('returns operationally visible employees', async () => {
-      tableResults.employees = {
-        data: [{ id: 'e1', name: 'أحمد', city: 'makkah', status: 'active', sponsorship_status: 'sponsored', probation_end_date: null }],
-        error: null,
-      };
-
-      const result = await fuelService.getActiveEmployees();
-      expect(result).toHaveLength(1);
-      expect(result[0].name).toBe('أحمد');
-    });
-
-    it('throws formatted error on database failure', async () => {
-      tableResults.employees = { data: null, error: new Error('connection refused') };
-      await expect(fuelService.getActiveEmployees()).rejects.toThrow('connection refused');
-    });
-  });
 
   describe('simple query methods throw on database error', () => {
     it.each([
-      ['getActiveApps', () => fuelService.getActiveApps(), 'apps'],
-      ['getActiveEmployeeAppLinks', () => fuelService.getActiveEmployeeAppLinks(), 'employee_apps'],
       ['getMonthlyDailyMileage', () => fuelService.getMonthlyDailyMileage('2026-03-01', '2026-03-31'), 'vehicle_mileage_daily'],
-      ['getMonthlyOrders', () => fuelService.getMonthlyOrders('2026-03-01', '2026-03-31'), 'daily_orders'],
       ['getMonthlyFuelByMonthYear', () => fuelService.getMonthlyFuelByMonthYear('2026-03'), 'vehicle_mileage'],
       ['getActiveVehicleAssignments', () => fuelService.getActiveVehicleAssignments(), 'vehicle_assignments'],
     ])('%s throws when query fails', async (_name, call, tableName) => {

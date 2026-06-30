@@ -14,6 +14,7 @@ import { ServiceError, toServiceError } from '@services/serviceError';
 import { createPagedResult } from '@shared/types/pagination';
 import { sanitizeStoragePath } from '@shared/lib/storagePath';
 import { sanitizeLikeQuery } from '@shared/lib/security';
+import { fetchAllPages } from '@shared/lib/supabaseUtils';
 import type { TablesInsert, TablesUpdate } from '@services/supabase/types';
 
 export type EmployeeAppOption = {
@@ -41,6 +42,32 @@ async function employeeHasBlockingOperationalRecords(employeeId: string): Promis
 }
 
 export const employeeService = {
+  getActiveEmployees: async () => {
+    type EmployeeRow = { id: string; name: string; personal_photo_url: string | null; city: string | null; sponsorship_status: string | null; probation_end_date: string | null; status: string | null };
+    return await fetchAllPages<EmployeeRow>(async (offset, limit) => {
+      const { data, error } = await supabase
+        .from('employees')
+        .select('id, name, personal_photo_url, city, sponsorship_status, probation_end_date, status')
+        .order('name')
+        .range(offset, offset + limit - 1);
+      return { data, error };
+    });
+  },
+
+  getActiveEmployeeAppLinks: async () => {
+    type AppLinkRow = { employee_id: string; app_id: string };
+    return await fetchAllPages<AppLinkRow>(async (offset, limit) => {
+      const { data, error } = await supabase
+        .from('employee_apps')
+        .select('employee_id, app_id')
+        .eq('status', 'active')
+        .order('employee_id')
+        .order('app_id')
+        .range(offset, offset + limit - 1);
+      return { data, error };
+    });
+  },
+
   async getAll() {
     const PAGE_SIZE = 1000;
     type EmployeeRow = Record<string, unknown> & {
