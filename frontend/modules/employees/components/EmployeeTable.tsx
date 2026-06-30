@@ -26,6 +26,7 @@ import {
 
 import { buildColumnFilter } from "./table/EmployeeTableFilters";
 import { renderEmployeeCell } from "./table/EmployeeTableRenderers";
+import { EmployeeTablePagination } from "@modules/employees/components/EmployeeTablePagination";
 
 
 
