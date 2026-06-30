@@ -85,12 +85,12 @@ export function useBatchPdfExport(params: {
         iframe.style.cssText = 'position:fixed;left:-10000px;top:-10000px;width:794px;height:1123px;border:none';
         activeIframeRef.current = iframe;
         document.body.appendChild(iframe);
-        const iDoc = iframe.contentDocument || iframe.contentWindow?.document;
-        if (iDoc) {
-          iDoc.open();
-          iDoc.write(html);
-          iDoc.close();
-        }
+        const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+        const blobUrl = URL.createObjectURL(blob);
+        iframe.src = blobUrl;
+        
+        // Clean up Blob URL when iframe loads or unmounts, but we'll do it on load
+        iframe.onload = () => URL.revokeObjectURL(blobUrl);
 
         await new Promise(resolve => setTimeout(resolve, 200));
         if (batchAbortRef.current) {

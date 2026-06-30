@@ -156,7 +156,7 @@ export function computePerformanceScore(entry: {
   const consistencyScore = Math.min(100, consistencyRatio * 100);
 
   // Growth bonus: growth% mapped to 0-100 (−50% → 0, 0% → 50, +50% → 100)
-  const growthScore = Math.max(0, Math.min(100, (growthPct + 50) * 1));
+  const growthScore = Math.max(0, Math.min(100, growthPct + 50));
 
   // Attendance: active days / working days * 100
   const attendanceScore = Math.min(100, (activeDays / Math.max(workingDaysInMonth, 1)) * 100);

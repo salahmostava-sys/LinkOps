@@ -76,14 +76,15 @@ export function useSalaryPrint(params: UseSalaryPrintParams) {
       computeRow: (r) => map.get(r.id) ?? computeRow(r),
     });
 
-    const win = globalThis.open('', '_blank', 'width=1100,height=800');
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const blobUrl = URL.createObjectURL(blob);
+    const win = globalThis.open(blobUrl, '_blank', 'width=1100,height=800');
     if (win) {
-      const parser = new DOMParser();
-      const newDoc = parser.parseFromString(html, 'text/html');
-      win.document.replaceChild(win.document.adoptNode(newDoc.documentElement), win.document.documentElement);
-      win.document.close();
-      win.focus();
-      setTimeout(() => { win.print(); }, 500);
+      win.onload = () => {
+        win.focus();
+        setTimeout(() => win.print(), 500);
+      };
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 15000);
     }
   }, [filtered, selectedMonth, platforms, platformColors, projectName, computeRow, toast, getComputedRowsMap]);
 
@@ -115,14 +116,15 @@ export function useSalaryPrint(params: UseSalaryPrintParams) {
     <title>كشوف الرواتب — ${monthLabel}</title>
     <style>${MERGED_PDF_STYLES}</style></head><body>${pages}</body></html>`;
 
-    const win = globalThis.open('', '_blank');
+    const blob = new Blob([mergedHtml], { type: 'text/html;charset=utf-8' });
+    const blobUrl = URL.createObjectURL(blob);
+    const win = globalThis.open(blobUrl, '_blank');
     if (win) {
-      const parser = new DOMParser();
-      const newDoc = parser.parseFromString(mergedHtml, 'text/html');
-      win.document.replaceChild(win.document.adoptNode(newDoc.documentElement), win.document.documentElement);
-      win.document.close();
-      win.focus();
-      setTimeout(() => win.print(), 500);
+      win.onload = () => {
+        win.focus();
+        setTimeout(() => win.print(), 500);
+      };
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 15000);
     }
     toast.success(`📄 تم فتح ملف PDF مدمج لـ ${toPrint.length} مندوب`);
   }, [filtered, selectedMonth, computeRow, toast, getComputedRowsMap]);

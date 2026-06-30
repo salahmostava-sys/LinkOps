@@ -167,7 +167,7 @@ const normalizePreviewPlatformBreakdown = (value: unknown) => {
 
   const typedValue = value as unknown as SalaryPreviewPlatformBreakdown[];
   typedValue.forEach((item) => {
-    const appName = String(item.app_name ?? '').trim();
+    const appName = safeStr(item.app_name).trim();
     if (!appName) return;
 
     breakdown[appName] = {
@@ -186,7 +186,7 @@ const normalizePreviewPlatformBreakdown = (value: unknown) => {
 export const buildPreviewMap = (previewData: Array<Record<string, unknown>> | null | undefined) => {
   const previewMap: Record<string, PreviewMapEntry> = {};
   (previewData || []).forEach((row) => {
-    const employeeId = (typeof row.employee_id === 'string' || typeof row.employee_id === 'number') && row.employee_id ? String(row.employee_id) : '';
+    const employeeId = safeStr(row.employee_id);
     if (!employeeId) return;
     previewMap[employeeId] = {
       base_salary: Number(row.base_salary || 0),
@@ -443,7 +443,7 @@ function buildEmployeeSalaryRow(params: {
     nationalId: safeStr(emp.national_id, '•'),
     city: toCityArabicLabel(rawCity),
     cityKey,
-    bankAccount: emp.iban ? String(emp.iban).slice(-6) : '',
+    bankAccount: emp.iban ? safeStr(emp.iban).slice(-6) : '',
     hasIban,
     paymentMethod: normalizePaymentMethod(saved?.payment_method, fallbackPaymentMethod),
     registeredApps: platformNames.filter((platformName) => hasPlatformActivity(platformMetrics[platformName])),

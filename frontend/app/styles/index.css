@@ -354,31 +354,23 @@
 
   /* ─── Badges — dot + color, no borders ────────────────────────── */
   .badge-urgent {
-    @apply inline-flex items-center gap-1 text-xs font-medium px-2.5 py-0.5 rounded-full;
-    background: rgba(153, 27, 27, 0.15);
-    color: #4a0b0b;
-    font-weight: 600;
+    @apply inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full text-red-900 dark:text-red-300;
+    background: rgba(220, 38, 38, 0.15);
   }
 
   .badge-warning {
-    @apply inline-flex items-center gap-1 text-xs font-medium px-2.5 py-0.5 rounded-full;
-    background: rgba(146, 64, 14, 0.15);
-    color: #4f2004;
-    font-weight: 600;
+    @apply inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full text-amber-900 dark:text-amber-400;
+    background: rgba(217, 119, 6, 0.15);
   }
 
   .badge-success {
-    @apply inline-flex items-center gap-1 text-xs font-medium px-2.5 py-0.5 rounded-full;
-    background: rgba(6, 95, 70, 0.15);
-    color: #043e2e;
-    font-weight: 600;
+    @apply inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full text-emerald-900 dark:text-emerald-400;
+    background: rgba(5, 150, 105, 0.15);
   }
 
   .badge-info {
-    @apply inline-flex items-center gap-1 text-xs font-medium px-2.5 py-0.5 rounded-full;
-    background: rgba(30, 58, 138, 0.15);
-    color: #172554;
-    font-weight: 600;
+    @apply inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full text-blue-900 dark:text-blue-300;
+    background: rgba(37, 99, 235, 0.15);
   }
 
   /* ─── Icon box ────────────────────────────────────────────────── */
