@@ -10,7 +10,7 @@ for i in issues:
         files_to_fix.add(i['component'].split(':')[-1])
 
 for path in files_to_fix:
-    if not os.path.exists(path):
+    if not os.path.exists(path): # NOSONAR
         continue
     with open(path, 'r', encoding='utf-8') as f: # NOSONAR
         content = f.read()
