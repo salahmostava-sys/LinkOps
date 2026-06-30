@@ -77,9 +77,7 @@ const PlatformAccounts = () => {
 
   return (
     <div className="space-y-4" dir="rtl">
-      <div>
-        <nav className="page-breadcrumb"><span>الرئيسية</span><span className="page-breadcrumb-sep">/</span><span>حسابات المنصات</span></nav>
-      </div>
+
       <PlatformAccountsHeader
         loading={loading}
         accountsCount={accounts.length}

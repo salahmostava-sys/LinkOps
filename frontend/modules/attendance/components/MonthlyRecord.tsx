@@ -1,7 +1,7 @@
 import type React from 'react';
 import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, X, Check, FileText } from "lucide-react";
+import { Loader2, X, Check, FileText, Search } from "lucide-react";
 import { useLanguage } from "@app/providers/LanguageContext";
 import { authQueryUserId, useAuthQueryGate } from "@shared/hooks/useAuthQueryGate";
 import attendanceService from "@services/attendanceService";
@@ -142,6 +142,8 @@ const MonthlyRecord = ({ selectedMonth, selectedYear }: Readonly<MonthlyRecordPr
       return {
         employees: result.employees || [],
         attendanceRows: result.attendanceRows || [],
+        apps: result.apps || [],
+        employeeApps: result.employeeApps || [],
       };
     },
   });
@@ -152,6 +154,9 @@ const MonthlyRecord = ({ selectedMonth, selectedYear }: Readonly<MonthlyRecordPr
     day: number;
     record: CellData | null;
   } | null>(null);
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedAppId, setSelectedAppId] = useState<string>('all');
 
   const mutation = useMutation({
     mutationFn: async (payload: {
@@ -180,6 +185,23 @@ const MonthlyRecord = ({ selectedMonth, selectedYear }: Readonly<MonthlyRecordPr
     return buildAttendanceGridData(employees, attendanceRows);
   }, [data]);
 
+  const filteredGridData = useMemo(() => {
+    let result = gridData;
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(r => r.name.toLowerCase().includes(q));
+    }
+    if (selectedAppId !== 'all') {
+      const empIdsWithApp = new Set(
+        (data?.employeeApps ?? [])
+          .filter((ea: any) => ea.app_id === selectedAppId)
+          .map((ea: any) => ea.employee_id)
+      );
+      result = result.filter(r => empIdsWithApp.has(r.id));
+    }
+    return result;
+  }, [gridData, searchQuery, selectedAppId, data?.employeeApps]);
+
   if (isLoading) {
     return <div className="flex items-center justify-center p-12 text-muted-foreground"><Loader2 className="animate-spin w-8 h-8" /></div>;
   }
@@ -194,6 +216,29 @@ const MonthlyRecord = ({ selectedMonth, selectedYear }: Readonly<MonthlyRecordPr
 
   return (
     <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+          <Input
+            placeholder="ابحث باسم الموظف..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pr-9"
+          />
+        </div>
+        <Select value={selectedAppId} onValueChange={setSelectedAppId}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="تصفية بالتطبيق" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">كل التطبيقات</SelectItem>
+            {(data?.apps || []).map((app: any) => (
+              <SelectItem key={app.id} value={app.id}>{app.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       <div className="rounded-xl border border-border shadow-sm overflow-hidden bg-card">
         <div className="overflow-x-auto custom-sidebar-scroll pb-2">
           <table className="w-full text-[13px] border-collapse" dir={isRTL ? "rtl" : "ltr"}>
@@ -215,47 +260,55 @@ const MonthlyRecord = ({ selectedMonth, selectedYear }: Readonly<MonthlyRecordPr
               </tr>
             </thead>
             <tbody>
-              {gridData.map(row => (
-                <tr key={row.id} className="hover:bg-muted/30 transition-colors">
-                  <td className="sticky right-0 z-10 bg-card p-3 text-start border-b border-l border-border font-medium shadow-[1px_0_0_hsl(var(--border))] text-foreground">
-                    <div className="truncate w-full max-w-[140px]" title={row.name}>{row.name}</div>
+              {filteredGridData.length === 0 ? (
+                <tr>
+                  <td colSpan={daysArray.length + 6} className="p-8 text-center text-muted-foreground">
+                    لا يوجد موظفين مطابقين للبحث
                   </td>
-                  {daysArray.map(d => {
-                    const record = row.recordByDay[d];
-                    const status = record?.status || 'none';
-                    const config = STATUS_MAP[status];
-                    const hasNote = !!record?.note;
-
-                    return (
-                      <td key={d} className="p-0 border-b border-l border-border relative align-middle">
-                        <button
-                          onClick={() => setEditingCell({ empId: row.id, empName: row.name, day: d, record: record || null })}
-                          className={cn(
-                            "w-full h-[40px] flex items-center justify-center transition-colors relative hover:bg-muted/80 focus:outline-none",
-                            config.color
-                          )}
-                          title={`${row.name} - يوم ${d} - ${config.label}`}
-                        >
-                          <span className={cn("font-bold text-xs", status === 'none' && "text-muted-foreground/30")}>
-                            {config.char}
-                          </span>
-                          
-                          {hasNote && (
-                            <div className="absolute top-0.5 right-0.5 text-primary">
-                              <FileText size={10} className="opacity-80" />
-                            </div>
-                          )}
-                        </button>
-                      </td>
-                    );
-                  })}
-                  <td className="p-3 text-center border-b border-border font-bold text-green-600 bg-green-500/5">{row.summary.presentCount || '-'}</td>
-                  <td className="p-3 text-center border-b border-border font-bold text-destructive bg-destructive/5">{row.summary.absentCount || '-'}</td>
-                  <td className="p-3 text-center border-b border-border font-bold text-yellow-600 bg-yellow-500/5">{row.summary.leaveCount || '-'}</td>
-                  <td className="p-3 text-center border-b border-border font-bold text-purple-600 bg-purple-500/5">{row.summary.sickCount || '-'}</td>
-                  <td className="p-3 text-center border-b border-border font-bold text-orange-600 bg-orange-500/5">{row.summary.lateCount || '-'}</td>
                 </tr>
-              ))}
+              ) : (
+                filteredGridData.map(row => (
+                  <tr key={row.id} className="hover:bg-muted/30 transition-colors">
+                    <td className="sticky right-0 z-10 bg-card p-3 text-start border-b border-l border-border font-medium shadow-[1px_0_0_hsl(var(--border))] text-foreground">
+                      <div className="truncate w-full max-w-[140px]" title={row.name}>{row.name}</div>
+                    </td>
+                    {daysArray.map(d => {
+                      const record = row.recordByDay[d];
+                      const status = record?.status || 'none';
+                      const config = STATUS_MAP[status];
+                      const hasNote = !!record?.note;
+
+                      return (
+                        <td key={d} className="p-0 border-b border-l border-border relative align-middle">
+                          <button
+                            onClick={() => setEditingCell({ empId: row.id, empName: row.name, day: d, record: record || null })}
+                            className={cn(
+                              "w-full h-[40px] flex items-center justify-center transition-colors relative hover:bg-muted/80 focus:outline-none",
+                              config.color
+                            )}
+                            title={`${row.name} - يوم ${d} - ${config.label}`}
+                          >
+                            <span className={cn("font-bold text-xs", status === 'none' && "text-muted-foreground/30")}>
+                              {config.char}
+                            </span>
+                            
+                            {hasNote && (
+                              <div className="absolute top-0.5 right-0.5 text-primary">
+                                <FileText size={10} className="opacity-80" />
+                              </div>
+                            )}
+                          </button>
+                        </td>
+                      );
+                    })}
+                    <td className="p-3 text-center border-b border-border font-bold text-green-600 bg-green-500/5">{row.summary.presentCount || '-'}</td>
+                    <td className="p-3 text-center border-b border-border font-bold text-destructive bg-destructive/5">{row.summary.absentCount || '-'}</td>
+                    <td className="p-3 text-center border-b border-border font-bold text-yellow-600 bg-yellow-500/5">{row.summary.leaveCount || '-'}</td>
+                    <td className="p-3 text-center border-b border-border font-bold text-purple-600 bg-purple-500/5">{row.summary.sickCount || '-'}</td>
+                    <td className="p-3 text-center border-b border-border font-bold text-orange-600 bg-orange-500/5">{row.summary.lateCount || '-'}</td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

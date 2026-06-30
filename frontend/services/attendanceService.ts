@@ -136,7 +136,7 @@ const attendanceService = {
   },
 
   getMonthlyEmployeesAndAttendance: async (startDate: string, endDate: string) => {
-    const [employeesRes, attendanceRes] = await Promise.all([
+    const [employeesRes, attendanceRes, appsRes, empAppsRes] = await Promise.all([
       supabase
         .from('employees')
         .select('id, name, national_id, salary_type, base_salary, sponsorship_status, probation_end_date')
@@ -147,12 +147,24 @@ const attendanceService = {
         .select('employee_id, status, note, date, check_in, check_out')
         .gte('date', startDate)
         .lte('date', endDate),
+      supabase
+        .from('apps')
+        .select('id, name, logo_url')
+        .eq('is_active', true)
+        .order('name'),
+      supabase
+        .from('employee_apps')
+        .select('employee_id, app_id'),
     ]);
     if (employeesRes.error) handleSupabaseError(employeesRes.error, 'attendanceService.getMonthlyEmployeesAndAttendance.employees');
     if (attendanceRes.error) handleSupabaseError(attendanceRes.error, 'attendanceService.getMonthlyEmployeesAndAttendance.attendance');
+    if (appsRes.error) handleSupabaseError(appsRes.error, 'attendanceService.getMonthlyEmployeesAndAttendance.apps');
+    if (empAppsRes.error) handleSupabaseError(empAppsRes.error, 'attendanceService.getMonthlyEmployeesAndAttendance.empApps');
     return {
       employees: filterEmployeesForAttendanceMonth(employeesRes.data ?? [], startDate),
       attendanceRows: attendanceRes.data ?? [],
+      apps: appsRes.data ?? [],
+      employeeApps: empAppsRes.data ?? [],
     };
   },
 
