@@ -464,7 +464,7 @@ export const orderService = {
 
   getBaseEmployees: async () => {
     const PAGE_SIZE = 1000;
-    const allRows: any[] = [];
+    const allRows: OrderBaseEmployee[] = [];
     let offset = 0;
     let hasMore = true;
 

@@ -22,7 +22,8 @@ export interface MileageMonthlyPayload {
 export const fuelService = {
   getActiveEmployees: async () => {
     const PAGE_SIZE = 1000;
-    const allRows: any[] = [];
+    type EmployeeRow = { id: string; name: string; personal_photo_url: string | null; city: string | null; sponsorship_status: string | null; probation_end_date: string | null; status: string | null };
+    const allRows: EmployeeRow[] = [];
     let offset = 0;
     let hasMore = true;
 
@@ -60,7 +61,8 @@ export const fuelService = {
 
   getActiveEmployeeAppLinks: async () => {
     const PAGE_SIZE = 1000;
-    const allRows: any[] = [];
+    type AppLinkRow = { employee_id: string; app_id: string };
+    const allRows: AppLinkRow[] = [];
     let offset = 0;
     let hasMore = true;
 

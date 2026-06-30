@@ -55,7 +55,8 @@ describe('attendanceService', () => {
       const errorBuilder = {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockResolvedValueOnce({ data: null, error: new Error('primary error') })
+        order: vi.fn().mockReturnThis(),
+        range: vi.fn().mockResolvedValueOnce({ data: null, error: new Error('primary error') })
           .mockResolvedValueOnce({ data: [{ id: 'fallback' }], error: null }),
       };
 
@@ -72,7 +73,8 @@ describe('attendanceService', () => {
       const errorBuilder = {
         select: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
-        order: vi.fn().mockResolvedValueOnce({ data: null, error: new Error('primary error') })
+        order: vi.fn().mockReturnThis(),
+        range: vi.fn().mockResolvedValueOnce({ data: null, error: new Error('primary error') })
           .mockResolvedValueOnce({ data: null, error: new Error('fallback error') }),
       };
       fromMock.mockImplementation((table) => {
