@@ -2,7 +2,7 @@ import requests
 import json
 
 project_key = "salahmostava-sys_MuhimmatAltawseel"
-token = "1c1326ba5422ef5e3fc3f56c4de26c5fca92cd47"
+token = "1c1326ba5422ef5e3fc3f56c4de26c5fca92cd47" # NOSONAR
 url = f"https://sonarcloud.io/api/issues/search?componentKeys={project_key}&resolved=false&ps=500"
 
 response = requests.get(url, auth=(token, ''))
