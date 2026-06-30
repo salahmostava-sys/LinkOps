@@ -252,16 +252,16 @@ function mapRpcToDashboardResponse(raw: any): PerformanceDashboardResponse {
   const sorted = [...leaderboard].sort(
     (a, b) => Number(b.totalOrders ?? b.total_orders ?? 0) - Number(a.totalOrders ?? a.total_orders ?? 0),
   );
-  const topPerformers = sorted.slice(0, 20).map(mapEntry);
-  const lowPerformers = [...sorted].reverse().slice(0, 20).map(mapEntry);
+  const topPerformers = sorted.slice(0, 20).map((entry, index) => mapEntry(entry, index));
+  const lowPerformers = [...sorted].reverse().slice(0, 20).map((entry, index) => mapEntry(entry, index));
   const mostImproved = [...leaderboard]
     .sort((a, b) => Number(b.growthPct ?? b.growth_pct ?? 0) - Number(a.growthPct ?? a.growth_pct ?? 0))
     .slice(0, 10)
-    .map(mapEntry);
+    .map((entry, index) => mapEntry(entry, index));
   const mostDeclined = [...leaderboard]
     .sort((a, b) => Number(a.growthPct ?? a.growth_pct ?? 0) - Number(b.growthPct ?? b.growth_pct ?? 0))
     .slice(0, 10)
-    .map(mapEntry);
+    .map((entry, index) => mapEntry(entry, index));
 
   // ── monthComparison / weekComparison → comparison ────────────────────────
   const mc = raw.monthComparison ?? raw.month_comparison ?? {};
