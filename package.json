@@ -1,9 +1,14 @@
 {
+  "workspaces": [
+    "frontend",
+    "server"
+  ],
   "devDependencies": {
     "husky": "^9.1.7"
   },
   "scripts": {
-    "prepare": "husky"
+    "prepare": "husky || true",
+    "build": "cd frontend && npm run build && cp -r dist ../public || xcopy /E /I dist ..\\public"
   },
   "dependencies": {
     "pg-dump-restore-nodejs": "^0.0.10",
