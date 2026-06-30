@@ -129,8 +129,15 @@ export function useDashboard(params: {
   );
   const monthPace = useMemo(() => {
     const now = new Date();
-    return { daysInMonth: getDaysInMonth(now), daysPassed: Math.max(1, getDate(now)) };
-  }, []);
+    const monthDate = new Date(`${currentMonth}-01T00:00:00`);
+    const isCurrentMonth = now.getFullYear() === monthDate.getFullYear() && now.getMonth() === monthDate.getMonth();
+    const isPastMonth = monthDate < now && !isCurrentMonth;
+    
+    const daysInMonth = getDaysInMonth(monthDate);
+    const daysPassed = isPastMonth ? daysInMonth : isCurrentMonth ? Math.max(1, getDate(now)) : 1;
+    
+    return { daysInMonth, daysPassed };
+  }, [currentMonth]);
 
   const sortedRidersDesc = useMemo(() => {
     const sorted = [...allRiders];
