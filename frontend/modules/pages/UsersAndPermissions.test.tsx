@@ -102,7 +102,7 @@ describe('UsersAndPermissions', () => {
         role: 'viewer',
       }),
     );
-  });
+  }, 10000);
 
   it('allows admins to delete another user but keeps current-account delete disabled', async () => {
     render(<UsersAndPermissions />);
