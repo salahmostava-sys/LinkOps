@@ -214,7 +214,7 @@ export const fuelService = {
       else offset += PAGE_SIZE;
     }
     return allRows;
-  }
+  },
 
   /**
    * Server-side daily mileage list (pagination + filters) for a month.
