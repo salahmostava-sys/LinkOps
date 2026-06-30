@@ -57,7 +57,7 @@ const TAB_TITLES: Record<TabKey, { ar: string; en: string }> = {
 const tabLoaders: Record<TabKey, () => Promise<TabModule>> = {
   general: () => import('./settings-hub/GeneralSettingsContent'),
   company: () => import('./settings-hub/CompanySettingsContent'),
-  schemes: () => import('./SalarySchemes') as Promise<TabModule>,
+  schemes: () => import('./SalarySchemes'),
   users: () => import('./settings-hub/UsersContent'),
   activity: () => import('./settings-hub/ActivityLogContent'),
   profile: () => import('./settings-hub/ProfileSettingsContent'),
