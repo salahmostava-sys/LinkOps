@@ -108,10 +108,14 @@ export const buildMonthlyRows = (
   aggMap: Record<string, MonthlyAgg>,
   ordersMap: Record<string, number>,
   vehicleMap: Record<string, { plate_number: string; type: string; brand?: string | null; model?: string | null }>,
-  employees: Employee[]
+  employees: Employee[],
+  employeeIdsOnPlatform: Set<string> | null
 ): MonthlyRow[] => {
   const employeeById = buildEmployeeIndex(employees);
   const allEmployeeIds = new Set<string>([
+    ...employees
+      .filter(e => !employeeIdsOnPlatform || employeeIdsOnPlatform.has(e.id))
+      .map(e => e.id),
     ...Object.keys(aggMap),
     ...Object.keys(ordersMap).filter((id) => (ordersMap[id] || 0) > 0),
   ]);

@@ -91,7 +91,7 @@ const WalletPage = () => {
                             disabled={item.balance <= 0}
                           >
                             <ArrowDownRight className="w-3.5 h-3.5" />
-                            توريد للشركة
+                            شحن المحفظة
                           </Button>
                           <Button
                             variant="ghost"

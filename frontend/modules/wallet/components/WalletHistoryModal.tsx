@@ -50,7 +50,7 @@ const WalletHistoryModal = ({ open, onOpenChange, employee }: Props) => {
                       </div>
                       <div>
                         <div className="font-medium text-sm">
-                          {isCollection ? 'استلام كاش (مستحق)' : 'توريد للشركة (مسدد)'}
+                          {isCollection ? 'استلام كاش (مستحق)' : 'شحن المحفظة (مسدد)'}
                         </div>
                         <div className="text-xs text-muted-foreground flex gap-2">
                           <span>{format(new Date(tx.transaction_date), 'dd MMMM yyyy', { locale: ar })}</span>

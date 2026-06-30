@@ -24,8 +24,8 @@ const WalletTransactionModal = ({ open, onOpenChange, employee, type, onSuccess 
   const [notes, setNotes] = useState('');
 
   const isCollection = type === 'collection';
-  const title = isCollection ? `تسجيل استلام كاش - ${employee.name}` : `تسجيل توريد للشركة - ${employee.name}`;
-  const btnLabel = isCollection ? 'تسجيل الكاش' : 'تأكيد التوريد';
+  const title = isCollection ? `تسجيل استلام كاش - ${employee.name}` : `تسجيل شحن المحفظة - ${employee.name}`;
+  const btnLabel = isCollection ? 'تسجيل الكاش' : 'تأكيد الشحن';
 
   const mutation = useMutation({
     mutationFn: async () => {
