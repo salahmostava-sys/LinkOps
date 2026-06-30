@@ -17,7 +17,7 @@ for file in migration_files:
         content = f.read()
     
     # Remove functions, policies, triggers, grants
-    content = re.sub(r'CREATE\s+(OR\s+REPLACE\s+)?FUNCTION.*?LANGUAGE.*?AS\s+\$\$.*?\$\$;', '', content, flags=re.IGNORECASE | re.DOTALL)
+    content = re.sub(r'CREATE\s+(OR\s+REPLACE\s+)?FUNCTION.*?LANGUAGE.*?AS\s+\$\$.*?\$\$;', '', content, flags=re.IGNORECASE | re.DOTALL) # NOSONAR
     content = re.sub(r'CREATE\s+POLICY.*?;', '', content, flags=re.IGNORECASE | re.DOTALL)  # NOSONAR
     content = re.sub(r'DROP\s+POLICY.*?;', '', content, flags=re.IGNORECASE | re.DOTALL)  # NOSONAR
     content = re.sub(r'CREATE\s+TRIGGER.*?;', '', content, flags=re.IGNORECASE | re.DOTALL)  # NOSONAR

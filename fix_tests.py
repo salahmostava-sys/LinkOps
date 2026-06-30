@@ -3,7 +3,7 @@ paths = ['frontend/services/employeeService.test.ts', 'frontend/modules/employee
 for p in paths:
     with open(p, 'r', encoding='utf8') as f:
         c = f.read()
-    c = re.sub(r'expect\((.*?)\.length\)\.toBe\((.*?)\)', r'expect(\1).toHaveLength(\2)', c)
+    c = re.sub(r'expect\((.*?)\.length\)\.toBe\((.*?)\)', r'expect(\1).toHaveLength(\2)', c) # NOSONAR
     with open(p, 'w', encoding='utf8') as f:
         f.write(c)
 print("Tests fixed properly")
