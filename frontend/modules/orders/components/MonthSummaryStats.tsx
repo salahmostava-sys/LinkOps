@@ -1,4 +1,4 @@
-﻿import type React from 'react';
+import type React from 'react';
 import { Loader2, TrendingUp } from 'lucide-react';
 import { getAppColor, type AppColorData } from '@shared/hooks/useAppColors';
 import type { App } from '@modules/orders/types';
@@ -74,11 +74,14 @@ export function MonthSummaryStats(props: Readonly<Props>) {
               </div>
               <div className="flex items-center gap-1">
                 <input
-                  type="number"
-                  min={0}
+                  type="text"
+                  inputMode="numeric"
                   placeholder="هدف"
                   value={targets[app.id] ?? ''}
-                  onChange={(e) => setTargets((prev) => ({ ...prev, [app.id]: e.target.value }))}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d).toString()).replace(/[^0-9]/g, '');
+                    setTargets((prev) => ({ ...prev, [app.id]: val }));
+                  }}
                   onBlur={(e) => { saveTarget(app.id, e.target.value); }}
                   onKeyDown={(e) => { if (e.key === 'Enter') { saveTarget(app.id, targets[app.id] || '0'); } }}
                   disabled={!canEdit || isMonthLocked}

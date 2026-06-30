@@ -5,23 +5,24 @@ import { ColorBadge } from '@shared/components/ui/ColorBadge';
 import { ColorDot } from '@shared/components/ui/ColorDot';
 
 function getDayHeaderClass(isToday: boolean, isWeekend: boolean, isThursday: boolean): string {
-  if (isToday) return 'bg-primary/20 text-primary font-bold';
-  if (isWeekend) return 'text-muted-foreground/50 bg-muted/40';
-  if (isThursday) return 'text-muted-foreground/70 bg-muted/20';
-  return 'text-muted-foreground';
+  const base = 'text-sm font-bold text-foreground';
+  if (isToday) return `${base} bg-primary/20 !text-primary`;
+  if (isWeekend) return `${base} bg-muted/40 shadow-[inset_0_0_8px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_0_8px_rgba(0,0,0,0.2)]`;
+  if (isThursday) return `${base} bg-muted/20 shadow-[inset_0_0_8px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_0_8px_rgba(0,0,0,0.2)]`;
+  return base;
 }
 
 function getDayCellBg(isToday: boolean, isWeekend: boolean, isThursday: boolean): string {
   if (isToday) return 'bg-primary/10';
-  if (isWeekend) return 'bg-muted/20';
-  if (isThursday) return 'bg-muted/10';
+  if (isWeekend) return 'bg-muted/20 shadow-[inset_0_0_8px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_0_8px_rgba(0,0,0,0.2)]';
+  if (isThursday) return 'bg-muted/10 shadow-[inset_0_0_8px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_0_8px_rgba(0,0,0,0.2)]';
   return '';
 }
 
 function getExpandedDayCellBg(isToday: boolean, isWeekend: boolean, isThursday: boolean): string {
   if (isToday) return 'bg-primary/5';
-  if (isWeekend) return 'bg-muted/20 opacity-70';
-  if (isThursday) return 'bg-muted/10';
+  if (isWeekend) return 'bg-muted/20 opacity-70 shadow-[inset_0_0_8px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_0_8px_rgba(0,0,0,0.2)]';
+  if (isThursday) return 'bg-muted/10 shadow-[inset_0_0_8px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_0_8px_rgba(0,0,0,0.2)]';
   return '';
 }
 
@@ -245,13 +246,13 @@ export const OrdersGridTable = React.memo(({
                           const isToday = d === today;
                           return (
                             <td key={d} className={`text-center p-0 border-l border-border/20 ${getExpandedDayCellBg(isToday, isWeekend, isThursday)}`} style={{ minWidth: 36 }}>
-                              <div className={`h-6 flex items-center justify-center font-medium text-[10px] ${val > 0 ? 'text-[var(--cval)]' : ''}`}>
+                              <div className={`h-6 flex items-center justify-center font-medium text-[10px] ${val > 0 ? 'text-foreground' : ''}`}>
                                 {val > 0 ? val : <span className="text-muted-foreground/20">·</span>}
                               </div>
                             </td>
                           );
                         })}
-                        <td className="ta-td sticky left-0 z-10 font-bold border-r-2 border-border text-[10px] bg-muted text-[var(--cval)]" style={{ minWidth: 64 }}>
+                        <td className="ta-td sticky left-0 z-10 font-bold border-r-2 border-border text-[10px] bg-muted text-foreground" style={{ minWidth: 64 }}>
                           {appTotal > 0 ? appTotal : '—'}
                         </td>
                       </tr>
@@ -273,8 +274,12 @@ export const OrdersGridTable = React.memo(({
               {dayArr.map(d => {
                 const dayTotal = filteredEmployees.reduce((s, e) => s + empDayTotal(e.id, d), 0);
                 const isToday = d === today;
+                const dow = new Date(year, month - 1, d).getDay();
+                const isWeekend = dow === 5 || dow === 6;
+                const isThursday = dow === 4;
+                const hasShadow = isWeekend || isThursday;
                 return (
-                  <td key={d} className={`text-center px-0.5 py-1.5 font-bold border-l border-border/40 ${isToday ? 'bg-primary/10 text-primary' : 'text-foreground'}`}
+                  <td key={d} className={`text-center px-0.5 py-1.5 font-bold border-l border-border/40 ${isToday ? 'bg-primary/10 text-primary' : 'text-foreground'} ${hasShadow ? 'shadow-[inset_0_0_8px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_0_8px_rgba(0,0,0,0.2)]' : ''}`}
                     style={{ minWidth: 36, backgroundColor: isToday ? undefined : 'hsl(var(--muted) / 0.4)' }}>
                     {dayTotal > 0 ? dayTotal : <span className="text-muted-foreground/30">—</span>}
                   </td>

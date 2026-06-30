@@ -168,24 +168,10 @@ const AppLayoutInner = ({ children }: Readonly<AppLayoutProps>) => { // NOSONAR:
             </Link>
           </div>
 
-          {/* بحث في الوسط */}
-          <div className="order-last sm:order-none w-full sm:w-auto flex-1 flex justify-center min-w-0 basis-full sm:basis-auto">
-            <div className="w-full max-w-md lg:max-w-lg">
-              <GlobalSearch />
-            </div>
-          </div>
-
-          {/* إشعارات + ثيم + مسار + مستخدم */}
-          <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 shrink-0 ms-auto sm:ms-0">
-            <div className="hidden sm:block">
-              <GlobalMonthPicker />
-            </div>
-            <NotificationCenter />
-
-            <ThemeToggle />
-
+          {/* مسار الصفحة + بحث في الوسط */}
+          <div className="order-last sm:order-none w-full sm:w-auto flex-1 flex items-center justify-center gap-2 min-w-0 basis-full sm:basis-auto">
             <div
-              className="hidden md:flex items-center gap-1.5 text-[11px] min-w-0 max-w-[220px] lg:max-w-[280px] px-2.5 py-1 rounded-lg bg-muted/50 border border-border/50"
+              className="hidden md:flex items-center gap-1.5 text-[11px] min-w-0 max-w-[220px] lg:max-w-[280px] px-3 py-2 rounded-full bg-muted border border-border/50 shrink-0"
               style={{ color: 'var(--ds-on-surface-variant)' }}
               aria-label="مسار الصفحة الحالية"
             >
@@ -204,6 +190,19 @@ const AppLayoutInner = ({ children }: Readonly<AppLayoutProps>) => { // NOSONAR:
                 {pageTitle}
               </span>
             </div>
+            <div className="w-full max-w-md lg:max-w-lg">
+              <GlobalSearch />
+            </div>
+          </div>
+
+          {/* إشعارات + ثيم + مستخدم */}
+          <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 shrink-0 ms-auto sm:ms-0">
+            <div className="hidden sm:block">
+              <GlobalMonthPicker />
+            </div>
+            <NotificationCenter />
+
+            <ThemeToggle />
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

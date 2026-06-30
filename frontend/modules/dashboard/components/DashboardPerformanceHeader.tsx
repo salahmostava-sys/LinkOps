@@ -5,7 +5,7 @@ import { ar } from 'date-fns/locale';
 import { useTemporalContext } from '@app/providers/TemporalContext';
 import { cn } from '@shared/lib/utils';
 
-export type DashboardPerformanceTabKey = 'overview' | 'analytics' | 'ranking' | 'platforms';
+export type DashboardPerformanceTabKey = 'overview_analytics' | 'ranking_platforms';
 
 type DashboardPerformanceHeaderProps = {
   activeTab: DashboardPerformanceTabKey;
@@ -14,10 +14,8 @@ type DashboardPerformanceHeaderProps = {
 };
 
 const TAB_LABELS: Record<DashboardPerformanceTabKey, string> = {
-  overview: 'النظرة العامة',
-  analytics: 'التحليلات',
-  ranking: 'التصنيف',
-  platforms: 'المنصات',
+  overview_analytics: 'النظرة العامة والتحليلات',
+  ranking_platforms: 'التصنيف والمنصات',
 };
 
 export function DashboardPerformanceHeader({
@@ -43,14 +41,14 @@ export function DashboardPerformanceHeader({
         </div>
 
         <div className="flex items-center bg-muted rounded-xl p-1 gap-1 overflow-x-auto">
-          {(['overview', 'analytics', 'ranking', 'platforms'] as const).map((tab) => (
+          {(['overview_analytics', 'ranking_platforms'] as const).map((tab) => (
             <button
               key={tab}
               type="button"
               onClick={() => onTabChange(tab)}
-              onFocus={tab === 'overview' ? undefined : onPrefetchIntent}
-              onMouseEnter={tab === 'overview' ? undefined : onPrefetchIntent}
-              onTouchStart={tab === 'overview' ? undefined : onPrefetchIntent}
+              onFocus={tab === 'overview_analytics' ? undefined : onPrefetchIntent}
+              onMouseEnter={tab === 'overview_analytics' ? undefined : onPrefetchIntent}
+              onTouchStart={tab === 'overview_analytics' ? undefined : onPrefetchIntent}
               className={cn(
                 'px-4 py-1.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-1.5 whitespace-nowrap',
                 activeTab === tab
@@ -58,10 +56,8 @@ export function DashboardPerformanceHeader({
                   : 'text-muted-foreground hover:text-foreground/75',
               )}
             >
-              {tab === 'overview' ? <LayoutDashboard size={13} /> : null}
-              {tab === 'analytics' ? <TrendingUp size={13} /> : null}
-              {tab === 'ranking' ? <Medal size={13} /> : null}
-              {tab === 'platforms' ? <LayoutGrid size={13} /> : null}
+              {tab === 'overview_analytics' ? <LayoutDashboard size={13} /> : null}
+              {tab === 'ranking_platforms' ? <Medal size={13} /> : null}
               {TAB_LABELS[tab]}
             </button>
           ))}

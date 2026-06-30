@@ -1,4 +1,4 @@
-﻿import type React from 'react';
+import type React from 'react';
 import { Search, AlertTriangle, XCircle, CheckCircle, CheckCircle2, RefreshCw, ListChecks, Trash2 } from 'lucide-react';
 import { Button } from '@shared/components/ui/button';
 import { Input } from '@shared/components/ui/input';
@@ -60,14 +60,14 @@ export default function ViolationSearchTab({
       {/* -- Search Card -- */}
       <div className="bg-card border border-border -2xl p-4 shadow-sm space-y-3 rounded-2xl">
         <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
-          <Search size={15} className="text-primary" /> ?????? ?????????
+          <Search size={15} className="text-primary" /> البحث والاستعلام
         </h2>
 
         {/* Filters in one horizontal row */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Plate number with autocomplete */}
           <div className="relative" ref={suggRef}>
-            <Label className="text-sm mb-1.5 block">??? ???? ??????? <span className="text-destructive">*</span></Label>
+            <Label className="text-sm mb-1.5 block">رقم لوحة المركبة <span className="text-destructive">*</span></Label>
             <Input
               value={form.plate_number}
               onChange={e => {
@@ -78,7 +78,7 @@ export default function ViolationSearchTab({
                 setAssigningEmployeeId(null);
               }}
               onFocus={() => form.plate_number && setShowSuggestions(true)}
-              placeholder="????: ? ? ? 1234"
+              placeholder="مثال: ا ب ج 1234"
               className="h-10"
               autoComplete="off"
             />
@@ -95,7 +95,7 @@ export default function ViolationSearchTab({
                     <span className="text-xs text-muted-foreground">
                       {v.plate_number_en && <span className="ms-2 text-muted-foreground/60">{v.plate_number_en}</span>}
                       {v.brand && <span>{v.brand} · </span>}
-                      <span>{v.type === 'motorcycle' ? '?????' : '?????'}</span>
+                      <span>{v.type === 'motorcycle' ? 'دراجة' : 'سيارة'}</span>
                     </span>
                   </button>
                 ))}
@@ -104,7 +104,7 @@ export default function ViolationSearchTab({
             {/* Selected badge */}
             {form.selected_vehicle_id && (
               <p className="text-xs text-success mt-1 flex items-center gap-1">
-                <CheckCircle size={11} /> ?? ????? ???????
+                <CheckCircle size={11} /> تم اختيار المركبة
               </p>
             )}
           </div>
@@ -112,13 +112,13 @@ export default function ViolationSearchTab({
           {/* Date / datetime toggle */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <Label className="text-sm">????? ???????? <span className="text-destructive">*</span></Label>
+              <Label className="text-sm">تاريخ المخالفة <span className="text-destructive">*</span></Label>
               <button
                 type="button"
                 onClick={() => setForm(f => ({ ...f, use_time: !f.use_time }))}
                 className="text-xs text-primary hover:underline"
               >
-                {form.use_time ? '???? ???' : '?? ?????'}
+                {form.use_time ? 'بدون وقت' : 'تحديد وقت'}
               </button>
             </div>
             {form.use_time ? (
@@ -140,18 +140,18 @@ export default function ViolationSearchTab({
 
           {/* Place */}
           <div>
-            <Label className="text-sm mb-1.5 block">???? ????????</Label>
+            <Label className="text-sm mb-1.5 block">مكان المخالفة</Label>
             <Input
               value={form.place}
               onChange={e => setForm(f => ({ ...f, place: e.target.value }))}
-              placeholder="????: ???? ??? - ???"
+              placeholder="مثال: طريق الملك - جدة"
               className="h-10"
             />
           </div>
 
           {/* Amount */}
           <div>
-            <Label className="text-sm mb-1.5 block">?????? (?.?)</Label>
+            <Label className="text-sm mb-1.5 block">المبلغ (ر.س)</Label>
             <Input
               type="number"
               min={0}
@@ -164,11 +164,11 @@ export default function ViolationSearchTab({
         </div>
 
         <div>
-          <Label className="text-sm mb-1.5 block">?????? ??????</Label>
+          <Label className="text-sm mb-1.5 block">تفاصيل المخالفة</Label>
           <Input
             value={form.note}
             onChange={e => setForm(f => ({ ...f, note: e.target.value }))}
-            placeholder="?? ?????? ??????..."
+            placeholder="أدخل تفاصيل المخالفة..."
             className="h-10"
           />
         </div>
@@ -176,11 +176,11 @@ export default function ViolationSearchTab({
         <div className="flex gap-2">
           <Button onClick={handleSearch} disabled={searching} className="flex-1 gap-2 h-11 text-base font-semibold">
             {searching
-              ? <><span className="animate-spin w-4 h-4 border-2 border-primary-foreground/40 border-t-primary-foreground rounded-full" />???? ?????...</>
-              : <><Search size={17} />??? ?? ???????</>}
+              ? <><span className="animate-spin w-4 h-4 border-2 border-primary-foreground/40 border-t-primary-foreground rounded-full" />جاري البحث...</>
+              : <><Search size={17} />بحث عن المخالفات</>}
           </Button>
           <Button variant="outline" onClick={handleReset} className="h-11 gap-1.5">
-            <RefreshCw size={14} /> ???
+            <RefreshCw size={14} /> إعادة ضبط
           </Button>
         </div>
       </div>
@@ -189,9 +189,9 @@ export default function ViolationSearchTab({
       {noVehicle && (
         <div className="bg-card border border-border -2xl p-6 text-center space-y-2 rounded-2xl">
           <XCircle className="mx-auto text-muted-foreground" size={36} />
-          <p className="font-semibold text-foreground">?? ??? ?????? ??? ???????</p>
+          <p className="font-semibold text-foreground">لم يتم العثور على المركبة</p>
           <p className="text-sm text-muted-foreground">
-            ?? ???? ????? ???? ?????? "<span className="font-medium">{form.plate_number}</span>" ?? ??????.
+            لم نتمكن من إيجاد مركبة برقم اللوحة "<span className="font-medium">{form.plate_number}</span>" في النظام.
           </p>
         </div>
       )}
@@ -200,9 +200,9 @@ export default function ViolationSearchTab({
       {results !== null && results.length === 0 && !noVehicle && (
         <div className="bg-card border border-border -2xl p-6 text-center space-y-2 rounded-2xl">
           <AlertTriangle className="mx-auto text-warning" size={36} />
-          <p className="font-semibold text-foreground">?? ???? ???? ????? ?? ??? ???????</p>
+          <p className="font-semibold text-foreground">لم يتم العثور على مخالفات</p>
           <p className="text-sm text-muted-foreground">
-            ?? ??? ????? ??????? ??? ????? ?? ????? <span className="font-medium">{dateDisplay}</span>.
+            لم يتم تسجيل مخالفات على هذه المركبة في تاريخ <span className="font-medium">{dateDisplay}</span>.
           </p>
         </div>
       )}
@@ -212,22 +212,22 @@ export default function ViolationSearchTab({
         <div className="bg-card border border-border -2xl shadow-sm overflow-hidden rounded-2xl">
           <div className="px-5 py-3 border-b border-border flex flex-wrap items-center justify-between gap-2">
             <h2 className="text-sm font-semibold text-foreground">
-              ????? ????????? · {results.length} ???
+              نتائج الاستعلام · {results.length} سجل
             </h2>
             <p className="text-xs text-muted-foreground">
-              ??? ??????? ???? <strong className="text-foreground">???</strong> ????? ?? <strong className="text-foreground">????? ???????</strong> ???????? ?? ??????? ??????.
+              هذه المخالفات يمكن <strong className="text-foreground">تأكيد</strong> تسجيلها أو <strong className="text-foreground">ترحيل للمرحلة</strong> لمراجعتها في التبويب الثاني.
             </p>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[760px] text-sm">
               <thead className="bg-muted/40 border-b border-border">
                 <tr>
-                  <th className="ta-th">??? ??????</th>
-                  <th className="ta-th">?????? ????????</th>
-                  <th className="ta-th">???????</th>
-                  <th className="ta-th">??????</th>
-                  <th className="ta-th">??????</th>
-                  <th className="ta-th min-w-[200px]">???????</th>
+                  <th className="ta-th">اسم الموظف</th>
+                  <th className="ta-th">تفاصيل المخالفة</th>
+                  <th className="ta-th">التاريخ</th>
+                  <th className="ta-th">المبلغ</th>
+                  <th className="ta-th">الحالة</th>
+                  <th className="ta-th min-w-[200px]">الإجراء</th>
                 </tr>
               </thead>
               <tbody>
@@ -237,16 +237,16 @@ export default function ViolationSearchTab({
                     <td className="ta-td text-muted-foreground">{row.violation_details || '—'}</td>
                     <td className="ta-td text-muted-foreground">{row.violation_date}</td>
                     <td className="ta-td font-medium text-foreground">
-                      {row.amount.toLocaleString('en-US')} ?.?
+                      {row.amount.toLocaleString('en-US')} ر.س
                     </td>
                     <td className="ta-td text-muted-foreground">
                       {row.status === 'recorded' ? (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-success/10 text-success border border-success/20">
-                          <CheckCircle2 size={12} /> ??????
+                          <CheckCircle2 size={12} /> مسجلة
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border/50">
-                          — ??? ??????
+                          — غير مسجلة
                         </span>
                       )}
                     </td>
@@ -271,7 +271,7 @@ export default function ViolationSearchTab({
                               onClick={() => { handleDeleteSearchResultRow(row); }}
                             >
                               <Trash2 size={12} />
-                              {deletingSearchDeductionId === row.external_deduction_id ? '...' : '???'}
+                              {deletingSearchDeductionId === row.external_deduction_id ? '...' : 'حذف'}
                             </Button>
                             <Button
                               size="sm"
@@ -279,7 +279,7 @@ export default function ViolationSearchTab({
                               className="h-7 text-xs px-2 gap-1"
                               onClick={() => handleTransferSearchRowToSaved(row)}
                             >
-                              <ListChecks size={12} /> ????? ???????
+                              <ListChecks size={12} /> ترحيل للمرحلة
                             </Button>
                           </>
                         )}

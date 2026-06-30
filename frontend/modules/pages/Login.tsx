@@ -208,11 +208,11 @@ function LoginBrandingPanel({
             <img
               src={brandLogoSrc(settings.logo_url, settings.updated_at)}
               alt=""
-              className="w-16 h-16 -2xl object-contain bg-white/10 backdrop-blur-sm p-2.5 ring-1 ring-white/20 shadow-card rounded-2xl"
+              className="w-24 h-24 -2xl object-contain bg-white/10 backdrop-blur-sm p-2.5 ring-1 ring-white/20 shadow-card rounded-2xl"
             />
           ) : (
-            <div className="w-16 h-16 -2xl bg-white/10 backdrop-blur-sm flex items-center justify-center ring-1 ring-white/20 shadow-card relative rounded-2xl">
-              <span className="material-symbols-outlined text-4xl text-white" style={{ fontVariationSettings: "'FILL' 1" }}>local_shipping</span>
+            <div className="w-24 h-24 -2xl bg-white/10 backdrop-blur-sm flex items-center justify-center ring-1 ring-white/20 shadow-card relative rounded-2xl">
+              <span className="material-symbols-outlined text-6xl text-white" style={{ fontVariationSettings: "'FILL' 1" }}>local_shipping</span>
               <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-400 rounded-full ring-2 ring-white/30" />
             </div>
           )}
@@ -280,8 +280,8 @@ function PasswordField({ password, setPassword, showPw, setShowPw, capsLock, set
 }>) {
   return (
     <div className="relative group">
-      <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-muted-foreground group-focus-within:text-primary transition-colors duration-200">
-        <span className="material-symbols-outlined text-xl">lock</span>
+      <div className="absolute inset-y-0 right-0 pr-5 flex items-center pointer-events-none text-muted-foreground group-focus-within:text-primary transition-colors duration-200">
+        <span className="material-symbols-outlined text-2xl">lock</span>
       </div>
       <input
         id="login-password"
@@ -295,16 +295,16 @@ function PasswordField({ password, setPassword, showPw, setShowPw, capsLock, set
         autoComplete="current-password"
         autoFocus={!!email}
         aria-invalid={!!loginError}
-        className="block w-full pr-12 pl-12 py-4 bg-muted/40 border border-border/60 rounded-xl focus-visible:ring-4 focus-visible:ring-primary/20 focus-visible:border-primary hover:border-border transition-all duration-200 outline-none text-foreground placeholder:text-muted-foreground/50 dark:bg-muted/20 dark:hover:border-border/80"
-        style={{ fontFamily: 'system-ui, sans-serif', letterSpacing: !showPw ? '0.2em' : 'normal', fontSize: !showPw ? '1.125rem' : '1rem' }}
+        className="block w-full pr-14 pl-14 py-5 text-lg bg-muted/40 border border-border/60 rounded-xl focus-visible:ring-4 focus-visible:ring-primary/20 focus-visible:border-primary hover:border-border transition-all duration-200 outline-none text-foreground placeholder:text-muted-foreground/50 dark:bg-muted/20 dark:hover:border-border/80"
+        style={{ fontFamily: 'system-ui, sans-serif', letterSpacing: !showPw ? '0.2em' : 'normal', fontSize: !showPw ? '1.5rem' : '1.125rem' }}
       />
       <button
         type="button"
         onClick={() => setShowPw(v => !v)}
-        className="absolute inset-y-0 left-0 pl-4 flex items-center text-muted-foreground hover:text-foreground transition-colors duration-200"
+        className="absolute inset-y-0 left-0 pl-5 flex items-center text-muted-foreground hover:text-foreground transition-colors duration-200"
         aria-label={showPw ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
       >
-        {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
+        {showPw ? <EyeOff size={22} /> : <Eye size={22} />}
       </button>
       {capsLock && (
         <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 px-1 animate-slide-up mt-2">
@@ -360,11 +360,11 @@ function LoginFormSection(props: LoginFormSectionProps) {
           <img
             src={brandLogoSrc(settings.logo_url, settings.updated_at)}
             alt=""
-            className="w-16 h-16 -2xl object-contain shadow-card border border-border bg-card p-1 mb-3 rounded-2xl"
+            className="w-24 h-24 -2xl object-contain shadow-card border border-border bg-card p-1 mb-3 rounded-2xl"
           />
         ) : (
-          <div className="w-16 h-16 rounded-2xl mb-3 flex items-center justify-center shadow-brand" style={{ background: 'linear-gradient(225deg, #00288e, #1e40af)' }}>
-            <span className="material-symbols-outlined text-3xl text-white" style={{ fontVariationSettings: "'FILL' 1" }}>local_shipping</span>
+          <div className="w-24 h-24 rounded-2xl mb-3 flex items-center justify-center shadow-brand" style={{ background: 'linear-gradient(225deg, #00288e, #1e40af)' }}>
+            <span className="material-symbols-outlined text-5xl text-white" style={{ fontVariationSettings: "'FILL' 1" }}>local_shipping</span>
           </div>
         )}
         <h1 className="text-2xl font-extrabold text-foreground">{projectName}</h1>
@@ -389,8 +389,8 @@ function LoginFormSection(props: LoginFormSectionProps) {
           >
             <label htmlFor="login-email" className="block text-sm font-medium text-muted-foreground">البريد الإلكتروني</label>
             <div className="relative group">
-              <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-muted-foreground group-focus-within:text-primary transition-colors duration-200">
-                <span className="material-symbols-outlined text-xl">mail</span>
+              <div className="absolute inset-y-0 right-0 pr-5 flex items-center pointer-events-none text-muted-foreground group-focus-within:text-primary transition-colors duration-200">
+                <span className="material-symbols-outlined text-2xl">mail</span>
               </div>
               <input
                 id="login-email"
@@ -404,7 +404,7 @@ function LoginFormSection(props: LoginFormSectionProps) {
                 autoComplete="email"
                 autoFocus={!email}
                 aria-invalid={!!loginError}
-                className="block w-full pr-12 pl-4 py-4 bg-muted/40 border border-border/60 rounded-xl focus-visible:ring-4 focus-visible:ring-primary/20 focus-visible:border-primary hover:border-border transition-all duration-200 outline-none text-foreground placeholder:text-muted-foreground/50 dark:bg-muted/20 dark:hover:border-border/80"
+                className="block w-full pr-14 pl-5 py-5 text-lg bg-muted/40 border border-border/60 rounded-xl focus-visible:ring-4 focus-visible:ring-primary/20 focus-visible:border-primary hover:border-border transition-all duration-200 outline-none text-foreground placeholder:text-muted-foreground/50 dark:bg-muted/20 dark:hover:border-border/80"
               />
             </div>
           </div>

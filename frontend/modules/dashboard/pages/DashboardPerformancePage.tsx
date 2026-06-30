@@ -43,7 +43,7 @@ export default function DashboardPerformancePage() {
   const uid = authQueryUserId(userId);
   const queryClient = useQueryClient();
   const { selectedMonth: currentMonth } = useTemporalContext();
-  const [activeTab, setActiveTab] = useState<DashboardPerformanceTabKey>('overview');
+  const [activeTab, setActiveTab] = useState<DashboardPerformanceTabKey>('overview_analytics');
 
   useRealtimePostgresChanges('performance-dashboard-realtime', REALTIME_TABLES_DASHBOARD, () => {
     if (!user?.id) return;
@@ -62,13 +62,11 @@ export default function DashboardPerformancePage() {
   }, [dashboardQuery.data]);
 
   const handleTabChange = (tab: DashboardPerformanceTabKey) => {
-    if (tab === 'analytics') {
+    if (tab === 'overview_analytics') {
       loadAnalyticsTab();
     }
-    if (tab === 'ranking') {
+    if (tab === 'ranking_platforms') {
       loadRankingTab();
-    }
-    if (tab === 'platforms') {
       loadPlatformsTab();
     }
 
@@ -99,29 +97,27 @@ export default function DashboardPerformancePage() {
         />
       ) : null}
 
-      {!dashboardQuery.isError && activeTab === 'overview' ? (
-        <DashboardPerformanceOverviewTab
-          loading={dashboardQuery.isLoading}
-          dashboard={dashboardQuery.data ?? null}
-        />
+      {!dashboardQuery.isError && activeTab === 'overview_analytics' ? (
+        <div className="space-y-6">
+          <DashboardPerformanceOverviewTab
+            loading={dashboardQuery.isLoading}
+            dashboard={dashboardQuery.data ?? null}
+          />
+          <Suspense fallback={<TabFallback />}>
+            <LazyDashboardPerformanceAnalyticsTab dashboard={dashboardQuery.data ?? null} />
+          </Suspense>
+        </div>
       ) : null}
 
-      {!dashboardQuery.isError && activeTab === 'analytics' ? (
-        <Suspense fallback={<TabFallback />}>
-          <LazyDashboardPerformanceAnalyticsTab dashboard={dashboardQuery.data ?? null} />
-        </Suspense>
-      ) : null}
-
-      {!dashboardQuery.isError && activeTab === 'ranking' ? (
-        <Suspense fallback={<TabFallback />}>
-          <LazyDashboardRankingTab dashboard={dashboardQuery.data ?? null} />
-        </Suspense>
-      ) : null}
-
-      {!dashboardQuery.isError && activeTab === 'platforms' ? (
-        <Suspense fallback={<TabFallback />}>
-          <LazyDashboardPlatformsTab dashboard={dashboardQuery.data ?? null} />
-        </Suspense>
+      {!dashboardQuery.isError && activeTab === 'ranking_platforms' ? (
+        <div className="space-y-6">
+          <Suspense fallback={<TabFallback />}>
+            <LazyDashboardRankingTab dashboard={dashboardQuery.data ?? null} />
+          </Suspense>
+          <Suspense fallback={<TabFallback />}>
+            <LazyDashboardPlatformsTab dashboard={dashboardQuery.data ?? null} />
+          </Suspense>
+        </div>
       ) : null}
 
       {/* المساعد الذكي */}

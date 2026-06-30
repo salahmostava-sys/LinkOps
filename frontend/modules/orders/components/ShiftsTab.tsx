@@ -565,10 +565,10 @@ export function ShiftsTab({
                                 className="h-7 w-full text-center text-[10px] border-0 bg-transparent cursor-pointer focus:outline-none font-bold"
                               >
                                 <option value="">— فاضي —</option>
-                                <option value="1">حاضر ✅</option>
-                                <option value="0">غائب ❌</option>
-                                <option value="-1">إجازة براتب 🏖️</option>
-                                <option value="-2">إجازة مرضى 🏥</option>
+                                <option value="1">حاضر</option>
+                                <option value="0">غائب</option>
+                                <option value="-1">إجازة براتب</option>
+                                <option value="-2">إجازة مرضى</option>
                               </select>
                             ) : (
                               <div className="h-7 flex items-center justify-center">

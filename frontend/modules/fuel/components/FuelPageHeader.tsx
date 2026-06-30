@@ -48,30 +48,9 @@ export function FuelPageHeader({
           <span>فترة: {monthLabel} {selectedYear}</span>
         </div>
 
-        <div className="flex items-center bg-muted rounded-lg p-1 gap-1">
-          <button
-            type="button"
-            onClick={() => onViewChange('monthly')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${view === 'monthly' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
-          >
-            <BarChart3 size={13} /> عرض شهري
-          </button>
-          <button
-            type="button"
-            onClick={() => onViewChange('daily')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${view === 'daily' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
-          >
-            <Calendar size={13} /> عرض يومي
-          </button>
-          <button
-            type="button"
-            onClick={() => onViewChange('spreadsheet')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${view === 'spreadsheet' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
-          >
-            <Grid3X3 size={13} /> جدول بيانات
-          </button>
+        <div className="flex items-center gap-1">
+          {toolbarEnd}
         </div>
-        {toolbarEnd}
       </div>
     </div>
   );

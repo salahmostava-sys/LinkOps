@@ -1,257 +1,18 @@
-import { Loader2, ShieldAlert, Pencil, Trash2, X, Check, Car } from 'lucide-react';
+import React from 'react';
+import { Loader2, ShieldAlert } from 'lucide-react';
 import { useFuelPage } from '@modules/fuel/hooks/useFuelPage';
 import { FuelPageHeader } from '@modules/fuel/components/FuelPageHeader';
 import { FuelFiltersToolbar, FuelPlatformTabs } from '@modules/fuel/components/FuelFilters';
-import { FuelMonthlyStats, FuelDailyStats } from '@modules/fuel/components/FuelStats';
-import { FuelForm } from '@modules/fuel/components/FuelForm';
+import { FuelMonthlyStats } from '@modules/fuel/components/FuelStats';
 import { Card, CardContent } from '@shared/components/ui/card';
-import { Input } from '@shared/components/ui/input';
-import { Button } from '@shared/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/components/ui/select';
-import { DAY_NAMES } from '@modules/fuel/types/fuel.types';
 import type { DailyRow, MonthlyRow } from '@modules/fuel/types/fuel.types';
 import { useAuthQueryGate } from '@shared/hooks/useAuthQueryGate';
 
-/* ─── Monthly Table ──────────────────────────────────────────── */
-function MonthlyTable({ rows }: Readonly<{ rows: MonthlyRow[] }>) {
-  if (rows.length === 0) {
-    return (
-      <div className="text-center py-16 text-muted-foreground text-sm">
-        لا توجد بيانات لهذا الشهر
-      </div>
-    );
-  }
-  return (
-    <div className="overflow-x-auto">
-      <table ref={undefined} className="w-full text-sm">
-        <thead>
-          <tr className="border-b border-border/60 text-muted-foreground text-xs">
-            <th className="ta-th text-start font-medium">المندوب</th>
-            <th className="ta-th text-start font-medium">المركبة</th>
-            <th className="ta-th text-start font-medium">أيام مسجّلة</th>
-            <th className="ta-th text-start font-medium">الكيلومترات</th>
-            <th className="ta-th text-start font-medium">تكلفة البنزين</th>
-            <th className="ta-th text-start font-medium">تكلفة/كم</th>
-            <th className="ta-th text-start font-medium">الطلبات</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-border/40">
-          {rows.map((row) => {
-            const costPerKm = row.km_total > 0 ? row.fuel_cost / row.km_total : 0;
-            return (
-              <tr key={row.employee_id} className="hover:bg-muted/30 transition-colors">
-                <td className="ta-td font-medium">{row.employee_name}</td>
-                <td className="ta-td text-muted-foreground">
-                  {row.vehicle ? (
-                    <span className="flex items-center gap-1">
-                      <Car size={11} />
-                      {row.vehicle.plate_number}
-                    </span>
-                  ) : '—'}
-                </td>
-                <td className="ta-td">{row.daily_count}</td>
-                <td className="ta-td font-mono">{row.km_total.toLocaleString('en-US')}</td>
-                <td className="ta-td font-mono">{row.fuel_cost.toLocaleString('en-US')} ر.س</td>
-                <td className="ta-td font-mono text-muted-foreground">
-                  {costPerKm > 0 ? `${costPerKm.toFixed(3)} ر.س` : '—'}
-                </td>
-                <td className="ta-td">{row.orders_count}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-/* ─── Daily Table Row ────────────────────────────────────────── */
-function DailyTableRow({
-  row,
-  editing,
-  saving,
-  canEdit,
-  onEdit,
-  onCancelEdit,
-  onSaveEdit,
-  onDelete,
-  onUpdateEditing,
-}: Readonly<{
-  row: DailyRow;
-  editing: { id: string; km_total: string; fuel_cost: string; notes: string } | null;
-  saving: boolean;
-  canEdit: boolean;
-  onEdit: () => void;
-  onCancelEdit: () => void;
-  onSaveEdit: (row: DailyRow) => void;
-  onDelete: (id: string) => void;
-  onUpdateEditing: (field: 'km_total' | 'fuel_cost' | 'notes', value: string) => void;
-}>) {
-  const isEditing = editing?.id === row.id;
-  const dayName = DAY_NAMES[new Date(`${row.date}T12:00:00`).getDay()];
-
-  return (
-    <tr className="hover:bg-muted/30 transition-colors border-b border-border/40 last:border-0">
-      <td className="ta-td text-muted-foreground">
-        {row.date} <span className="text-primary/60 font-medium">{dayName}</span>
-      </td>
-      <td className="ta-td font-medium">{row.employee?.name || '—'}</td>
-      <td className="ta-td">
-        {isEditing ? (
-          <Input
-            type="number"
-            className="h-7 w-24 text-xs"
-            value={editing.km_total}
-            onChange={(e) => onUpdateEditing('km_total', e.target.value)}
-          />
-        ) : (
-          <span className="font-mono">{row.km_total.toLocaleString('en-US')}</span>
-        )}
-      </td>
-      <td className="ta-td">
-        {isEditing ? (
-          <Input
-            type="number"
-            className="h-7 w-28 text-xs"
-            value={editing.fuel_cost}
-            onChange={(e) => onUpdateEditing('fuel_cost', e.target.value)}
-          />
-        ) : (
-          <span className="font-mono">{row.fuel_cost.toLocaleString('en-US')} ر.س</span>
-        )}
-      </td>
-      <td className="ta-td text-muted-foreground">
-        {isEditing ? (
-          <Input
-            className="h-7 text-xs"
-            value={editing.notes}
-            onChange={(e) => onUpdateEditing('notes', e.target.value)}
-          />
-        ) : (
-          row.notes || '—'
-        )}
-      </td>
-      {canEdit && (
-        <td className="ta-td">
-          {isEditing ? (
-            <div className="flex gap-1">
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-7 w-7 p-0 text-green-600"
-                disabled={saving}
-                onClick={() => onSaveEdit(row)}
-              >
-                <Check size={13} />
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-7 w-7 p-0 text-muted-foreground"
-                onClick={onCancelEdit}
-              >
-                <X size={13} />
-              </Button>
-            </div>
-          ) : (
-            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-7 w-7 p-0"
-                onClick={onEdit}
-              >
-                <Pencil size={12} />
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-7 w-7 p-0 text-destructive"
-                onClick={() => onDelete(row.id)}
-              >
-                <Trash2 size={12} />
-              </Button>
-            </div>
-          )}
-        </td>
-      )}
-    </tr>
-  );
-}
-
-/* ─── Daily Table ────────────────────────────────────────────── */
-function DailyTable({
-  rows,
-  editing,
-  saving,
-  canEdit,
-  setEditing,
-  onSaveEdit,
-  onDelete,
-  onUpdateEditing,
-}: Readonly<{
-  rows: DailyRow[];
-  editing: { id: string; km_total: string; fuel_cost: string; notes: string } | null;
-  saving: boolean;
-  canEdit: boolean;
-  setEditing: (v: { id: string; km_total: string; fuel_cost: string; notes: string } | null) => void;
-  onSaveEdit: (row: DailyRow) => void;
-  onDelete: (id: string) => void;
-  onUpdateEditing: (field: 'km_total' | 'fuel_cost' | 'notes', value: string) => void;
-}>) {
-  if (rows.length === 0) {
-    return (
-      <div className="text-center py-16 text-muted-foreground text-sm">
-        لا توجد إدخالات يومية لهذا الشهر
-      </div>
-    );
-  }
-  return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b border-border/60 text-muted-foreground text-xs">
-            <th className="ta-th text-start font-medium">التاريخ</th>
-            <th className="ta-th text-start font-medium">المندوب</th>
-            <th className="ta-th text-start font-medium">الكيلومترات</th>
-            <th className="ta-th text-start font-medium">تكلفة البنزين</th>
-            <th className="ta-th text-start font-medium">ملاحظات</th>
-            {canEdit && <th className="ta-th w-20" />}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <DailyTableRow
-              key={row.id}
-              row={row}
-              editing={editing}
-              saving={saving}
-              canEdit={canEdit}
-              onEdit={() =>
-                setEditing({
-                  id: row.id,
-                  km_total: String(row.km_total),
-                  fuel_cost: String(row.fuel_cost),
-                  notes: row.notes ?? '',
-                })
-              }
-              onCancelEdit={() => setEditing(null)}
-              onSaveEdit={onSaveEdit}
-              onDelete={onDelete}
-              onUpdateEditing={onUpdateEditing}
-            />
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-/* ─── Spreadsheet Table ──────────────────────────────────────── */
-function SpreadsheetView({
+/* ─── Mega Spreadsheet Table ──────────────────────────────────────── */
+function MegaSpreadsheetTable({
   monthly,
   daily,
-  dailyOrderRows: _dailyOrderRows,
+  dailyOrderRows,
   monthYear,
 }: Readonly<{
   monthly: MonthlyRow[];
@@ -263,11 +24,24 @@ function SpreadsheetView({
   const daysInMonth = new Date(year, month, 0).getDate();
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
-  const kmByEmpDay: Record<string, Record<number, number>> = {};
+  // Group daily records by employee -> day
+  const dailyDataByEmpDay: Record<string, Record<number, { km: number; fuel: number }>> = {};
   daily.forEach((r) => {
     const d = new Date(`${r.date}T12:00:00`).getDate();
-    if (!kmByEmpDay[r.employee_id]) kmByEmpDay[r.employee_id] = {};
-    kmByEmpDay[r.employee_id][d] = (kmByEmpDay[r.employee_id][d] || 0) + r.km_total;
+    if (!dailyDataByEmpDay[r.employee_id]) dailyDataByEmpDay[r.employee_id] = {};
+    const existing = dailyDataByEmpDay[r.employee_id][d] || { km: 0, fuel: 0 };
+    dailyDataByEmpDay[r.employee_id][d] = {
+      km: existing.km + r.km_total,
+      fuel: existing.fuel + r.fuel_cost,
+    };
+  });
+
+  // Group orders by employee -> day
+  const ordersByEmpDay: Record<string, Record<number, number>> = {};
+  dailyOrderRows.forEach((r) => {
+    const d = new Date(`${r.date}T12:00:00`).getDate();
+    if (!ordersByEmpDay[r.employee_id]) ordersByEmpDay[r.employee_id] = {};
+    ordersByEmpDay[r.employee_id][d] = (ordersByEmpDay[r.employee_id][d] || 0) + Number(r.orders_count);
   });
 
   if (monthly.length === 0) {
@@ -279,32 +53,66 @@ function SpreadsheetView({
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-xs border-collapse">
+    <div className="overflow-x-auto relative scrollbar-thin pb-4">
+      <table className="w-full text-[11px] border-collapse" style={{ minWidth: `${daysInMonth * 120 + 200}px` }}>
         <thead>
-          <tr className="ta-thead">
-            <th className="ta-th text-start font-medium sticky right-0 bg-muted/60 min-w-[130px]">المندوب</th>
+          <tr className="bg-muted/60 border-b border-border/40">
+            <th rowSpan={2} className="ta-th text-start font-medium sticky right-0 bg-muted z-20 min-w-[150px] border-l-2 border-border/50">
+              المندوب
+            </th>
             {days.map((d) => (
-              <th key={d} className="ta-th px-1.5 font-medium min-w-[36px]">
-                {d}
+              <th key={d} colSpan={3} className="text-center py-1.5 border-l-2 border-border/40 font-bold bg-muted/40">
+                اليوم {d}
               </th>
             ))}
-            <th className="ta-th font-medium min-w-[80px]">الإجمالي</th>
+            <th colSpan={3} className="text-center py-1.5 border-border/40 font-bold bg-primary/10 text-primary">
+              الإجمالي
+            </th>
+          </tr>
+          <tr className="bg-muted/40 border-b-2 border-border/60">
+            {days.map((d) => (
+              <React.Fragment key={`sub-${d}`}>
+                <th className="ta-th px-1 py-1.5 font-medium text-center border-l border-border/20 min-w-[40px] text-orange-600 dark:text-orange-400">بنزين</th>
+                <th className="ta-th px-1 py-1.5 font-medium text-center border-l border-border/20 min-w-[40px] text-info">طلبات</th>
+                <th className="ta-th px-1 py-1.5 font-medium text-center border-l-2 border-border/40 min-w-[40px] text-foreground">كم</th>
+              </React.Fragment>
+            ))}
+            {/* Totals */}
+            <th className="ta-th px-1 py-1.5 font-bold text-center border-l border-primary/20 bg-primary/5 min-w-[50px] text-primary">بنزين</th>
+            <th className="ta-th px-1 py-1.5 font-bold text-center border-l border-primary/20 bg-primary/5 min-w-[50px] text-primary">طلبات</th>
+            <th className="ta-th px-1 py-1.5 font-bold text-center bg-primary/5 min-w-[50px] text-primary">كم</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-border/30">
-          {monthly.map((row) => (
-            <tr key={row.employee_id} className="hover:bg-muted/20">
-              <td className="ta-td font-medium sticky right-0 bg-card border-r border-border/40 rounded-2xl">{row.employee_name}</td>
+          {monthly.map((row, idx) => (
+            <tr key={row.employee_id} className={`hover:bg-muted/30 transition-colors ${idx % 2 === 1 ? 'bg-muted/10' : ''}`}>
+              <td className={`ta-td font-semibold sticky right-0 border-l-2 border-border/50 z-10 whitespace-nowrap ${idx % 2 === 1 ? 'bg-muted/10 backdrop-blur-sm' : 'bg-card'}`}>
+                {row.employee_name}
+              </td>
               {days.map((d) => {
-                const km = kmByEmpDay[row.employee_id]?.[d];
+                const fuel = dailyDataByEmpDay[row.employee_id]?.[d]?.fuel || 0;
+                const orders = ordersByEmpDay[row.employee_id]?.[d] || 0;
+                const km = dailyDataByEmpDay[row.employee_id]?.[d]?.km || 0;
+                const isWeekend = new Date(year, month - 1, d).getDay() === 5 || new Date(year, month - 1, d).getDay() === 6;
+                const bgClass = isWeekend ? 'bg-muted/30' : '';
                 return (
-                  <td key={d} className="ta-td font-mono">
-                    {km ? <span className="text-primary font-medium">{km}</span> : <span className="text-border">·</span>}
-                  </td>
+                  <React.Fragment key={d}>
+                    <td className={`ta-td text-center border-l border-border/20 font-mono ${bgClass}`}>
+                      {fuel > 0 ? <span className="font-medium text-orange-600 dark:text-orange-400">{fuel}</span> : <span className="text-muted-foreground/30">·</span>}
+                    </td>
+                    <td className={`ta-td text-center border-l border-border/20 font-mono ${bgClass}`}>
+                      {orders > 0 ? <span className="font-medium text-info">{orders}</span> : <span className="text-muted-foreground/30">·</span>}
+                    </td>
+                    <td className={`ta-td text-center border-l-2 border-border/40 font-mono ${bgClass}`}>
+                      {km > 0 ? <span className="font-medium text-foreground">{km}</span> : <span className="text-muted-foreground/30">·</span>}
+                    </td>
+                  </React.Fragment>
                 );
               })}
-              <td className="ta-td font-mono font-semibold">{row.km_total.toLocaleString('en-US')}</td>
+              {/* Row Totals */}
+              <td className="ta-td text-center border-l border-border/20 font-mono font-bold bg-primary/5 text-primary">{row.fuel_cost.toLocaleString('en-US')}</td>
+              <td className="ta-td text-center border-l border-border/20 font-mono font-bold bg-primary/5 text-primary">{row.orders_count.toLocaleString('en-US')}</td>
+              <td className="ta-td text-center font-mono font-bold bg-primary/5 text-primary">{row.km_total.toLocaleString('en-US')}</td>
             </tr>
           ))}
         </tbody>
@@ -341,27 +149,18 @@ export default function FuelPage() {
     selectedMonth,
     selectedYear,
     search, setSearch,
-    selectedEmployee, setSelectedEmployee,
     platformTab, setPlatformTab,
     apps,
     monthYear,
-    ridersForTab,
     loading,
     filteredMonthly, filteredDaily,
     totalKm, totalFuel, totalOrders, avgCostPerKm,
-    dailyTotalKm, dailyTotalFuel,
     handleExportMonthly, handleExportDaily,
-    newEntry, setNewEntry, defaultEntryDate, savingEntry,
-    submitNewEntry,
-    editingDaily, setEditingDaily,
-    updateEditingDaily, saveEditedDaily,
-    handleDeleteDaily,
-    permissions,
     dailyOrderRows,
   } = page;
 
   return (
-    <div className="flex flex-col gap-4 w-full max-w-[1600px]" dir="rtl">
+    <div className="flex flex-col gap-4 w-full max-w-[1600px] overflow-hidden" dir="rtl">
       <FuelPageHeader
         view={view}
         onViewChange={setView}
@@ -387,54 +186,13 @@ export default function FuelPage() {
         />
       )}
 
-      {view === 'daily' && (
-        <div className="flex flex-wrap gap-2 items-center">
-          <Select value={selectedEmployee} onValueChange={setSelectedEmployee}>
-            <SelectTrigger className="h-8 w-[200px] text-xs">
-              <SelectValue placeholder="كل المناديب" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="_all_">كل المناديب</SelectItem>
-              {ridersForTab.map((r) => (
-                <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
-
-      {view === 'monthly' && (
-        <FuelMonthlyStats
-          totalKm={totalKm}
-          totalFuel={totalFuel}
-          avgCostPerKm={avgCostPerKm}
-          totalOrders={totalOrders}
-        />
-      )}
-
-      {view === 'daily' && (
-        <FuelDailyStats
-          count={filteredDaily.length}
-          totalKm={dailyTotalKm}
-          totalFuel={dailyTotalFuel}
-        />
-      )}
-
-      {view === 'daily' && permissions.can_edit && (
-        <Card className="border-border/60 shadow-sm">
-          <CardContent className="p-4">
-            <p className="text-xs font-semibold text-muted-foreground mb-3">إضافة سجل جديد</p>
-            <FuelForm
-              riders={ridersForTab}
-              entry={newEntry}
-              defaultEntryDate={defaultEntryDate}
-              saving={savingEntry}
-              onChange={setNewEntry}
-              onSubmit={submitNewEntry}
-            />
-          </CardContent>
-        </Card>
-      )}
+      {/* Top Stats: Totals for the month */}
+      <FuelMonthlyStats
+        totalKm={totalKm}
+        totalFuel={totalFuel}
+        avgCostPerKm={avgCostPerKm}
+        totalOrders={totalOrders}
+      />
 
       <Card className="border-border/60 shadow-sm overflow-hidden">
         <CardContent className="p-0">
@@ -443,23 +201,8 @@ export default function FuelPage() {
               <Loader2 size={24} className="animate-spin text-primary" />
             </div>
           )}
-          {!loading && view === 'monthly' && (
-            <MonthlyTable rows={filteredMonthly} />
-          )}
-          {!loading && view === 'daily' && (
-            <DailyTable
-              rows={filteredDaily}
-              editing={editingDaily}
-              saving={savingEntry}
-              canEdit={permissions.can_edit}
-              setEditing={setEditingDaily}
-              onSaveEdit={saveEditedDaily}
-              onDelete={handleDeleteDaily}
-              onUpdateEditing={updateEditingDaily}
-            />
-          )}
-          {!loading && view === 'spreadsheet' && (
-            <SpreadsheetView
+          {!loading && (
+            <MegaSpreadsheetTable
               monthly={filteredMonthly}
               daily={filteredDaily}
               dailyOrderRows={dailyOrderRows}

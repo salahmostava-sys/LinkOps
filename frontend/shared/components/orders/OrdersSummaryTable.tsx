@@ -121,13 +121,13 @@ export const OrdersSummaryTable = React.memo(({
                 const c = getAppColor(appColorsList, app.name);
                 const appTotal = dayArr.reduce((s, d) => s + (data[`${emp.id}::${app.id}::${d}`] ?? 0), 0);
                 return (
-                  <td key={app.id} className="ta-td p-3 font-semibold border-l border-border/30" style={{ color: appTotal > 0 ? c.val : undefined }}>
+                  <td key={app.id} className="ta-td p-3 font-semibold border-l border-border/30 text-foreground">
                     {appTotal > 0 ? appTotal : <span className="text-muted-foreground/30">—</span>}
                   </td>
                 );
               })}
-              <td className="ta-td p-3 font-bold text-primary border-l border-border">{Math.max(total, 0)}</td>
-              <td className="ta-td p-3 text-muted-foreground">{avg}</td>
+              <td className="ta-td p-3 font-bold text-foreground border-l border-border">{Math.max(total, 0)}</td>
+              <td className="ta-td p-3 text-foreground">{avg}</td>
               <td className="ta-td p-3">
                 {(() => {
                   const level = getPerformanceLevel(avg);
@@ -154,12 +154,12 @@ export const OrdersSummaryTable = React.memo(({
               const c = getAppColor(appColorsList, app.name);
               const total = appGrandTotal(app.id);
               return (
-                <td key={app.id} className="ta-td p-3 font-bold border-l border-border/40" style={{ color: c.val }}>
+                <td key={app.id} className="ta-td p-3 font-bold border-l border-border/40 text-foreground">
                   {total > 0 ? total : '—'}
                 </td>
               );
             })}
-            <td className="ta-td p-3 font-bold text-primary border-l border-border">{grandTotal}</td>
+            <td className="ta-td p-3 font-bold text-foreground border-l border-border">{grandTotal}</td>
             <td />
             <td />
           </tr>

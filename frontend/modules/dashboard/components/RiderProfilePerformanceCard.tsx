@@ -1,4 +1,4 @@
-﻿/**
+/**
  * RiderProfilePerformanceCard — Comprehensive rider profile showing
  * performance, comparison, trends, AI analysis, finance, and targets.
  */
@@ -38,11 +38,11 @@ function ProfileStatRow({
   sub?: string;
 }>) {
   return (
-    <div className="flex items-center justify-between py-2 border-b border-border/30 last:border-b-0">
-      <span className="text-xs text-muted-foreground">{label}</span>
+    <div className="flex items-center justify-between py-3 border-b border-border/30 last:border-b-0">
+      <span className="text-sm font-medium text-foreground">{label}</span>
       <div className="text-end">
-        <span className="text-sm font-bold text-foreground">{value}</span>
-        {sub && <p className="text-[10px] text-muted-foreground">{sub}</p>}
+        <span className="text-base font-bold text-foreground">{value}</span>
+        {sub && <p className="text-xs text-foreground/80 mt-0.5">{sub}</p>}
       </div>
     </div>
   );
@@ -61,13 +61,13 @@ function ComparisonRow({
 }>) {
   const positive = pct >= 0;
   return (
-    <div className="flex items-center justify-between py-2 border-b border-border/30 last:border-b-0">
-      <span className="text-xs text-muted-foreground">{label}</span>
+    <div className="flex items-center justify-between py-3 border-b border-border/30 last:border-b-0">
+      <span className="text-sm font-medium text-foreground">{label}</span>
       <div className="flex items-center gap-3">
-        <span className="text-xs text-muted-foreground">{previous.toLocaleString('en-US')}</span>
-        <span className="text-xs text-muted-foreground">→</span>
-        <span className="text-sm font-bold text-foreground">{current.toLocaleString('en-US')}</span>
-        <span className={`text-xs font-bold ${positive ? 'text-emerald-600' : 'text-rose-500'}`}>
+        <span className="text-sm font-medium text-foreground">{previous.toLocaleString('en-US')}</span>
+        <span className="text-sm text-muted-foreground">→</span>
+        <span className="text-base font-bold text-foreground">{current.toLocaleString('en-US')}</span>
+        <span className={`text-sm font-bold ${positive ? 'text-emerald-600' : 'text-rose-500'}`}>
           {positive ? '+' : ''}{pct.toFixed(1)}%
         </span>
       </div>
@@ -93,15 +93,15 @@ function TargetProgressBar({
   })();
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between text-xs">
-        <span className="text-muted-foreground">الهدف: {target.toLocaleString('en-US')} طلب</span>
-        <span className="font-bold text-foreground">{pct.toFixed(0)}%</span>
+    <div className="space-y-3">
+      <div className="flex items-center justify-between text-sm text-foreground">
+        <span className="font-medium">الهدف: {target.toLocaleString('en-US')} طلب</span>
+        <span className="font-bold text-base">{pct.toFixed(0)}%</span>
       </div>
-      <div className="w-full h-2.5 bg-muted rounded-full overflow-hidden">
+      <div className="w-full h-3 bg-muted rounded-full overflow-hidden">
         <div className={`h-full rounded-full ${color} transition-all duration-500`} style={{ width: `${clampedPct}%` }} />
       </div>
-      <p className="text-[10px] text-muted-foreground">
+      <p className="text-xs font-medium text-foreground">
         {value.toLocaleString('en-US')} من {target.toLocaleString('en-US')} طلب
       </p>
     </div>
@@ -122,9 +122,9 @@ function MonthRow({
   targetPct: number;
 }>) {
   return (
-    <div className="flex items-center justify-between py-2 border-b border-border/30 last:border-b-0">
-      <span className="text-xs font-medium text-foreground">{monthYear}</span>
-      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+    <div className="flex items-center justify-between py-3 border-b border-border/30 last:border-b-0">
+      <span className="text-base font-bold text-foreground">{monthYear}</span>
+      <div className="flex items-center gap-4 text-sm font-medium text-foreground">
         <span>{totalOrders.toLocaleString('en-US')} طلب</span>
         <span>{avgOrdersPerDay.toFixed(1)}/يوم</span>
         <span>{activeDays} يوم</span>
@@ -184,9 +184,9 @@ export function RiderProfilePerformanceCard({ data }: Readonly<RiderProfilePerfo
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* ── الأداء الحالي ──────────────────────────────────── */}
         <div className="bg-card -2xl p-5 shadow-card rounded-2xl">
-          <div className="flex items-center gap-2 mb-3">
-            <Target size={16} className="text-foreground" />
-            <h3 className="text-sm font-bold text-foreground">الأداء الحالي</h3>
+          <div className="flex items-center gap-2 mb-4">
+            <Target size={20} className="text-foreground" />
+            <h3 className="text-base font-bold text-foreground">الأداء الحالي</h3>
           </div>
           <ProfileStatRow
             label="إجمالي الطلبات"
@@ -210,9 +210,9 @@ export function RiderProfilePerformanceCard({ data }: Readonly<RiderProfilePerfo
 
         {/* ── المقارنة ──────────────────────────────────────── */}
         <div className="bg-card -2xl p-5 shadow-card rounded-2xl">
-          <div className="flex items-center gap-2 mb-3">
-            <Calendar size={16} className="text-foreground" />
-            <h3 className="text-sm font-bold text-foreground">مقارنة الأداء</h3>
+          <div className="flex items-center gap-2 mb-4">
+            <Calendar size={20} className="text-foreground" />
+            <h3 className="text-base font-bold text-foreground">مقارنة الأداء</h3>
           </div>
           <ComparisonRow
             label="الشهر"
@@ -244,37 +244,37 @@ export function RiderProfilePerformanceCard({ data }: Readonly<RiderProfilePerfo
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* ── تحليل AI ─────────────────────────────────────── */}
         <div className="bg-card -2xl p-5 shadow-card rounded-2xl">
-          <div className="flex items-center gap-2 mb-3">
-            <Award size={16} className="text-violet-600" />
-            <h3 className="text-sm font-bold text-foreground">تحليل ذكي</h3>
-            <span className="text-[10px] font-bold text-violet-600 bg-violet-50 px-2 py-0.5 rounded-md">AI</span>
+          <div className="flex items-center gap-2 mb-4">
+            <Award size={20} className="text-violet-600" />
+            <h3 className="text-base font-bold text-foreground">تحليل ذكي</h3>
+            <span className="text-xs font-bold text-violet-600 bg-violet-50 px-2 py-0.5 rounded-md">AI</span>
           </div>
-          <div className="rounded-xl bg-gradient-to-br from-violet-50 to-purple-50/50 border border-violet-100 px-4 py-3 mb-3">
-            <p className="text-sm font-bold text-violet-900 leading-relaxed">
+          <div className="rounded-xl bg-gradient-to-br from-violet-50 to-purple-50/50 border border-violet-100 px-4 py-3 mb-4">
+            <p className="text-base font-bold text-violet-900 leading-relaxed">
               {analysis.judgmentText}
             </p>
           </div>
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             {analysis.details.map((detail) => (
-              <div key={detail} className="flex items-start gap-2 text-xs text-muted-foreground">
-                <span className="mt-1 w-1.5 h-1.5 rounded-full bg-violet-300 shrink-0" />
+              <div key={detail} className="flex items-start gap-2 text-sm font-medium text-foreground">
+                <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-violet-400 shrink-0" />
                 <span>{detail}</span>
               </div>
             ))}
           </div>
           {analysis.needsFollowUp && (
-            <div className="flex items-center gap-2 mt-4 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200">
-              <AlertTriangle size={14} className="text-amber-600 shrink-0" />
-              <span className="text-xs font-bold text-amber-800">يحتاج متابعة</span>
+            <div className="flex items-center gap-2 mt-5 px-4 py-3 rounded-xl bg-amber-50 border border-amber-200">
+              <AlertTriangle size={16} className="text-amber-600 shrink-0" />
+              <span className="text-sm font-bold text-amber-800">يحتاج متابعة</span>
             </div>
           )}
         </div>
 
         {/* ── Finance ──────────────────────────────────────── */}
         <div className="bg-card -2xl p-5 shadow-card rounded-2xl">
-          <div className="flex items-center gap-2 mb-3">
-            <DollarSign size={16} className="text-foreground" />
-            <h3 className="text-sm font-bold text-foreground">المالية</h3>
+          <div className="flex items-center gap-2 mb-4">
+            <DollarSign size={20} className="text-foreground" />
+            <h3 className="text-base font-bold text-foreground">المالية</h3>
           </div>
           {salary ? (
             <>
@@ -309,9 +309,9 @@ export function RiderProfilePerformanceCard({ data }: Readonly<RiderProfilePerfo
       {/* ── Target Progress ──────────────────────────────────── */}
       {summary.monthlyTargetOrders > 0 && (
         <div className="bg-card -2xl p-5 shadow-card rounded-2xl">
-          <div className="flex items-center gap-2 mb-3">
-            <Target size={16} className="text-foreground" />
-            <h3 className="text-sm font-bold text-foreground">تحقيق الهدف</h3>
+          <div className="flex items-center gap-2 mb-4">
+            <Target size={20} className="text-foreground" />
+            <h3 className="text-base font-bold text-foreground">تحقيق الهدف</h3>
           </div>
           <TargetProgressBar
             value={summary.totalOrders}
@@ -324,7 +324,7 @@ export function RiderProfilePerformanceCard({ data }: Readonly<RiderProfilePerfo
       {/* ── Last 3 Months Trend ──────────────────────────────── */}
       {lastThreeMonths.length > 0 && (
         <div className="bg-card -2xl p-5 shadow-card rounded-2xl">
-          <h3 className="text-sm font-bold text-foreground mb-3">آخر 3 شهور</h3>
+          <h3 className="text-base font-bold text-foreground mb-4">آخر 3 شهور</h3>
           {lastThreeMonths.map((m) => (
             <MonthRow
               key={m.monthYear}
@@ -341,7 +341,7 @@ export function RiderProfilePerformanceCard({ data }: Readonly<RiderProfilePerfo
       {/* ── Platform Breakdown ───────────────────────────────── */}
       {platformBreakdown.length > 0 && (
         <div className="bg-card -2xl p-5 shadow-card rounded-2xl">
-          <h3 className="text-sm font-bold text-foreground mb-3">توزيع المنصات</h3>
+          <h3 className="text-base font-bold text-foreground mb-4">توزيع المنصات</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {platformBreakdown.map((pb) => (
               <div

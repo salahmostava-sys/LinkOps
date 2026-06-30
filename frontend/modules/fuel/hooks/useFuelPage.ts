@@ -45,7 +45,7 @@ export function useFuelPage() { // NOSONAR: page data layer with many independen
   const { permissions } = usePermissions('fuel');
   const { selectedMonth: globalMonth } = useTemporalContext();
   const now = new Date();
-  const [view, setView] = useState<'monthly' | 'daily' | 'spreadsheet'>('monthly');
+  const [view, setView] = useState<'spreadsheet'>('spreadsheet');
 
   const [yearStr, monthStr] = globalMonth.split('-');
   const selectedMonth = monthStr;
@@ -160,7 +160,7 @@ export function useFuelPage() { // NOSONAR: page data layer with many independen
   /** Daily orders with date — used by spreadsheet view for per-day orders */
   const { data: dailyOrderRows = [] } = useQuery({
     queryKey: ['fuel', uid, 'daily-orders-by-date', monthYear],
-    enabled: enabled && view === 'spreadsheet',
+    enabled: enabled,
     queryFn: async () => {
       const [y, m] = monthYear.split('-').map(Number);
       const rows = await orderService.getMonthRaw(y, m);
@@ -189,7 +189,7 @@ export function useFuelPage() { // NOSONAR: page data layer with many independen
     refetch: refetchMonthly,
   } = useQuery({
     queryKey: ['fuel', uid, 'monthly', monthYear, platformTab, employees.map((e) => e.id).join(',')],
-    enabled: enabled && (view === 'monthly' || view === 'spreadsheet'),
+    enabled: enabled,
     queryFn: async () => {
       const ms = `${monthYear}-01`;
       const me = format(endOfMonth(new Date(`${monthYear}-01`)), ISO_DATE_FORMAT);
@@ -214,7 +214,7 @@ export function useFuelPage() { // NOSONAR: page data layer with many independen
     refetch: refetchDaily,
   } = useQuery({
     queryKey: ['fuel', uid, 'daily', monthYear, selectedEmployee, platformTab],
-    enabled: enabled && (view === 'daily' || view === 'spreadsheet'),
+    enabled: enabled,
     queryFn: async () => {
       const ms = `${monthYear}-01`;
       const me = format(endOfMonth(new Date(`${monthYear}-01`)), ISO_DATE_FORMAT);
