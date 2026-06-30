@@ -88,9 +88,9 @@ async function executeMonthMode(adminClient, payload) {
 }
 
 const PREVIEW_CACHE_TTL_MS = 5 * 60 * 1000;
-const previewCache = new Map<string, { data: unknown; expiresAt: number }>();
+const previewCache = new Map();
 
-function readPreviewCache(key: string): unknown | undefined {
+function readPreviewCache(key) {
   const entry = previewCache.get(key);
   if (!entry) return undefined;
   if (Date.now() > entry.expiresAt) {
@@ -100,7 +100,7 @@ function readPreviewCache(key: string): unknown | undefined {
   return entry.data;
 }
 
-function writePreviewCache(key: string, data: unknown) {
+function writePreviewCache(key, data) {
   previewCache.set(key, { data, expiresAt: Date.now() + PREVIEW_CACHE_TTL_MS });
   if (previewCache.size > 500) {
     const oldestKey = previewCache.keys().next().value;
