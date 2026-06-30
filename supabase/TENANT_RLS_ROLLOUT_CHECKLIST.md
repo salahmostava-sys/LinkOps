@@ -24,9 +24,6 @@
   9. `20260325190000_salary_engine_tenant_secure.sql`
   10. `20260325193000_salary_preview_rpc.sql`
 
-- Deploy edge function:
-  - `supabase functions deploy salary-engine`
-
 ## Immediate Post-Deployment Validation (SQL)
 
 - Run `supabase/tenant_rls_smoke_tests.sql`.

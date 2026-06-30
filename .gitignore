@@ -81,3 +81,7 @@ bun.lock
 bun.lockb
 yarn.lock
 pnpm-lock.yaml
+
+# Reports and Dumps
+sonar_issues*.json
+pg.zip

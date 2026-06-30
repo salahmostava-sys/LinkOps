@@ -354,23 +354,19 @@
 
   /* ─── Badges — dot + color, no borders ────────────────────────── */
   .badge-urgent {
-    @apply inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full text-red-900 dark:text-red-300;
-    background: rgba(220, 38, 38, 0.15);
+    @apply inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200;
   }
 
   .badge-warning {
-    @apply inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full text-amber-900 dark:text-amber-400;
-    background: rgba(217, 119, 6, 0.15);
+    @apply inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200;
   }
 
   .badge-success {
-    @apply inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full text-emerald-900 dark:text-emerald-400;
-    background: rgba(5, 150, 105, 0.15);
+    @apply inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200;
   }
 
   .badge-info {
-    @apply inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full text-blue-900 dark:text-blue-300;
-    background: rgba(37, 99, 235, 0.15);
+    @apply inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200;
   }
 
   /* ─── Icon box ────────────────────────────────────────────────── */

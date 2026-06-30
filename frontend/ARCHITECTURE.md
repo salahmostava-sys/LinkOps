@@ -11,7 +11,7 @@ This document is the **single source of truth** for architectural decisions in t
 #### UI Components & Styling
 - **UI**: Tailwind CSS + `shadcn/ui` components.
 - **Icons**: `lucide-react` only.
-- **Forbidden**: inline styles (`style={{...}}`) and ad-hoc icon libraries.
+- **Forbidden**: ad-hoc icon libraries. Inline styles (`style={{...}}`) are strictly forbidden except when dynamically injecting CSS variables (e.g. for dynamic theme values or grid sizes).
 
 #### Forms & Validation
 - **Forms**: `react-hook-form` + `zod` (schema-first).

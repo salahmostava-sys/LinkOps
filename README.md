@@ -2,7 +2,7 @@
 
 نظام إدارة شركات التوصيل — يشمل إدارة الموظفين، الطلبات اليومية، الرواتب، السلف، المركبات، الحضور، والتنبيهات.
 
-**Stack:** React 18 · TypeScript · Vite · Supabase · TanStack Query · Tailwind CSS · shadcn/ui
+**Stack:** React 18 · TypeScript · Vite · Supabase · Express (Node.js) · FastAPI (Python) · TanStack Query · Tailwind CSS · shadcn/ui
 
 **Production:** [muhimat.vercel.app](https://muhimat.vercel.app)
 
@@ -41,6 +41,10 @@ npm run dev
 ```
 MuhimmatAltawseel/
 ├── frontend/                  ← React SPA (Vite · port 5000)
+├── server/                    ← Express Backend (Salary Engine & Auth handlers)
+├── api/                       ← Vercel Serverless Functions wrapper
+├── ai-backend/                ← Python FastAPI (ML Predictions)
+├── supabase/                  ← DB Migrations (180+ files), RLS, and Types
 │   ├── app/                   ← Routing, providers, config
 │   │   ├── App.tsx            ← Route definitions
 │   │   ├── routesManifest.ts  ← Sidebar navigation config
