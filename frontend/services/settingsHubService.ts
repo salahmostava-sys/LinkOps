@@ -21,6 +21,10 @@ const EXPORT_TABLE_ALLOWLIST = new Set([
   'system_settings',
 ]);
 
+/** Max rows per settings backup export (paginated). */
+const EXPORT_MAX_ROWS = 10_000;
+const EXPORT_PAGE_SIZE = 1_000;
+
 export const settingsHubService = {
   getCurrentUserId: async () => {
     const { data, error } = await supabase.auth.getSession();
@@ -232,8 +236,31 @@ export const settingsHubService = {
     if (!EXPORT_TABLE_ALLOWLIST.has(table)) {
       throw toServiceError(new Error('Table is not allowed for export'), 'settingsHubService.exportTableRows');
     }
-    const { data, error } = await supabase.from(table as never).select('*');
-    if (error) throw toServiceError(error, 'settingsHubService.exportTableRows');
-    return data ?? [];
+
+    const allRows: Record<string, unknown>[] = [];
+    let from = 0;
+
+    while (allRows.length < EXPORT_MAX_ROWS) {
+      const to = from + EXPORT_PAGE_SIZE - 1;
+      const { data, error } = await supabase
+        .from(table as never)
+        .select('*')
+        .range(from, to);
+      if (error) throw toServiceError(error, 'settingsHubService.exportTableRows');
+      if (!data || data.length === 0) break;
+
+      allRows.push(...(data as Record<string, unknown>[]));
+      if (data.length < EXPORT_PAGE_SIZE) break;
+      from += EXPORT_PAGE_SIZE;
+    }
+
+    if (allRows.length >= EXPORT_MAX_ROWS) {
+      throw toServiceError(
+        new Error(`Export limit exceeded (${EXPORT_MAX_ROWS} rows). Narrow the table or contact an administrator.`),
+        'settingsHubService.exportTableRows',
+      );
+    }
+
+    return allRows;
   },
 };

@@ -11,9 +11,11 @@ setup('authenticate', async ({ page }) => {
   const password = process.env.E2E_DASHBOARD_PASSWORD;
 
   if (!email || !password) {
-    console.warn('Skipping auth setup: E2E_DASHBOARD_EMAIL or E2E_DASHBOARD_PASSWORD is not set.');
-    // Save empty state to avoid errors in dependent tests that might gracefully skip
-    await page.context().storageState({ path: authFile });
+    const msg = 'E2E_DASHBOARD_EMAIL and E2E_DASHBOARD_PASSWORD must be set for authenticated E2E tests.';
+    if (process.env.CI) {
+      throw new Error(msg);
+    }
+    setup.skip(true, msg);
     return;
   }
 

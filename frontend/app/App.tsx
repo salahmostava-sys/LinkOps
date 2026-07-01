@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useState } from "react";
 import { ChunkRecoveryBootstrap } from "@app/components/ChunkRecoveryBootstrap";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "@app/providers/AuthContext";
@@ -58,23 +58,25 @@ const handleGlobalAuthError = (source: "query" | "mutation", error: unknown) => 
   emitAuthFailure({ source, reason: "unauthenticated" });
 };
 
-const queryClient = new QueryClient({
-  queryCache: new QueryCache({
-    onError: (error) => handleGlobalAuthError("query", error),
-  }),
-  mutationCache: new MutationCache({
-    onError: (error) => handleGlobalAuthError("mutation", error),
-  }),
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000,
-      gcTime: 10 * 60 * 1000,
-      refetchOnWindowFocus: false,
-      refetchOnReconnect: false,
-      retry: 1,
+function createQueryClient() {
+  return new QueryClient({
+    queryCache: new QueryCache({
+      onError: (error) => handleGlobalAuthError("query", error),
+    }),
+    mutationCache: new MutationCache({
+      onError: (error) => handleGlobalAuthError("mutation", error),
+    }),
+    defaultOptions: {
+      queries: {
+        staleTime: 5 * 60 * 1000,
+        gcTime: 10 * 60 * 1000,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+        retry: 1,
+      },
     },
-  },
-});
+  });
+}
 
 const DashboardRouteShell = () => (
   <DashboardLayout>
@@ -172,7 +174,10 @@ const router = createBrowserRouter([
   },
 ]);
 
-const App = () => (
+const App = () => {
+  const [queryClient] = useState(createQueryClient);
+
+  return (
   <QueryClientProvider client={queryClient}>
     <ChunkRecoveryBootstrap />
     <ThemeProvider>
@@ -189,6 +194,7 @@ const App = () => (
       </TooltipProvider>
     </ThemeProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;

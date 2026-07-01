@@ -43,24 +43,20 @@ function buildNamePattern(name) {
   return `%${escaped}%`;
 }
 
-async function queryRidersRanking(sb, monthFrom, monthTo, ascending) {
-  const { data, error } = await sb.from('daily_orders')
-    .select('employee_id, orders_count, employees(name)')
-    .gte('date', monthFrom)
-    .lte('date', monthTo);
+async function queryRidersRanking(sb, monthFrom, _monthTo, ascending) {
+  const monthYear = monthFrom.slice(0, 7);
+  const { data, error } = await sb
+    .from('v_rider_monthly_performance')
+    .select('employee_name, total_orders')
+    .eq('month_year', monthYear)
+    .order('total_orders', { ascending })
+    .limit(10);
   if (error) throw error;
-  const totals = {};
-  for (const r of (data ?? [])) {
-    const id = r.employee_id;
-    const name = r.employees?.name ?? id;
-    const count = r.orders_count ?? 0;
-    if (!totals[id]) totals[id] = { name, total: 0 };
-    totals[id].total += count;
-  }
-  const sorted = Object.values(totals)
-    .toSorted((a, b) => (ascending ? a.total - b.total : b.total - a.total))
-    .slice(0, 10);
-  return sorted.map((r, i) => ({ rank: i + 1, name: r.name, orders: r.total }));
+  return (data ?? []).map((r, i) => ({
+    rank: i + 1,
+    name: r.employee_name ?? '—',
+    orders: r.total_orders ?? 0,
+  }));
 }
 
 async function callGroqChat(groqApiKey, groqBaseUrl, msgs, tools, model) {
@@ -97,7 +93,15 @@ function _buildDateCtx() {
 }
 
 async function _toolEmployeeStats(sb) {
-  const { data, error } = await sb.from('employees').select('sponsorship_status, status');
+  const { count: total, error: countError } = await sb
+    .from('employees')
+    .select('*', { count: 'exact', head: true });
+  if (countError) throw countError;
+
+  const { data, error } = await sb
+    .from('employees')
+    .select('sponsorship_status, status')
+    .limit(2000);
   if (error) throw error;
   const rows = data ?? [];
   const by_sponsorship = {};
@@ -105,7 +109,15 @@ async function _toolEmployeeStats(sb) {
     const s = r.sponsorship_status ?? 'unknown';
     by_sponsorship[s] = (by_sponsorship[s] ?? 0) + 1;
   }
-  return { total: rows.length, active_employees_count: rows.filter(r => r.status === 'active').length, by_sponsorship };
+  const result = {
+    total: total ?? rows.length,
+    active_employees_count: rows.filter(r => r.status === 'active').length,
+    by_sponsorship,
+  };
+  if ((total ?? 0) > rows.length) {
+    result.note = 'by_sponsorship breakdown based on first 2000 rows; total count is exact';
+  }
+  return result;
 }
 
 async function _toolVehicleStatus(sb) {
@@ -123,7 +135,11 @@ async function _toolOrdersSummary(sb, args, ctx) {
   const period = args.period || 'today';
   const from = period === 'this_month' ? ctx.monthFrom : ctx.today;
   const to = period === 'this_month' ? ctx.monthTo : ctx.today;
-  const { data, error } = await sb.from('daily_orders').select('orders_count, apps(name)').gte('date', from).lte('date', to);
+  const { data, error } = await sb.from('daily_orders')
+    .select('orders_count, apps(name)')
+    .gte('date', from)
+    .lte('date', to)
+    .limit(5000);
   if (error) throw error;
   let total = 0;
   const by_platform = {};
@@ -133,7 +149,9 @@ async function _toolOrdersSummary(sb, args, ctx) {
     const appName = r.apps?.name ?? 'أخرى';
     by_platform[appName] = (by_platform[appName] ?? 0) + count;
   }
-  return { total, period: period === 'this_month' ? 'الشهر الحالي' : 'اليوم', by_platform };
+  const result = { total, period: period === 'this_month' ? 'الشهر الحالي' : 'اليوم', by_platform };
+  if ((data ?? []).length >= 5000) result.truncated = true;
+  return result;
 }
 
 async function _toolSalarySummary(sb, ctx) {
@@ -158,14 +176,20 @@ async function _toolAttendanceSummary(sb, args, ctx) {
   const period = args.period || 'today';
   const from = period === 'this_month' ? ctx.monthFrom : ctx.today;
   const to = period === 'this_month' ? ctx.monthTo : ctx.today;
-  const { data, error } = await sb.from('attendance').select('status').gte('date', from).lte('date', to);
+  const { data, error } = await sb.from('attendance')
+    .select('status')
+    .gte('date', from)
+    .lte('date', to)
+    .limit(5000);
   if (error) throw error;
   const by_status = {};
   for (const r of (data ?? [])) {
     const s = r.status ?? 'unknown';
     by_status[s] = (by_status[s] ?? 0) + 1;
   }
-  return { period: period === 'this_month' ? 'الشهر الحالي' : 'اليوم', total_records: (data ?? []).length, by_status };
+  const result = { period: period === 'this_month' ? 'الشهر الحالي' : 'اليوم', total_records: (data ?? []).length, by_status };
+  if ((data ?? []).length >= 5000) result.truncated = true;
+  return result;
 }
 
 async function _toolAlertsSummary(sb, ctx) {

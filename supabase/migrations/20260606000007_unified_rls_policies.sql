@@ -1001,8 +1001,7 @@ DROP POLICY IF EXISTS "combined_all_policy" ON "public"."salary_slip_templates";
 DROP POLICY IF EXISTS "combined_select_policy" ON "public"."salary_slip_templates";
 CREATE POLICY "unified_select_policy" ON "public"."salary_slip_templates" FOR SELECT
   USING (
-    (((auth.role() = 'authenticated'::text) OR (is_active_user(( SELECT auth.uid() AS uid)) AND (has_role(( SELECT auth.uid() AS uid), _const_role_admin()) OR has_role(( SELECT auth.uid() AS uid), _const_role_operations()))))) OR 
-    ((true OR is_active_user(( SELECT auth.uid() AS uid))))
+    (((auth.role() = 'authenticated'::text) OR (is_active_user(( SELECT auth.uid() AS uid)) AND (has_role(( SELECT auth.uid() AS uid), _const_role_admin()) OR has_role(( SELECT auth.uid() AS uid), _const_role_operations())))))
   );
 CREATE POLICY "unified_insert_policy" ON "public"."salary_slip_templates" FOR INSERT
   WITH CHECK (

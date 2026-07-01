@@ -106,6 +106,13 @@ export function logError(message: string, error?: unknown, options?: { level?: L
   logger.error(message, error, { meta: options?.meta });
 }
 
+/** Run an async task without blocking; log failures instead of swallowing silently. */
+export function runSafe(promise: Promise<unknown>, context: string): void {
+  void promise.catch((error) => {
+    logError(context, error, { level: 'warn' });
+  });
+}
+
 export function installGlobalErrorMonitoring() {
   if (monitoringInstalled) return;
   monitoringInstalled = true;

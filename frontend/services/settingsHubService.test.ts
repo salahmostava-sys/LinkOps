@@ -286,6 +286,24 @@ describe('settingsHubService', () => {
       expect(result).toEqual([{ id: 1 }]);
     });
 
+    it('paginates large exports', async () => {
+      const page1 = Array.from({ length: 1000 }, (_, i) => ({ id: i }));
+      const page2 = [{ id: 1000 }];
+      let call = 0;
+      fromMock.mockImplementation((_table: string) => {
+        const mockObj = call === 0
+          ? { data: page1, error: null }
+          : { data: page2, error: null };
+        call += 1;
+        const p: any = Promise.resolve(mockObj);
+        p.select = vi.fn().mockReturnValue(p);
+        p.range = vi.fn().mockReturnValue(p);
+        return p;
+      });
+      const result = await settingsHubService.exportTableRows('employees');
+      expect(result).toHaveLength(1001);
+    });
+
     it('throws for disallowed tables', async () => {
       await expect(settingsHubService.exportTableRows('secrets_table')).rejects.toThrow('Table is not allowed for export');
     });

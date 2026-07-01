@@ -68,6 +68,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const isFirstLoad = useRef(true);
   const redirectLockRef = useRef(false);
   const redirectCooldownUntilRef = useRef(0);
+  const pathnameRef = useRef(location.pathname);
+  pathnameRef.current = location.pathname;
 
   const isPublicAuthRoute = useCallback((pathname: string) => (
     pathname === '/login'
@@ -75,14 +77,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const redirectToLoginIfNeeded = useCallback(() => {
     if (redirectLockRef.current) return;
-    if (isPublicAuthRoute(location.pathname)) return;
+    if (isPublicAuthRoute(pathnameRef.current)) return;
     const now = Date.now();
     if (now < redirectCooldownUntilRef.current) return;
     redirectLockRef.current = true;
     redirectCooldownUntilRef.current = now + 2000;
-    navigate('/login', { replace: true, state: { from: location.pathname } });
+    navigate('/login', { replace: true, state: { from: pathnameRef.current } });
     setTimeout(() => { redirectLockRef.current = false; }, 300);
-  }, [isPublicAuthRoute, location.pathname, navigate]);
+  }, [isPublicAuthRoute, navigate]);
 
   const handleUnauthenticatedState = useCallback(async (reason: string) => {
     try {
@@ -198,9 +200,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           return true;
         }
 
-        // No stored session/token: arefreshSession() to prevent AuthSessionMissingError spam.
-        if (!current) return false;
-        await authService.refreshSession();
+        // Session missing or expired — attempt token refresh before giving up.
+        try {
+          await authService.refreshSession();
+        } catch (refreshErr) {
+          logError('[Auth] refreshSession during recovery failed', refreshErr);
+          return false;
+        }
 
         const after = await authService.getSession();
         if (after?.user) {
@@ -251,7 +257,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } catch (e) {
           logError('[Auth] onAuthStateChange handler failed', e);
         }
-      })().catch(() => {});
+      })().catch((e) => logError('[Auth] onAuthStateChange handler failed', e, { level: 'warn' }));
     });
 
     // Bootstrap: resolve current session on mount
@@ -307,7 +313,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           const active = await verifyCurrentUserActive(currentSession.user.id, 'wake_recheck');
           if (!active) return;
         }
-        queryClient.refetchQueries({ type: 'active' });
+        try {
+          await queryClient.refetchQueries({ type: 'active' });
+        } catch (e) {
+          logError('[Auth] refetchQueries on wake failed', e);
+        }
       }
     };
 

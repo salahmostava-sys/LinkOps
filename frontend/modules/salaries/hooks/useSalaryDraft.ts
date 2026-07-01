@@ -4,7 +4,7 @@
  * Extracted from SalariesPage to reduce the component's responsibility.
  * Handles:
  *  - Building the draft map from dirty rows
- *  - Mirroring to localStorage for offline persistence
+ *  - Mirroring to sessionStorage for tab-scoped offline persistence
  *  - Debounced server sync via salaryDraftService (2s after change)
  *  - Skipping the first render (avoids writing back what we just loaded)
  *  - Resetting tracking refs when selectedMonth or user changes
@@ -56,7 +56,7 @@ export function useSalaryDraft({
 
   // Draft auto-save effect:
   // 1. Build draft patch from dirty rows → serialize to JSON.
-  // 2. Mirror to localStorage for offline persistence.
+  // 2. Mirror to sessionStorage for tab-scoped offline persistence.
   // 3. On first data load (skipNextDraftSaveRef), capture signature but don't sync to server.
   // 4. On subsequent changes, compare signature. If changed, debounce 2s then sync to server.
   useEffect(() => {
@@ -65,15 +65,15 @@ export function useSalaryDraft({
     const draft = buildSalaryDraftMap(rows);
     const serializedDraft = JSON.stringify(draft);
 
-    // ── localStorage mirror ────────────────────────────────────────────────
+  // ── sessionStorage mirror (cleared when browser tab closes) ─────────────
     try {
       if (Object.keys(draft).length === 0) {
-        localStorage.removeItem(salariesDraftKey);
+        sessionStorage.removeItem(salariesDraftKey);
       } else {
-        localStorage.setItem(salariesDraftKey, serializedDraft);
+        sessionStorage.setItem(salariesDraftKey, serializedDraft);
       }
     } catch (e) {
-      logError('[SalaryDraft] Failed to mirror drafts to localStorage', e, { level: 'warn' });
+      logError('[SalaryDraft] Failed to mirror drafts to sessionStorage', e, { level: 'warn' });
     }
 
     // ── Skip first render (data just loaded) ──────────────────────────────
@@ -99,7 +99,7 @@ export function useSalaryDraft({
           logError('[SalaryDraft] Failed to clear server drafts after approve', e, { level: 'warn' });
           toast.error('فشل مسح المسودات من الخادم بعد الاعتماد');
         }
-      })().catch(() => {});
+      })().catch((e) => { logError('[SalaryDraft] Unexpected error clearing server drafts', e, { level: 'warn' }); });
       return;
     }
 
@@ -113,7 +113,7 @@ export function useSalaryDraft({
           logError('[SalaryDraft] Failed to auto-save drafts to server', e, { level: 'warn' });
           toast.error('فشل حفظ المسودات تلقائياً — سيتم إعادة المحاولة');
         }
-      })().catch(() => {});
+      })().catch((e) => { logError('[SalaryDraft] Unexpected error during debounced sync', e, { level: 'warn' }); });
     }, DRAFT_DEBOUNCE_MS);
 
     return () => clearTimeout(timer);

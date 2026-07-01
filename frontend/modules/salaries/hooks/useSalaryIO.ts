@@ -14,7 +14,7 @@ import { getManualDeductionTotal } from '@modules/salaries/lib/salaryDomain';
 import { loadXlsx } from '@modules/salaries/lib/salaryPdfLoaders';
 import type { SalaryRow } from '@modules/salaries/types/salary.types';
 import type { computeSalaryRow } from '@modules/salaries/hooks/useSalaryTable';
-import { useSafeAction } from '@shared/hooks/useSafeAction';
+import { runSafe } from '@shared/lib/logger';
 
 // ─── Params ──────────────────────────────────────────────────────────────────
 
@@ -155,7 +155,7 @@ export function useSalaryIO(params: UseSalaryIOParams) {
         toast.error('خطأ', { description: 'صيغة الملف غير مدعومة — استخدم xlsx أو xls' });
         return;
       }
-      handleSalaryImportFile(file).catch(() => {});
+      runSafe(handleSalaryImportFile(file), '[SalaryIO] import file failed');
     },
     [handleSalaryImportFile, toast],
   );

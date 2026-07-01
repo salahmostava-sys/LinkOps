@@ -21,8 +21,7 @@ const {
 } = require('../../api/_lib.js');
 
 // ─── Rate Limiting Helper ───────────────────────────────────────────────────
-
-const fallbackRateLimits = new Map();
+// Uses Supabase RPC only — no in-memory fallback (unreliable on serverless).
 
 async function checkRateLimit(supabaseClient, userId, action, limit, windowSeconds) {
   const key = `${action}_${userId}`;
@@ -32,20 +31,8 @@ async function checkRateLimit(supabaseClient, userId, action, limit, windowSecon
     p_window_seconds: windowSeconds
   });
   if (error) {
-    logError('Rate limit check failed, using in-memory fallback', { error: error.message, action, user_id: userId });
-    
-    const now = Date.now();
-    let record = fallbackRateLimits.get(key);
-    
-    if (!record || now > record.resetTime) {
-      record = { count: 0, resetTime: now + windowSeconds * 1000 };
-    }
-    
-    record.count += 1;
-    fallbackRateLimits.set(key, record);
-    
-    const allowed = record.count <= limit;
-    return { allowed, remaining: Math.max(0, limit - record.count) };
+    logError('Rate limit check failed — denying request (fail-closed)', { error: error.message, action, user_id: userId });
+    return { allowed: false, remaining: 0 };
   }
   return data?.[0] ?? { allowed: true };
 }
@@ -87,38 +74,11 @@ async function executeMonthMode(adminClient, payload) {
   return { status: 200, data };
 }
 
-const PREVIEW_CACHE_TTL_MS = 5 * 60 * 1000;
-const previewCache = new Map();
-
-function readPreviewCache(key) {
-  const entry = previewCache.get(key);
-  if (!entry) return undefined;
-  if (Date.now() > entry.expiresAt) {
-    previewCache.delete(key);
-    return undefined;
-  }
-  return entry.data;
-}
-
-function writePreviewCache(key, data) {
-  previewCache.set(key, { data, expiresAt: Date.now() + PREVIEW_CACHE_TTL_MS });
-  if (previewCache.size > 500) {
-    const oldestKey = previewCache.keys().next().value;
-    if (oldestKey) previewCache.delete(oldestKey);
-  }
-}
-
 async function executeMonthPreviewMode(adminClient, payload) {
-  const cacheKey = payload.month_year;
-  const cached = readPreviewCache(cacheKey);
-  if (cached !== undefined) {
-    return { status: 200, data: cached, cached: true };
-  }
   const { data, error } = await adminClient.rpc('preview_salary_for_month', {
     p_month_year: payload.month_year,
   });
   if (error) throw new Error(error.message);
-  writePreviewCache(cacheKey, data);
   return { status: 200, data };
 }
 
@@ -319,8 +279,8 @@ export async function groqChatHandler(req, res) {
       .eq('user_id', callerUser.id);
     if (roleError) throw new Error(roleError.message);
     const roles = new Set((roleRows ?? []).map(r => r.role));
-    if (!roles.has('admin') && !roles.has('supervisor')) {
-      return res.status(403).json({ error: 'Only admin/supervisor can access groq-chat directly' });
+    if (!roles.has('admin') && !roles.has('operations')) {
+      return res.status(403).json({ error: 'Only admin/operations can access groq-chat directly' });
     }
 
     const adminClient = getAdminClient();

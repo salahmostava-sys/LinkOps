@@ -9,16 +9,19 @@
 import DOMPurify from 'dompurify';
 import { escapeHtml } from '@shared/lib/security';
 
-// Restrictive allowlist suitable for branded headers/footers.
+// Restrictive allowlist: no inline styles or external URLs (prevents pixel-tracking exfiltration).
 const SANITIZE_CONFIG: DOMPurify.Config = {
-  ALLOWED_TAGS: ['div', 'span', 'img', 'h1', 'h2', 'h3', 'p', 'br', 'strong', 'em', 'small', 'table', 'tr', 'td', 'th'],
-  ALLOWED_ATTR: ['class', 'style', 'src', 'alt', 'width', 'height'],
-  FORBID_ATTR: ['onerror', 'onload', 'onclick'],
+  ALLOWED_TAGS: ['div', 'span', 'h1', 'h2', 'h3', 'p', 'br', 'strong', 'em', 'small', 'table', 'tr', 'td', 'th'],
+  ALLOWED_ATTR: ['class', 'alt'],
+  FORBID_ATTR: ['style', 'src', 'onerror', 'onload', 'onclick'],
   ALLOW_DATA_ATTR: false,
+  ALLOW_UNKNOWN_PROTOCOLS: false,
 };
 
-const sanitizeTemplateHtml = (html?: string): string =>
-  html ? DOMPurify.sanitize(html, SANITIZE_CONFIG) : '';
+const sanitizeTemplateHtml = (html?: string): string => {
+  if (!html) return '';
+  return DOMPurify.sanitize(html, SANITIZE_CONFIG);
+};
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 

@@ -5,6 +5,15 @@
 -- NOTE: This file contains the complete schema (tables, functions, RLS, indexes)
 --       for a fresh database setup. DO NOT apply this to production!
 --       Production already has all migrations applied.
+-- WARNING: This squash is NOT a complete baseline on its own. After applying it,
+--       you MUST also run these subsequent migrations in order:
+--         20260702000000_fix_all_recursive_constants.sql
+--         20260702000001_employee_wallets.sql
+--         20260703000000_advances_attachment.sql
+--         20260703000001_treasury.sql
+--         20260703000002_fix_wallet_rls.sql
+--         20260704000000_fix_salary_slip_templates_rls.sql
+--       Prefer `supabase db reset` (applies all migrations) over squash-only setup.
 -- USAGE: Use this file ONLY for:
 --        - Local development (fresh DB setup)
 --        - New developer onboarding

@@ -2,6 +2,7 @@ import { useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '@app/providers/AuthContext';
 import { ReactNode, useEffect, useState } from 'react';
 import Loading from '@shared/components/Loading';
+import { logError } from '@shared/lib/logger';
 
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   const { session, loading, recoverSessionSilently } = useAuth();
@@ -12,9 +13,11 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
     if (loading || session) return;
     let mounted = true;
     setCheckingRecovery(true);
-    recoverSessionSilently().catch(() => {}).finally(() => {
-      if (mounted) setCheckingRecovery(false);
-    });
+    recoverSessionSilently()
+      .catch((e) => logError('[ProtectedRoute] session recovery failed', e, { level: 'warn' }))
+      .finally(() => {
+        if (mounted) setCheckingRecovery(false);
+      });
     return () => {
       mounted = false;
     };

@@ -20,7 +20,7 @@ import { useRealtimePostgresChanges, REALTIME_TABLES_DASHBOARD } from '@shared/h
 import { QueryErrorRetry } from '@shared/components/QueryErrorRetry';
 import { isEmployeeVisibleInMonth } from '@shared/lib/employeeVisibility';
 import { getEmployeeCities, applyEmployeeFilters, sortEmployees } from '@modules/employees/model/employeeUtils';
-import { useEmployeesData } from '@modules/employees/hooks/useEmployees';
+import { runSafe } from '@shared/lib/logger';
 import { EmployeeActionsBar } from '@modules/employees/components/EmployeeActionsBar';
 import { EmployeeDetailedTable } from '@modules/employees/components/EmployeeTable';
 import { useEmployeeActions } from '@modules/employees/hooks/useEmployeeTable';
@@ -110,7 +110,7 @@ const Employees = () => {
   const tableRef = useRef<HTMLTableElement>(null);
 
   useRealtimePostgresChanges('employees-page-realtime', REALTIME_TABLES_DASHBOARD, () => {
-    refetchEmployees().catch(() => {});
+    runSafe(refetchEmployees(), '[EmployeesPage] refetch on mount failed');
   });
 
   const syncSystemAfterEmployeeImport = useCallback(async () => {
@@ -149,7 +149,7 @@ const Employees = () => {
       if (document.visibilityState !== 'visible' || hiddenAt === null) return;
       const away = Date.now() - hiddenAt;
       hiddenAt = null;
-      if (away >= minAwayMs) refetchEmployees().catch(() => {});
+      if (away >= minAwayMs) runSafe(refetchEmployees(), '[EmployeesPage] refetch on wake failed');
     };
     document.addEventListener('visibilitychange', onVis);
     return () => document.removeEventListener('visibilitychange', onVis);
@@ -366,7 +366,7 @@ const Employees = () => {
             open={showAddModal}
             editEmployee={editEmployee}
             onClose={() => { setShowAddModal(false); setEditEmployee(null); }}
-            onSuccess={() => { refetchEmployees().catch(() => {}); setShowAddModal(false); setEditEmployee(null); }}
+            onSuccess={() => { runSafe(refetchEmployees(), '[EmployeesPage] refetch after save failed'); setShowAddModal(false); setEditEmployee(null); }}
           />
         </Suspense>
       )}

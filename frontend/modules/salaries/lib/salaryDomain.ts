@@ -562,9 +562,9 @@ export const buildSalaryRows = ({
 };
 
 const readLocalSalaryDraftMap = (storageKey?: string): Record<string, SalaryDraftPatch> => {
-  if (!storageKey || typeof localStorage === 'undefined') return {};
+  if (!storageKey || typeof sessionStorage === 'undefined') return {};
   try {
-    const raw = localStorage.getItem(storageKey);
+    const raw = sessionStorage.getItem(storageKey);
     if (!raw) return {};
     const parsed: unknown = JSON.parse(raw);
     if (!parsed || typeof parsed !== 'object' || parsed === null) return {};
@@ -577,7 +577,7 @@ const readLocalSalaryDraftMap = (storageKey?: string): Record<string, SalaryDraf
     }
     return result;
   } catch (e) {
-    logError('[Salaries] Failed to read drafts from localStorage', e, { level: 'warn' });
+    logError('[Salaries] Failed to read drafts from sessionStorage', e, { level: 'warn' });
     return {};
   }
 };
