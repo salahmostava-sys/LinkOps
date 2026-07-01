@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Plus, Pencil, Trash2, Search, Package, AlertTriangle, ShoppingCart } from 'lucide-react';
+import { Pencil, Trash2, Search, Package, AlertTriangle, ShoppingCart } from 'lucide-react';
 import { Button } from '@shared/components/ui/button';
 import { Input } from '@shared/components/ui/input';
 import { Label } from '@shared/components/ui/label';

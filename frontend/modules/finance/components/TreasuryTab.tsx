@@ -52,7 +52,7 @@ export function TreasuryTab() {
       setDescription('');
       setFile(null);
       toast.success('تم تسجيل العملية بنجاح');
-    } catch (_err) {
+    } catch {
       toast.error('فشل في تسجيل العملية');
     }
   };
@@ -144,7 +144,7 @@ export function TreasuryTab() {
                             try {
                               const url = await storageService.createSignedUrl('advance-attachments', t.attachment_url!);
                               window.open(url, '_blank');
-                            } catch (_e) { toast.error('فشل فتح المرفق'); }
+                            } catch { toast.error('فشل فتح المرفق'); }
                           }}>
                             <Paperclip size={14} />
                           </Button>

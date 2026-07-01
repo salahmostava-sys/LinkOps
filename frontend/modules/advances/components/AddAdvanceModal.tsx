@@ -312,7 +312,7 @@ export const EditAdvanceModal = ({ advance, onClose, onSaved }: Readonly<EditAdv
                   try {
                     const url = await storageService.createSignedUrl('advance-attachments', advance.attachment_url!);
                     window.open(url, '_blank');
-                  } catch (_e) {
+                  } catch {
                     toast({ title: 'فشل فتح المرفق', variant: 'destructive' });
                   }
                 }}>
@@ -482,8 +482,8 @@ export const TransactionsModal = ({ employeeId, employeeName, nationalId, totalD
       setEditingNoteId(null);
       onRefresh();
       toast({ title: '✅ تم حفظ الملاحظة' });
-    } catch (_e) {
-      logError('[Advances] save note failed', e);
+    } catch {
+      logError('[Advances] save note failed', new Error('Save note failed'));
       toast({ title: 'خطأ', variant: 'destructive' });
     } finally {
       setSavingNote(false);
@@ -625,7 +625,7 @@ export const TransactionsModal = ({ employeeId, employeeName, nationalId, totalD
                             try {
                               const url = await storageService.createSignedUrl('advance-attachments', inst.attachmentUrl!);
                               window.open(url, '_blank');
-                            } catch (_error) {
+                            } catch {
                               toast({ title: 'فشل فتح المرفق', variant: 'destructive' });
                             }
                           }} title="عرض المرفق">
