@@ -357,7 +357,7 @@ export const dashboardService = {
 
     const [fuelRes, maintenanceRes, violationsRes, advancesRes, salariesRes] = await Promise.all([
       supabase.from('vehicle_mileage_daily').select('fuel_cost, km_total').gte('date', start).lte('date', end),
-      supabase.from('maintenance_logs').select('cost').gte('date', start).lte('date', end),
+      supabase.from('maintenance_logs').select('total_cost').gte('date', start).lte('date', end),
       Promise.resolve({ data: [] as { amount: number }[], error: null }), // violations removed until correct table found
       supabase.from('advances').select('amount').eq('status', 'active'),
       supabase.from('salary_records').select('net_salary').eq('month_year', monthYear).eq('is_approved', true),
@@ -371,7 +371,7 @@ export const dashboardService = {
 
     const fuelCost = (fuelRes.data ?? []).reduce((s, r) => s + (r.fuel_cost ?? 0), 0);
     const fuelLiters = (fuelRes.data ?? []).reduce((s, r) => s + (r.km_total ?? 0), 0);
-    const maintenanceCost = (maintenanceRes.data ?? []).reduce((s, r) => s + (r.cost ?? 0), 0);
+    const maintenanceCost = (maintenanceRes.data ?? []).reduce((s, r) => s + (r.total_cost ?? 0), 0);
     const violationsCount = violationsRes.data?.length ?? 0;
     const violationsCost = (violationsRes.data ?? []).reduce((s, r) => s + (r.amount ?? 0), 0);
     const pendingAdvances = (advancesRes.data ?? []).reduce((s, r) => s + (r.amount ?? 0), 0);

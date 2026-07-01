@@ -214,7 +214,7 @@ describe('dashboardService', () => {
   describe('getAdditionalMetrics', () => {
     const validMetricsSetup = () => {
       tableResults.vehicle_mileage_daily = { data: [{ fuel_cost: 100, km_total: 50 }], error: null };
-      tableResults.maintenance_logs = { data: [{ cost: 200 }], error: null };
+      tableResults.maintenance_logs = { data: [{ total_cost: 200 }], error: null };
       tableResults.violations = { data: [{ amount: 300 }], error: null };
       tableResults.advances = { data: [{ amount: 400 }], error: null };
       tableResults.salary_records = { data: [{ net_salary: 500 }], error: null };
