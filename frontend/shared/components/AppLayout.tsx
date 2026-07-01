@@ -21,7 +21,6 @@ import { cn } from '@shared/lib/utils';
 import { brandLogoSrc } from '@shared/lib/brandLogo';
 import { logError } from '@shared/lib/logger';
 import { profileService } from '@services/profileService';
-import { AiChatWidget } from '@shared/components/AiChatWidget';
 import GlobalMonthPicker from '@shared/components/Temporal/GlobalMonthPicker';
 
 interface AppLayoutProps {
@@ -301,11 +300,10 @@ const AppLayoutInner = ({ children }: Readonly<AppLayoutProps>) => { // NOSONAR:
         {/* ── Page content ─────────────────────────────────── */}
         <div
           key={pageKey}
-          className="flex-1 overflow-auto p-4 sm:p-5 lg:p-6 xl:p-8 min-h-0 flex flex-col page-enter relative"
+          className="flex-1 overflow-auto p-4 sm:p-5 lg:p-6 xl:p-8 min-h-0 flex flex-col page-enter"
           style={{ background: 'var(--ds-surface)' }}
         >
           {children}
-          <AiChatWidget />
         </div>
       </main>
     </div>
