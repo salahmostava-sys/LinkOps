@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Plus, Pencil, Trash2, Loader2, Search } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, Package, AlertTriangle, ShoppingCart } from 'lucide-react';
 import { Button } from '@shared/components/ui/button';
 import { Input } from '@shared/components/ui/input';
 import { Label } from '@shared/components/ui/label';
@@ -20,23 +20,235 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@shared/components/ui/alert-dialog';
+import { Skeleton } from '@shared/components/ui/skeleton';
 import { useToast } from '@shared/hooks/use-toast';
 import { usePermissions } from '@shared/hooks/usePermissions';
 import { useSpareParts, useInvalidateMaintenanceQueries } from '@modules/maintenance/hooks/useMaintenanceData';
 import * as maintenanceService from '@services/maintenanceService';
 import type { SparePart } from '@services/maintenanceService';
-import { cn } from '@shared/lib/utils';
 
-const emptyForm: maintenanceService.CreateSparePartInput = {
+// ── Types ────────────────────────────────────────────────────────────────────
+
+type PurchaseForm = {
+  name_ar: string;
+  part_number: string;
+  quantity: string;       // كمية الشراء
+  unit_cost: string;      // سعر الشراء وقت الشراء
+  unit: string;
+  supplier: string;
+  notes: string;
+};
+
+const emptyPurchase = (): PurchaseForm => ({
   name_ar: '',
   part_number: '',
-  stock_quantity: 0,
-  min_stock_alert: 5,
-  unit: '????',
-  unit_cost: 0,
+  quantity: '1',
+  unit_cost: '',
+  unit: 'قطعة',
   supplier: '',
   notes: '',
-};
+});
+
+// ── Sub-components ────────────────────────────────────────────────────────────
+
+function StockBadge({ qty, minAlert }: Readonly<{ qty: number; minAlert: number }>) {
+  const isLow = qty < minAlert;
+  const isEmpty = qty <= 0;
+  if (isEmpty) return <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400">نفد المخزون</span>;
+  if (isLow)   return <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">مخزون منخفض</span>;
+  return <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">متوفر</span>;
+}
+
+// ── Add/Edit Purchase Modal ───────────────────────────────────────────────────
+
+function PurchaseModal({
+  open,
+  onOpenChange,
+  editing,
+  onSaved,
+}: Readonly<{
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  editing: SparePart | null;
+  onSaved: () => void;
+}>) {
+  const { toast } = useToast();
+  const [form, setForm] = useState<PurchaseForm>(emptyPurchase);
+  const [saving, setSaving] = useState(false);
+
+  useMemo(() => {
+    if (!open) return;
+    if (editing) {
+      setForm({
+        name_ar: editing.name_ar,
+        part_number: editing.part_number ?? '',
+        quantity: String(editing.stock_quantity),
+        unit_cost: String(editing.unit_cost),
+        unit: editing.unit,
+        supplier: editing.supplier ?? '',
+        notes: editing.notes ?? '',
+      });
+    } else {
+      setForm(emptyPurchase());
+    }
+  }, [open, editing]);
+
+  const set = (field: keyof PurchaseForm, val: string) =>
+    setForm(prev => ({ ...prev, [field]: val }));
+
+  const handleSave = async () => {
+    if (!form.name_ar.trim()) { toast({ title: 'أدخل اسم القطعة', variant: 'destructive' }); return; }
+    const qty = parseFloat(form.quantity);
+    const cost = parseFloat(form.unit_cost);
+    if (isNaN(qty) || qty < 0) { toast({ title: 'أدخل كمية صحيحة', variant: 'destructive' }); return; }
+    if (isNaN(cost) || cost < 0) { toast({ title: 'أدخل سعر شراء صحيح', variant: 'destructive' }); return; }
+
+    setSaving(true);
+    try {
+      const payload = {
+        name_ar: form.name_ar.trim(),
+        part_number: form.part_number.trim() || null,
+        stock_quantity: qty,
+        unit_cost: cost,
+        unit: form.unit || 'قطعة',
+        supplier: form.supplier.trim() || null,
+        notes: form.notes.trim() || null,
+        min_stock_alert: 5,
+      };
+
+      if (editing) {
+        await maintenanceService.updateSparePart(editing.id, payload);
+        toast({ title: '✅ تم تحديث القطعة' });
+      } else {
+        await maintenanceService.createSparePart(payload);
+        toast({ title: '✅ تم إضافة القطعة للمخزون' });
+      }
+      onSaved();
+      onOpenChange(false);
+    } catch (err) {
+      toast({ title: 'خطأ', description: (err as Error).message, variant: 'destructive' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const isEdit = !!editing;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg" dir="rtl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <ShoppingCart size={18} className="text-primary" />
+            {isEdit ? 'تعديل قطعة الغيار' : 'تسجيل شراء قطعة غيار'}
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4 py-2">
+          {/* Name */}
+          <div className="space-y-1.5">
+            <Label>اسم القطعة <span className="text-destructive">*</span></Label>
+            <Input
+              placeholder="مثال: فلتر زيت، إطار خلفي، بطارية 70 أمبير..."
+              value={form.name_ar}
+              onChange={e => set('name_ar', e.target.value)}
+            />
+          </div>
+
+          {/* Quantity + Unit */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label>{isEdit ? 'الكمية في المخزون' : 'الكمية المشتراة'} <span className="text-destructive">*</span></Label>
+              <Input
+                type="number"
+                min="0"
+                step="1"
+                placeholder="مثال: 4"
+                value={form.quantity}
+                onChange={e => set('quantity', e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>وحدة القياس</Label>
+              <select
+                value={form.unit}
+                onChange={e => set('unit', e.target.value)}
+                className="w-full bg-background border border-input rounded-md px-3 h-10 text-sm"
+              >
+                <option value="قطعة">قطعة</option>
+                <option value="لتر">لتر</option>
+                <option value="كيلو">كيلو</option>
+                <option value="متر">متر</option>
+                <option value="زوج">زوج</option>
+                <option value="طقم">طقم</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Price + Part Number */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label>
+                {isEdit ? 'سعر الوحدة (ر.س)' : 'سعر الشراء للوحدة (ر.س)'}
+                <span className="text-destructive"> *</span>
+              </Label>
+              <Input
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="مثال: 35.00"
+                value={form.unit_cost}
+                onChange={e => set('unit_cost', e.target.value)}
+              />
+              {!isEdit && form.quantity && form.unit_cost && (
+                <p className="text-xs text-muted-foreground">
+                  الإجمالي: {(parseFloat(form.quantity || '0') * parseFloat(form.unit_cost || '0')).toLocaleString('en-US')} ر.س
+                </p>
+              )}
+            </div>
+            <div className="space-y-1.5">
+              <Label>رقم القطعة (اختياري)</Label>
+              <Input
+                placeholder="مثال: OIL-4L-5W30"
+                value={form.part_number}
+                onChange={e => set('part_number', e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Supplier */}
+          <div className="space-y-1.5">
+            <Label>المورد / مكان الشراء</Label>
+            <Input
+              placeholder="مثال: شركة الغانم، سوق قطع الغيار..."
+              value={form.supplier}
+              onChange={e => set('supplier', e.target.value)}
+            />
+          </div>
+
+          {/* Notes */}
+          <div className="space-y-1.5">
+            <Label>ملاحظات</Label>
+            <Input
+              placeholder="أي ملاحظات إضافية..."
+              value={form.notes}
+              onChange={e => set('notes', e.target.value)}
+            />
+          </div>
+        </div>
+
+        <DialogFooter className="gap-2">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>إلغاء</Button>
+          <Button onClick={handleSave} disabled={saving}>
+            {saving ? 'جاري الحفظ...' : isEdit ? '💾 حفظ التعديلات' : '✅ إضافة للمخزون'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ── Main Component ────────────────────────────────────────────────────────────
 
 export function SparePartsTab() {
   const { permissions } = usePermissions('maintenance');
@@ -44,348 +256,207 @@ export function SparePartsTab() {
   const invalidate = useInvalidateMaintenanceQueries();
   const q = useSpareParts();
   const rows = useMemo(() => q.data ?? [], [q.data]);
-  const [search, setSearch] = useState('');
 
-  const filteredRows = useMemo(() => {
+  const [search, setSearch] = useState('');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editing, setEditing] = useState<SparePart | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<SparePart | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const filtered = useMemo(() => {
     const t = search.trim().toLowerCase();
     if (!t) return rows;
-    return rows.filter((p) => {
-      const blob = [
-        p.name_ar,
-        p.part_number ?? '',
-        p.supplier ?? '',
-        p.notes ?? '',
-        p.unit,
-      ]
-        .join(' ')
-        .toLowerCase();
-      return blob.includes(t);
-    });
+    return rows.filter(p =>
+      [p.name_ar, p.part_number ?? '', p.supplier ?? ''].join(' ').toLowerCase().includes(t)
+    );
   }, [rows, search]);
 
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editing, setEditing] = useState<SparePart | null>(null);
-  const [form, setForm] = useState<maintenanceService.CreateSparePartInput>(emptyForm);
-  const [saving, setSaving] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<SparePart | null>(null);
-
   const summary = useMemo(() => {
-    let low = 0;
-    let stockValue = 0;
-    for (const p of rows) {
-      if (Number(p.stock_quantity) < Number(p.min_stock_alert ?? 0)) low += 1;
-      stockValue += Number(p.stock_quantity) * Number(p.unit_cost);
-    }
-    return { count: rows.length, low, stockValue };
+    const low = rows.filter(p => Number(p.stock_quantity) < Number(p.min_stock_alert ?? 5) && Number(p.stock_quantity) > 0).length;
+    const empty = rows.filter(p => Number(p.stock_quantity) <= 0).length;
+    const value = rows.reduce((s, p) => s + Number(p.stock_quantity) * Number(p.unit_cost), 0);
+    return { total: rows.length, low, empty, value };
   }, [rows]);
 
-  const filteredSummary = useMemo(() => {
-    let low = 0;
-    for (const p of filteredRows) {
-      if (Number(p.stock_quantity) < Number(p.min_stock_alert ?? 0)) low += 1;
-    }
-    return { count: filteredRows.length, low };
-  }, [filteredRows]);
+  const openAdd = () => { setEditing(null); setModalOpen(true); };
+  const openEdit = (p: SparePart) => { setEditing(p); setModalOpen(true); };
 
-  const openCreate = () => {
-    setEditing(null);
-    setForm(emptyForm);
-    setDialogOpen(true);
-  };
-
-  const openEdit = (p: SparePart) => {
-    setEditing(p);
-    setForm({
-      name_ar: p.name_ar,
-      part_number: p.part_number ?? '',
-      stock_quantity: p.stock_quantity,
-      min_stock_alert: p.min_stock_alert,
-      unit: p.unit,
-      unit_cost: p.unit_cost,
-      supplier: p.supplier ?? '',
-      notes: p.notes ?? '',
-    });
-    setDialogOpen(true);
-  };
-
-  const save = async () => {
-    if (!form.name_ar.trim()) {
-      toast({ title: '???? ??? ??????', variant: 'destructive' });
-      return;
-    }
-    setSaving(true);
-    try {
-      if (editing) {
-        await maintenanceService.updateSparePart(editing.id, {
-          name_ar: form.name_ar,
-          part_number: form.part_number || null,
-          stock_quantity: Number(form.stock_quantity),
-          min_stock_alert: Number(form.min_stock_alert),
-          unit: form.unit ?? '????',
-          unit_cost: Number(form.unit_cost),
-          supplier: form.supplier || null,
-          notes: form.notes || null,
-        });
-        toast({ title: '?? ???????' });
-      } else {
-        await maintenanceService.createSparePart({
-          ...form,
-          stock_quantity: Number(form.stock_quantity),
-          min_stock_alert: Number(form.min_stock_alert),
-          unit_cost: Number(form.unit_cost),
-        });
-        toast({ title: '??? ???????' });
-      }
-      invalidate();
-      setDialogOpen(false);
-    } catch (e) {
-      toast({
-        title: '???',
-        description: e instanceof Error ? e.message : undefined,
-        variant: 'destructive',
-      });
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const doDelete = async () => {
+  const handleDelete = async () => {
     if (!deleteTarget) return;
+    setDeleting(true);
     try {
       await maintenanceService.deleteSparePart(deleteTarget.id);
-      toast({ title: '?? ?????' });
+      toast({ title: 'تم حذف القطعة من المخزون' });
       invalidate();
+    } catch (err) {
+      toast({ title: 'خطأ', description: (err as Error).message, variant: 'destructive' });
+    } finally {
+      setDeleting(false);
       setDeleteTarget(null);
-    } catch (e) {
-      toast({
-        title: '???? ?????',
-        description: e instanceof Error ? e.message : undefined,
-        variant: 'destructive',
-      });
     }
   };
 
+  if (q.isLoading) {
+    return (
+      <div className="space-y-3">
+        {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-16 rounded-xl" />)}
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-4" dir="rtl">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="border bg-card p-4 shadow-sm rounded-2xl">
-          <div className="text-xs text-muted-foreground">?????? ?????</div>
-          <div className="text-2xl font-bold">{summary.count}</div>
+    <div className="space-y-4">
+      {/* Summary Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="bg-card border border-border/60 rounded-xl p-3 text-center">
+          <p className="text-xl font-bold text-foreground">{summary.total}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">إجمالي الأصناف</p>
         </div>
-        <div className="border bg-card p-4 shadow-sm rounded-2xl">
-          <div className="text-xs text-muted-foreground">??? ??? ????</div>
-          <div className="text-2xl font-bold text-destructive">{summary.low}</div>
+        <div className="bg-card border border-border/60 rounded-xl p-3 text-center">
+          <p className="text-xl font-bold text-primary">{summary.value.toLocaleString('en-US')}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">قيمة المخزون (ر.س)</p>
         </div>
-        <div className="border bg-card p-4 shadow-sm rounded-2xl">
-          <div className="text-xs text-muted-foreground">???? ??????? (???????)</div>
-          <div className="text-2xl font-bold">
-            {summary.stockValue.toLocaleString('ar-SA', { maximumFractionDigits: 0 })} ?.?
-          </div>
+        <div className="bg-card border border-orange-200 dark:border-orange-900/50 rounded-xl p-3 text-center">
+          <p className="text-xl font-bold text-orange-600">{summary.low}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">مخزون منخفض</p>
+        </div>
+        <div className="bg-card border border-rose-200 dark:border-rose-900/50 rounded-xl p-3 text-center">
+          <p className="text-xl font-bold text-rose-600">{summary.empty}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">نفد المخزون</p>
         </div>
       </div>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative flex-1 min-w-[200px] max-w-md">
-          <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
+      {/* Toolbar */}
+      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+        <div className="relative flex-1 sm:w-64">
+          <Search size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <Input
-            className="pr-9"
-            placeholder="??? ??????? ?????? ??????? ?????????..."
+            placeholder="بحث باسم القطعة أو المورد..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={e => setSearch(e.target.value)}
+            className="pr-8"
           />
         </div>
-        {permissions.can_edit && (
-          <Button className="gap-1 w-full sm:w-auto shrink-0" onClick={openCreate}>
-            <Plus size={16} /> ????? ????
+        {permissions.can_create && (
+          <Button onClick={openAdd} className="gap-1.5 shrink-0">
+            <ShoppingCart size={16} /> تسجيل شراء قطعة
           </Button>
         )}
       </div>
 
-      {search.trim() && (
-        <p className="text-xs text-muted-foreground">
-          ??? {filteredSummary.count} ?? ??? {summary.count} ????
-          {filteredSummary.low > 0 ? ` - ${filteredSummary.low} ??? ???? ?? ???????` : ''}
-        </p>
-      )}
-
-      <div className="bg-card shadow-card overflow-hidden border border-border/50 rounded-2xl">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[1000px] text-sm">
-            <thead className="bg-muted/40">
-              <tr>
-                <th className="ta-th text-start">?????</th>
-                <th className="ta-th text-start">??? ??????</th>
-                <th className="ta-th text-start">???????</th>
-                <th className="ta-th text-start">???? ??????</th>
-                <th className="ta-th text-start">??????</th>
-                <th className="ta-th text-start">??? ??????</th>
-                <th className="ta-th text-start">??????</th>
-                <th className="ta-th text-start max-w-[200px]">???????</th>
-                <th className="ta-th text-start w-28">???????</th>
+      {/* Table */}
+      {filtered.length === 0 ? (
+        <div className="text-center py-16 text-muted-foreground">
+          <Package size={40} className="mx-auto mb-3 opacity-30" />
+          <p className="font-semibold">{search ? 'لا توجد نتائج' : 'المخزون فارغ'}</p>
+          {!search && permissions.can_create && (
+            <p className="text-sm mt-1">اضغط "تسجيل شراء قطعة" لإضافة أول قطعة</p>
+          )}
+        </div>
+      ) : (
+        <div className="border border-border/60 rounded-xl overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-muted/50">
+              <tr className="text-right">
+                <th className="p-3 font-semibold text-muted-foreground">اسم القطعة</th>
+                <th className="p-3 font-semibold text-muted-foreground text-center">الكمية</th>
+                <th className="p-3 font-semibold text-muted-foreground text-center">سعر الوحدة</th>
+                <th className="p-3 font-semibold text-muted-foreground text-center hidden sm:table-cell">المورد</th>
+                <th className="p-3 font-semibold text-muted-foreground text-center">الحالة</th>
+                {(permissions.can_update || permissions.can_delete) && (
+                  <th className="p-3 w-20" />
+                )}
               </tr>
             </thead>
-            <tbody>
-              {q.isLoading && (
-                <tr>
-                  <td colSpan={9} className="ta-td">
-                    <Loader2 className="inline animate-spin" />
-                  </td>
-                </tr>
-              )}
-              {!q.isLoading &&
-                filteredRows.map((p) => {
-                  const low = Number(p.stock_quantity) < Number(p.min_stock_alert ?? 0);
-                  return (
-                    <tr
-                      key={p.id}
-                      className={cn(
-                        'border-b border-border/30',
-                        low && 'bg-destructive/5 text-destructive'
-                      )}
-                    >
-                      <td className="ta-td font-medium">{p.name_ar}</td>
-                      <td className="ta-td">{p.part_number ?? '-'}</td>
-                      <td className="ta-td">{p.stock_quantity}</td>
-                      <td className="ta-td">{p.min_stock_alert}</td>
-                      <td className="ta-td">{p.unit}</td>
-                      <td className="ta-td">{p.unit_cost}</td>
-                      <td className="ta-td">{p.supplier ?? '-'}</td>
-                      <td className="ta-td max-w-[200px] truncate text-muted-foreground" title={p.notes ?? undefined}>
-                        {p.notes?.trim() ? p.notes : '-'}
-                      </td>
-                      <td className="ta-td">
-                        <div className="flex gap-1">
-                          {permissions.can_edit && (
-                            <Button variant="ghost" size="icon" onClick={() => openEdit(p)}>
-                              <Pencil size={16} />
-                            </Button>
+            <tbody className="divide-y divide-border/50">
+              {filtered.map(part => {
+                const isLow = Number(part.stock_quantity) < Number(part.min_stock_alert ?? 5);
+                return (
+                  <tr key={part.id} className={`hover:bg-muted/20 transition-colors ${isLow ? 'bg-orange-50/30 dark:bg-orange-950/10' : ''}`}>
+                    <td className="p-3">
+                      <div className="flex items-center gap-2">
+                        {isLow && <AlertTriangle size={14} className="text-orange-500 shrink-0" />}
+                        <div>
+                          <p className="font-medium text-foreground">{part.name_ar}</p>
+                          {part.part_number && (
+                            <p className="text-xs text-muted-foreground font-mono">{part.part_number}</p>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="p-3 text-center">
+                      <span className="font-bold text-foreground">{Number(part.stock_quantity).toLocaleString('en-US')}</span>
+                      <span className="text-xs text-muted-foreground mr-1">{part.unit}</span>
+                    </td>
+                    <td className="p-3 text-center">
+                      <span className="font-semibold text-foreground">{Number(part.unit_cost).toLocaleString('en-US')}</span>
+                      <span className="text-xs text-muted-foreground mr-1">ر.س</span>
+                    </td>
+                    <td className="p-3 text-center hidden sm:table-cell text-muted-foreground text-xs">
+                      {part.supplier ?? '—'}
+                    </td>
+                    <td className="p-3 text-center">
+                      <StockBadge qty={Number(part.stock_quantity)} minAlert={Number(part.min_stock_alert ?? 5)} />
+                    </td>
+                    {(permissions.can_update || permissions.can_delete) && (
+                      <td className="p-3">
+                        <div className="flex items-center justify-center gap-1">
+                          {permissions.can_update && (
+                            <button
+                              onClick={() => openEdit(part)}
+                              className="text-muted-foreground hover:text-foreground transition-colors p-1.5 rounded hover:bg-muted"
+                              title="تعديل"
+                            >
+                              <Pencil size={13} />
+                            </button>
                           )}
                           {permissions.can_delete && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="text-destructive"
-                              onClick={() => setDeleteTarget(p)}
+                            <button
+                              onClick={() => setDeleteTarget(part)}
+                              className="text-muted-foreground hover:text-destructive transition-colors p-1.5 rounded hover:bg-muted"
+                              title="حذف"
                             >
-                              <Trash2 size={16} />
-                            </Button>
+                              <Trash2 size={13} />
+                            </button>
                           )}
                         </div>
                       </td>
-                    </tr>
-                  );
-                })}
-              {!q.isLoading && filteredRows.length === 0 && (
-                <tr>
-                  <td colSpan={9} className="ta-td text-muted-foreground">
-                    {rows.length === 0 ? '?? ???? ??? ?? ???????. ??? ???? ?? ???? ??????? ????? ????????.' : '?? ???? ????? ?????? ?????.'}
-                  </td>
-                </tr>
-              )}
+                    )}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
-      </div>
+      )}
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent dir="rtl" className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>{editing ? 'تعديل قطعة' : 'إضافة قطعة'}</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-3">
-            <div className="space-y-1">
-              <Label>?????</Label>
-              <Input
-                value={form.name_ar}
-                onChange={(e) => setForm((f) => ({ ...f, name_ar: e.target.value }))}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label>??? ??????</Label>
-              <Input
-                value={form.part_number ?? ''}
-                onChange={(e) => setForm((f) => ({ ...f, part_number: e.target.value }))}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <div className="space-y-1">
-                <Label>???????</Label>
-                <Input
-                  type="number"
-                  value={form.stock_quantity}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, stock_quantity: Number(e.target.value) }))
-                  }
-                />
-              </div>
-              <div className="space-y-1">
-                <Label>???? ??????</Label>
-                <Input
-                  type="number"
-                  value={form.min_stock_alert}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, min_stock_alert: Number(e.target.value) }))
-                  }
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <div className="space-y-1">
-                <Label>??????</Label>
-                <Input
-                  value={form.unit}
-                  onChange={(e) => setForm((f) => ({ ...f, unit: e.target.value }))}
-                />
-              </div>
-              <div className="space-y-1">
-                <Label>??? ??????</Label>
-                <Input
-                  type="number"
-                  value={form.unit_cost}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, unit_cost: Number(e.target.value) }))
-                  }
-                />
-              </div>
-            </div>
-            <div className="space-y-1">
-              <Label>??????</Label>
-              <Input
-                value={form.supplier ?? ''}
-                onChange={(e) => setForm((f) => ({ ...f, supplier: e.target.value }))}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label>???????</Label>
-              <Input
-                value={form.notes ?? ''}
-                onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
-                placeholder="???????"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              ?????
-            </Button>
-            <Button disabled={saving} onClick={() => { save(); }}>
-              ???
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Purchase Modal */}
+      <PurchaseModal
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        editing={editing}
+        onSaved={invalidate}
+      />
 
-      <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
+      {/* Delete Confirm */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={v => !v && setDeleteTarget(null)}>
         <AlertDialogContent dir="rtl">
           <AlertDialogHeader>
-            <AlertDialogTitle>??? ???????</AlertDialogTitle>
+            <AlertDialogTitle>حذف قطعة الغيار</AlertDialogTitle>
             <AlertDialogDescription>
-              ?? ???? ??? ?????? ??? ???? ??????? ?? ????? ?????.
+              هل أنت متأكد من حذف "{deleteTarget?.name_ar}" من المخزون؟
+              إذا كانت مستخدمة في صيانات سابقة، لن يمكن حذفها.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>?????</AlertDialogCancel>
-            <AlertDialogAction onClick={() => { doDelete(); }}>???</AlertDialogAction>
+            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? 'جاري الحذف...' : 'نعم، احذف'}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

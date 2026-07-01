@@ -59,7 +59,7 @@ const MaintenancePage = () => {
 
   return (
     <div className="flex flex-col gap-4 w-full max-w-[1600px]" dir="rtl">
-      <div className="flex-shrink-0 space-y-2">
+      <div className="flex-shrink-0 space-y-1">
         <nav className="page-breadcrumb">
           <span>الرئيسية</span>
           <span className="page-breadcrumb-sep">/</span>
@@ -68,20 +68,8 @@ const MaintenancePage = () => {
         <h1 className="page-title flex items-center gap-2">
           <Wrench size={18} /> الصيانة والمخزون
         </h1>
-        <p className="text-sm text-muted-foreground leading-relaxed max-w-3xl">
-          البيانات مُخزَّنة في قاعدة البيانات: جدول{' '}
-          <span className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded" dir="ltr">
-            maintenance_logs
-          </span>{' '}
-          للسجلات،{' '}
-          <span className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded" dir="ltr">
-            spare_parts
-          </span>{' '}
-          للمخزون، و{' '}
-          <span className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded mx-0.5" dir="ltr">
-            maintenance_parts
-          </span>{' '}
-          لربط القطع بكل عملية صيانة. عند إضافة صيانة بكميات قطع، يُحدَّث رصيد المخزون تلقائياً حسب سياسات الخادم.
+        <p className="text-sm text-muted-foreground">
+          سجّل عمليات صيانة المركبات وتابع مخزون قطع الغيار وتكاليف الشراء
         </p>
       </div>
 

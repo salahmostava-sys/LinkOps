@@ -201,13 +201,17 @@ export async function createMaintenanceLog(
   const { data: userData } = await supabase.auth.getUser();
   const uid = userData.user?.id ?? null;
 
+  const totalCost = parts.reduce((sum, p) => sum + p.quantity_used * p.cost_at_time, 0);
+
   const { data: inserted, error } = await supabase
     .from('maintenance_logs')
     .insert({
       vehicle_id: data.vehicle_id,
-      date: data.maintenance_date ?? new Date().toISOString().split('T')[0],
+      maintenance_date: data.maintenance_date ?? new Date().toISOString().split('T')[0],
       type: data.type,
-      description: data.notes ?? null,
+      notes: data.notes ?? null,
+      total_cost: totalCost,
+      odometer_reading: data.odometer_reading ?? null,
       created_by: uid,
     })
     .select('id')
