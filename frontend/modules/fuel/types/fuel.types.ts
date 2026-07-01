@@ -45,13 +45,13 @@ export type ImportRow = {
 export const MONTHLY_SKELETON_ROWS = ['m1', 'm2', 'm3', 'm4', 'm5'];
 
 export type MonthlyOrderRow = { employee_id: string; orders_count: number };
-export type VehicleAssignmentRow = { employee_id: string; vehicles?: { plate_number: string; type: string; brand?: string | null; model?: string | null } };
+export type VehicleAssignmentRow = { employee_id: string; vehicles: { plate_number: string; type: string; brand: string; model: string } | null };
 
 export type DailyMileageAggSource = {
   employee_id: string;
   km_total: number;
   fuel_cost: number;
-  employees?: { name: string; personal_photo_url?: string | null };
+  employees: { name: string; personal_photo_url: string | null } | null;
 };
 
 export type MonthlyAgg = { km: number; fuel: number; count: number; name: string; photo?: string | null };
@@ -71,8 +71,8 @@ export const buildOrdersMap = (rows: MonthlyOrderRow[]): Record<string, number> 
 
 export const buildVehicleMap = (
   rows: VehicleAssignmentRow[]
-): Record<string, { plate_number: string; type: string; brand?: string | null; model?: string | null }> => {
-  const map: Record<string, { plate_number: string; type: string; brand?: string | null; model?: string | null }> = {};
+): Record<string, { plate_number: string; type: string; brand: string; model: string }> => {
+  const map: Record<string, { plate_number: string; type: string; brand: string; model: string }> = {};
   rows.forEach((row) => {
     if (map[row.employee_id] || !row.vehicles) return;
     map[row.employee_id] = row.vehicles;

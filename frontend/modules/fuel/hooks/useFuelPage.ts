@@ -21,7 +21,6 @@ import type {
   AppRow,
   VehicleAssignmentRow,
   DailyMileageAggSource,
-  DailyMileageResponseRow,
 } from '@modules/fuel/types/fuel.types';
 import {
   getErrorMessageOrFallback,
@@ -114,7 +113,7 @@ export function useFuelPage() { // NOSONAR: page data layer with many independen
         fuelApi.getActiveEmployeeAppLinks(),
         fuelApi.getActiveVehicleAssignments(),
       ]);
-      const vehicleMap = buildVehicleMap((assignmentRows || []) as VehicleAssignmentRow[]);
+      const vehicleMap = buildVehicleMap((assignmentRows || []));
       const employeesWithVehicles = (empRows || []).map((emp: Employee) => ({
         ...emp,
         vehicle: vehicleMap[emp.id] || null,
@@ -199,8 +198,8 @@ export function useFuelPage() { // NOSONAR: page data layer with many independen
         fuelApi.getActiveVehicleAssignments(),
       ]);
       const ordersMap = buildOrdersMap((orderRows || []));
-      const vehicleMap = buildVehicleMap((assignmentRows || []) as VehicleAssignmentRow[]);
-      const aggMap = buildMonthlyAggMap((dailyRowsRaw || []) as DailyMileageAggSource[], employeeIdsOnPlatform);
+      const vehicleMap = buildVehicleMap((assignmentRows || []));
+      const aggMap = buildMonthlyAggMap((dailyRowsRaw || []), employeeIdsOnPlatform);
       return buildMonthlyRows(aggMap, ordersMap, vehicleMap, employees, employeeIdsOnPlatform);
     },
     retry: defaultQueryRetry,
@@ -219,7 +218,8 @@ export function useFuelPage() { // NOSONAR: page data layer with many independen
       const ms = `${monthYear}-01`;
       const me = format(endOfMonth(new Date(`${monthYear}-01`)), ISO_DATE_FORMAT);
       const dailyData = await fuelApi.getDailyMileageByMonth(ms, me);
-      const mappedRows = mapDailyRows((dailyData || []) as DailyMileageResponseRow[]);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const mappedRows = mapDailyRows((dailyData || []) as any);
       return applyDailyFilters(mappedRows, selectedEmployee, employeeIdsOnPlatform);
     },
     retry: defaultQueryRetry,
