@@ -24,6 +24,7 @@ import { runSafe } from '@shared/lib/logger';
 import { EmployeeActionsBar } from '@modules/employees/components/EmployeeActionsBar';
 import { EmployeeDetailedTable } from '@modules/employees/components/EmployeeTable';
 import { useEmployeeActions } from '@modules/employees/hooks/useEmployeeTable';
+import { useEmployeesData } from '@modules/employees/hooks/useEmployees';
 import Loading from '@shared/components/Loading';
 import { CommercialRecordsManager } from '@shared/components/employees/CommercialRecordsManager';
 import { EmployeeKPIs } from '@modules/employees/components/EmployeeKPIs';
