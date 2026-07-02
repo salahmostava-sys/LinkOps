@@ -93,10 +93,10 @@ const AppProvidersShell = () => (
     <ProgressBar />
     <KeyboardShortcuts />
     <OfflineIndicator />
-    <AlertsFaviconBadge />
     <LanguageProvider>
       <TemporalProvider>
         <SystemSettingsProvider>
+          <AlertsFaviconBadge />
           <Outlet />
         </SystemSettingsProvider>
       </TemporalProvider>

@@ -337,7 +337,7 @@ export function SparePartsTab() {
             className="pr-8"
           />
         </div>
-        {permissions.can_create && (
+        {permissions.can_edit && (
           <Button onClick={openAdd} className="gap-1.5 shrink-0">
             <ShoppingCart size={16} /> تسجيل شراء قطعة
           </Button>
@@ -349,7 +349,7 @@ export function SparePartsTab() {
         <div className="text-center py-16 text-muted-foreground">
           <Package size={40} className="mx-auto mb-3 opacity-30" />
           <p className="font-semibold">{search ? 'لا توجد نتائج' : 'المخزون فارغ'}</p>
-          {!search && permissions.can_create && (
+          {!search && permissions.can_edit && (
             <p className="text-sm mt-1">اضغط "تسجيل شراء قطعة" لإضافة أول قطعة</p>
           )}
         </div>
@@ -363,7 +363,7 @@ export function SparePartsTab() {
                 <th className="p-3 font-semibold text-muted-foreground text-center">سعر الوحدة</th>
                 <th className="p-3 font-semibold text-muted-foreground text-center hidden sm:table-cell">المورد</th>
                 <th className="p-3 font-semibold text-muted-foreground text-center">الحالة</th>
-                {(permissions.can_update || permissions.can_delete) && (
+                {(permissions.can_edit || permissions.can_delete) && (
                   <th className="p-3 w-20" />
                 )}
               </tr>
@@ -398,10 +398,10 @@ export function SparePartsTab() {
                     <td className="p-3 text-center">
                       <StockBadge qty={Number(part.stock_quantity)} minAlert={Number(part.min_stock_alert ?? 5)} />
                     </td>
-                    {(permissions.can_update || permissions.can_delete) && (
+                    {(permissions.can_edit || permissions.can_delete) && (
                       <td className="p-3">
                         <div className="flex items-center justify-center gap-1">
-                          {permissions.can_update && (
+                          {permissions.can_edit && (
                             <button
                               onClick={() => openEdit(part)}
                               className="text-muted-foreground hover:text-foreground transition-colors p-1.5 rounded hover:bg-muted"

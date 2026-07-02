@@ -146,6 +146,43 @@ export const dashboardService = {
     return data ?? [];
   },
 
+  /**
+   * Historical analytics data: active apps, employees map, and per-month order rows.
+   * Used by DashboardAnalyticsTab to build trends across the last N months.
+   */
+  fetchHistoricalData: async (months: Array<{ start: string; end: string }>) => {
+    const [appsRes, employeesRes, ...monthOrdersRes] = await Promise.all([
+      supabase
+        .from('apps')
+        .select('id, name, brand_color, text_color')
+        .eq('is_active', true),
+      supabase
+        .from('employees')
+        .select('id, name'),
+      ...months.map((month) =>
+        supabase
+          .from('daily_orders')
+          .select('employee_id, app_id, orders_count')
+          .gte('date', month.start)
+          .lte('date', month.end)
+      ),
+    ]);
+
+    if (appsRes.error) handleSupabaseError(appsRes.error, 'dashboardService.fetchHistoricalData.apps');
+    if (employeesRes.error) handleSupabaseError(employeesRes.error, 'dashboardService.fetchHistoricalData.employees');
+    monthOrdersRes.forEach((res) => {
+      if (res.error) handleSupabaseError(res.error, 'dashboardService.fetchHistoricalData.orders');
+    });
+
+    return {
+      apps: (appsRes.data ?? []) as Array<{ id: string; name: string; brand_color: string; text_color: string }>,
+      employees: (employeesRes.data ?? []) as Array<{ id: string; name: string }>,
+      monthOrders: monthOrdersRes.map(
+        (res) => (res.data ?? []) as Array<{ employee_id: string; app_id: string; orders_count: number }>
+      ),
+    };
+  },
+
   /** Simple orders count for a previous month (for trend comparison) */
   getMonthOrdersCount: async (monthYear: string) => {
     const start = `${monthYear}-01`;

@@ -286,11 +286,11 @@ export function ShiftsTab({
   /** Set an explicit attendance value; pass null to clear the cell entirely */
   const commitAttendance = (key: string, value: number | null) => {
     setGrid((prev) => {
-      const next = new Map(prev);
+      const next = { ...prev };
       if (value === null) {
-        next.delete(key); // "فاضي" — remove from grid
+        delete next[key]; // "فاضي" — remove from grid
       } else {
-        next.set(key, value); // 0=غائب, 1=حاضر, -1=إجازة براتب, -2=إجازة مرضى
+        next[key] = value; // 0=غائب, 1=حاضر, -1=إجازة براتب, -2=إجازة مرضى
       }
       return next;
     });

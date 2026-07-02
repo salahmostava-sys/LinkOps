@@ -34,7 +34,9 @@ export function TreasuryTab() {
     try {
       let attachment_url = null;
       if (file) {
-        attachment_url = await storageService.uploadFile('advance-attachments', file);
+        const ext = file.name.split('.').pop();
+        const fileName = `treasury-${Date.now()}.${ext}`;
+        attachment_url = await storageService.uploadFile('advance-attachments', fileName, file);
       }
 
       await createTransaction({

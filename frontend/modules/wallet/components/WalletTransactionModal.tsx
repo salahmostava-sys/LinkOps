@@ -48,7 +48,7 @@ const WalletTransactionModal = ({ open, onOpenChange, employee, type, onSuccess 
       onSuccess();
     },
     onError: (err: unknown) => {
-      toast.error(err.message || 'حدث خطأ أثناء الحفظ');
+      toast.error(err instanceof Error ? err.message : 'حدث خطأ أثناء الحفظ');
     }
   });
 
