@@ -104,7 +104,7 @@ async function performLoginAction(
   signIn: (e: string, p: string) => Promise<{ error: { message: string } | null }>,
   setLoading: (l: boolean) => void,
   setLoginError: (err: string) => void,
-  navigate: (path: string, opts?: unknown) => void
+  navigate: (path: string, opts?: { replace?: boolean }) => void
 ) {
   setLoading(true);
   let error: { message: string } | null;

@@ -379,10 +379,10 @@ export const SalaryTable = memo(function SalaryTable(props: Readonly<SalaryTable
     acc.remaining += c?.remaining || 0;
     return acc;
   }, {
-    platformOrders: {} as Record<string, number>,
-    platformShiftDays: {} as Record<string, number>,
-    platformSalariesTotals: {} as Record<string, number>,
-    customColTotals: {} as Record<string, number>,
+    platformOrders: {},
+    platformShiftDays: {},
+    platformSalariesTotals: {},
+    customColTotals: {},
     totalOrders: 0, totalShiftDays: 0,
     platformSalaries: 0, platformIncome: 0, workDaysSum: 0, fuelCost: 0,
     incentives: 0, sickAllowance: 0,
