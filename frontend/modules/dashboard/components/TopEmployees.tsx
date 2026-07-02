@@ -40,7 +40,7 @@ export function TopEmployees(props: Readonly<{
               <p className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-widest mb-2">????????</p>
               <div className="space-y-2">
                 {topRidersOverall.map((r) => (
-                  <div key={r.appId} className="flex items-center justify-between rounded-xl px-3 py-2.5 hover:bg-muted/40">
+                  <div key={`${r.appId}-${r.name}`} className="flex items-center justify-between rounded-xl px-3 py-2.5 hover:bg-muted/40">
                     <span className="text-sm font-semibold truncate">{r.name}</span>
                     <span className="text-sm font-black">{r.orders.toLocaleString('en-US')}</span>
                   </div>
@@ -59,7 +59,7 @@ export function TopEmployees(props: Readonly<{
                       </div>
                       <div className="space-y-2">
                         {app.riders.map((r) => (
-                          <div key={r.id} className="flex items-center justify-between rounded-xl px-3 py-2 hover:bg-muted/40">
+                          <div key={`${app.id}-${r.name}`} className="flex items-center justify-between rounded-xl px-3 py-2 hover:bg-muted/40">
                             <span className="text-sm truncate">{r.name}</span>
                             <span className="text-sm font-black">{r.orders.toLocaleString('en-US')}</span>
                           </div>
@@ -82,7 +82,7 @@ export function TopEmployees(props: Readonly<{
                       </div>
                       <div className="space-y-2">
                         {app.riders.map((r) => (
-                          <div key={`bottom-${app.id}-${r.id}`} className="flex items-center justify-between rounded-xl px-3 py-2 hover:bg-rose-50/50 border border-rose-100/60">
+                          <div key={`bottom-${app.id}-${r.name}`} className="flex items-center justify-between rounded-xl px-3 py-2 hover:bg-rose-50/50 border border-rose-100/60">
                             <span className="text-sm truncate">{r.name}</span>
                             <span className="text-sm font-black text-rose-700">{r.orders.toLocaleString('en-US')}</span>
                           </div>

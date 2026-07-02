@@ -188,7 +188,7 @@ export function MaintenanceLogsTab() {
               className="pr-8"
             />
           </div>
-          {permissions.can_create && (
+          {permissions.can_edit && (
             <Button onClick={() => setAddOpen(true)} className="gap-1.5 shrink-0">
               <Plus size={16} /> إضافة صيانة
             </Button>
@@ -201,7 +201,7 @@ export function MaintenanceLogsTab() {
         <div className="text-center py-16 text-muted-foreground">
           <Wrench size={40} className="mx-auto mb-3 opacity-30" />
           <p className="font-semibold">{search ? 'لا توجد نتائج' : 'لا توجد سجلات صيانة'}</p>
-          {!search && permissions.can_create && (
+          {!search && permissions.can_edit && (
             <p className="text-sm mt-1">اضغط "إضافة صيانة" لتسجيل أول عملية</p>
           )}
         </div>
