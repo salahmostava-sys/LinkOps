@@ -45,7 +45,7 @@ export function useFuelPage() { // NOSONAR: page data layer with many independen
   const { permissions } = usePermissions('fuel');
   const { selectedMonth: globalMonth } = useTemporalContext();
   const now = new Date();
-  const [view, setView] = useState<'spreadsheet'>('spreadsheet');
+  const [view, setView] = useState<'monthly' | 'daily' | 'spreadsheet'>('spreadsheet');
 
   const [yearStr, monthStr] = globalMonth.split('-');
   const selectedMonth = monthStr;

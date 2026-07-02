@@ -2,7 +2,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@shared/components/ui/button';
 import { Pin, Lock, Loader2 } from 'lucide-react';
 import { cn } from '@shared/lib/utils';
-import { TierType, Tier } from '../types/scheme.ui.types';
+import { TierType, Tier } from '../../types/scheme.ui.types';
 
 export const arabicMonths: Record<string, string> = {
   '01': 'يناير', '02': 'فبراير', '03': 'مارس', '04': 'أبريل',
