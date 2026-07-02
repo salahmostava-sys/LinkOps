@@ -353,7 +353,7 @@ export default function FuelSpreadsheetView(props: Readonly<{
       {/* ── Spreadsheet Grid ──────────────────────────────────────── */}
       {riders.length === 0 ? (
         <div className="bg-card shadow-card p-12 text-center rounded-2xl">
-          <span className="text-4xl">📊</span>
+          <BarChart3 size={40} className="mx-auto opacity-60" aria-hidden />
           <p className="font-medium text-foreground mt-3">لا يوجد مناديب</p>
           <p className="text-xs text-muted-foreground mt-1">غيّر المنصة أو البحث</p>
         </div>

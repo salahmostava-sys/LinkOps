@@ -12,7 +12,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@shared/components/ui/dropdown-menu';
-import { Menu, ChevronLeft, ChevronRight, LogOut, Settings, User, ChevronDown } from 'lucide-react';
+import { Menu, ChevronLeft, ChevronRight, LogOut, Settings, User, ChevronDown, Sparkles } from 'lucide-react';
 import { ThemeToggle } from '@shared/components/ThemeToggle';
 import { LanguageToggle } from '@shared/components/LanguageToggle';
 import NotificationCenter from '@shared/components/NotificationCenter';
@@ -329,8 +329,8 @@ function MobileLogo({ logoSrc }: Readonly<{ logoSrc?: string }>) {
     );
   }
   return (
-    <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-full flex items-center justify-center text-lg sm:text-xl shrink-0 border-2 border-border/80 shadow-sm bg-gradient-to-br from-primary to-primary/80 text-primary-foreground">
-      🚀
+    <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-full flex items-center justify-center shrink-0 border-2 border-border/80 shadow-sm bg-gradient-to-br from-primary to-primary/80 text-primary-foreground">
+      <Sparkles size={20} aria-hidden />
     </div>
   );
 }
