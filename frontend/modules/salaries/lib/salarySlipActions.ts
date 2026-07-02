@@ -5,6 +5,8 @@
  * No canvas or image capture involved.
  */
 
+import DOMPurify from 'dompurify';
+
 // ─── Preview in iframe ──────────────────────────────────────────────────────
 
 /**
@@ -143,7 +145,7 @@ export async function exportSlipToBlob(html: string, _filename: string): Promise
 
     iframeDoc.open();
     // Sanitize HTML to prevent XSS before injecting into iframe
-    const cleanHtml = DOMPurify.sanitize(html);
+    const cleanHtml = String(DOMPurify.sanitize(html));
     iframeDoc.write(cleanHtml);
     iframeDoc.close();
 

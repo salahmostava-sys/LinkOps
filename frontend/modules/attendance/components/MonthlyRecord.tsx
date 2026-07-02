@@ -194,8 +194,8 @@ const MonthlyRecord = ({ selectedMonth, selectedYear }: Readonly<MonthlyRecordPr
     if (selectedAppId !== 'all') {
       const empIdsWithApp = new Set(
         (data?.employeeApps ?? [])
-          .filter((ea: unknown) => ea.app_id === selectedAppId)
-          .map((ea: unknown) => ea.employee_id)
+          .filter((ea: { app_id: string; employee_id: string }) => ea.app_id === selectedAppId)
+          .map((ea: { app_id: string; employee_id: string }) => ea.employee_id)
       );
       result = result.filter(r => empIdsWithApp.has(r.id));
     }
@@ -232,7 +232,7 @@ const MonthlyRecord = ({ selectedMonth, selectedYear }: Readonly<MonthlyRecordPr
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">كل التطبيقات</SelectItem>
-            {(data?.apps || []).map((app: unknown) => (
+            {(data?.apps || []).map((app: { id: string; name: string }) => (
               <SelectItem key={app.id} value={app.id}>{app.name}</SelectItem>
             ))}
           </SelectContent>

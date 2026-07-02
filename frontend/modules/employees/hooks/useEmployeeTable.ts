@@ -269,7 +269,7 @@ export function useEmployeeActions(params: {
     }
   };
 
-  const runPrintDetailed = () => {
+  const runPrintDetailed = async () => {
     setActionLoading(true);
     try {
       handlePrint();

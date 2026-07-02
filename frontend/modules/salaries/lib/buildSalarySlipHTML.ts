@@ -6,11 +6,11 @@
  * Output is a standalone HTML string suitable for iframe, print, and PDF export.
  */
 
-import DOMPurify from 'dompurify';
+import DOMPurify, { type Config } from 'dompurify';
 import { escapeHtml } from '@shared/lib/security';
 
 // Restrictive allowlist: no inline styles or external URLs (prevents pixel-tracking exfiltration).
-const SANITIZE_CONFIG: DOMPurify.Config = {
+const SANITIZE_CONFIG: Config = {
   ALLOWED_TAGS: ['div', 'span', 'h1', 'h2', 'h3', 'p', 'br', 'strong', 'em', 'small', 'table', 'tr', 'td', 'th'],
   ALLOWED_ATTR: ['class', 'alt'],
   FORBID_ATTR: ['style', 'src', 'onerror', 'onload', 'onclick'],
@@ -20,7 +20,7 @@ const SANITIZE_CONFIG: DOMPurify.Config = {
 
 const sanitizeTemplateHtml = (html?: string): string => {
   if (!html) return '';
-  return DOMPurify.sanitize(html, SANITIZE_CONFIG);
+  return String(DOMPurify.sanitize(html, SANITIZE_CONFIG));
 };
 
 // ─── Types ───────────────────────────────────────────────────────────────────

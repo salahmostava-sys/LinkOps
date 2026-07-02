@@ -4,6 +4,7 @@ export type AppToastOptions = {
   description?: string;
   action?: { label: string; onClick: () => void };
   duration?: number;
+  style?: React.CSSProperties;
 };
 
 const POSITION = "top-center" as const;
@@ -43,14 +44,16 @@ function toastError(message: string, options?: AppToastOptions) {
   return toastHot.error(formatBody(message, description), {
     duration: duration ?? 4000,
     position: POSITION,
+    ...(options?.style ? { style: options.style } : {}),
   });
 }
 
 function toastSuccess(message: string, options?: AppToastOptions) {
-  const { description, duration } = options ?? {};
+  const { description, duration, style } = options ?? {};
   return toastHot.success(formatBody(message, description), {
     duration: duration ?? 4000,
     position: POSITION,
+    ...(style ? { style } : {}),
   });
 }
 
