@@ -494,10 +494,10 @@ function SidebarLogo({ logoSrc }: Readonly<{ logoSrc?: string }>) {
   }
   return (
     <div
-      className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-base font-bold flex-shrink-0 shadow-brand-sm"
+      className="w-9 h-9 rounded-xl flex items-center justify-center text-white flex-shrink-0 shadow-brand-sm"
       style={{ background: 'linear-gradient(135deg, #2642e6, #465fff)' }}
     >
-      🚀
+      <Sparkles size={18} aria-hidden />
     </div>
   );
 }

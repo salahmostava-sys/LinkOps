@@ -170,12 +170,12 @@ const MonthlyRecord = ({ selectedMonth, selectedYear }: Readonly<MonthlyRecordPr
       await attendanceService.upsertDailyAttendance(payload);
     },
     onSuccess: () => {
-      toast.success("تم الحفظ بنجاح", { style: { background: "var(--ds-surface-container)", color: "var(--ds-on-surface)" } as React.CSSProperties });
+      toast.success("تم الحفظ بنجاح", { style: { background: "var(--ds-surface-container)", color: "var(--ds-on-surface)" } });
       queryClient.invalidateQueries({ queryKey });
       setEditingCell(null);
     },
     onError: () => {
-      toast.error("حدث خطأ أثناء الحفظ", { style: { background: "var(--destructive)", color: "white" } as React.CSSProperties });
+      toast.error("حدث خطأ أثناء الحفظ", { style: { background: "var(--destructive)", color: "white" } });
     }
   });
 
@@ -194,8 +194,8 @@ const MonthlyRecord = ({ selectedMonth, selectedYear }: Readonly<MonthlyRecordPr
     if (selectedAppId !== 'all') {
       const empIdsWithApp = new Set(
         (data?.employeeApps ?? [])
-          .filter((ea: unknown) => ea.app_id === selectedAppId)
-          .map((ea: unknown) => ea.employee_id)
+          .filter((ea: { app_id: string; employee_id: string }) => ea.app_id === selectedAppId)
+          .map((ea: { app_id: string; employee_id: string }) => ea.employee_id)
       );
       result = result.filter(r => empIdsWithApp.has(r.id));
     }
@@ -232,7 +232,7 @@ const MonthlyRecord = ({ selectedMonth, selectedYear }: Readonly<MonthlyRecordPr
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">كل التطبيقات</SelectItem>
-            {(data?.apps || []).map((app: unknown) => (
+            {(data?.apps || []).map((app: { id: string; name: string }) => (
               <SelectItem key={app.id} value={app.id}>{app.name}</SelectItem>
             ))}
           </SelectContent>

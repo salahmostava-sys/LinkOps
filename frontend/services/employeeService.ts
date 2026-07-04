@@ -290,11 +290,26 @@ export const employeeService = {
   },
 
   async createEmployee(payload: Record<string, unknown>) {
+    const safePayload = { ...payload };
+    const dateFields = [
+      'join_date',
+      'birth_date',
+      'residency_expiry',
+      'health_insurance_expiry',
+      'license_expiry',
+      'probation_end_date'
+    ];
+    for (const field of dateFields) {
+      if (safePayload[field] === '') {
+        safePayload[field] = null;
+      }
+    }
+    
     // Supabase generated types require exact shape — payload comes from dynamic forms
     // so we validate at the DB level (NOT NULL constraints + RLS) rather than compile-time.
     const { data, error } = await supabase
       .from('employees')
-      .insert(payload as TablesInsert<'employees'>)
+      .insert(safePayload as TablesInsert<'employees'>)
       .select()
       .single();
     if (error) throw toServiceError(error, 'employeeService.createEmployee');
@@ -302,9 +317,24 @@ export const employeeService = {
   },
 
   async updateEmployee(employeeId: string, payload: Record<string, unknown>) {
+    const safePayload = { ...payload };
+    const dateFields = [
+      'join_date',
+      'birth_date',
+      'residency_expiry',
+      'health_insurance_expiry',
+      'license_expiry',
+      'probation_end_date'
+    ];
+    for (const field of dateFields) {
+      if (safePayload[field] === '') {
+        safePayload[field] = null;
+      }
+    }
+    
     const { error } = await supabase
       .from('employees')
-      .update(payload as TablesInsert<'employees'>)
+      .update(safePayload as TablesInsert<'employees'>)
       .eq('id', employeeId);
     if (error) throw toServiceError(error, 'employeeService.updateEmployee');
   },

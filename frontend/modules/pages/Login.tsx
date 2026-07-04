@@ -104,7 +104,7 @@ async function performLoginAction(
   signIn: (e: string, p: string) => Promise<{ error: { message: string } | null }>,
   setLoading: (l: boolean) => void,
   setLoginError: (err: string) => void,
-  navigate: (path: string, opts?: unknown) => void
+  navigate: (path: string, opts?: { replace?: boolean }) => void
 ) {
   setLoading(true);
   let error: { message: string } | null;
@@ -515,7 +515,7 @@ const Login = () => {
       />
 
       {/* Security badge */}
-      <div className="fixed bottom-6 left-6 hidden lg:flex items-center gap-2 bg-card/90 backdrop-blur-sm py-2 px-4 -full shadow-card border border-border/40 rounded-2xl">
+      <div className="fixed bottom-6 left-6 hidden lg:flex items-center gap-2 bg-card/90 backdrop-blur-sm py-2 px-4 shadow-card border border-border/40 rounded-2xl">
         <span className="material-symbols-outlined text-emerald-500 text-lg">verified_user</span>
         <span className="text-xs font-semibold text-muted-foreground">اتصال آمن ومحمي</span>
       </div>

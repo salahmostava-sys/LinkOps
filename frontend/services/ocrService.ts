@@ -20,7 +20,10 @@ export interface IqamaData {
 }
 
 export interface LicenseData {
+  name?: string;
+  nameEn?: string;
   licenseNumber?: string;
+  dateOfBirth?: string;
   expiryDate?: string;
   licenseClass?: string;
 }

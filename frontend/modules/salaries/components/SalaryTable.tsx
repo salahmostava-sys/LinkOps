@@ -22,7 +22,7 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { Button } from '@shared/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@shared/components/ui/tooltip';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/components/ui/select';
-import { CheckCircle, Printer, AlertTriangle, Loader2, Undo } from 'lucide-react';
+import { CheckCircle, Printer, AlertTriangle, Loader2, Undo, Inbox, Search } from 'lucide-react';
 import type { CustomColumn } from '@shared/hooks/useAppColors';
 import { SalarySortIcon } from '@modules/salaries/components/SalarySortIcon';
 import {
@@ -434,7 +434,7 @@ export const SalaryTable = memo(function SalaryTable(props: Readonly<SalaryTable
     const isEmpty = rows.length === 0;
     return (
       <div className="shadow-card bg-card h-48 flex flex-col items-center justify-center gap-2 text-muted-foreground rounded-2xl">
-        <span className="text-2xl">{isEmpty ? '📭' : '🔍'}</span>
+        {isEmpty ? <Inbox size={28} className="opacity-60" aria-hidden /> : <Search size={28} className="opacity-60" aria-hidden />}
         <p className="text-sm">
           {isEmpty
             ? 'لا يوجد موظفون نشطون أو بيانات لهذا الشهر'

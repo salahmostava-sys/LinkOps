@@ -154,7 +154,7 @@ function PerformanceAlerts({ alerts }: Readonly<{ alerts: PerformanceAlert[] }>)
       <CardContent className="space-y-2">
         {alerts.slice(0, 8).map((a) => (
           <div
-            key={a.id}
+            key={`${a.alertType}-${a.employeeId ?? 'system'}`}
             className="flex flex-wrap items-center gap-2 border border-border/60 bg-card px-3 py-2 text-sm rounded-2xl"
           >
             <Badge variant={SEVERITY_BADGE[a.severity]}>

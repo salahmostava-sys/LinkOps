@@ -97,6 +97,17 @@ export const treasuryService = {
     return data as TreasuryTransaction;
   },
 
+  updateTransaction: async (id: string, input: Partial<TreasuryTransaction>) => {
+    const { data, error } = await supabase
+      .from('treasury_transactions')
+      .update(input)
+      .eq('id', id)
+      .select()
+      .single();
+    if (error) handleSupabaseError(error, 'treasuryService.updateTransaction');
+    return data as TreasuryTransaction;
+  },
+
   deleteTransaction: async (id: string) => {
     const { error } = await supabase
       .from('treasury_transactions')

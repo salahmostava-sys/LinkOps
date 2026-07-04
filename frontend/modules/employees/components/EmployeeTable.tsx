@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import { parseISO, format } from "date-fns";
+import { Users } from "lucide-react";
 import {
   SortIcon,
   ColFilterPopover,
@@ -135,7 +136,7 @@ function EmployeeDetailedTableInner() {
         value={getDateInputValue(value)}
         inputType="date"
         dir="ltr"
-        onSave={(nextValue) => saveField(employeeId, field, nextValue)}
+        onSave={(nextValue) => saveField(employeeId, field, nextValue === '' ? null : nextValue)}
         renderDisplay={() => displayNode}
       />
     );
@@ -221,7 +222,7 @@ function EmployeeDetailedTableInner() {
               <tr>
                 <td colSpan={activeCols.length} className="ta-td">
                   <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                    <span className="text-4xl">👥</span>
+                    <Users size={40} className="opacity-60" aria-hidden />
                     <p className="font-medium">لا توجد نتائج</p>
                     <p className="text-xs">
                       جرّب تغيير الفلاتر أو إضافة موظف جديد

@@ -12,7 +12,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@shared/components/ui/dropdown-menu';
-import { Menu, ChevronLeft, ChevronRight, LogOut, Settings, User, ChevronDown } from 'lucide-react';
+import { Menu, ChevronLeft, ChevronRight, LogOut, Settings, User, ChevronDown, Sparkles } from 'lucide-react';
 import { ThemeToggle } from '@shared/components/ThemeToggle';
 import { LanguageToggle } from '@shared/components/LanguageToggle';
 import NotificationCenter from '@shared/components/NotificationCenter';
@@ -142,7 +142,7 @@ const AppLayoutInner = ({ children }: Readonly<AppLayoutProps>) => { // NOSONAR:
             <button
               type="button"
               onClick={toggle}
-              className="h-9 w-9 flex items-center justify-center -full border border-border/60 bg-card/80 flex-shrink-0 rounded-2xl"
+              className="h-9 w-9 flex items-center justify-center border border-border/60 bg-card/80 flex-shrink-0 rounded-2xl"
               style={{ color: 'var(--ds-on-surface-variant)' }}
               aria-label="Toggle sidebar"
             >
@@ -323,14 +323,14 @@ function MobileLogo({ logoSrc }: Readonly<{ logoSrc?: string }>) {
       <img
         src={logoSrc}
         alt=""
-        className="h-10 w-10 sm:h-11 sm:w-11 -full object-cover border-2 border-border/80 bg-card shadow-sm shrink-0 rounded-2xl"
+        className="h-10 w-10 sm:h-11 sm:w-11 object-cover border-2 border-border/80 bg-card shadow-sm shrink-0 rounded-2xl"
         onError={() => setFailed(true)}
       />
     );
   }
   return (
-    <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-full flex items-center justify-center text-lg sm:text-xl shrink-0 border-2 border-border/80 shadow-sm bg-gradient-to-br from-primary to-primary/80 text-primary-foreground">
-      🚀
+    <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-full flex items-center justify-center shrink-0 border-2 border-border/80 shadow-sm bg-gradient-to-br from-primary to-primary/80 text-primary-foreground">
+      <Sparkles size={20} aria-hidden />
     </div>
   );
 }

@@ -277,8 +277,8 @@ const SalarySchemes = () => {
   const setSchemeSnapshotYear = (schemeId: string, year: number) => {
     setSnapshotYearByScheme(prev => ({ ...prev, [schemeId]: year }));
     setPinSelectionByScheme(prev => {
-      const next = new Map(prev);
-      next.delete(schemeId);
+      const next = { ...prev };
+      delete next[schemeId];
       return next;
     });
   };

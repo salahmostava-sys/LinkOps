@@ -19,6 +19,7 @@ import {
 } from '@modules/employees/types/employee.types';
 
 import { loadXlsx } from '@modules/orders/utils/xlsx';
+import { useUndo } from '@shared/context/UndoContext';
 
 export function useEmployeeActions(params: {
   data: Employee[];
@@ -59,6 +60,8 @@ export function useEmployeeActions(params: {
     tableRef, setColFilters,
   } = params;
 
+  const { registerAction } = useUndo();
+
   // Keep a stable ref to data so saveField doesn't need data as a dep
   const dataRef = useRef(data);
   useEffect(() => { dataRef.current = data; }, [data]);
@@ -69,18 +72,38 @@ export function useEmployeeActions(params: {
     setSortDir(next.sortDir);
   }, [sortField, sortDir, setSortField, setSortDir]);
 
-  const saveField = useCallback(async (id: string, field: string, value: string, extraFields?: Record<string, unknown>) => {
+  const saveField = useCallback(async (id: string, field: string, value: string | null, extraFields?: Record<string, unknown>) => {
     const prev = dataRef.current.find(e => e.id === id);
-    const updatePatch = { [field]: value, ...(extraFields) };
+    const prevValue = prev ? (prev as Record<string, unknown>)[field] as string | null : null;
+    const coerced = value === '' ? null : value;
+    const updatePatch = { [field]: coerced, ...(extraFields) };
     setData(d => d.map(e => e.id === id ? { ...e, ...updatePatch } : e));
     try {
       await employeeService.updateEmployee(id, updatePatch);
+      // Register undo action after successful save
+      if (prev) {
+        registerAction({
+          description: `تعديل ${prev.name} — حقل "${field}"`,
+          undoCommand: async () => {
+            const revertPatch: Record<string, unknown> = { [field]: prevValue };
+            if (extraFields) {
+              // Revert any extra fields to their old values too
+              for (const key of Object.keys(extraFields)) {
+                revertPatch[key] = (prev as Record<string, unknown>)[key] ?? null;
+              }
+            }
+            setData(d => d.map(e => e.id === id ? { ...e, ...revertPatch } : e));
+            await employeeService.updateEmployee(id, revertPatch);
+          },
+        });
+      }
     } catch (err: unknown) {
       const message = getErrorMessage(err, 'تعذر حفظ التعديل');
       setData(d => d.map(e => e.id === id ? (prev ?? e) : e));
       toast({ title: 'خطأ في الحفظ', description: message, variant: 'destructive' });
     }
-  }, [setData, toast]);
+  }, [setData, toast, registerAction]);
+
 
   const handleSaveStatusWithDate = async () => {
     if (!statusDateDialog) return;
@@ -269,7 +292,7 @@ export function useEmployeeActions(params: {
     }
   };
 
-  const runPrintDetailed = () => {
+  const runPrintDetailed = async () => {
     setActionLoading(true);
     try {
       handlePrint();

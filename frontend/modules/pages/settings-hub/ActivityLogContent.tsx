@@ -404,10 +404,9 @@ export default function ActivityLogContent() {
             <thead>
               <tr className="bg-muted border-b border-border" >
                 {['التاريخ والوقت', 'المستخدم', 'العملية', 'الوحدة', 'التفاصيل'].map((h, i) => (
-                  <th className="text-muted-foreground"
+                  <th
                     key={h}
-                    className={`p-3 text-xs font-semibold whitespace-nowrap text-start ${i === 4 ? 'hidden lg:table-cell' : ''}`}
-                    
+                    className={`text-muted-foreground p-3 text-xs font-semibold whitespace-nowrap text-start ${i === 4 ? 'hidden lg:table-cell' : ''}`}
                   >
                     {h}
                   </th>
@@ -665,8 +664,7 @@ export default function ActivityLogContent() {
               <button
                 onClick={() => setPage(p => Math.max(0, p - 1))}
                 disabled={page === 0}
-                className="h-7 w-7 flex items-center justify-center rounded-lg disabled:opacity-40 hover:bg-muted transition-colors"
-                classNameToAdd="border border-border"
+                className="h-7 w-7 flex items-center justify-center rounded-lg border border-border disabled:opacity-40 hover:bg-muted transition-colors"
               >
                 {isRTL ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
               </button>
@@ -676,8 +674,7 @@ export default function ActivityLogContent() {
               <button
                 onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
                 disabled={page >= totalPages - 1}
-                className="h-7 w-7 flex items-center justify-center rounded-lg disabled:opacity-40 hover:bg-muted transition-colors"
-                classNameToAdd="border border-border"
+                className="h-7 w-7 flex items-center justify-center rounded-lg border border-border disabled:opacity-40 hover:bg-muted transition-colors"
               >
                 {isRTL ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
               </button>
