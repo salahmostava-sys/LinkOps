@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   Edit2, Trash2,
-  ChevronDown, ChevronUp,
+  ChevronDown, ChevronUp, Fuel,
 } from 'lucide-react';
 import { Button } from '@shared/components/ui/button';
 import { Input } from '@shared/components/ui/input';
@@ -71,7 +71,7 @@ const renderMonthlyEmptyRow = (): React.ReactNode => (
   <tr>
     <td colSpan={9} className="ta-td">
       <div className="flex flex-col items-center gap-2 text-muted-foreground">
-        <span className="text-4xl">⛽</span>
+        <Fuel size={40} className="opacity-60" aria-hidden />
         <p className="font-medium">لا توجد بيانات لهذا الشهر</p>
         <p className="text-xs">أضف إدخالات يومية من عرض يومي أو غيّر المنصة/البحث</p>
       </div>
