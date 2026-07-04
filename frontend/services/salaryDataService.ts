@@ -7,6 +7,22 @@ import { salaryService } from '@services/salaryService';
 import { advanceService } from '@services/advanceService';
 import { externalDeductionService } from '@services/externalDeductionService';
 import { performanceService } from '@services/performanceService';
+import { logError } from '@shared/lib/logger';
+
+async function optionalSalaryContext<T>(
+  label: string,
+  task: Promise<T[]>,
+): Promise<T[]> {
+  try {
+    return await task;
+  } catch (error) {
+    // Optional adjustments must not block the base salary grid.
+    logError(`[salaryDataService.getMonthlyContext] optional source failed: ${label}`, error, {
+      level: 'warn',
+    });
+    return [];
+  }
+}
 
 export const salaryDataService = {
   calculateSalaryForEmployeeMonth(
@@ -34,16 +50,27 @@ export const salaryDataService = {
   },
 
   async getMonthlyContext(selectedMonth: string) {
-    const [employees, extRes, orders, appsWithSchemeRes, fuelRes, savedRecords, allAdvances] =
+    const [employees, orders, appsWithSchemeRes, savedRecords] =
       await Promise.all([
         employeeService.getActiveForSalaryContext(),
-        externalDeductionService.getApprovedByMonth(selectedMonth),
         orderService.getSalaryContextOrdersByMonth(selectedMonth),
         appService.getActiveWithSalarySchemes(),
-        fuelService.getMonthlyFuelByMonthYear(selectedMonth),
         salaryService.getMonthRecordsForSalaryContext(selectedMonth),
-        advanceService.getActiveAndPausedForSalaryContext(),
       ]);
+    const [extRes, fuelRes, allAdvances] = await Promise.all([
+      optionalSalaryContext(
+        'external_deductions',
+        externalDeductionService.getApprovedByMonth(selectedMonth),
+      ),
+      optionalSalaryContext(
+        'vehicle_mileage',
+        fuelService.getMonthlyFuelByMonthYear(selectedMonth),
+      ),
+      optionalSalaryContext(
+        'advances',
+        advanceService.getActiveAndPausedForSalaryContext(),
+      ),
+    ]);
 
     return {
       employees,

@@ -1,11 +1,19 @@
 const { createClient } = require('@supabase/supabase-js');
 const aiTools = require('./_aiTools');
 
-// FIX #19: NEVER use VITE_* variables (frontend env) as fallback for server-side secrets.
-// VITE_* variables are bundled into the frontend and exposed to browsers.
-// Server must have explicit, separate environment variables.
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
+const cleanEnv = (value) => {
+  if (value == null || String(value).trim() === '') return undefined;
+  return String(value).trim().replace(/^['"]/, '').replace(/['"]$/, '');
+};
+
+// These two are public Supabase credentials, not server secrets. Accept the
+// Vite names too so Vercel serverless functions can share the deployed config.
+const SUPABASE_URL = cleanEnv(process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL);
+const SUPABASE_ANON_KEY = cleanEnv(
+  process.env.SUPABASE_ANON_KEY ||
+  process.env.SUPABASE_PUBLISHABLE_KEY ||
+  process.env.VITE_SUPABASE_PUBLISHABLE_KEY
+);
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 // FIX #6: Log at startup instead of throwing at module-load time.
@@ -14,10 +22,10 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 // Instead, we detect misconfiguration here and handle it per-request in requireAuth.
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   console.error(
-    '[api/_lib] FATAL: Missing SUPABASE_URL or SUPABASE_ANON_KEY. ' +
+    '[api/_lib] FATAL: Missing Supabase public credentials. ' +
     'All authenticated requests will return 503. ' +
-    'Set these variables in your Vercel project settings under Environment Variables. ' +
-    'DO NOT use VITE_* variables (those are frontend-only and exposed in bundles).'
+    'Set SUPABASE_URL plus SUPABASE_ANON_KEY, or VITE_SUPABASE_URL plus VITE_SUPABASE_PUBLISHABLE_KEY, ' +
+    'in your Vercel project settings under Environment Variables.'
   );
 }
 
@@ -39,7 +47,7 @@ function getAdminClient() {
 async function requireAuth(req, res) {
   // FIX #6 (runtime): If misconfigured, return 503 instead of crashing the process.
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    res.status(503).json({ error: 'Service misconfigured: missing Supabase credentials' });
+    res.status(503).json({ error: 'Service misconfigured: missing Supabase public credentials' });
     return null;
   }
   const authHeader = req.headers['authorization'];
