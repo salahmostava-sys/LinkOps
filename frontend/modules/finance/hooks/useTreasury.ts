@@ -40,6 +40,14 @@ export function useTreasury(from: string, to: string) {
     },
   });
 
+  const updateTransactionMutation = useMutation({
+    mutationFn: ({ id, input }: { id: string; input: Partial<TreasuryTransaction> }) => treasuryService.updateTransaction(id, input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['treasury_transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['treasury_balances'] });
+    },
+  });
+
   const deleteTransactionMutation = useMutation({
     mutationFn: (id: string) => treasuryService.deleteTransaction(id),
     onSuccess: () => {
@@ -85,8 +93,10 @@ export function useTreasury(from: string, to: string) {
     transactions: transactionsQuery.data ?? [],
     isLoading: accountsQuery.isLoading || categoriesQuery.isLoading || transactionsQuery.isLoading || balancesQuery.isLoading,
     createTransaction: createTransaction.mutateAsync,
+    updateTransaction: updateTransactionMutation.mutateAsync,
     deleteTransaction: deleteTransactionMutation.mutateAsync,
     isDeletingTransaction: deleteTransactionMutation.isPending,
+    isUpdatingTransaction: updateTransactionMutation.isPending,
     createAccount: createAccount.mutateAsync,
     createCategory: createCategory.mutateAsync,
     deleteAccount: deleteAccount.mutateAsync,
