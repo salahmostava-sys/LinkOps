@@ -22,6 +22,7 @@ import ProtectedRoute from "@shared/components/ProtectedRoute";
 import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Navigate, RouterProvider, createBrowserRouter, Outlet, useLocation } from "react-router-dom";
 import { emitAuthFailure, isStrictUnauthenticatedError } from "@shared/lib/auth/authFailureBus";
+import { UndoProvider } from "@shared/context/UndoContext";
 
 const Login = lazy(() => import("@modules/pages/Login"));
 
@@ -89,18 +90,20 @@ const DashboardRouteShell = () => (
 
 const AppProvidersShell = () => (
   <AuthProvider>
-    <ErrorContextSync />
-    <ProgressBar />
-    <KeyboardShortcuts />
-    <OfflineIndicator />
-    <LanguageProvider>
-      <TemporalProvider>
-        <SystemSettingsProvider>
-          <AlertsFaviconBadge />
-          <Outlet />
-        </SystemSettingsProvider>
-      </TemporalProvider>
-    </LanguageProvider>
+    <UndoProvider>
+      <ErrorContextSync />
+      <ProgressBar />
+      <KeyboardShortcuts />
+      <OfflineIndicator />
+      <LanguageProvider>
+        <TemporalProvider>
+          <SystemSettingsProvider>
+            <AlertsFaviconBadge />
+            <Outlet />
+          </SystemSettingsProvider>
+        </TemporalProvider>
+      </LanguageProvider>
+    </UndoProvider>
   </AuthProvider>
 );
 

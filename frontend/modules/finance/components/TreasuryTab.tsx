@@ -120,7 +120,7 @@ export function TreasuryTab() {
   const handleConfirmDelete = async () => {
     if (!deleteTarget) return;
     try {
-      await deleteTransaction(deleteTarget.id);
+      await deleteTransaction(deleteTarget);
       toast.success('تم حذف القيد بنجاح');
     } catch {
       toast.error('فشل في حذف القيد');
