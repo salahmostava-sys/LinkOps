@@ -1,6 +1,4 @@
-import { useCallback, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { Wrench, Loader2, ShieldAlert } from 'lucide-react';
+import { Wrench } from 'lucide-react';
 import { Tabs, TabsContent } from '@shared/components/ui/tabs';
 import { Card, CardContent } from '@shared/components/ui/card';
 import { ResponsiveTabBar } from '@shared/components/ResponsiveTabBar';
@@ -8,6 +6,8 @@ import { MaintenanceLogsTab } from '@modules/maintenance/components/MaintenanceL
 import { SparePartsTab } from '@modules/maintenance/components/SparePartsTab';
 import { useAuthQueryGate } from '@shared/hooks/useAuthQueryGate';
 import { usePermissions } from '@shared/hooks/usePermissions';
+import { useUrlTab } from '@shared/hooks/useUrlTab';
+import { PageLoadingState, PageAccessDeniedState } from '@shared/components/PageAccessState';
 
 const MAINT_TABS = ['logs', 'inventory'] as const;
 type MaintTab = (typeof MAINT_TABS)[number];
@@ -18,43 +18,14 @@ const isMaintTab = (v: string | null): v is MaintTab =>
 const MaintenancePage = () => {
   const { authLoading } = useAuthQueryGate();
   const { permissions, loading: permsLoading } = usePermissions('maintenance');
-  const [searchParams, setSearchParams] = useSearchParams();
-  const tab = useMemo(() => {
-    const v = searchParams.get('tab');
-    return isMaintTab(v) ? v : 'logs';
-  }, [searchParams]);
-
-  const onTabChange = useCallback(
-    (v: string) => {
-      setSearchParams(
-        (prev) => {
-          const next = new URLSearchParams(prev);
-          if (v === 'logs') next.delete('tab');
-          else next.set('tab', v);
-          return next;
-        },
-        { replace: true },
-      );
-    },
-    [setSearchParams],
-  );
+  const { tab, onTabChange } = useUrlTab(isMaintTab, 'logs');
 
   if (authLoading || permsLoading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 size={28} className="animate-spin text-primary" />
-      </div>
-    );
+    return <PageLoadingState />;
   }
 
   if (!permissions.can_view) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 gap-3 text-center">
-        <ShieldAlert size={40} className="text-destructive" />
-        <p className="text-lg font-semibold">غير مصرح بالوصول</p>
-        <p className="text-sm text-muted-foreground">ليس لديك صلاحية الوصول لصفحة الصيانة</p>
-      </div>
-    );
+    return <PageAccessDeniedState message="ليس لديك صلاحية الوصول لصفحة الصيانة" />;
   }
 
   return (

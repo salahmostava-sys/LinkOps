@@ -46,6 +46,56 @@ export type SpreadsheetImportResult = {
   errors: string[];
 };
 
+/**
+ * يطبّق مطابقة الأسماء النهائية، يدمج بيانات الاستيراد، ويعرض إشعار النتيجة
+ * (نجاح/تحذيرات/مسح شامل) — منطق مشترك بين مسار الاستيراد التلقائي ومسار
+ * التأكيد اليدوي لمطابقة الأسماء.
+ */
+function applyMatrixMappingAndNotify(params: {
+  matrix: unknown[][];
+  dayArr: number[];
+  apps: App[];
+  data: DailyData;
+  targetAppId?: string;
+  appEmployeeIds: AppEmployeeIdsMap;
+  onApplyData: (next: DailyData) => void;
+  nameMapping: Map<string, string>;
+  isClearAll: boolean;
+}): SpreadsheetImportResult {
+  const { matrix, dayArr, apps, data, targetAppId, appEmployeeIds, onApplyData, nameMapping, isClearAll } = params;
+
+  const { newData, imported, skipped, errors } = mergeImportedOrdersFromMatrixWithMapping({
+    matrixRows: matrix.slice(1),
+    dayArr,
+    apps,
+    prev: data,
+    targetAppId,
+    nameMapping,
+    appEmployeeIds,
+  });
+  onApplyData(newData);
+  const appName = targetAppId
+    ? apps.find((a) => a.id === targetAppId)?.name
+    : 'التوزيع الذكي حسب تعيين الموظف';
+
+  if (errors.length > 0) {
+    toast.warning(`تم الاستيراد مع تحذيرات`, {
+      description: `✅ نجح: ${imported} إدخال | ⚠️ تخطي: ${skipped} صف\n${errors.slice(0, 5).join('\n')}` + (errors.length > 5 ? `\n... و${errors.length - 5} أخطاء أخرى` : ''),
+      duration: 10000,
+    });
+  } else if (isClearAll) {
+    toast.success(TOAST_SUCCESS_OPERATION, {
+      description: `تم مسح جميع طلبات الشهر - ${monthLabel(0, 0)}`
+    });
+  } else {
+    toast.success(TOAST_SUCCESS_ACTION, {
+      description: `تم استيراد ${imported} إدخال إلى ${appName}`
+    });
+  }
+
+  return { appliedData: newData, imported, skipped, errors };
+}
+
 export async function exportSpreadsheetExcel(params: {
   year: number;
   month: number;
@@ -161,32 +211,12 @@ export async function runSpreadsheetImport(params: {
           matched.forEach((match, name) => finalMapping.set(name, match.id));
           nameMapping.forEach((id, name) => finalMapping.set(name, id));
 
-          // استيراد البيانات مع المطابقات
-          const { newData, imported, skipped, errors } = mergeImportedOrdersFromMatrixWithMapping({
-            matrixRows: matrix.slice(1),
-            dayArr,
-            apps,
-            prev: data,
-            targetAppId,
+          const result = applyMatrixMappingAndNotify({
+            matrix, dayArr, apps, data, targetAppId, appEmployeeIds, onApplyData,
             nameMapping: finalMapping,
-            appEmployeeIds,
+            isClearAll: false,
           });
-          onApplyData(newData);
-          const appName = targetAppId
-            ? apps.find((a) => a.id === targetAppId)?.name
-            : 'التوزيع الذكي حسب تعيين الموظف';
-
-          if (errors.length > 0) {
-            toast.warning(`تم الاستيراد مع تحذيرات`, {
-              description: `✅ نجح: ${imported} إدخال | ⚠️ تخطي: ${skipped} صف\n${errors.slice(0, 5).join('\n')}` + (errors.length > 5 ? `\n... و${errors.length - 5} أخطاء أخرى` : ''),
-              duration: 10000,
-            });
-          } else {
-            toast.success(TOAST_SUCCESS_ACTION, {
-              description: `تم استيراد ${imported} إدخال إلى ${appName}`
-            });
-          }
-          resolve({ appliedData: newData, imported, skipped, errors });
+          resolve(result);
         });
       });
     }
@@ -195,35 +225,11 @@ export async function runSpreadsheetImport(params: {
     const finalMapping = new Map<string, string>();
     matched.forEach((match, name) => finalMapping.set(name, match.id));
 
-    const { newData, imported, skipped, errors } = mergeImportedOrdersFromMatrixWithMapping({
-      matrixRows: matrix.slice(1),
-      dayArr,
-      apps,
-      prev: data,
-      targetAppId,
+    return applyMatrixMappingAndNotify({
+      matrix, dayArr, apps, data, targetAppId, appEmployeeIds, onApplyData,
       nameMapping: finalMapping,
-      appEmployeeIds,
+      isClearAll: file.name === '__never__',
     });
-    onApplyData(newData);
-    const appName = targetAppId
-      ? apps.find((a) => a.id === targetAppId)?.name
-      : 'التوزيع الذكي حسب تعيين الموظف';
-
-    if (errors.length > 0) {
-      toast.warning(`تم الاستيراد مع تحذيرات`, {
-        description: `✅ نجح: ${imported} إدخال | ⚠️ تخطي: ${skipped} صف\n${errors.slice(0, 5).join('\n')}` + (errors.length > 5 ? `\n... و${errors.length - 5} أخطاء أخرى` : ''),
-        duration: 10000,
-      });
-    } else if (file.name === '__never__') {
-      toast.success(TOAST_SUCCESS_OPERATION, {
-        description: `تم مسح جميع طلبات الشهر - ${monthLabel(0, 0)}`
-      });
-    } else {
-      toast.success(TOAST_SUCCESS_ACTION, {
-        description: `تم استيراد ${imported} إدخال إلى ${appName}`
-      });
-    }
-    return { appliedData: newData, imported, skipped, errors };
   } catch (err) {
     logError('[Orders] import spreadsheet failed', err);
     const errorMsg = getErrorMessage(err, 'خطأ غير معروف');
