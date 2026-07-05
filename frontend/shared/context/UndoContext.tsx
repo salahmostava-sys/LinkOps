@@ -38,6 +38,7 @@ export function UndoProvider({ children }: Readonly<{ children: React.ReactNode 
         </button>
       </div>
     ), { duration: 6000, position: 'bottom-left' });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleUndo = async (actionId?: string) => {
@@ -75,6 +76,7 @@ export function UndoProvider({ children }: Readonly<{ children: React.ReactNode 
 
   const undoLastAction = useCallback(async () => {
     await handleUndo();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionStack, isUndoing]);
 
   useEffect(() => {

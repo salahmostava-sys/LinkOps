@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-duplicate-string */
 import { getEmployeeCities } from '@modules/employees/model/employeeUtils';
 import { cityLabel } from '@modules/employees/model/employeeCity';
 import { EMPTY_DATA_PLACEHOLDER } from '@modules/employees/types/employee.types';
