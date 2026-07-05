@@ -89,6 +89,7 @@ const CellEditorDialog = ({
                 <SelectItem value="leave">🏝️ إجازة</SelectItem>
                 <SelectItem value="sick">🤒 مريض</SelectItem>
                 <SelectItem value="late">⏳ متأخر</SelectItem>
+                <SelectItem value="none">➖ غير محدد</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -162,12 +163,23 @@ const MonthlyRecord = ({ selectedMonth, selectedYear }: Readonly<MonthlyRecordPr
     mutationFn: async (payload: {
       employee_id: string;
       date: string;
-      status: 'present' | 'absent' | 'leave' | 'sick' | 'late';
+      status: 'present' | 'absent' | 'leave' | 'sick' | 'late' | 'none';
       check_in: string | null;
       check_out: string | null;
       note: string | null;
     }) => {
-      await attendanceService.upsertDailyAttendance(payload);
+      if (payload.status === 'none') {
+        await attendanceService.deleteDailyAttendanceByKeys(payload.employee_id, payload.date);
+      } else {
+        await attendanceService.upsertDailyAttendance({
+          employee_id: payload.employee_id,
+          date: payload.date,
+          status: payload.status,
+          check_in: payload.check_in,
+          check_out: payload.check_out,
+          note: payload.note,
+        });
+      }
     },
     onSuccess: () => {
       toast.success("تم الحفظ بنجاح", { style: { background: "var(--ds-surface-container)", color: "var(--ds-on-surface)" } });
@@ -324,11 +336,10 @@ const MonthlyRecord = ({ selectedMonth, selectedYear }: Readonly<MonthlyRecordPr
           initialData={editingCell.record}
           isSaving={mutation.isPending}
           onSave={(data) => {
-             if (data.status === 'none') return; 
              mutation.mutate({
                employee_id: editingCell.empId,
                date: `${selectedYear}-${monthStr}-${String(editingCell.day).padStart(2, "0")}`,
-               status: data.status as 'present' | 'absent' | 'leave' | 'sick' | 'late',
+               status: data.status as 'present' | 'absent' | 'leave' | 'sick' | 'late' | 'none',
                check_in: data.check_in || null,
                check_out: data.check_out || null,
                note: data.note || null

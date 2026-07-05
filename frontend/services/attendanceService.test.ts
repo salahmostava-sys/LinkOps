@@ -281,4 +281,17 @@ describe('attendanceService', () => {
       await expect(attendanceService.addStatusConfig('test cfg')).rejects.toThrow('cfg error');
     });
   });
+
+  describe('deleteDailyAttendanceByKeys', () => {
+    it('deletes successfully', async () => {
+      tableResults.attendance = { data: null, error: null };
+      await attendanceService.deleteDailyAttendanceByKeys('emp-1', '2026-04-01');
+      expect(fromMock).toHaveBeenCalledWith('attendance');
+    });
+
+    it('throws on error', async () => {
+      tableResults.attendance = { data: null, error: new Error('delete err') };
+      await expect(attendanceService.deleteDailyAttendanceByKeys('emp-1', '2026-04-01')).rejects.toThrow('delete err');
+    });
+  });
 });

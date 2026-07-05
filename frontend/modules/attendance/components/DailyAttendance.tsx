@@ -310,6 +310,35 @@ const DailyAttendance = ({ selectedMonth, selectedYear }: Readonly<Props>) => {
 
   const savedCount = Object.values(records).filter(r => r.status !== null).length;
 
+  const isDirty = useMemo(() => {
+    const dbRecords = recordsQuery.data || [];
+    const dbMap = new Map(dbRecords.map(r => [r.employee_id, r]));
+
+    for (const r of Object.values(records)) {
+      const dbRec = dbMap.get(r.employeeId);
+      if (!dbRec) {
+        if (r.status !== null || r.checkIn !== "" || r.checkOut !== "" || r.note !== "") {
+          return true;
+        }
+      } else {
+        const dbStatus = dbRec.status ?? null;
+        const dbCheckIn = dbRec.check_in ?? "";
+        const dbCheckOut = dbRec.check_out ?? "";
+        const dbNote = dbRec.note ?? "";
+
+        if (
+          r.status !== dbStatus ||
+          r.checkIn !== dbCheckIn ||
+          r.checkOut !== dbCheckOut ||
+          r.note !== dbNote
+        ) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }, [records, recordsQuery.data]);
+
   const allStatuses = [
     ...BUILT_IN_STATUSES.map(k => ({ value: k, label: statusLabels[k] })),
     ...customStatuses.map(s => ({ value: s, label: s })),
@@ -605,7 +634,7 @@ const DailyAttendance = ({ selectedMonth, selectedYear }: Readonly<Props>) => {
             </Button>
           )}
           {permissions.can_edit && (
-            <Button onClick={handleSave} disabled={saving || savedCount === 0} className="gap-2 h-9 text-sm">
+            <Button onClick={handleSave} disabled={saving || !isDirty} className="gap-2 h-9 text-sm">
               <Save size={16} />
               {saving ? "جاري الحفظ..." : `حفظ (${savedCount})`}
             </Button>
