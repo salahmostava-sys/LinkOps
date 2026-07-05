@@ -4,12 +4,13 @@ import { Card, CardContent } from '@shared/components/ui/card';
 import { ResponsiveTabBar } from '@shared/components/ResponsiveTabBar';
 import { MaintenanceLogsTab } from '@modules/maintenance/components/MaintenanceLogsTab';
 import { SparePartsTab } from '@modules/maintenance/components/SparePartsTab';
+import { VehicleReportsTab } from '@modules/maintenance/components/VehicleReportsTab';
 import { useAuthQueryGate } from '@shared/hooks/useAuthQueryGate';
 import { usePermissions } from '@shared/hooks/usePermissions';
 import { useUrlTab } from '@shared/hooks/useUrlTab';
 import { PageLoadingState, PageAccessDeniedState } from '@shared/components/PageAccessState';
 
-const MAINT_TABS = ['logs', 'inventory'] as const;
+const MAINT_TABS = ['logs', 'inventory', 'vehicle-reports'] as const;
 type MaintTab = (typeof MAINT_TABS)[number];
 
 const isMaintTab = (v: string | null): v is MaintTab =>
@@ -54,6 +55,7 @@ const MaintenancePage = () => {
               options={[
                 { value: 'logs', label: '🔧 سجل الصيانة', selectLabel: 'سجل الصيانة' },
                 { value: 'inventory', label: '📦 المخزون وقطع الغيار', selectLabel: 'المخزون وقطع الغيار' },
+                { value: 'vehicle-reports', label: '📊 تقارير المركبات', selectLabel: 'تقارير المركبات' },
               ]}
             />
             <TabsContent value="logs" className="mt-4 sm:mt-5 outline-none">
@@ -61,6 +63,9 @@ const MaintenancePage = () => {
             </TabsContent>
             <TabsContent value="inventory" className="mt-4 sm:mt-5 outline-none">
               <SparePartsTab />
+            </TabsContent>
+            <TabsContent value="vehicle-reports" className="mt-4 sm:mt-5 outline-none">
+              <VehicleReportsTab />
             </TabsContent>
           </Tabs>
         </CardContent>
