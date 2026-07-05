@@ -15,9 +15,6 @@ import {
   filterDailyRows,
   filterMonthlyRows,
 } from '@modules/fuel/model/fuelCalculations';
-
-const SAVE_ERROR_TITLE = 'خطأ في الحفظ';
-
 import type {
   DailyRow,
   Employee,
