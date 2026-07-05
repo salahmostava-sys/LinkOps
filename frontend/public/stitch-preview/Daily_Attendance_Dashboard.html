@@ -284,7 +284,7 @@
 <thead class="bg-surface-container-low border-b border-outline-variant sticky top-0 z-10">
 <tr>
 <th class="p-4 w-12 text-center">
-<input class="w-4 h-4 text-primary bg-surface border-outline rounded focus:ring-primary focus:ring-2 checked:bg-primary cursor-pointer" type="checkbox"/>
+<input aria-label="Select attendance row" class="w-4 h-4 text-primary bg-surface border-outline rounded focus:ring-primary focus:ring-2 checked:bg-primary cursor-pointer" type="checkbox"/>
 </th>
 <th class="p-4 font-label-md text-label-md text-on-surface-variant font-bold uppercase tracking-wider">Employee</th>
 <th class="p-4 font-label-md text-label-md text-on-surface-variant font-bold uppercase tracking-wider">Check-in</th>
@@ -298,7 +298,7 @@
 <!-- Row 1: Present -->
 <tr class="hover:bg-surface-container transition-colors group cursor-default">
 <td class="p-4 text-center">
-<input checked="" class="w-4 h-4 text-primary bg-surface border-outline rounded focus:ring-primary focus:ring-2 checked:bg-primary cursor-pointer" type="checkbox"/>
+<input aria-label="Select attendance row" checked="" class="w-4 h-4 text-primary bg-surface border-outline rounded focus:ring-primary focus:ring-2 checked:bg-primary cursor-pointer" type="checkbox"/>
 </td>
 <td class="p-4">
 <div class="flex items-center gap-3">
@@ -310,10 +310,10 @@
 </div>
 </td>
 <td class="p-4">
-<input class="ghost-input font-label-md text-label-md text-on-surface w-24" type="text" value="08:45 AM"/>
+<input aria-label="Clock-in time" class="ghost-input font-label-md text-label-md text-on-surface w-24" type="text" value="08:45 AM"/>
 </td>
 <td class="p-4">
-<input class="ghost-input font-label-md text-label-md text-on-surface-variant w-24" placeholder="--:--" type="text"/>
+<input aria-label="Clock-out time" class="ghost-input font-label-md text-label-md text-on-surface-variant w-24" placeholder="--:--" type="text"/>
 </td>
 <td class="p-4">
 <button class="inline-flex items-center px-2.5 py-1 rounded-full bg-emerald-light text-emerald-dark font-label-md text-label-md font-bold uppercase tracking-wide hover:bg-[#bbf7d0] transition-colors border border-emerald-light focus:outline-none focus:ring-2 focus:ring-emerald-dark focus:ring-offset-1">
@@ -321,7 +321,7 @@
                                     </button>
 </td>
 <td class="p-4 w-64">
-<input class="ghost-input font-body-sm text-body-sm text-on-surface w-full" placeholder="Add note..." type="text"/>
+<input aria-label="Note" class="ghost-input font-body-sm text-body-sm text-on-surface w-full" placeholder="Add note..." type="text"/>
 </td>
 <td class="p-4 text-right">
 <button class="text-on-surface-variant hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity">
@@ -332,7 +332,7 @@
 <!-- Row 2: Late -->
 <tr class="hover:bg-surface-container transition-colors group cursor-default bg-[#fefce8]">
 <td class="p-4 text-center">
-<input checked="" class="w-4 h-4 text-primary bg-surface border-outline rounded focus:ring-primary focus:ring-2 checked:bg-primary cursor-pointer" type="checkbox"/>
+<input aria-label="Select attendance row" checked="" class="w-4 h-4 text-primary bg-surface border-outline rounded focus:ring-primary focus:ring-2 checked:bg-primary cursor-pointer" type="checkbox"/>
 </td>
 <td class="p-4">
 <div class="flex items-center gap-3">
@@ -346,10 +346,10 @@
 </div>
 </td>
 <td class="p-4">
-<input class="ghost-input font-label-md text-label-md text-amber-dark font-bold w-24" type="text" value="09:32 AM"/>
+<input aria-label="Clock-in time" class="ghost-input font-label-md text-label-md text-amber-dark font-bold w-24" type="text" value="09:32 AM"/>
 </td>
 <td class="p-4">
-<input class="ghost-input font-label-md text-label-md text-on-surface-variant w-24" placeholder="--:--" type="text"/>
+<input aria-label="Clock-out time" class="ghost-input font-label-md text-label-md text-on-surface-variant w-24" placeholder="--:--" type="text"/>
 </td>
 <td class="p-4">
 <button class="inline-flex items-center px-2.5 py-1 rounded-full bg-amber-light text-amber-dark font-label-md text-label-md font-bold uppercase tracking-wide hover:bg-[#fde68a] transition-colors border border-amber-light focus:outline-none focus:ring-2 focus:ring-amber-dark focus:ring-offset-1">
@@ -357,7 +357,7 @@
                                     </button>
 </td>
 <td class="p-4 w-64">
-<input class="ghost-input font-body-sm text-body-sm text-on-surface w-full" type="text" value="Traffic delay on I-95"/>
+<input aria-label="Note" class="ghost-input font-body-sm text-body-sm text-on-surface w-full" type="text" value="Traffic delay on I-95"/>
 </td>
 <td class="p-4 text-right">
 <button class="text-on-surface-variant hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity">
@@ -368,7 +368,7 @@
 <!-- Row 3: Absent -->
 <tr class="hover:bg-surface-container transition-colors group cursor-default">
 <td class="p-4 text-center">
-<input checked="" class="w-4 h-4 text-primary bg-surface border-outline rounded focus:ring-primary focus:ring-2 checked:bg-primary cursor-pointer" type="checkbox"/>
+<input aria-label="Select attendance row" checked="" class="w-4 h-4 text-primary bg-surface border-outline rounded focus:ring-primary focus:ring-2 checked:bg-primary cursor-pointer" type="checkbox"/>
 </td>
 <td class="p-4">
 <div class="flex items-center gap-3">
@@ -380,10 +380,10 @@
 </div>
 </td>
 <td class="p-4">
-<input class="bg-transparent border-transparent text-on-surface-variant font-label-md text-label-md w-24 cursor-not-allowed" disabled="" placeholder="--:--" type="text"/>
+<input aria-label="Clock-in time" class="bg-transparent border-transparent text-on-surface-variant font-label-md text-label-md w-24 cursor-not-allowed" disabled="" placeholder="--:--" type="text"/>
 </td>
 <td class="p-4">
-<input class="bg-transparent border-transparent text-on-surface-variant font-label-md text-label-md w-24 cursor-not-allowed" disabled="" placeholder="--:--" type="text"/>
+<input aria-label="Clock-out time" class="bg-transparent border-transparent text-on-surface-variant font-label-md text-label-md w-24 cursor-not-allowed" disabled="" placeholder="--:--" type="text"/>
 </td>
 <td class="p-4">
 <button class="inline-flex items-center px-2.5 py-1 rounded-full bg-rose-light text-rose-dark font-label-md text-label-md font-bold uppercase tracking-wide hover:bg-[#fecdd3] transition-colors border border-rose-light focus:outline-none focus:ring-2 focus:ring-rose-dark focus:ring-offset-1">
@@ -391,7 +391,7 @@
                                     </button>
 </td>
 <td class="p-4 w-64">
-<input class="ghost-input font-body-sm text-body-sm text-on-surface w-full" type="text" value="Sick leave approved"/>
+<input aria-label="Note" class="ghost-input font-body-sm text-body-sm text-on-surface w-full" type="text" value="Sick leave approved"/>
 </td>
 <td class="p-4 text-right">
 <button class="text-on-surface-variant hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity">
@@ -402,7 +402,7 @@
 <!-- Row 4: Present (Checked Out) -->
 <tr class="hover:bg-surface-container transition-colors group cursor-default">
 <td class="p-4 text-center">
-<input class="w-4 h-4 text-primary bg-surface border-outline rounded focus:ring-primary focus:ring-2 cursor-pointer" type="checkbox"/>
+<input aria-label="Select attendance row" class="w-4 h-4 text-primary bg-surface border-outline rounded focus:ring-primary focus:ring-2 cursor-pointer" type="checkbox"/>
 </td>
 <td class="p-4">
 <div class="flex items-center gap-3">
@@ -414,10 +414,10 @@
 </div>
 </td>
 <td class="p-4">
-<input class="ghost-input font-label-md text-label-md text-on-surface w-24" type="text" value="08:55 AM"/>
+<input aria-label="Clock-in time" class="ghost-input font-label-md text-label-md text-on-surface w-24" type="text" value="08:55 AM"/>
 </td>
 <td class="p-4">
-<input class="ghost-input font-label-md text-label-md text-on-surface w-24" type="text" value="12:30 PM"/>
+<input aria-label="Clock-out time" class="ghost-input font-label-md text-label-md text-on-surface w-24" type="text" value="12:30 PM"/>
 </td>
 <td class="p-4">
 <button class="inline-flex items-center px-2.5 py-1 rounded-full bg-emerald-light text-emerald-dark font-label-md text-label-md font-bold uppercase tracking-wide hover:bg-[#bbf7d0] transition-colors border border-emerald-light focus:outline-none focus:ring-2 focus:ring-emerald-dark focus:ring-offset-1">
@@ -425,7 +425,7 @@
                                     </button>
 </td>
 <td class="p-4 w-64">
-<input class="ghost-input font-body-sm text-body-sm text-on-surface w-full" type="text" value="Half-day PTO"/>
+<input aria-label="Note" class="ghost-input font-body-sm text-body-sm text-on-surface w-full" type="text" value="Half-day PTO"/>
 </td>
 <td class="p-4 text-right">
 <button class="text-on-surface-variant hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity">
