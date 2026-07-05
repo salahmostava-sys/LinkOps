@@ -86,6 +86,10 @@ async function getGoogleAccessToken(credentials) {
 
   // Aggressively reformat the private key to ensure it's a valid PEM
   let privateKeyStr = credentials.private_key || '';
+  if (!privateKeyStr || privateKeyStr.length < 50) {
+    throw new Error('private_key is missing or too short in GOOGLE_APPLICATION_CREDENTIALS_JSON.');
+  }
+
   if (privateKeyStr.includes('BEGIN')) {
     const b64 = privateKeyStr
       .replace(/-----BEGIN.*?-----/g, '')
@@ -101,8 +105,13 @@ async function getGoogleAccessToken(credentials) {
     privateKeyStr = `-----BEGIN PRIVATE KEY-----\n${chunks.join('\n')}\n-----END PRIVATE KEY-----\n`;
   }
 
-  // createPrivateKey() properly parses the PEM key — required for Node 18+ / OpenSSL 3.x
-  const privateKey = createPrivateKey(privateKeyStr);
+  let privateKey;
+  try {
+    // createPrivateKey() properly parses the PEM key — required for Node 18+ / OpenSSL 3.x
+    privateKey = createPrivateKey(privateKeyStr);
+  } catch (err) {
+    throw new Error(`Failed to decode private key (length ${privateKeyStr.length}): ${err.message}`);
+  }
   const sign = createSign('RSA-SHA256');
   sign.update(signingInput);
   const signature = sign
