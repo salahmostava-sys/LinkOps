@@ -67,7 +67,11 @@ export async function extractTextFromImage(
       onProgress({ status: 'جاري استخراج النص عبر Google Vision...', progress: 0.6 });
     }
 
-    const response = await fetch('/ai/api/ocr/extract-waybill', {
+    const aiBackendUrl = import.meta.env.VITE_AI_BACKEND_URL;
+    const baseUrl = aiBackendUrl && aiBackendUrl !== 'none' ? aiBackendUrl : '/ai';
+    const cleanBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+
+    const response = await fetch(`${cleanBaseUrl}/api/ocr/extract-waybill`, {
       method: 'POST',
       body: formData,
     });
