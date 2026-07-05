@@ -5,12 +5,7 @@ import { Skeleton } from '@shared/components/ui/skeleton';
 import { QueryErrorRetry } from '@shared/components/QueryErrorRetry';
 import { useMaintenanceLogs } from '@modules/maintenance/hooks/useMaintenanceData';
 import type { MaintenanceLogWithDetails } from '@services/maintenanceService';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@shared/components/ui/accordion';
+
 
 const TYPE_COLORS: Record<string, string> = {
   'غيار زيت':    'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300',
@@ -115,10 +110,10 @@ export function VehicleReportsTab() {
         </div>
       ) : (
         <div className="bg-card border border-border/60 rounded-xl overflow-hidden">
-          <Accordion type="multiple" className="w-full">
+          <div className="w-full flex flex-col">
             {filteredGroups.map(group => (
-              <AccordionItem key={group.vehicle_id} value={group.vehicle_id} className="border-b last:border-b-0">
-                <AccordionTrigger className="px-4 py-4 hover:no-underline hover:bg-muted/50 transition-colors">
+              <details key={group.vehicle_id} className="group border-b last:border-b-0">
+                <summary className="px-4 py-4 hover:bg-muted/50 transition-colors cursor-pointer list-none [&::-webkit-details-marker]:hidden">
                   <div className="flex items-center justify-between w-full pr-2">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 flex items-center justify-center shrink-0">
@@ -134,8 +129,8 @@ export function VehicleReportsTab() {
                       <span className="font-bold">{group.total_cost.toLocaleString('en-US')} ر.س</span>
                     </div>
                   </div>
-                </AccordionTrigger>
-                <AccordionContent className="px-4 pb-4 pt-1 bg-muted/10 border-t border-border/40 shadow-inner">
+                </summary>
+                <div className="px-4 pb-4 pt-1 bg-muted/10 border-t border-border/40 shadow-inner group-open:block hidden">
                   <div className="space-y-3 mt-3">
                     {group.logs.map(log => {
                       const colorClass = TYPE_COLORS[log.type] ?? TYPE_COLORS['أخرى'];
@@ -183,10 +178,10 @@ export function VehicleReportsTab() {
                       );
                     })}
                   </div>
-                </AccordionContent>
-              </AccordionItem>
+                </div>
+              </details>
             ))}
-          </Accordion>
+          </div>
         </div>
       )}
     </div>

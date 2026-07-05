@@ -43,7 +43,6 @@ const FinancePage = lazy(() => import("@modules/finance/pages/FinancePage"));
 const Motorcycles = lazy(() => import("@modules/pages/Motorcycles"));
 const VehicleAssignment = lazy(() => import("@modules/pages/VehicleAssignment"));
 const EmployeeTiers = lazy(() => import("@modules/pages/EmployeeTiers"));
-const StitchPreview = lazy(() => import("@modules/pages/StitchPreview"));
 const AiAnalytics = lazy(() => import("@modules/pages/AiAnalyticsPage"));
 const ProfilePage = lazy(() => import("@modules/pages/ProfilePage"));
 const NotFound = lazy(() => import("@modules/pages/NotFound"));
@@ -118,14 +117,6 @@ const router = createBrowserRouter([
         element: (
           <PublicLayout>
             <Login />
-          </PublicLayout>
-        ),
-      },
-      {
-        path: "stitch-preview",
-        element: (
-          <PublicLayout>
-            <StitchPreview />
           </PublicLayout>
         ),
       },
