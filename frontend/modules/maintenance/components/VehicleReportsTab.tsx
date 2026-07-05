@@ -99,81 +99,112 @@ export function VehicleReportsTab() {
     }
   };
 
-  const exportToPdf = () => {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
+  const exportToPdf = async () => {
+    try {
+      const { default: JsPdf } = await import('jspdf');
 
-    const html = `
-      <html dir="rtl" lang="ar">
-        <head>
-          <title>تقرير صيانة المركبات</title>
-          <style>
-            @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
-            body { font-family: 'Tajawal', system-ui, sans-serif; padding: 30px; color: #111; }
-            h1 { text-align: center; margin-bottom: 5px; color: #0f172a; }
-            .header-info { text-align: center; margin-bottom: 30px; font-size: 14px; color: #64748b; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; text-align: right; font-size: 14px; }
-            th, td { border: 1px solid #cbd5e1; padding: 12px; }
-            th { background-color: #f8fafc; font-weight: bold; color: #334155; }
-            tr:nth-child(even) { background-color: #f8fafc; }
-            @media print {
-              body { padding: 0; }
-              @page { margin: 1cm; }
-            }
-          </style>
-        </head>
-        <body>
-          <h1>تقرير صيانة المركبات</h1>
-          <div class="header-info">
-            <p>تاريخ استخراج التقرير: ${new Date().toLocaleDateString('ar-SA')} | إجمالي المركبات المشمولة: ${filteredGroups.length}</p>
-          </div>
-          <table>
-            <thead>
-              <tr>
-                <th>رقم اللوحة</th>
-                <th>نوع المركبة</th>
-                <th>تاريخ الصيانة</th>
-                <th>نوع الصيانة</th>
-                <th>التكلفة</th>
-                <th>ملاحظات</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${filteredGroups.map(g => {
-                if (g.logs.length === 0) {
-                  return `<tr>
-                    <td>${g.plate_number}</td>
-                    <td>${g.type}</td>
-                    <td colspan="4" style="text-align: center; color: #94a3b8;">لا توجد صيانات مسجلة</td>
-                  </tr>`;
-                }
-                return g.logs.map(log => `
+      const iframe = document.createElement('iframe');
+      iframe.style.position = 'fixed';
+      iframe.style.left = '-10000px';
+      iframe.style.top = '-10000px';
+      iframe.style.width = '794px';
+      iframe.style.height = '1123px';
+      iframe.style.border = 'none';
+      document.body.appendChild(iframe);
+
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+      if (!iframeDoc) return;
+
+      const html = `
+        <html dir="rtl" lang="ar">
+          <head>
+            <style>
+              @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
+              body { font-family: 'Tajawal', system-ui, sans-serif; padding: 0; margin: 0; color: #111; background: #fff; }
+              .pdf-container { width: 700px; padding: 20px; background: #fff; margin: 0 auto; }
+              .company-name { text-align: center; font-size: 22px; font-weight: bold; margin-bottom: 5px; color: #1e293b; }
+              h1 { text-align: center; margin-bottom: 5px; color: #0f172a; font-size: 18px; }
+              .header-info { text-align: center; margin-bottom: 20px; font-size: 13px; color: #64748b; }
+              table { width: 100%; border-collapse: collapse; margin-top: 10px; text-align: right; font-size: 13px; }
+              th, td { border: 1px solid #cbd5e1; padding: 10px; }
+              th { background-color: #f8fafc; font-weight: bold; color: #334155; }
+              tr:nth-child(even) { background-color: #f8fafc; }
+            </style>
+          </head>
+          <body>
+            <div class="pdf-container">
+              <div class="company-name">شركة مهمة التوصيل للخدمات اللوجستية</div>
+              <h1>تقرير صيانة المركبات والمخزون</h1>
+              <div class="header-info">
+                <p>تاريخ الاستخراج: ${new Date().toLocaleDateString('ar-SA')} | إجمالي المركبات: ${filteredGroups.length}</p>
+              </div>
+              <table>
+                <thead>
                   <tr>
-                    <td>${g.plate_number}</td>
-                    <td>${g.type}</td>
-                    <td>${log.maintenance_date ? new Date(log.maintenance_date).toLocaleDateString('ar-SA') : ''}</td>
-                    <td>${log.type}</td>
-                    <td>${Number(log.total_cost) || 0} ر.س</td>
-                    <td>${log.notes || ''}</td>
+                    <th>رقم اللوحة</th>
+                    <th>نوع المركبة</th>
+                    <th>تاريخ الصيانة</th>
+                    <th>نوع الصيانة</th>
+                    <th>التكلفة</th>
+                    <th>ملاحظات</th>
                   </tr>
-                `).join('');
-              }).join('')}
-            </tbody>
-          </table>
-          <script>
-            window.onload = () => {
-              setTimeout(() => {
-                window.print();
-                window.close();
-              }, 500);
-            };
-          </script>
-        </body>
-      </html>
-    `;
+                </thead>
+                <tbody>
+                  ${filteredGroups.map(g => {
+                    if (g.logs.length === 0) {
+                      return `<tr>
+                        <td>${g.plate_number}</td>
+                        <td>${g.type}</td>
+                        <td colspan="4" style="text-align: center; color: #94a3b8;">لا توجد صيانات مسجلة</td>
+                      </tr>`;
+                    }
+                    return g.logs.map(log => `
+                      <tr>
+                        <td>${g.plate_number}</td>
+                        <td>${g.type}</td>
+                        <td>${log.maintenance_date ? new Date(log.maintenance_date).toLocaleDateString('ar-SA') : ''}</td>
+                        <td>${log.type}</td>
+                        <td>${Number(log.total_cost) || 0} ر.س</td>
+                        <td>${log.notes || ''}</td>
+                      </tr>
+                    `).join('');
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+          </body>
+        </html>
+      `;
 
-    printWindow.document.write(html);
-    printWindow.document.close();
+      iframeDoc.open();
+      iframeDoc.write(html);
+      iframeDoc.close();
+
+      iframe.addEventListener('load', () => {
+        // Wait briefly for the Google font to render
+        setTimeout(async () => {
+          try {
+            const container = iframeDoc.querySelector('.pdf-container') as HTMLElement;
+            const pdf = new JsPdf({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+            await pdf.html(container, {
+              callback: () => {},
+              x: 10,
+              y: 10,
+              width: 190,
+              windowWidth: 700,
+              html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+            });
+            pdf.save('تقرير_صيانة_المركبات.pdf');
+          } catch (e) {
+            console.error('PDF Generation error:', e);
+          } finally {
+            document.body.removeChild(iframe);
+          }
+        }, 1000);
+      });
+    } catch (error) {
+      console.error('Failed to export to PDF', error);
+    }
   };
 
   if (logsQ.isError) {
