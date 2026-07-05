@@ -86,12 +86,17 @@ async function getGoogleAccessToken(credentials) {
 
   // Aggressively reformat the private key to ensure it's a valid PEM
   let privateKeyStr = credentials.private_key || '';
-  if (privateKeyStr.includes('BEGIN PRIVATE KEY')) {
+  if (privateKeyStr.includes('BEGIN')) {
     const b64 = privateKeyStr
-      .replace(/-----BEGIN PRIVATE KEY-----/g, '')
-      .replace(/-----END PRIVATE KEY-----/g, '')
+      .replace(/-----BEGIN.*?-----/g, '')
+      .replace(/-----END.*?-----/g, '')
       .replace(/\\n/g, '')
       .replace(/\s+/g, '');
+    const chunks = b64.match(/.{1,64}/g) || [];
+    privateKeyStr = `-----BEGIN PRIVATE KEY-----\n${chunks.join('\n')}\n-----END PRIVATE KEY-----\n`;
+  } else {
+    // If it has no headers at all, assume it's raw base64
+    const b64 = privateKeyStr.replace(/\\n/g, '').replace(/\s+/g, '');
     const chunks = b64.match(/.{1,64}/g) || [];
     privateKeyStr = `-----BEGIN PRIVATE KEY-----\n${chunks.join('\n')}\n-----END PRIVATE KEY-----\n`;
   }
