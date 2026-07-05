@@ -25,6 +25,27 @@ type Shortcut = {
   handler: () => void;
 };
 
+/** يعرض صفاً واحداً لاختصار لوحة مفاتيح (الأيقونة، الوصف، ومفاتيحه). */
+function ShortcutRow({ shortcut }: { shortcut: Shortcut }) {
+  return (
+    <div className="flex items-center justify-between rounded-lg px-3 py-2 text-sm hover:bg-muted/60 transition-colors">
+      <div className="flex items-center gap-2.5 text-foreground">
+        <span className="text-muted-foreground">{shortcut.icon}</span>
+        <span className="font-medium">{shortcut.label}</span>
+        <span className="text-xs text-muted-foreground">— {shortcut.action}</span>
+      </div>
+      <kbd className="inline-flex items-center gap-0.5 rounded-md border border-border bg-muted px-1.5 py-0.5 font-mono text-[11px] font-medium text-muted-foreground shadow-sm">
+        {shortcut.keys.map((k, i) => (
+          <span key={k}>
+            {i > 0 && <span className="mx-0.5 opacity-40">+</span>}
+            {k}
+          </span>
+        ))}
+      </kbd>
+    </div>
+  );
+}
+
 /**
  * KeyboardShortcuts — نافذة اختصارات لوحة المفاتيح تفتح بـ Shift+?
  * تظهر قائمة بكل الاختصارات المتاحة للمستخدمين المتقدمين.
@@ -163,24 +184,7 @@ export function KeyboardShortcuts() {
           </h4>
           <div className="mb-4 space-y-1">
             {shortcuts.slice(2, 8).map((s) => (
-              <div
-                key={s.keys.join('+')}
-                className="flex items-center justify-between rounded-lg px-3 py-2 text-sm hover:bg-muted/60 transition-colors"
-              >
-                <div className="flex items-center gap-2.5 text-foreground">
-                  <span className="text-muted-foreground">{s.icon}</span>
-                  <span className="font-medium">{s.label}</span>
-                  <span className="text-xs text-muted-foreground">— {s.action}</span>
-                </div>
-                <kbd className="inline-flex items-center gap-0.5 rounded-md border border-border bg-muted px-1.5 py-0.5 font-mono text-[11px] font-medium text-muted-foreground shadow-sm">
-                  {s.keys.map((k, i) => (
-                    <span key={k}>
-                      {i > 0 && <span className="mx-0.5 opacity-40">+</span>}
-                      {k}
-                    </span>
-                  ))}
-                </kbd>
-              </div>
+              <ShortcutRow key={s.keys.join('+')} shortcut={s} />
             ))}
           </div>
 
@@ -190,24 +194,7 @@ export function KeyboardShortcuts() {
           </h4>
           <div className="space-y-1">
             {shortcuts.filter(s => s.keys.includes('K') || s.keys.includes('?') || s.keys.includes('Esc')).map((s) => (
-              <div
-                key={s.keys.join('+')}
-                className="flex items-center justify-between rounded-lg px-3 py-2 text-sm hover:bg-muted/60 transition-colors"
-              >
-                <div className="flex items-center gap-2.5 text-foreground">
-                  <span className="text-muted-foreground">{s.icon}</span>
-                  <span className="font-medium">{s.label}</span>
-                  <span className="text-xs text-muted-foreground">— {s.action}</span>
-                </div>
-                <kbd className="inline-flex items-center gap-0.5 rounded-md border border-border bg-muted px-1.5 py-0.5 font-mono text-[11px] font-medium text-muted-foreground shadow-sm">
-                  {s.keys.map((k, i) => (
-                    <span key={k}>
-                      {i > 0 && <span className="mx-0.5 opacity-40">+</span>}
-                      {k}
-                    </span>
-                  ))}
-                </kbd>
-              </div>
+              <ShortcutRow key={s.keys.join('+')} shortcut={s} />
             ))}
           </div>
         </div>

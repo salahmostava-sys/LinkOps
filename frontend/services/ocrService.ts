@@ -108,6 +108,40 @@ function extractDateFromLine(line: string): string | undefined {
   return undefined;
 }
 
+/** أنماط البحث عن سطر رقم الهوية/الإقامة/الرخصة */
+const ID_LINE_RE = /(رقم|الهوية|القوبة|الاقامة|الإقامة|Number|ID)/gi;
+/** أنماط البحث عن سطر تاريخ الانتهاء */
+const EXPIRY_LINE_RE = /(الانتهاء|انتهاء|النتهاء|الانتها|Expiry|End|Valid)/gi;
+/** أنماط البحث عن سطر تاريخ الميلاد */
+const DOB_LINE_RE = /(الميلاد|المبلاد|ميلاد|مبلاد|الولادة|Birth|Eith)/gi;
+
+/** يبحث عن أول سطر يطابق نمطاً معيناً ويحتوي على رقم */
+function findLineWithDigits(lines: string[], pattern: RegExp): string | undefined {
+  return lines.find(line => pattern.test(line) && /\d/.test(line));
+}
+
+/**
+ * يستخرج تاريخي الانتهاء والميلاد من قائمة أسطر النص — منطق مشترك بين
+ * تحليل الإقامة ورخصة القيادة.
+ */
+function extractExpiryAndDob(lines: string[]): { expiryDate?: string; dateOfBirth?: string } {
+  const result: { expiryDate?: string; dateOfBirth?: string } = {};
+
+  const expiryLine = findLineWithDigits(lines, EXPIRY_LINE_RE);
+  if (expiryLine) {
+    const date = extractDateFromLine(expiryLine);
+    if (date) result.expiryDate = date;
+  }
+
+  const dobLine = findLineWithDigits(lines, DOB_LINE_RE);
+  if (dobLine) {
+    const date = extractDateFromLine(dobLine);
+    if (date) result.dateOfBirth = date;
+  }
+
+  return result;
+}
+
 /**
  * يستخرج بيانات الإقامة السعودية من النص المستخرج.
  *
@@ -119,30 +153,14 @@ export function parseIqamaData(rawText: string): IqamaData {
   const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
   const result: IqamaData = {};
 
-  const idLine = lines.find(line => 
-    /(رقم|الهوية|القوبة|الاقامة|الإقامة|Number|ID)/gi.test(line) && /\d/.test(line)
-  );
+  const idLine = findLineWithDigits(lines, ID_LINE_RE);
   if (idLine) {
     const clean = cleanOcrNumbers(idLine);
     const match = /2\d{9}/.exec(clean) || /[12]\d{9}/.exec(clean) || /\d{10}/.exec(clean);
     if (match) result.iqamaNumber = match[0];
   }
 
-  const expiryLine = lines.find(line => 
-    /(الانتهاء|انتهاء|النتهاء|الانتها|Expiry|End|Valid)/gi.test(line) && /\d/.test(line)
-  );
-  if (expiryLine) {
-    const date = extractDateFromLine(expiryLine);
-    if (date) result.expiryDate = date;
-  }
-
-  const dobLine = lines.find(line => 
-    /(الميلاد|المبلاد|ميلاد|مبلاد|الولادة|Birth|Eith)/gi.test(line) && /\d/.test(line)
-  );
-  if (dobLine) {
-    const date = extractDateFromLine(dobLine);
-    if (date) result.dateOfBirth = date;
-  }
+  Object.assign(result, extractExpiryAndDob(lines));
 
   const upperText = text.toUpperCase();
   for (const nat of KNOWN_NATIONALITIES) {
@@ -211,30 +229,14 @@ export function parseLicenseData(rawText: string): LicenseData {
   const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
   const result: LicenseData = {};
 
-  const idLine = lines.find(line => 
-    /(رقم|الهوية|القوبة|الاقامة|الإقامة|Number|ID)/gi.test(line) && /\d/.test(line)
-  );
+  const idLine = findLineWithDigits(lines, ID_LINE_RE);
   if (idLine) {
     const clean = cleanOcrNumbers(idLine);
     const match = /[12]\d{9}/.exec(clean) || /\d{10}/.exec(clean);
     if (match) result.licenseNumber = match[0];
   }
 
-  const expiryLine = lines.find(line => 
-    /(الانتهاء|انتهاء|النتهاء|الانتها|Expiry|End|Valid)/gi.test(line) && /\d/.test(line)
-  );
-  if (expiryLine) {
-    const date = extractDateFromLine(expiryLine);
-    if (date) result.expiryDate = date;
-  }
-
-  const dobLine = lines.find(line => 
-    /(الميلاد|المبلاد|ميلاد|مبلاد|الولادة|Birth|Eith)/gi.test(line) && /\d/.test(line)
-  );
-  if (dobLine) {
-    const date = extractDateFromLine(dobLine);
-    if (date) result.dateOfBirth = date;
-  }
+  Object.assign(result, extractExpiryAndDob(lines));
 
   const classMatch = [...text.matchAll(LICENSE_CLASS_RE)];
   if (classMatch.length > 0) {
