@@ -34,6 +34,7 @@ import { useFuelTable } from '@modules/fuel/hooks/useFuelTable';
 import { useTemporalContext } from '@app/providers/TemporalContext';
 
 const ISO_DATE_FORMAT = 'yyyy-MM-dd';
+const SAVE_ERROR_TITLE = 'خطأ في الحفظ';
 
 export function useFuelPage() { // NOSONAR: page data layer with many independent handlers
   const { toast } = useToast();
@@ -283,7 +284,7 @@ export function useFuelPage() { // NOSONAR: page data layer with many independen
     } catch (e) {
       logError('[Fuel] save daily failed', e);
       const message = getErrorMessage(e);
-      toast({ title: 'خطأ في الحفظ', description: message, variant: 'destructive' });
+      toast({ title: SAVE_ERROR_TITLE, description: message, variant: 'destructive' });
     } finally {
       setSavingEntry(false);
     }
@@ -316,7 +317,7 @@ export function useFuelPage() { // NOSONAR: page data layer with many independen
     } catch (e) {
       logError('[Fuel] update daily failed', e);
       const message = getErrorMessage(e);
-      toast({ title: 'خطأ في الحفظ', description: message, variant: 'destructive' });
+      toast({ title: SAVE_ERROR_TITLE, description: message, variant: 'destructive' });
     } finally {
       setSavingEntry(false);
     }
@@ -370,7 +371,7 @@ export function useFuelPage() { // NOSONAR: page data layer with many independen
     } catch (e) {
       logError('[Fuel] save metric cell failed', e);
       const message = getErrorMessage(e);
-      toast({ title: 'خطأ في الحفظ', description: message, variant: 'destructive' });
+      toast({ title: SAVE_ERROR_TITLE, description: message, variant: 'destructive' });
     }
   };
 
