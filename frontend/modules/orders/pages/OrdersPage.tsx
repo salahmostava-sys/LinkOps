@@ -1,11 +1,12 @@
-import { Suspense, lazy, useCallback, useMemo, Component, type ErrorInfo, type ReactNode } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { Package, Loader2, ShieldAlert, AlertTriangle } from 'lucide-react';
+import { Suspense, lazy, Component, type ErrorInfo, type ReactNode } from 'react';
+import { Package, AlertTriangle } from 'lucide-react';
 import { Tabs, TabsContent } from '@shared/components/ui/tabs';
 import { ResponsiveTabBar } from '@shared/components/ResponsiveTabBar';
 import Loading from '@shared/components/Loading';
 import { useAuthQueryGate } from '@shared/hooks/useAuthQueryGate';
 import { usePermissions } from '@shared/hooks/usePermissions';
+import { useUrlTab } from '@shared/hooks/useUrlTab';
+import { PageLoadingState, PageAccessDeniedState } from '@shared/components/PageAccessState';
 import { Button } from '@shared/components/ui/button';
 import { logError } from '@shared/lib/logger';
 
@@ -76,43 +77,14 @@ const TabLoader = () => <Loading minHeightClassName="min-h-[240px]" />;
 const OrdersPage = () => {
   const { authLoading } = useAuthQueryGate();
   const { permissions, loading: permsLoading } = usePermissions('orders');
-  const [searchParams, setSearchParams] = useSearchParams();
-  const tab = useMemo(() => {
-    const v = searchParams.get('tab');
-    return isOrderTab(v) ? v : 'grid';
-  }, [searchParams]);
-
-  const onTabChange = useCallback(
-    (v: string) => {
-      setSearchParams(
-        (prev) => {
-          const next = new URLSearchParams(prev);
-          if (v === 'grid') next.delete('tab');
-          else next.set('tab', v);
-          return next;
-        },
-        { replace: true },
-      );
-    },
-    [setSearchParams],
-  );
+  const { tab, onTabChange } = useUrlTab(isOrderTab, 'grid');
 
   if (authLoading || permsLoading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 size={28} className="animate-spin text-primary" />
-      </div>
-    );
+    return <PageLoadingState />;
   }
 
   if (!permissions.can_view) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 gap-3 text-center" dir="rtl">
-        <ShieldAlert size={40} className="text-destructive" />
-        <p className="text-lg font-semibold">غير مصرح بالوصول</p>
-        <p className="text-sm text-muted-foreground">ليس لديك صلاحية الوصول لصفحة الطلبات</p>
-      </div>
-    );
+    return <PageAccessDeniedState message="ليس لديك صلاحية الوصول لصفحة الطلبات" dir="rtl" />;
   }
 
   return (
