@@ -239,20 +239,34 @@ const DailyAttendance = ({ selectedMonth, selectedYear }: Readonly<Props>) => {
     setCustomInput("");
   };
 
-  // ── Save (unchanged logic) ──
   const handleSave = async () => {
     setSaving(true);
     const dateStr = format(date, "yyyy-MM-dd");
-    const toSave = Object.values(records).filter(r => r.status !== null);
     let saved = 0;
     const validDbStatuses = new Set<AttendanceStatus>(["present", "absent", "leave", "sick", "late"]);
 
-    for (const r of toSave) {
-      const dbStatus: AttendanceStatus = validDbStatuses.has(r.status as AttendanceStatus)
-        ? (r.status as AttendanceStatus)
+    const currentDbRecords = recordsQuery.data || [];
+    const dbRecordMap = new Map(currentDbRecords.map(r => [r.employee_id, r.id]));
+
+    for (const r of Object.values(records)) {
+      if (r.status === null) {
+        const dbId = dbRecordMap.get(r.employeeId);
+        if (dbId) {
+          try {
+            await attendanceService.deleteDailyAttendance(dbId);
+            saved++;
+          } catch {
+            /* row failed; continue */
+          }
+        }
+        continue;
+      }
+
+      const dbStatus: AttendanceStatus = validDbStatuses.has(r.status)
+        ? (r.status)
         : "present";
       const noteText =
-        [r.note, validDbStatuses.has(r.status as AttendanceStatus) ? "" : r.status]
+        [r.note, validDbStatuses.has(r.status) ? "" : r.status]
           .filter(Boolean).join(" | ") || null;
 
       const payload = {
@@ -271,9 +285,11 @@ const DailyAttendance = ({ selectedMonth, selectedYear }: Readonly<Props>) => {
       }
     }
 
+    queryClient.invalidateQueries({ queryKey: ["attendance", uid, "daily-records", dateStr] });
+
     setSaving(false);
     toast.success(TOAST_SUCCESS_EDIT, {
-      description: `${saved} مندوب — ${format(date, "dd MMMM yyyy", { locale: dateLocale })}`,
+      description: `${saved} سجل تم تحديثه — ${format(date, "dd MMMM yyyy", { locale: dateLocale })}`,
     });
   };
 
@@ -385,12 +401,14 @@ const DailyAttendance = ({ selectedMonth, selectedYear }: Readonly<Props>) => {
                 </div>
               ) : (
                 <Select
-                  value={currentStatus || ""}
+                  value={currentStatus || "__clear__"}
                   disabled={!permissions.can_edit}
                   onValueChange={v => {
                     if (v === "__add_custom__") {
                       setAddingCustomFor(emp.id);
                       setCustomInput("");
+                    } else if (v === "__clear__") {
+                      updateRecord(emp.id, "status", null);
                     } else {
                       updateRecord(emp.id, "status", v || null);
                     }
@@ -399,12 +417,15 @@ const DailyAttendance = ({ selectedMonth, selectedYear }: Readonly<Props>) => {
                   <SelectTrigger
                     className={cn(
                       "h-8 text-xs w-40 border",
-                      currentStatus ? selectColor : "text-muted-foreground",
+                      currentStatus && currentStatus !== "__clear__" ? selectColor : "text-muted-foreground",
                     )}
                   >
                     <SelectValue placeholder="اختر الحالة..." />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="__clear__" className="text-muted-foreground italic">
+                      -- تفريغ الحالة --
+                    </SelectItem>
                     {allStatuses.map(s => (
                       <SelectItem key={s.value} value={s.value}>
                         <span className={`inline-block px-1.5 py-0.5 rounded text-xs font-medium ${STATUS_COLORS[s.value] || DEFAULT_COLOR}`}>

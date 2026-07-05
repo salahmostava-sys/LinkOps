@@ -135,6 +135,12 @@ const attendanceService = {
     if (error) handleSupabaseError(error, 'attendanceService.upsertDailyAttendance');
   },
 
+  deleteDailyAttendance: async (id: string) => {
+    const { error } = await supabase.from('attendance').delete().eq('id', id);
+    if (error) handleSupabaseError(error, 'attendanceService.deleteDailyAttendance');
+  },
+
+
   getMonthlyEmployeesAndAttendance: async (startDate: string, endDate: string) => {
     const [employeesRes, attendanceRes, appsRes, empAppsRes] = await Promise.all([
       supabase
