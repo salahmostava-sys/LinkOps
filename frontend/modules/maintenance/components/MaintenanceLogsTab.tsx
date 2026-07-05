@@ -164,24 +164,33 @@ export function MaintenanceLogsTab() {
     );
   }
 
+  if (logsQ.isError || partsQ.isError) {
+    return (
+      <div className="space-y-4">
+        {logsQ.isError && (
+          <QueryErrorRetry
+            error={logsQ.error}
+            isFetching={logsQ.isFetching}
+            onRetry={() => logsQ.refetch().catch(() => {})}
+            title="تعذر تحميل سجلات الصيانة"
+            hint="تحقق من الاتصال بالإنترنت أو أعد المحاولة."
+          />
+        )}
+        {partsQ.isError && (
+          <QueryErrorRetry
+            error={partsQ.error}
+            isFetching={partsQ.isFetching}
+            onRetry={() => partsQ.refetch().catch(() => {})}
+            title="تعذر تحميل قطع الغيار"
+            hint="تحقق من الاتصال بالإنترنت أو أعد المحاولة."
+          />
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
-      {logsQ.isError && !logsQ.isLoading && (
-        <QueryErrorRetry
-          error={logsQ.error}
-          onRetry={() => logsQ.refetch().catch(() => {})}
-          title="تعذر تحميل سجلات الصيانة"
-          hint="تحقق من الاتصال بالإنترنت أو أعد المحاولة."
-        />
-      )}
-      {partsQ.isError && !partsQ.isLoading && (
-        <QueryErrorRetry
-          error={partsQ.error}
-          onRetry={() => partsQ.refetch().catch(() => {})}
-          title="تعذر تحميل قطع الغيار"
-          hint="تحقق من الاتصال بالإنترنت أو أعد المحاولة."
-        />
-      )}
       {/* Header */}
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
         <div className="flex gap-4">

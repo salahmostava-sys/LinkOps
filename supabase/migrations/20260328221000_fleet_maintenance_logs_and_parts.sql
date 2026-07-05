@@ -8,7 +8,27 @@ DROP POLICY IF EXISTS "Operations/admin can manage maintenance_logs" ON public.m
 DROP POLICY IF EXISTS "Ops/admin can view maintenance_logs" ON public.maintenance_logs;
 DROP POLICY IF EXISTS "Authenticated can view maintenance_logs" ON public.maintenance_logs;
 
-ALTER TABLE IF EXISTS public.maintenance_logs RENAME TO maintenance_logs_legacy_pre_fleet;
+-- Idempotent rename: only rename the legacy table if it is still the old
+-- (pre-fleet) schema, i.e. it doesn't yet have the new odometer_reading
+-- column, and a legacy backup doesn't already exist. This allows the script
+-- to be safely re-run without renaming the wrong relation or erroring out.
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'maintenance_logs'
+  )
+  AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'maintenance_logs' AND column_name = 'odometer_reading'
+  )
+  AND NOT EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'maintenance_logs_legacy_pre_fleet'
+  ) THEN
+    ALTER TABLE public.maintenance_logs RENAME TO maintenance_logs_legacy_pre_fleet;
+  END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS public.maintenance_logs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

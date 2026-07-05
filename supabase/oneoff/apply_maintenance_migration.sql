@@ -1,4 +1,12 @@
-﻿-- Fleet: spare parts inventory (single-org RLS aligned with vehicles / fuel)
+-- Combined helper script: applies the fleet maintenance/spare-parts migrations
+-- (20260328220000, 20260328221000, 20260328222000) in one go.
+-- Run this once in Supabase Dashboard -> SQL Editor if these migrations were
+-- never applied to your live database (this fixes 400 Bad Request errors on
+-- the Maintenance & Spare Parts pages).
+-- Safe to re-run: guarded with IF NOT EXISTS / IF EXISTS checks.
+
+-- ==== supabase/migrations/20260328220000_fleet_spare_parts.sql ====
+-- Fleet: spare parts inventory (single-org RLS aligned with vehicles / fuel)
 
 BEGIN;
 
@@ -47,7 +55,10 @@ CREATE TRIGGER update_spare_parts_updated_at
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
 COMMIT;
-﻿-- Replace legacy maintenance_logs with fleet maintenance + line-item parts.
+
+
+-- ==== supabase/migrations/20260328221000_fleet_maintenance_logs_and_parts.sql ====
+-- Replace legacy maintenance_logs with fleet maintenance + line-item parts.
 -- Preserves old rows in maintenance_logs_legacy_pre_fleet.
 
 BEGIN;
@@ -57,7 +68,27 @@ DROP POLICY IF EXISTS "Operations/admin can manage maintenance_logs" ON public.m
 DROP POLICY IF EXISTS "Ops/admin can view maintenance_logs" ON public.maintenance_logs;
 DROP POLICY IF EXISTS "Authenticated can view maintenance_logs" ON public.maintenance_logs;
 
-ALTER TABLE IF EXISTS public.maintenance_logs RENAME TO maintenance_logs_legacy_pre_fleet;
+-- Idempotent rename: only rename the legacy table if it is still the old
+-- (pre-fleet) schema, i.e. it doesn't yet have the new odometer_reading
+-- column, and a legacy backup doesn't already exist. This allows the script
+-- to be safely re-run without renaming the wrong relation or erroring out.
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'maintenance_logs'
+  )
+  AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'maintenance_logs' AND column_name = 'odometer_reading'
+  )
+  AND NOT EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'maintenance_logs_legacy_pre_fleet'
+  ) THEN
+    ALTER TABLE public.maintenance_logs RENAME TO maintenance_logs_legacy_pre_fleet;
+  END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS public.maintenance_logs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -147,6 +178,9 @@ CREATE TRIGGER update_maintenance_logs_updated_at
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
 COMMIT;
+
+
+-- ==== supabase/migrations/20260328222000_fleet_maintenance_triggers.sql ====
 -- Triggers: auto employee, stock deduct/restore, total_cost rollup
 
 BEGIN;
@@ -240,5 +274,5 @@ CREATE TRIGGER trg_update_total_cost
   FOR EACH ROW EXECUTE FUNCTION public.update_maintenance_total_cost();
 
 COMMIT;
--- إعادة تحميل كاش مخطط PostgREST
-NOTIFY pgrst, 'reload schema';
+
+

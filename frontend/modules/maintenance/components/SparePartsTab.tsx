@@ -314,16 +314,22 @@ export function SparePartsTab() {
     );
   }
 
-  return (
-    <div className="space-y-4">
-      {q.isError && !q.isLoading && (
+  if (q.isError) {
+    return (
+      <div className="space-y-4">
         <QueryErrorRetry
           error={q.error}
+          isFetching={q.isFetching}
           onRetry={() => q.refetch().catch(() => {})}
           title="تعذر تحميل قطع الغيار"
           hint="تحقق من الاتصال بالإنترنت أو أعد المحاولة."
         />
-      )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
       {/* Summary Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="bg-card border border-border/60 rounded-xl p-3 text-center">
