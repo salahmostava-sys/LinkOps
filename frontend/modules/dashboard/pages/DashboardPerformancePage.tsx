@@ -13,8 +13,8 @@ import {
 } from '@modules/dashboard/components/DashboardPerformanceHeader';
 import { DashboardPerformanceOverviewTab } from '@modules/dashboard/components/DashboardPerformanceOverviewTab';
 import { SystemOverviewSection } from '@modules/dashboard/components/SystemOverviewSection';
+import { DashboardManagementTab } from '@modules/dashboard/components/DashboardManagementTab';
 import { Skeleton } from '@shared/components/ui/skeleton';
-
 
 const loadAnalyticsTab = () =>
   import('@modules/dashboard/components/DashboardPerformanceAnalyticsTab').then((module) => ({
@@ -45,7 +45,7 @@ export default function DashboardPerformancePage() {
   const uid = authQueryUserId(userId);
   const queryClient = useQueryClient();
   const { selectedMonth: currentMonth } = useTemporalContext();
-  const [activeTab, setActiveTab] = useState<DashboardPerformanceTabKey>('overview_analytics');
+  const [activeTab, setActiveTab] = useState<DashboardPerformanceTabKey>('overview');
 
   useRealtimePostgresChanges('performance-dashboard-realtime', REALTIME_TABLES_DASHBOARD, () => {
     if (!user?.id) return;
@@ -64,14 +64,11 @@ export default function DashboardPerformancePage() {
   }, [dashboardQuery.data]);
 
   const handleTabChange = (tab: DashboardPerformanceTabKey) => {
-    if (tab === 'overview_analytics') {
+    if (tab === 'analytics_ranking') {
       loadAnalyticsTab();
-    }
-    if (tab === 'ranking_platforms') {
       loadRankingTab();
       loadPlatformsTab();
     }
-
     startTransition(() => {
       setActiveTab(tab);
     });
@@ -79,8 +76,6 @@ export default function DashboardPerformancePage() {
 
   return (
     <div className="space-y-5" dir="rtl">
-      <SystemOverviewSection />
-
       <DashboardPerformanceHeader
         activeTab={activeTab}
         onTabChange={handleTabChange}
@@ -101,26 +96,35 @@ export default function DashboardPerformancePage() {
         />
       ) : null}
 
-      {!dashboardQuery.isError && activeTab === 'overview_analytics' ? (
+      {!dashboardQuery.isError && activeTab === 'overview' ? (
         <div className="space-y-6">
           <DashboardPerformanceOverviewTab
             loading={dashboardQuery.isLoading}
             dashboard={dashboardQuery.data ?? null}
           />
-          <Suspense fallback={<TabFallback />}>
-            <LazyDashboardPerformanceAnalyticsTab dashboard={dashboardQuery.data ?? null} />
-          </Suspense>
         </div>
       ) : null}
 
-      {!dashboardQuery.isError && activeTab === 'ranking_platforms' ? (
+      {!dashboardQuery.isError && activeTab === 'analytics_ranking' ? (
         <div className="space-y-6">
           <Suspense fallback={<TabFallback />}>
-            <LazyDashboardRankingTab dashboard={dashboardQuery.data ?? null} />
+            <LazyDashboardPerformanceAnalyticsTab dashboard={dashboardQuery.data ?? null} />
           </Suspense>
-          <Suspense fallback={<TabFallback />}>
-            <LazyDashboardPlatformsTab dashboard={dashboardQuery.data ?? null} />
-          </Suspense>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Suspense fallback={<TabFallback />}>
+              <LazyDashboardRankingTab dashboard={dashboardQuery.data ?? null} />
+            </Suspense>
+            <Suspense fallback={<TabFallback />}>
+              <LazyDashboardPlatformsTab dashboard={dashboardQuery.data ?? null} />
+            </Suspense>
+          </div>
+        </div>
+      ) : null}
+
+      {!dashboardQuery.isError && activeTab === 'management' ? (
+        <div className="space-y-6">
+          <SystemOverviewSection />
+          <DashboardManagementTab />
         </div>
       ) : null}
 

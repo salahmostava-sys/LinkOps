@@ -139,22 +139,16 @@ export function SystemOverviewSection() {
   return (
     <div className="space-y-6">
       {/* ── Operational KPIs (visible to everyone) ───────────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
-        <StatCard label="الموظفين النشطين" value={kpis.activeEmployees.toLocaleString('en-US')} icon={Users} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <StatCard label="الموظفين المسجلين" value={kpis.activeEmployees.toLocaleString('en-US')} icon={Users} />
         <StatCard label="حاضر اليوم" value={kpis.presentToday.toLocaleString('en-US')} icon={UserCheck} accent="good" />
         <StatCard
-          label="غايب اليوم"
+          label="غائب اليوم"
           value={kpis.absentToday.toLocaleString('en-US')}
           icon={UserX}
           accent={kpis.absentToday > 0 ? 'warn' : 'default'}
         />
         <StatCard label="المركبات النشطة" value={activeVehicles.toLocaleString('en-US')} icon={Car} />
-        <StatCard
-          label="تنبيهات غير محلولة"
-          value={unresolvedAlerts.toLocaleString('en-US')}
-          icon={AlertTriangle}
-          accent={unresolvedAlerts > 0 ? 'bad' : 'good'}
-        />
       </div>
 
       {/* ── Financial + cost KPIs (hidden from supervisors/operations) ────── */}
@@ -185,64 +179,6 @@ export function SystemOverviewSection() {
           />
         </div>
       )}
-
-      {/* ── Supervisor performance + recent activity ──────────────────────── */}
-      <div className="grid grid-cols-1 xl:grid-cols-[1.4fr,0.8fr] gap-4">
-        <div className="bg-card p-5 shadow-card rounded-2xl">
-          <div className="flex items-center justify-between gap-3 mb-4">
-            <h3 className="text-sm font-bold text-foreground">أداء المشرفين</h3>
-            <span className="text-xs font-semibold text-muted-foreground">{supervisorPerf.length} مشرف</span>
-          </div>
-          {supervisorPerf.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-6">لا توجد بيانات أهداف للمشرفين هذا الشهر</p>
-          ) : (
-            <div className="space-y-3">
-              {supervisorPerf.map((row) => (
-                <div key={row.supervisor_id} className="rounded-xl bg-muted/30 px-4 py-3 flex items-center justify-between gap-3">
-                  <span className="text-sm font-medium text-foreground">{row.supervisor_name}</span>
-                  <div className="flex items-center gap-3 text-xs">
-                    <span className="text-muted-foreground">
-                      {row.actual_orders.toLocaleString('en-US')} / {row.target_orders.toLocaleString('en-US')}
-                    </span>
-                    <span
-                      className={`font-black ${row.achievement_percent >= 100 ? 'text-emerald-600' : 'text-amber-600'}`}
-                    >
-                      {row.achievement_percent.toFixed(0)}%
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {canSeeFinance && (
-          <div className="bg-card p-5 shadow-card rounded-2xl">
-            <div className="flex items-center gap-2 mb-4">
-              <History size={16} className="text-muted-foreground" />
-              <h3 className="text-sm font-bold text-foreground">آخر الأنشطة في النظام</h3>
-            </div>
-            {recentActivity.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-6">لا توجد أنشطة حديثة</p>
-            ) : (
-              <div className="space-y-2">
-                {recentActivity.map((entry) => (
-                  <div
-                    key={`${entry.user_id ?? 'system'}-${entry.table_name}-${entry.created_at}`}
-                    className="flex items-center justify-between gap-2 text-sm py-2 border-b border-border/40 last:border-0"
-                  >
-                    <span className="text-foreground/85">{actionLabel(entry.action, entry.table_name)}</span>
-                    <span className="text-[11px] text-muted-foreground flex items-center gap-1">
-                      <Clock size={11} />
-                      {formatDistanceToNow(new Date(entry.created_at), { addSuffix: true, locale: ar })}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
     </div>
   );
 }
