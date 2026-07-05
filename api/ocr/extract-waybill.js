@@ -82,11 +82,14 @@ async function getGoogleAccessToken(credentials) {
 
   const signingInput = `${b64u(header)}.${b64u(payload)}`;
 
-  const { createSign } = await import('node:crypto');
+  const { createSign, createPrivateKey } = await import('node:crypto');
+
+  // createPrivateKey() properly parses the PEM key — required for Node 18+ / OpenSSL 3.x
+  const privateKey = createPrivateKey(credentials.private_key);
   const sign = createSign('RSA-SHA256');
   sign.update(signingInput);
   const signature = sign
-    .sign(credentials.private_key, 'base64')
+    .sign(privateKey, 'base64')
     .replace(/=/g, '')
     .replace(/\+/g, '-')
     .replace(/\//g, '_');
