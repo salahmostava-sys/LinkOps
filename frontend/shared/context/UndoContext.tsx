@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import toast from 'react-hot-toast';
 
 export type UndoAction = {
@@ -19,6 +19,8 @@ export function UndoProvider({ children }: Readonly<{ children: React.ReactNode 
   const [actionStack, setActionStack] = useState<UndoAction[]>([]);
   const [isUndoing, setIsUndoing] = useState(false);
 
+  const handleUndoRef = useRef<((actionId?: string) => Promise<void>) | null>(null);
+
   const registerAction = useCallback((action: Omit<UndoAction, 'id'>) => {
     const newAction: UndoAction = { ...action, id: crypto.randomUUID() };
     setActionStack(prev => [...prev, newAction].slice(-20)); // Keep last 20 actions
@@ -30,7 +32,9 @@ export function UndoProvider({ children }: Readonly<{ children: React.ReactNode 
         <button
           onClick={async () => {
             toast.dismiss(t.id);
-            await handleUndo(newAction.id);
+            if (handleUndoRef.current) {
+              await handleUndoRef.current(newAction.id);
+            }
           }}
           className="text-xs px-2 py-1 bg-primary/20 text-primary hover:bg-primary/30 rounded font-bold transition-colors"
         >
@@ -38,10 +42,9 @@ export function UndoProvider({ children }: Readonly<{ children: React.ReactNode 
         </button>
       </div>
     ), { duration: 6000, position: 'bottom-left' });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleUndo = async (actionId?: string) => {
+  const handleUndo = useCallback(async (actionId?: string) => {
     if (isUndoing) return;
     
     let actionToUndo: UndoAction | undefined;
@@ -72,12 +75,17 @@ export function UndoProvider({ children }: Readonly<{ children: React.ReactNode 
     } finally {
       setIsUndoing(false);
     }
-  };
+  }, [actionStack, isUndoing]);
+
+  useEffect(() => {
+    handleUndoRef.current = handleUndo;
+  }, [handleUndo]);
 
   const undoLastAction = useCallback(async () => {
-    await handleUndo();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionStack, isUndoing]);
+    if (handleUndoRef.current) {
+      await handleUndoRef.current();
+    }
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

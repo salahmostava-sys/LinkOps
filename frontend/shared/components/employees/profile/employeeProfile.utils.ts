@@ -1,4 +1,4 @@
-/* eslint-disable sonarjs/no-duplicate-string */
+ 
 import { getEmployeeCities } from '@modules/employees/model/employeeUtils';
 import { cityLabel } from '@modules/employees/model/employeeCity';
 import { EMPTY_DATA_PLACEHOLDER } from '@modules/employees/types/employee.types';
@@ -10,48 +10,54 @@ export function employeeCitySummary(employee: Pick<Employee, 'cities' | 'city'>)
   return values.map((value) => cityLabel(value, value)).join('، ');
 }
 
+const BADGE_SUCCESS = 'badge-success';
+const BADGE_WARNING = 'badge-warning';
+const TEXT_DESTRUCTIVE = 'text-destructive';
+const TEXT_WARNING = 'text-warning';
+const TEXT_FOREGROUND = 'text-foreground';
+
 export const statusLabels: Record<string, string> = {
   active: 'نشط', inactive: 'موقوف', ended: 'منتهي',
 };
 export const statusStyles: Record<string, string> = {
-  active: 'badge-success', inactive: 'badge-warning', ended: 'badge-urgent',
+  active: BADGE_SUCCESS, inactive: BADGE_WARNING, ended: 'badge-urgent',
 };
 
 export const advanceStatusLabel: Record<string, string> = {
   active: 'نشطة', completed: 'مكتملة', paused: 'موقوفة',
 };
 export const advanceStatusStyle: Record<string, string> = {
-  active: 'badge-warning', completed: 'badge-success', paused: 'badge-info',
+  active: BADGE_WARNING, completed: BADGE_SUCCESS, paused: 'badge-info',
 };
 
 export const installmentStatusStyle: Record<string, string> = {
-  deducted: 'badge-success', pending: 'badge-warning', deferred: 'bg-muted text-muted-foreground text-xs font-medium px-2.5 py-0.5 rounded-full',
+  deducted: BADGE_SUCCESS, pending: BADGE_WARNING, deferred: 'bg-muted text-muted-foreground text-xs font-medium px-2.5 py-0.5 rounded-full',
 };
 export const installmentStatusLabel: Record<string, string> = {
   deducted: 'مخصوم', pending: 'معلّق', deferred: 'مؤجل',
 };
 
-export const salaryTypeBadgeClass = (salaryType: string) => (salaryType === 'orders' ? 'badge-info' : 'badge-success');
+export const salaryTypeBadgeClass = (salaryType: string) => (salaryType === 'orders' ? 'badge-info' : BADGE_SUCCESS);
 export const salaryTypeLabel = (salaryType: string) => (salaryType === 'orders' ? 'طلبات' : 'دوام');
 
 export function residencyHeaderUrgencyClass(days: number): string {
-  if (days < 30) return 'text-destructive';
-  if (days < 60) return 'text-warning';
+  if (days < 30) return TEXT_DESTRUCTIVE;
+  if (days < 60) return TEXT_WARNING;
   return 'text-success';
 }
 
 export function residencyExpiryTextClass(residencyDays: number | null): string {
-  if (residencyDays === null) return 'text-foreground';
-  if (residencyDays < 30) return 'text-destructive';
-  if (residencyDays < 60) return 'text-warning';
-  return 'text-foreground';
+  if (residencyDays === null) return TEXT_FOREGROUND;
+  if (residencyDays < 30) return TEXT_DESTRUCTIVE;
+  if (residencyDays < 60) return TEXT_WARNING;
+  return TEXT_FOREGROUND;
 }
 
 export function healthInsuranceExpiryTextClass(hiDays: number): string {
-  if (hiDays < 0) return 'text-destructive';
-  if (hiDays < 30) return 'text-destructive';
-  if (hiDays < 60) return 'text-warning';
-  return 'text-foreground';
+  if (hiDays < 0) return TEXT_DESTRUCTIVE;
+  if (hiDays < 30) return TEXT_DESTRUCTIVE;
+  if (hiDays < 60) return TEXT_WARNING;
+  return TEXT_FOREGROUND;
 }
 
 export function isImageDocument(path?: string | null) {
