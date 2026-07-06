@@ -195,8 +195,49 @@ async function handleUpdatePassword(supabaseAdmin, user_id, password) {
   return { success: true };
 }
 
-async function dispatchAction(supabaseAdmin, normalizedAction, { user_id, password, email, name, role }, callerId) {
+async function handleUpdateUser(supabaseAdmin, user_id, { email, password, name, role, is_active }) {
+  // Update Auth layer
+  const authUpdates = {};
+  if (email !== undefined) authUpdates.email = email.toLowerCase().trim();
+  if (password !== undefined && password.trim() !== '') authUpdates.password = password;
+  
+  if (Object.keys(authUpdates).length > 0) {
+    if (authUpdates.email) authUpdates.email_confirm = true;
+    const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(user_id, authUpdates);
+    if (authError) throw authError;
+  }
+
+  // Update Profiles layer
+  const profileUpdates = {};
+  if (name !== undefined) profileUpdates.name = name.trim();
+  if (email !== undefined) profileUpdates.email = email.toLowerCase().trim();
+  if (is_active !== undefined) profileUpdates.is_active = is_active;
+
+  if (Object.keys(profileUpdates).length > 0) {
+    const { error: profileError } = await supabaseAdmin.from('profiles')
+      .update(profileUpdates)
+      .eq('id', user_id);
+    if (profileError) throw profileError;
+  }
+
+  // Update Role layer
+  if (role !== undefined) {
+    const normalizedRole = role.toLowerCase().trim();
+    if (!['admin', 'operations', 'supervisor', 'accountant'].includes(normalizedRole)) {
+      throw new Error('Invalid role specified');
+    }
+    const { error: roleError } = await supabaseAdmin.from('user_roles')
+      .update({ role: normalizedRole })
+      .eq('user_id', user_id);
+    if (roleError) throw roleError;
+  }
+
+  return { success: true };
+}
+
+async function dispatchAction(supabaseAdmin, normalizedAction, { user_id, password, email, name, role, is_active }, callerId) {
   if (normalizedAction === 'create_user') return handleCreateUser(supabaseAdmin, { email, password, name, role });
+  if (normalizedAction === 'update_user') return handleUpdateUser(supabaseAdmin, user_id, { email, password, name, role, is_active });
   if (normalizedAction === 'delete_user') return handleDeleteUser(supabaseAdmin, user_id, callerId);
   if (normalizedAction === 'revoke_session') return handleRevokeSession(supabaseAdmin, user_id);
   if (normalizedAction === 'update_password') return handleUpdatePassword(supabaseAdmin, user_id, password);
@@ -237,7 +278,7 @@ export async function adminUpdateUserHandler(req, res) {
       return res.status(429).json({ error: 'Too many requests. Please wait before trying again.' });
     }
 
-    const { user_id, password, email, name, role, action } = req.body;
+    const { user_id, password, email, name, role, is_active, action } = req.body;
     let normalizedAction = action;
     if (!normalizedAction && password) normalizedAction = 'update_password';
     if (!normalizedAction) throw new Error('action is required');
@@ -249,7 +290,7 @@ export async function adminUpdateUserHandler(req, res) {
 
     logInfo('Admin update user request', { request_id: requestId, admin_user_id: callerUser.id, action: normalizedAction });
 
-    const result = await dispatchAction(supabaseAdmin, normalizedAction, { user_id, password, email, name, role }, callerUser.id);
+    const result = await dispatchAction(supabaseAdmin, normalizedAction, { user_id, password, email, name, role, is_active }, callerUser.id);
     return res.json(result);
   } catch (err) {
     const message = getErrorMessage(err);

@@ -208,6 +208,22 @@ export const authService = {
     return result;
   },
 
+  updateManagedUser: async (userId: string | null, input: Partial<AdminCreateUserInput> & { is_active?: boolean }): Promise<void> => {
+    if (!userId) throw new Error("authService.updateManagedUser: userId is required");
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData.session?.access_token;
+    if (!token) throw new Error("authService.updateManagedUser: not authenticated");
+    await callAdminApi({
+      action: "update_user",
+      user_id: userId,
+      email: input.email,
+      password: input.password,
+      name: input.name,
+      role: input.role,
+      is_active: input.is_active,
+    });
+  },
+
   deleteManagedUser: async (userId: string | null): Promise<void> => {
     if (!userId) throw new Error("authService.deleteManagedUser: userId is required");
     const { data: sessionData } = await supabase.auth.getSession();

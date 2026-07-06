@@ -1,7 +1,7 @@
 import { BaseInput } from '@shared/components/ui/base-input';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Shield, RefreshCw, Save, AlertCircle, UserPlus, Trash2 } from 'lucide-react';
+import { Shield, RefreshCw, Save, AlertCircle, UserPlus, Trash2, Pencil } from 'lucide-react';
 import { Button } from '@shared/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/components/ui/select';
@@ -137,6 +137,10 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
   const [creatingUser, setCreatingUser] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<UserRow | null>(null);
   const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
+
+  const [editTarget, setEditTarget] = useState<UserRow | null>(null);
+  const [editUserForm, setEditUserForm] = useState({ name: '', email: '', password: '', role: 'viewer' as AppRole, isActive: true });
+  const [editingUser, setEditingUser] = useState(false);
 
   const isAdmin = authRole === 'admin';
   const canEdit = settingsPerm.can_edit && isAdmin;
@@ -308,6 +312,60 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
     }
   };
 
+  const openEditModal = (row: UserRow) => {
+    setEditTarget(row);
+    setEditUserForm({
+      name: row.name,
+      email: row.email || '',
+      password: '',
+      role: row.role,
+      isActive: row.isActive,
+    });
+  };
+
+  const saveEditUser = async () => {
+    if (!canEdit || !editTarget) return;
+    const name = editUserForm.name.trim();
+    const email = editUserForm.email.trim().toLowerCase();
+    const password = editUserForm.password;
+
+    if (!name) {
+      toast({ title: 'الاسم مطلوب', variant: 'destructive' });
+      return;
+    }
+    if (!email?.includes('@')) {
+      toast({ title: 'البريد الإلكتروني غير صالح', variant: 'destructive' });
+      return;
+    }
+    if (password && password.length < 8) {
+      toast({ title: 'كلمة المرور يجب أن تكون 8 أحرف على الأقل', variant: 'destructive' });
+      return;
+    }
+
+    setEditingUser(true);
+    try {
+      await authService.updateManagedUser(editTarget.id, {
+        name,
+        email,
+        password: password || undefined,
+        role: editUserForm.role,
+        is_active: editUserForm.isActive,
+      });
+      toast({ title: 'تم التحديث بنجاح' });
+      setEditTarget(null);
+      await refetchUsersData();
+    } catch (err: unknown) {
+      const message = getErrorMessage(err, 'تعذر تحديث المستخدم');
+      toast({
+        title: 'خطأ أثناء التحديث',
+        description: message,
+        variant: 'destructive',
+      });
+    } finally {
+      setEditingUser(false);
+    }
+  };
+
   const deleteUser = async () => {
     if (!canDelete || !deleteTarget) return;
     if (deleteTarget.id === currentUserId) {
@@ -441,6 +499,7 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
                     </td>
                     <td className="ta-td">
                       {canDelete ? (
+                        <>
                         <Button
                           type="button"
                           variant="outline"
@@ -453,6 +512,19 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
                           <Trash2 size={14} className="text-destructive" />
                           حذف
                         </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="gap-2"
+                          disabled={savingId === row.id}
+                          onClick={() => openEditModal(row)}
+                          title="تعديل المستخدم"
+                        >
+                          <Pencil size={14} />
+                          تعديل
+                        </Button>
+                      </>
                       ) : (
                         <span className="text-muted-foreground">—</span>
                       )}
@@ -633,6 +705,91 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
             </Button>
             <Button type="button" onClick={() => { createUser(); }} disabled={creatingUser}>
               {creatingUser ? 'جارٍ الإنشاء...' : 'إنشاء المستخدم'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={editTarget !== null}
+        onOpenChange={(open) => {
+          if (!open && !editingUser) setEditTarget(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-md" dir="rtl">
+          <DialogHeader>
+            <DialogTitle>تعديل بيانات المستخدم</DialogTitle>
+            <DialogDescription>
+              تعديل بيانات المستخدم المحددة. يمكنك تغيير كلمة المرور عبر إدخال قيمة جديدة أو تركها فارغة للاحتفاظ بالقديمة.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <BaseInput label="الاسم" id="edit-user-name"
+                value={editUserForm.name}
+                onChange={(e) => setEditUserForm(p => ({ ...p, name: e.target.value }))}
+                placeholder="اسم المستخدم"
+                disabled={editingUser} />
+
+            <BaseInput label="البريد الإلكتروني" id="edit-user-email"
+                type="email"
+                value={editUserForm.email}
+                onChange={(e) => setEditUserForm(p => ({ ...p, email: e.target.value }))}
+                placeholder="example@muhimmat.com"
+                dir="ltr"
+                disabled={editingUser} />
+
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-foreground">الدور</label>
+              <Select
+                value={editUserForm.role}
+                onValueChange={(value) => setEditUserForm(p => ({ ...p, role: value as AppRole }))}
+                disabled={editingUser}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="اختر الدور" />
+                </SelectTrigger>
+                <SelectContent>
+                  {ROLES.map((r) => (
+                    <SelectItem key={r} value={r}>
+                      {ROLE_LABELS_AR[r]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="flex items-center space-x-2 space-x-reverse pt-2 pb-2">
+              <Checkbox
+                id="edit-user-active"
+                checked={editUserForm.isActive}
+                onCheckedChange={(checked) => setEditUserForm(p => ({ ...p, isActive: !!checked }))}
+                disabled={editingUser}
+              />
+              <label htmlFor="edit-user-active" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                المستخدم نشط (يمكنه الدخول للنظام)
+              </label>
+            </div>
+
+            <BaseInput label="كلمة المرور الجديدة (اختياري)" id="edit-user-password"
+                type="password"
+                value={editUserForm.password}
+                onChange={(e) => setEditUserForm(p => ({ ...p, password: e.target.value }))}
+                placeholder="اتركه فارغاً لعدم التغيير"
+                disabled={editingUser} />
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setEditTarget(null)}
+              disabled={editingUser}
+            >
+              إلغاء
+            </Button>
+            <Button type="button" onClick={() => { saveEditUser(); }} disabled={editingUser}>
+              {editingUser ? 'جاري الحفظ...' : 'حفظ التعديلات'}
             </Button>
           </DialogFooter>
         </DialogContent>
