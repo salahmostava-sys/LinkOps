@@ -10,16 +10,11 @@
 
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { formatDistanceToNow } from 'date-fns';
-import { ar } from 'date-fns/locale';
 import type { LucideIcon } from 'lucide-react';
 import {
-  AlertTriangle,
   Banknote,
   Car,
-  Clock,
   Fuel,
-  History,
   UserCheck,
   UserX,
   Users,
@@ -70,26 +65,6 @@ function StatCard(props: Readonly<{
   );
 }
 
-function actionLabel(action: string, tableName: string) {
-  const tableLabels: Record<string, string> = {
-    employees: 'موظف',
-    salary_records: 'راتب',
-    advances: 'سلفة',
-    attendance: 'حضور',
-    maintenance_logs: 'صيانة',
-    vehicles: 'مركبة',
-    alerts: 'تنبيه',
-    daily_orders: 'طلبات',
-  };
-  const actionLabels: Record<string, string> = {
-    INSERT: 'إضافة',
-    UPDATE: 'تعديل',
-    DELETE: 'حذف',
-  };
-  const t = tableLabels[tableName] ?? tableName;
-  const a = actionLabels[action.toUpperCase()] ?? action;
-  return `${a} ${t}`;
-}
 
 export function SystemOverviewSection() {
   const { role } = useAuth();
@@ -104,22 +79,16 @@ export function SystemOverviewSection() {
     enabled,
     staleTime: 60_000,
     queryFn: async () => {
-      const [kpisRes, additional, supervisorPerf, activeVehicles, unresolvedAlerts, recentActivity] =
+      const [kpisRes, additional, activeVehicles] =
         await Promise.all([
           dashboardService.getKPIs(currentMonth, today),
           dashboardService.getAdditionalMetrics(currentMonth),
-          dashboardService.getSupervisorPerformance(currentMonth),
           dashboardService.getActiveVehiclesCount(),
-          dashboardService.getUnresolvedAlertsCount(),
-          canSeeFinance ? dashboardService.getRecentActivity(6) : Promise.resolve([]),
         ]);
       return {
         kpis: kpisRes.kpis,
         additional,
-        supervisorPerf,
         activeVehicles,
-        unresolvedAlerts,
-        recentActivity,
       };
     },
   });
@@ -134,7 +103,7 @@ export function SystemOverviewSection() {
     );
   }
 
-  const { kpis, additional, supervisorPerf, activeVehicles, unresolvedAlerts, recentActivity } = overviewQuery.data;
+  const { kpis, additional, activeVehicles } = overviewQuery.data;
 
   return (
     <div className="space-y-6">
