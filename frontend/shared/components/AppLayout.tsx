@@ -168,8 +168,8 @@ const AppLayoutInner = ({ children }: Readonly<AppLayoutProps>) => { // NOSONAR:
             </Link>
           </div>
 
-          {/* مسار الصفحة + بحث في الوسط */}
-          <div className="order-last sm:order-none w-full sm:w-auto flex-1 flex items-center justify-center gap-2 min-w-0 basis-full sm:basis-auto">
+          {/* مسار الصفحة + بحث */}
+          <div className="order-last sm:order-none w-full sm:w-auto flex-1 flex items-center justify-center md:justify-start gap-3 lg:gap-4 min-w-0 basis-full sm:basis-auto">
             <div
               className="hidden md:flex items-center gap-1.5 text-[11px] min-w-0 max-w-[220px] lg:max-w-[280px] px-3 py-2 rounded-full bg-muted border border-border/50 shrink-0"
               style={{ color: 'var(--ds-on-surface-variant)' }}
