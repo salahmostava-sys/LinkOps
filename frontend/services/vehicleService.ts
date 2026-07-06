@@ -24,6 +24,29 @@ export interface VehiclePayload {
   notes?: string;
 }
 
+export type VehicleDocumentType = 'license' | 'insurance' | 'registration' | 'authorization' | 'other';
+
+export interface VehicleDocument {
+  id: string;
+  vehicle_id: string;
+  doc_type: VehicleDocumentType;
+  title: string | null;
+  file_path: string;
+  file_name: string;
+  notes: string | null;
+  created_by: string | null;
+  created_at: string;
+}
+
+export interface VehicleDocumentPayload {
+  vehicle_id: string;
+  doc_type: VehicleDocumentType;
+  title?: string | null;
+  file_path: string;
+  file_name: string;
+  notes?: string | null;
+}
+
 export interface VehicleAssignmentPayload {
   vehicle_id: string;
   employee_id: string;
@@ -223,5 +246,30 @@ export const vehicleService = {
       .limit(VEHICLES_QUERY_MAX_ROWS);
     if (error) handleSupabaseError(error, 'vehicleService.getForSelect');
     return data ?? [];
+  },
+
+  getDocuments: async (vehicleId: string): Promise<VehicleDocument[]> => {
+    const { data, error } = await supabase
+      .from('vehicle_documents')
+      .select('*')
+      .eq('vehicle_id', vehicleId)
+      .order('created_at', { ascending: false });
+    if (error) handleSupabaseError(error, 'vehicleService.getDocuments');
+    return (data ?? []) as VehicleDocument[];
+  },
+
+  addDocument: async (payload: VehicleDocumentPayload): Promise<VehicleDocument> => {
+    const { data, error } = await supabase
+      .from('vehicle_documents')
+      .insert(payload as unknown as TablesInsert<'vehicle_documents'>)
+      .select()
+      .single();
+    if (error) handleSupabaseError(error, 'vehicleService.addDocument');
+    return data as VehicleDocument;
+  },
+
+  deleteDocument: async (id: string) => {
+    const { error } = await supabase.from('vehicle_documents').delete().eq('id', id);
+    if (error) handleSupabaseError(error, 'vehicleService.deleteDocument');
   },
 };

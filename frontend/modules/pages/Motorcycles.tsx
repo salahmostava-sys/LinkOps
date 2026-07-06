@@ -1,6 +1,6 @@
 import type React from 'react';
 import { Suspense, lazy, useEffect, useRef, useState, useCallback, type Dispatch, type SetStateAction } from 'react';
-import { Search, Plus, FolderOpen, Edit, Trash2, Bike } from 'lucide-react';
+import { Search, Plus, FolderOpen, Edit, Trash2, Bike, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Input } from '@shared/components/ui/input';
 import { Button } from '@shared/components/ui/button';
@@ -30,6 +30,16 @@ const LazyVehicleFormModal = lazy(() =>
 
 const prefetchVehicleFormModal = () => {
   loadVehicleFormModal();
+};
+
+const loadVehicleDetailsModal = () => import('@modules/pages/VehicleDetailsModal');
+
+const LazyVehicleDetailsModal = lazy(() =>
+  loadVehicleDetailsModal().then((module) => ({ default: module.VehicleDetailsModal })),
+);
+
+const prefetchVehicleDetailsModal = () => {
+  loadVehicleDetailsModal();
 };
 
 const prefetchXlsx = () => {
@@ -371,6 +381,7 @@ const Motorcycles = () => {
   const [fileIoHint, setFileIoHint] = useState<{ kind: 'ok' | 'err'; message: string } | null>(null);
   const [deleteVehicle, setDeleteVehicle] = useState<Vehicle | null>(null);
   const [deletingVehicle, setDeletingVehicle] = useState(false);
+  const [detailsVehicle, setDetailsVehicle] = useState<Vehicle | null>(null);
 
   const importRef = useRef<HTMLInputElement>(null);
   const tableRef = useRef<HTMLTableElement>(null);
@@ -739,6 +750,15 @@ const Motorcycles = () => {
                     </td>
                     <td className="ta-td align-top">
                       <div className="flex gap-1">
+                        <button
+                          onClick={() => setDetailsVehicle(v)}
+                          onMouseEnter={prefetchVehicleDetailsModal}
+                          onFocus={prefetchVehicleDetailsModal}
+                          className="p-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+                          title="البيانات والمستندات"
+                        >
+                          <FileText size={14} />
+                        </button>
                         {permissions.can_edit && (
                           <button
                             onClick={() => openEditForm(v)}
@@ -776,6 +796,17 @@ const Motorcycles = () => {
             onClose={closeForm}
             onSaved={() => refetchVehicles().catch(() => {})}
             editVehicle={editVehicle}
+          />
+        </Suspense>
+      )}
+
+      {detailsVehicle && (
+        <Suspense fallback={null}>
+          <LazyVehicleDetailsModal
+            vehicle={detailsVehicle}
+            canEdit={permissions.can_edit}
+            canDelete={permissions.can_delete}
+            onClose={() => setDetailsVehicle(null)}
           />
         </Suspense>
       )}
