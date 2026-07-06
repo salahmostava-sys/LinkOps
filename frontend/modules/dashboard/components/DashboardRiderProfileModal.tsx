@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 import { Dialog, DialogContent } from '@shared/components/ui/dialog';
 import { employeeService } from '@services/employeeService';
-import { authQueryUserId, useAuthQueryGate } from '@shared/hooks/useAuthQueryGate';
+import { useAuthQueryGate } from '@shared/hooks/useAuthQueryGate';
 
 const EmployeeProfile = lazy(() => import('@shared/components/employees/EmployeeProfile'));
 
