@@ -49,6 +49,7 @@ const InlineLoader = ({ minHeightClassName = 'min-h-[260px]' }: Readonly<{ minHe
   <Loading minHeightClassName={minHeightClassName} />
 );
 
+// eslint-disable-next-line sonarjs/cognitive-complexity
 const Employees = () => {
   useAuthQueryGate();
   const queryClient = useQueryClient();
@@ -238,7 +239,21 @@ const Employees = () => {
         <EmployeeProfile
           employee={selectedEmp}
           onBack={() => setSelectedEmployee(null)}
+          onEdit={permissions.can_edit ? (emp) => {
+            setEditEmployee(emp);
+            setShowAddModal(true);
+          } : undefined}
         />
+        {showAddModal && (
+          <Suspense fallback={<InlineLoader />} >
+            <EmployeeFormModal
+              open={showAddModal}
+              editEmployee={editEmployee}
+              onClose={() => { setShowAddModal(false); setEditEmployee(null); }}
+              onSuccess={() => { runSafe(refetchEmployees(), '[EmployeesPage] refetch after save failed'); setShowAddModal(false); setEditEmployee(null); }}
+            />
+          </Suspense>
+        )}
       </Suspense>
     );
   }

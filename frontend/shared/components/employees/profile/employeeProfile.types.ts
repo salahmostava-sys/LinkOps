@@ -53,4 +53,5 @@ export interface MonthlyOrders {
 export interface EmployeeProfileProps {
   employee: Employee;
   onBack: () => void;
+  onEdit?: (employee: Employee) => void;
 }

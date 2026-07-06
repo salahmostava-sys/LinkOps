@@ -46,7 +46,7 @@ import {
 import { SecureDocThumb } from './profile/EmployeeProfileComponents';
 
 // eslint-disable-next-line sonarjs/cognitive-complexity
-const EmployeeProfile = ({ employee, onBack }: Readonly<Props>) => {
+const EmployeeProfile = ({ employee, onBack, onEdit }: Readonly<Props>) => {
   const { enabled, userId } = useAuthQueryGate();
   const uid = authQueryUserId(userId);
   const queryClient = useQueryClient();
@@ -95,12 +95,20 @@ const EmployeeProfile = ({ employee, onBack }: Readonly<Props>) => {
 
   return (
     <div className="space-y-5">
-      {/* Back Button */}
-      <div className="flex items-center gap-4">
+      {/* Back Button & Edit Button */}
+      <div className="flex items-center justify-between gap-4">
         <Button variant="ghost" onClick={onBack} className="gap-2 text-muted-foreground">
           <ArrowRight size={16} />
           العودة للقائمة
         </Button>
+        {onEdit && (
+          <Button variant="outline" onClick={() => onEdit(employee)} className="gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+            تعديل البيانات
+          </Button>
+        )}
       </div>
 
       {/* Profile Card */}
