@@ -9,6 +9,7 @@ import { logError } from '@shared/lib/logger';
 import { getErrorMessage } from '@services/serviceError';
 import { orderService } from '@services/orderService';
 import { useFuel } from '@modules/fuel/hooks/useFuel';
+import { isEmployeeExcluded } from '@shared/lib/employeeVisibility';
 import {
   calcDailyStats,
   calcMonthlyStats,
@@ -134,7 +135,7 @@ export function useFuelPage() { // NOSONAR: page data layer with many independen
     if (!fuelBaseData) return;
     // For fuel page, show all active employees regardless of monthly activity
     // This ensures couriers with vehicles are visible even if they have no orders/attendance in the month
-    setEmployees(fuelBaseData.employees.filter(e => e.status === 'active'));
+    setEmployees(fuelBaseData.employees.filter(e => !isEmployeeExcluded(e)));
     setApps(fuelBaseData.apps);
     setEmployeeAppLinks(fuelBaseData.links);
   }, [fuelBaseData]);

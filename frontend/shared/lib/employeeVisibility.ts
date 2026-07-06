@@ -25,16 +25,20 @@ export function isExcludedSponsorshipStatus(status: string | null | undefined): 
   return (EXCLUDED_SPONSORSHIP_STATUSES as readonly string[]).includes(status);
 }
 
+export function isEmployeeExcluded(employee: EmployeeLike): boolean {
+  return employee.status === 'inactive' || isExcludedSponsorshipStatus(employee.sponsorship_status ?? null);
+}
+
 /**
  * Visibility rule:
- * - Hide absconded/terminated by default.
+ * - Hide absconded/terminated/inactive by default.
  * - Keep visible if employee has activity in the target month (activeEmployeeIdsInMonth contains id).
  */
 export function isEmployeeVisibleInMonth(
   employee: EmployeeLike,
   activeEmployeeIdsInMonth: ReadonlySet<string> | null | undefined
 ): boolean {
-  if (!isExcludedSponsorshipStatus(employee.sponsorship_status ?? null)) return true;
+  if (!isEmployeeExcluded(employee)) return true;
   /** أثناء تحميل نشاط الشهر لا نخفي المستبعدين لتفادي قائمة فارغة مؤقتاً */
   if (activeEmployeeIdsInMonth === undefined || activeEmployeeIdsInMonth === null) return true;
   return !!activeEmployeeIdsInMonth.has(employee.id);
@@ -51,7 +55,7 @@ export function isEmployeeRetainedForMonth<T extends EmployeeLike>(
   employee: T,
   activeEmployeeIdsInMonth: ReadonlySet<string> | null | undefined
 ): boolean {
-  if (employee.status === 'active') return true;
+  if (employee.status === 'active' && !isExcludedSponsorshipStatus(employee.sponsorship_status ?? null)) return true;
   if (activeEmployeeIdsInMonth === undefined) return false;
   return !!activeEmployeeIdsInMonth?.has(employee.id);
 }
