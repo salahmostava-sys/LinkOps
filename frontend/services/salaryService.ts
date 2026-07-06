@@ -6,6 +6,8 @@
  *
  * Also handles: salary record CRUD, salary schemes, pricing rules, app targets.
  */
+import { formatCurrency } from '@shared/lib/formatters';
+
 import { supabase } from '@services/supabase/client';
 import { callServerFunction } from '@services/serverFunction';
 import { isEmployeeIdUuid, isValidSalaryMonthYear } from '@shared/lib/salaryValidation';
@@ -198,7 +200,7 @@ export function getTierSalaryExplanationLines(
   }
 
   if (targetOrders && targetBonus && orders >= targetOrders) {
-    lines.push(`مكافأة الهدف (≥${targetOrders} طلب): +${targetBonus.toLocaleString('en-US')} ر.س`);
+    lines.push(`مكافأة الهدف (≥${targetOrders} طلب): +${formatCurrency(targetBonus)}`);
   }
   return lines;
 }

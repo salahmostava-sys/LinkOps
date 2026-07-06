@@ -1,3 +1,5 @@
+import { formatCurrency } from '@shared/lib/formatters';
+
 import { Suspense, lazy, useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { CreditCard, FolderOpen, UserPlus, AlertTriangle } from 'lucide-react';
@@ -194,9 +196,9 @@ const Advances = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
           { label: 'عدد المندوبين', value: grandTotals.count, color: 'text-primary' },
-          { label: 'إجمالي المديونية', value: `${grandTotals.totalDebt.toLocaleString('en-US')} ر.س`, color: 'text-info' },
-          { label: 'إجمالي المسدّد', value: `${grandTotals.totalPaid.toLocaleString('en-US')} ر.س`, color: 'text-success' },
-          { label: 'إجمالي المتبقي', value: `${grandTotals.remaining.toLocaleString('en-US')} ر.س`, color: 'text-destructive' },
+          { label: 'إجمالي المديونية', value: `${formatCurrency(grandTotals.totalDebt)}`, color: 'text-info' },
+          { label: 'إجمالي المسدّد', value: `${formatCurrency(grandTotals.totalPaid)}`, color: 'text-success' },
+          { label: 'إجمالي المتبقي', value: `${formatCurrency(grandTotals.remaining)}`, color: 'text-destructive' },
         ].map(s => (
           <div key={s.label} className="bg-card border border-border/50 p-4 rounded-2xl">
             <p className="text-xs text-muted-foreground">{s.label}</p>
@@ -229,7 +231,7 @@ const Advances = () => {
                 <div className="flex items-center gap-2">
                   <span className="badge-urgent text-xs">هارب</span>
                   <span className="text-sm font-medium text-foreground">{emp.name}</span>
-                  <span className="text-xs text-destructive font-bold">{emp.remaining.toLocaleString('en-US')} ر.س</span>
+                  <span className="text-xs text-destructive font-bold">{formatCurrency(emp.remaining)}</span>
                 </div>
                 <Button
                   size="sm"

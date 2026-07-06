@@ -1,3 +1,5 @@
+import { formatCurrency } from '@shared/lib/formatters';
+
 import { useState, useRef } from 'react';
 import { Plus, Edit, FileText, Printer, AlertTriangle, Check, X, RotateCcw, UserPlus, Search, Trash2, Paperclip, ExternalLink } from 'lucide-react';
 import { Input } from '@shared/components/ui/input';
@@ -148,7 +150,7 @@ export const WriteOffDialog = ({ employeeName, remaining, advanceIds, onClose, o
         <div className="space-y-4">
           <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-4 text-sm">
             <p className="font-semibold text-foreground">{employeeName}</p>
-            <p className="text-muted-foreground mt-1">المبلغ الذي سيتم إعدامه: <span className="font-bold text-destructive">{remaining.toLocaleString('en-US')} ر.س</span></p>
+            <p className="text-muted-foreground mt-1">المبلغ الذي سيتم إعدامه: <span className="font-bold text-destructive">{formatCurrency(remaining)}</span></p>
             <p className="text-xs text-muted-foreground mt-2">⚠️ يمكن التراجع عن هذا الإجراء لاحقاً من خلال زر الاسترداد.</p>
           </div>
           <div>
@@ -389,9 +391,9 @@ export const PrintSlip = ({ employeeName, nationalId, totalDebt, totalPaid, rema
             <p><strong>رقم الإقامة:</strong> {nationalId}</p>
           </div>
           <div style={{ display: 'flex', gap: 24, marginBottom: 16 }}>
-            <div className="stat"><div className="stat-val blue">{totalDebt.toLocaleString('en-US')} ر.س</div><div>إجمالي المديونية</div></div>
-            <div className="stat"><div className="stat-val green">{totalPaid.toLocaleString('en-US')} ر.س</div><div>إجمالي المسدّد</div></div>
-            <div className="stat"><div className={`stat-val ${remaining > 0 ? 'red' : 'green'}`}>{remaining.toLocaleString('en-US')} ر.س</div><div>المتبقي</div></div>
+            <div className="stat"><div className="stat-val blue">{formatCurrency(totalDebt)}</div><div>إجمالي المديونية</div></div>
+            <div className="stat"><div className="stat-val green">{formatCurrency(totalPaid)}</div><div>إجمالي المسدّد</div></div>
+            <div className="stat"><div className={`stat-val ${remaining > 0 ? 'red' : 'green'}`}>{formatCurrency(remaining)}</div><div>المتبقي</div></div>
           </div>
           <table>
             <thead>
@@ -405,8 +407,8 @@ export const PrintSlip = ({ employeeName, nationalId, totalDebt, totalPaid, rema
                   <td>{idx + 1}</td>
                   <td dir="ltr">{inst.month_year}</td>
                   <td>{inst.advanceDate}</td>
-                  <td>{inst.advanceTotal.toLocaleString('en-US')} ر.س</td>
-                  <td>{inst.status === 'deducted' ? `${inst.amount.toLocaleString('en-US')} ر.س` : '—'}</td>
+                  <td>{formatCurrency(inst.advanceTotal)}</td>
+                  <td>{inst.status === 'deducted' ? `${formatCurrency(inst.amount)}` : '—'}</td>
                   <td>{installmentStatusLabel(inst.status)}</td>
                   <td>{inst.notes || '—'}</td>
                 </tr>
@@ -564,15 +566,15 @@ export const TransactionsModal = ({ employeeId, employeeName, nationalId, totalD
           <div className="grid grid-cols-3 gap-3 mb-2">
             <div className="bg-info/10 rounded-xl p-3 text-center">
               <p className="text-xs text-muted-foreground">إجمالي المديونية</p>
-              <p className="text-lg font-bold text-info">{totalDebt.toLocaleString('en-US')} ر.س</p>
+              <p className="text-lg font-bold text-info">{formatCurrency(totalDebt)}</p>
             </div>
             <div className="bg-success/10 rounded-xl p-3 text-center">
               <p className="text-xs text-muted-foreground">إجمالي المسدّد</p>
-              <p className="text-lg font-bold text-success">{totalPaid.toLocaleString('en-US')} ر.س</p>
+              <p className="text-lg font-bold text-success">{formatCurrency(totalPaid)}</p>
             </div>
             <div className="bg-destructive/10 rounded-xl p-3 text-center">
               <p className="text-xs text-muted-foreground">المتبقي</p>
-              <p className="text-lg font-bold text-destructive">{remaining.toLocaleString('en-US')} ر.س</p>
+              <p className="text-lg font-bold text-destructive">{formatCurrency(remaining)}</p>
             </div>
           </div>
           {allInstallments.length === 0 ? (
@@ -599,11 +601,11 @@ export const TransactionsModal = ({ employeeId, employeeName, nationalId, totalD
                       <td className="ta-td" dir="ltr">{inst.month_year}</td>
                       <td className="ta-td text-muted-foreground">{inst.advanceDate}</td>
                       <td className="ta-td">
-                        <span className="font-semibold text-info text-xs">{inst.advanceTotal.toLocaleString('en-US')} ر.س</span>
+                        <span className="font-semibold text-info text-xs">{formatCurrency(inst.advanceTotal)}</span>
                       </td>
                       <td className="ta-td">
                         {inst.status === 'deducted'
-                          ? <span className="font-semibold text-success text-xs">{inst.amount.toLocaleString('en-US')} ر.س</span>
+                          ? <span className="font-semibold text-success text-xs">{formatCurrency(inst.amount)}</span>
                           : <span className="text-muted-foreground/40 text-xs">—</span>}
                       </td>
                       <td className="ta-td max-w-xs">
@@ -666,8 +668,8 @@ export const TransactionsModal = ({ employeeId, employeeName, nationalId, totalD
                 <tfoot>
                   <tr className="bg-muted/60 border-t-2 border-border/60">
                     <td colSpan={3} className="ta-td font-bold text-muted-foreground">الإجمالي</td>
-                    <td className="ta-td font-bold text-info">{totalDebt.toLocaleString('en-US')} ر.س</td>
-                    <td className="ta-td font-bold text-success">{totalPaid.toLocaleString('en-US')} ر.س</td>
+                    <td className="ta-td font-bold text-info">{formatCurrency(totalDebt)}</td>
+                    <td className="ta-td font-bold text-success">{formatCurrency(totalPaid)}</td>
                     <td colSpan={3} />
                   </tr>
                 </tfoot>

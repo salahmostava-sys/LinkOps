@@ -1,3 +1,5 @@
+import { formatCurrency } from '@shared/lib/formatters';
+
 import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { Plus, Trash2, Wrench } from 'lucide-react';
@@ -311,7 +313,7 @@ export function AddMaintenanceModal({ open, onOpenChange, vehicles, spareParts }
                           إجمالي قطع الغيار:
                         </td>
                         <td colSpan={2} className="p-2.5 text-sm font-bold text-primary">
-                          {partsTotalCost.toLocaleString('en-US')} ر.س
+                          {formatCurrency(partsTotalCost)}
                         </td>
                       </tr>
                     </tfoot>
@@ -326,7 +328,7 @@ export function AddMaintenanceModal({ open, onOpenChange, vehicles, spareParts }
             <div className="bg-primary/5 border border-primary/20 rounded-lg px-4 py-3 flex items-center justify-between">
               <span className="text-sm font-medium">إجمالي تكلفة الصيانة:</span>
               <span className="text-lg font-bold text-primary">
-                {finalTotalCost.toLocaleString('en-US')} ر.س
+                {formatCurrency(finalTotalCost)}
               </span>
             </div>
           )}

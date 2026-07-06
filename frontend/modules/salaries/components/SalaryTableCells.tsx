@@ -1,3 +1,5 @@
+import { formatCurrency } from '@shared/lib/formatters';
+
 import { useState, useRef, useEffect, type KeyboardEvent, type ReactNode } from 'react';
 import { getOrdersCellBackground } from '@modules/salaries/lib/salaryConstants';
 import { getPlatformActivitySummary, getPrimaryPlatformActivityCount } from '@modules/salaries/model/salaryUtils';
@@ -110,7 +112,7 @@ export const SalaryBreakdown = ({ orders, scheme, salary, children }: Readonly<S
           </div>
           <div className="border-t border-border/50 mt-2 pt-1 flex justify-between font-bold text-primary">
             <span>الإجمالي</span>
-            <span>{salary.toLocaleString('en-US')} ر.س</span>
+            <span>{formatCurrency(salary)}</span>
           </div>
         </div>
       )}
@@ -149,7 +151,7 @@ function platformOrdersSalaryMeta(
   }
   return (
     <span className="text-[11px] text-foreground font-medium">
-      {salary.toLocaleString('en-US')} ر.س
+      {formatCurrency(salary)}
     </span>
   );
 }

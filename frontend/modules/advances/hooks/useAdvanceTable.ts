@@ -1,3 +1,5 @@
+import { formatStandardDateTime } from '@shared/lib/formatters';
+
 import { useMemo, useRef, useState, useCallback, type ChangeEvent } from 'react';
 import { format } from 'date-fns';
 import { applyFilters } from '@shared/lib/filterUtils';
@@ -233,7 +235,7 @@ export function useAdvanceTable({
     if (!table) return;
     printHtmlTable(table, {
       title: 'تقرير السلف',
-      subtitle: `المجموع: ${filtered.length} مندوب — ${new Date().toLocaleDateString('ar-SA')}`,
+      subtitle: `المجموع: ${filtered.length} مندوب — ${formatStandardDateTime()}`,
     });
   }, [filtered]);
 

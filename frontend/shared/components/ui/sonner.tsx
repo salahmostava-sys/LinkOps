@@ -44,7 +44,11 @@ function toastError(message: string, options?: AppToastOptions) {
   return toastHot.error(formatBody(message, description), {
     duration: duration ?? 4000,
     position: POSITION,
-    ...(options?.style ? { style: options.style } : {}),
+    style: {
+      background: 'rgb(220 38 38)', // red-600
+      color: '#fff',
+      ...options?.style
+    },
   });
 }
 
@@ -53,7 +57,11 @@ function toastSuccess(message: string, options?: AppToastOptions) {
   return toastHot.success(formatBody(message, description), {
     duration: duration ?? 4000,
     position: POSITION,
-    ...(style ? { style } : {}),
+    style: {
+      background: 'rgb(22 163 74)', // green-600
+      color: '#fff',
+      ...style
+    },
   });
 }
 

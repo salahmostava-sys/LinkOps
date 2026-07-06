@@ -1,4 +1,6 @@
 ﻿import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { formatCurrency } from '@shared/lib/formatters';
+
 import { useQuery } from '@tanstack/react-query';
 import { useToast } from '@shared/hooks/use-toast';
 import { usePermissions } from '@shared/hooks/usePermissions';
@@ -438,7 +440,7 @@ export function useViolationTable() {
 
     const advanceNote = [
       `مخالفة مرورية بتاريخ ${violationDate}.`,
-      `المبلغ: ${v.amount.toLocaleString('en-US')} ر.س — شهر الخصم: ${v.apply_month}`,
+      `المبلغ: ${formatCurrency(v.amount)} — شهر الخصم: ${v.apply_month}`,
       '',
       'تفاصيل المخالفة (كاملة):',
       fullDetails,

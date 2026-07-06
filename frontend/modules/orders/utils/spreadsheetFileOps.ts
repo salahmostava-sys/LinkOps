@@ -1,3 +1,5 @@
+import { formatStandardDateTime } from '@shared/lib/formatters';
+
 import { toast } from '@shared/components/ui/sonner';
 import {
   TOAST_SUCCESS_ACTION,
@@ -279,7 +281,7 @@ export function printSpreadsheetTable(params: {
   title.textContent = `طلبات شهر ${month}/${year}`;
   const subtitle = doc.createElement('p');
   subtitle.className = 'sub';
-  subtitle.textContent = `المجموع: ${filteredEmployeeCount} مندوب - ${new Date().toLocaleDateString('ar-SA')}`;
+  subtitle.textContent = `المجموع: ${filteredEmployeeCount} مندوب - ${formatStandardDateTime()}`;
   body.replaceChildren();
   body.appendChild(title);
   body.appendChild(subtitle);

@@ -1,4 +1,6 @@
 ﻿import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@shared/components/ui/dialog';
+import { formatCurrency } from '@shared/lib/formatters';
+
 import { Button } from '@shared/components/ui/button';
 import { Printer } from 'lucide-react';
 import type { CustomColumn } from '@shared/hooks/useAppColors';
@@ -85,7 +87,7 @@ export function SalaryDetailDialog(props: Readonly<SalaryDetailDialogProps>) {
                         <span className="text-[10px] text-muted-foreground ms-1.5">{activitySummary}</span>
                       </div>
                     </div>
-                    <span className="font-semibold text-xs" style={{ color: pc?.header || 'hsl(var(--primary))' }}>{salary.toLocaleString('en-US')} ر.س</span>
+                    <span className="font-semibold text-xs" style={{ color: pc?.header || 'hsl(var(--primary))' }}>{formatCurrency(salary)}</span>
                   </div>
                 );
               })}
@@ -98,19 +100,19 @@ export function SalaryDetailDialog(props: Readonly<SalaryDetailDialogProps>) {
               {detailRow.incentives > 0 && (
                 <div className="flex justify-between items-center px-3 py-2.5">
                   <span className="text-xs text-foreground">حوافز</span>
-                  <span className="text-xs font-semibold text-success">+{detailRow.incentives.toLocaleString('en-US')} ر.س</span>
+                  <span className="text-xs font-semibold text-success">+{formatCurrency(detailRow.incentives)}</span>
                 </div>
               )}
               {detailRow.sickAllowance > 0 && (
                 <div className="flex justify-between items-center px-3 py-2.5">
                   <span className="text-xs text-foreground">بدل مرضي</span>
-                  <span className="text-xs font-semibold text-success">+{detailRow.sickAllowance.toLocaleString('en-US')} ر.س</span>
+                  <span className="text-xs font-semibold text-success">+{formatCurrency(detailRow.sickAllowance)}</span>
                 </div>
               )}
             </div>
             <div className="flex justify-between items-center px-3 py-2.5 bg-success/15 font-bold">
               <span className="text-xs text-success">إجمالي الاستحقاقات</span>
-              <span className="text-sm text-success">{c.totalWithSalary.toLocaleString('en-US')} ر.س</span>
+              <span className="text-sm text-success">{formatCurrency(c.totalWithSalary)}</span>
             </div>
           </div>
 
@@ -122,25 +124,25 @@ export function SalaryDetailDialog(props: Readonly<SalaryDetailDialogProps>) {
               <div className="flex justify-between items-center px-3 py-2.5">
                 <span className="text-xs text-foreground">قسط سلفة</span>
                 <span className={`text-xs font-semibold ${detailRow.advanceDeduction > 0 ? 'text-destructive' : 'text-muted-foreground/40'}`}>
-                  {detailRow.advanceDeduction > 0 ? `-${detailRow.advanceDeduction.toLocaleString('en-US')} ر.س` : '—'}
+                  {detailRow.advanceDeduction > 0 ? `-${formatCurrency(detailRow.advanceDeduction)}` : '—'}
                 </span>
               </div>
               {detailRow.advanceRemaining > 0 && (
                 <div className="flex justify-between items-center px-3 py-2.5">
                   <span className="text-xs text-muted-foreground">رصيد السلفة المتبقي</span>
-                  <span className="text-xs font-semibold text-warning">{detailRow.advanceRemaining.toLocaleString('en-US')} ر.س</span>
+                  <span className="text-xs font-semibold text-warning">{formatCurrency(detailRow.advanceRemaining)}</span>
                 </div>
               )}
               <div className="flex justify-between items-center px-3 py-2.5">
                 <span className="text-xs text-foreground">خصومات خارجية</span>
                 <span className={`text-xs font-semibold ${detailRow.externalDeduction > 0 ? 'text-destructive' : 'text-muted-foreground/40'}`}>
-                  {detailRow.externalDeduction > 0 ? `-${detailRow.externalDeduction.toLocaleString('en-US')} ر.س` : '—'}
+                  {detailRow.externalDeduction > 0 ? `-${formatCurrency(detailRow.externalDeduction)}` : '—'}
                 </span>
               </div>
               <div className="flex justify-between items-center px-3 py-2.5">
                 <span className="text-xs text-foreground">مخالفات</span>
                 <span className={`text-xs font-semibold ${detailRow.violations > 0 ? 'text-destructive' : 'text-muted-foreground/40'}`}>
-                  {detailRow.violations > 0 ? `-${detailRow.violations.toLocaleString('en-US')} ر.س` : '—'}
+                  {detailRow.violations > 0 ? `-${formatCurrency(detailRow.violations)}` : '—'}
                 </span>
               </div>
               {allCustomCols.map(col => {
@@ -153,7 +155,7 @@ export function SalaryDetailDialog(props: Readonly<SalaryDetailDialogProps>) {
                       <span className="text-[9px] text-muted-foreground">({col.appName})</span>
                     </span>
                     <span className={`text-xs font-semibold ${v > 0 ? 'text-destructive' : 'text-muted-foreground/40'}`}>
-                      {v > 0 ? `-${v.toLocaleString('en-US')} ر.س` : '—'}
+                      {v > 0 ? `-${formatCurrency(v)}` : '—'}
                     </span>
                   </div>
                 );
@@ -161,13 +163,13 @@ export function SalaryDetailDialog(props: Readonly<SalaryDetailDialogProps>) {
             </div>
             <div className="flex justify-between items-center px-3 py-2.5 bg-destructive/15 font-bold">
               <span className="text-xs text-destructive">إجمالي الاستقطاعات</span>
-              <span className="text-sm text-destructive">-{c.totalDeductions.toLocaleString('en-US')} ر.س</span>
+              <span className="text-sm text-destructive">-{formatCurrency(c.totalDeductions)}</span>
             </div>
           </div>
 
           <div className="flex justify-between items-center py-3.5 bg-primary text-primary-foreground rounded-xl px-5">
             <span className="font-bold text-sm">صافي الراتب</span>
-            <span className="text-xl font-black">{c.netSalary.toLocaleString('en-US')} ر.س</span>
+            <span className="text-xl font-black">{formatCurrency(c.netSalary)}</span>
           </div>
 
           <div className="flex gap-2 justify-end pt-1">

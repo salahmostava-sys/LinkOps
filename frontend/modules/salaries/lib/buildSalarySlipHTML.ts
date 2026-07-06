@@ -6,6 +6,8 @@
  * Output is a standalone HTML string suitable for iframe, print, and PDF export.
  */
 
+import { formatStandardDateTime } from '@shared/lib/formatters';
+
 import DOMPurify, { type Config } from 'dompurify';
 import { escapeHtml } from '@shared/lib/security';
 
@@ -282,7 +284,7 @@ const buildFooter = (templateFooter?: string): string => {
         <div class="signature-line"></div>
         <div>اعتماد الإدارة</div>
       </div>
-      <div>التاريخ: ${new Date().toLocaleDateString('ar-SA')}</div>
+      <div>التاريخ: ${formatStandardDateTime()}</div>
     </div>`;
 };
 

@@ -1,3 +1,5 @@
+import { formatStandardDateTime } from '@shared/lib/formatters';
+
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Search, Plus, RotateCcw, ClipboardList, CheckCircle, Clock, FolderOpen, AlertCircle, Trash2 } from 'lucide-react';
@@ -389,7 +391,7 @@ const VehicleAssignment = () => {
     // This avoids XSS potential from string-interpolating data into document.write
     printHtmlTable(table, {
       title: 'سجل تسليم المركبات',
-      subtitle: `المجموع: ${filtered.length} سجل — ${new Date().toLocaleDateString('ar-SA')}`,
+      subtitle: `المجموع: ${filtered.length} سجل — ${formatStandardDateTime()}`,
     });
   };
 

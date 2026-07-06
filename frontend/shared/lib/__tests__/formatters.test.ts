@@ -52,35 +52,35 @@ describe('formatters', () => {
 
   describe('formatCurrency', () => {
     it('should format positive amounts', () => {
-      expect(formatCurrency(1234.56)).toBe('$1234.56');
+      expect(formatCurrency(1234.56)).toBe('1234.56 ر.س');
     });
 
     it('should format zero', () => {
-      expect(formatCurrency(0)).toBe('$0.00');
+      expect(formatCurrency(0)).toBe('0.00 ر.س');
     });
 
     it('should format negative amounts', () => {
-      expect(formatCurrency(-500.25)).toBe('$-500.25');
+      expect(formatCurrency(-500.25)).toBe('-500.25 ر.س');
     });
 
     it('should use custom currency symbol', () => {
-      expect(formatCurrency(100, 'ر.س')).toBe('ر.س100.00');
+      expect(formatCurrency(100, 'ر.س')).toBe('100.00 ر.س');
     });
 
     it('should handle null', () => {
-      expect(formatCurrency(null)).toBe('$0.00');
+      expect(formatCurrency(null)).toBe('0.00 ر.س');
     });
 
     it('should handle undefined', () => {
-      expect(formatCurrency(undefined)).toBe('$0.00');
+      expect(formatCurrency(undefined)).toBe('0.00 ر.س');
     });
 
     it('should handle NaN', () => {
-      expect(formatCurrency(Number.NaN)).toBe('$0.00');
+      expect(formatCurrency(Number.NaN)).toBe('0.00 ر.س');
     });
 
     it('should round to 2 decimal places', () => {
-      expect(formatCurrency(10.999)).toBe('$11.00');
+      expect(formatCurrency(10.999)).toBe('11.00 ر.س');
     });
   });
 

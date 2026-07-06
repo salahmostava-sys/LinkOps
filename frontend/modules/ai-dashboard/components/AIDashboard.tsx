@@ -1,3 +1,5 @@
+import { formatCurrency } from '@shared/lib/formatters';
+
 import { useCallback, useEffect, useState } from 'react';
 import {
   Brain,
@@ -59,7 +61,7 @@ function renderSalaryForecastContent(
       <div className="space-y-4">
         <div className="text-center">
           <div className="text-2xl font-bold text-primary">
-            {salaryForecast.predicted_monthly_salary.toLocaleString('en-US')} ر.س
+            {formatCurrency(salaryForecast.predicted_monthly_salary)}
           </div>
           <div className="text-xs text-muted-foreground">الراتب المتوقع لهذا الشهر</div>
         </div>

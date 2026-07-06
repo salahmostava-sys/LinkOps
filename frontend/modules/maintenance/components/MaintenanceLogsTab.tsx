@@ -1,3 +1,5 @@
+import { formatCurrency } from '@shared/lib/formatters';
+
 import { useState, useMemo } from 'react';
 import { Plus, Trash2, Search, Wrench, Calendar, Car, Banknote } from 'lucide-react';
 import { Button } from '@shared/components/ui/button';
@@ -79,7 +81,7 @@ function LogCard({ log, canDelete, onDelete }: Readonly<{
         </div>
         <div className="flex items-center gap-1.5 text-muted-foreground col-span-2">
           <Banknote size={13} className="shrink-0" />
-          <span className="font-bold text-foreground">{Number(log.total_cost).toLocaleString('en-US')} ر.س</span>
+          <span className="font-bold text-foreground">{formatCurrency(Number(log.total_cost))}</span>
         </div>
       </div>
 
@@ -96,7 +98,7 @@ function LogCard({ log, canDelete, onDelete }: Readonly<{
             <div key={p.id} className="flex items-center justify-between text-xs bg-muted/30 rounded px-2.5 py-1.5">
               <span>{p.spare_parts?.name_ar ?? '—'}</span>
               <span className="text-muted-foreground">
-                {p.quantity_used} {p.spare_parts?.unit ?? ''} × {Number(p.cost_at_time).toLocaleString('en-US')} ر.س
+                {p.quantity_used} {p.spare_parts?.unit ?? ''} × {formatCurrency(Number(p.cost_at_time))}
               </span>
             </div>
           ))}

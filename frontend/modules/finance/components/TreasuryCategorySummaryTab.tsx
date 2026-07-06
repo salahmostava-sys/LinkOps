@@ -1,3 +1,5 @@
+import { formatCurrency } from '@shared/lib/formatters';
+
 import { useState } from 'react';
 import { format, subDays } from 'date-fns';
 import { useTreasury } from '../hooks/useTreasury';
@@ -96,7 +98,7 @@ export function TreasuryCategorySummaryTab() {
                 <TrendingUp size={15} /> بنود الإيرادات
               </h3>
               <span className="text-xs font-bold text-emerald-600 bg-emerald-100 dark:bg-emerald-900/50 px-2 py-0.5 rounded-full">
-                {totalIncome.toLocaleString('en-US')} ر.س
+                {formatCurrency(totalIncome)}
               </span>
             </div>
             <div className="divide-y divide-border/30">
@@ -147,7 +149,7 @@ export function TreasuryCategorySummaryTab() {
                 <TrendingDown size={15} /> بنود المصاريف
               </h3>
               <span className="text-xs font-bold text-rose-500 bg-rose-100 dark:bg-rose-900/50 px-2 py-0.5 rounded-full">
-                {totalExpense.toLocaleString('en-US')} ر.س
+                {formatCurrency(totalExpense)}
               </span>
             </div>
             <div className="divide-y divide-border/30">

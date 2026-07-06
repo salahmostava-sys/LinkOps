@@ -1,4 +1,6 @@
 ﻿import { escapeHtml } from '@shared/lib/security';
+import { formatCurrency, formatStandardDateTime } from '@shared/lib/formatters';
+
 import { getManualDeductionTotal } from '@modules/salaries/lib/salaryDomain';
 import { getStatusStyleForPrint } from '@modules/salaries/lib/salaryConstants';
 import type { SalaryRow } from '@modules/salaries/types/salary.types';
@@ -83,7 +85,7 @@ function buildRowHtml(
     <td style="text-align:center;font-weight:700;color:#1d4ed8">${c.totalPlatformSalary.toLocaleString('en-US')}</td>
     <td style="text-align:center">${c.totalAdditions > 0 ? `+${c.totalAdditions.toLocaleString('en-US')}` : '—'}</td>
     <td style="text-align:center;color:#dc2626">${c.totalDeductions > 0 ? `-${c.totalDeductions.toLocaleString('en-US')}` : '—'}</td>
-    <td style="text-align:center;font-weight:800;font-size:14px;color:#15803d">${c.netSalary.toLocaleString('en-US')} ر.س</td>
+    <td style="text-align:center;font-weight:800;font-size:14px;color:#15803d">${formatCurrency(c.netSalary)}</td>
     <td style="text-align:center">${r.transfer > 0 ? r.transfer.toLocaleString('en-US') : '—'}</td>
     <td style="text-align:center"><span style="padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;${statusStyle}">${statusLabel}</span></td>
   </tr>`;
@@ -122,26 +124,26 @@ export function buildSalaryTablePrintHtml(params: PrintTableParams): string {
       <div>
         <div class="company-name">${escapeHtml(projectName || 'مهمة التوصيل')}</div>
         <div class="report-title">تقرير الرواتب الشهرية</div>
-        <div class="report-meta">${monthLabel} • تاريخ الطباعة: ${new Date().toLocaleDateString('ar-SA')} • عدد الموظفين: ${rows.length}</div>
+        <div class="report-meta">${monthLabel} • تاريخ الطباعة: ${formatStandardDateTime()} • عدد الموظفين: ${rows.length}</div>
       </div>
       <div style="text-align:left">
         <div style="font-size:11px;color:#888">إجمالي صافي الرواتب</div>
-        <div style="font-size:24px;font-weight:900;color:#15803d">${totalNet.toLocaleString('en-US')} ر.س</div>
+        <div style="font-size:24px;font-weight:900;color:#15803d">${formatCurrency(totalNet)}</div>
       </div>
     </div>
 
     <div class="summary">
       <div class="summary-card">
         <div class="summary-label">إجمالي الرواتب الأساسية</div>
-        <div class="summary-value" style="color:#1d4ed8">${totalPlatformSalary.toLocaleString('en-US')} ر.س</div>
+        <div class="summary-value" style="color:#1d4ed8">${formatCurrency(totalPlatformSalary)}</div>
       </div>
       <div class="summary-card">
         <div class="summary-label">إجمالي المستقطعات</div>
-        <div class="summary-value" style="color:#dc2626">${totalDeductions.toLocaleString('en-US')} ر.س</div>
+        <div class="summary-value" style="color:#dc2626">${formatCurrency(totalDeductions)}</div>
       </div>
       <div class="summary-card">
         <div class="summary-label">صافي الرواتب</div>
-        <div class="summary-value" style="color:#15803d">${totalNet.toLocaleString('en-US')} ر.س</div>
+        <div class="summary-value" style="color:#15803d">${formatCurrency(totalNet)}</div>
       </div>
       <div class="summary-card">
         <div class="summary-label">عدد الموظفين</div>
@@ -182,7 +184,7 @@ export function buildSalaryTablePrintHtml(params: PrintTableParams): string {
           <td style="text-align:center;color:#1d4ed8">${totalPlatformSalary.toLocaleString('en-US')}</td>
           <td></td>
           <td style="text-align:center;color:#dc2626">-${totalDeductions.toLocaleString('en-US')}</td>
-          <td style="text-align:center;color:#15803d;font-size:15px">${totalNet.toLocaleString('en-US')} ر.س</td>
+          <td style="text-align:center;color:#15803d;font-size:15px">${formatCurrency(totalNet)}</td>
           <td></td>
           <td></td>
         </tr>

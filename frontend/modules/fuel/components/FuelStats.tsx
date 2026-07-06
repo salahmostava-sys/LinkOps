@@ -1,3 +1,5 @@
+import { formatCurrency } from '@shared/lib/formatters';
+
 import type React from 'react';
 import { TrendingUp, Fuel, DollarSign, Package, Calendar } from 'lucide-react';
 
@@ -22,8 +24,8 @@ export function FuelMonthlyStats(props: Readonly<{ totalKm: number; totalFuel: n
     const avgFuelPerOrder = totalOrders > 0 ? (totalFuel / totalOrders) : 0;
     return (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <StatCard icon={<Fuel size={22} />} label="إجمالي تكلفة البنزين" value={`${totalFuel.toLocaleString('en-US')} ر.س`} sub="هذا الشهر" />
-        <StatCard icon={<DollarSign size={22} />} label="متوسط البنزين للطلب" value={avgFuelPerOrder > 0 ? `${avgFuelPerOrder.toFixed(2)} ر.س` : '—'} sub="ر.س / طلب" />
+        <StatCard icon={<Fuel size={22} />} label="إجمالي تكلفة البنزين" value={`${formatCurrency(totalFuel)}`} sub="هذا الشهر" />
+        <StatCard icon={<DollarSign size={22} />} label="متوسط البنزين للطلب" value={avgFuelPerOrder > 0 ? `${formatCurrency(avgFuelPerOrder)}` : '—'} sub="ر.س / طلب" />
         <StatCard icon={<Package size={22} />} label="إجمالي الطلبات" value={totalOrders.toLocaleString('en-US')} sub="الطلبات المسجلة" />
       </div>
     );
@@ -43,8 +45,8 @@ export function FuelMonthlyStats(props: Readonly<{ totalKm: number; totalFuel: n
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       <StatCard icon={<TrendingUp size={22} />} label="إجمالي الكيلومترات" value={totalKm.toLocaleString('en-US')} sub="كم هذا الشهر" />
-      <StatCard icon={<Fuel size={22} />} label="إجمالي تكلفة البنزين" value={`${totalFuel.toLocaleString('en-US')} ر.س`} sub="هذا الشهر" />
-      <StatCard icon={<DollarSign size={22} />} label="متوسط تكلفة الكيلومتر" value={avgCostPerKm > 0 ? `${avgCostPerKm.toFixed(3)} ر.س` : '—'} sub="ر.س / كم" />
+      <StatCard icon={<Fuel size={22} />} label="إجمالي تكلفة البنزين" value={`${formatCurrency(totalFuel)}`} sub="هذا الشهر" />
+      <StatCard icon={<DollarSign size={22} />} label="متوسط تكلفة الكيلومتر" value={avgCostPerKm > 0 ? `${formatCurrency(avgCostPerKm)}` : '—'} sub="ر.س / كم" />
       <StatCard icon={<Package size={22} />} label="إجمالي الطلبات" value={totalOrders.toLocaleString('en-US')} sub="من الطلبات اليومية" />
     </div>
   );
@@ -56,7 +58,7 @@ export function FuelDailyStats(props: Readonly<{ count: number; totalKm: number;
     <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
       <StatCard icon={<Calendar size={22} />} label="إجمالي الإدخالات" value={String(count)} sub="سجل في هذا الشهر" />
       <StatCard icon={<TrendingUp size={22} />} label="إجمالي الكيلومترات" value={totalKm.toLocaleString('en-US')} sub="كم" />
-      <StatCard icon={<Fuel size={22} />} label="إجمالي تكلفة البنزين" value={`${totalFuel.toLocaleString('en-US')} ر.س`} sub="هذا الشهر" />
+      <StatCard icon={<Fuel size={22} />} label="إجمالي تكلفة البنزين" value={`${formatCurrency(totalFuel)}`} sub="هذا الشهر" />
     </div>
   );
 }

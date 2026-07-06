@@ -1,3 +1,5 @@
+import { formatCurrency } from '@shared/lib/formatters';
+
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowRight, User, FileText, Wallet, CreditCard, Clock, Package, DollarSign, Loader2, ChevronDown, ChevronUp, TrendingUp, ScanLine } from 'lucide-react';
@@ -410,15 +412,15 @@ const EmployeeProfile = ({ employee, onBack }: Readonly<Props>) => {
                       >
                         <div className="flex justify-between items-start">
                           <div>
-                            <p className="font-medium text-foreground">{adv.amount.toLocaleString('en-US')} ر.س</p>
-                            <p className="text-sm text-muted-foreground">قسط شهري: {adv.monthly_amount.toLocaleString('en-US')} ر.س · تاريخ الصرف: {adv.disbursement_date}</p>
+                            <p className="font-medium text-foreground">{formatCurrency(adv.amount)}</p>
+                            <p className="text-sm text-muted-foreground">قسط شهري: {formatCurrency(adv.monthly_amount)} · تاريخ الصرف: {adv.disbursement_date}</p>
                           </div>
                           <span className={advanceStatusStyle[adv.status] || 'badge-info'}>
                             {advanceStatusLabel[adv.status] || adv.status}
                           </span>
                         </div>
                         <div className="mt-2 text-xs text-muted-foreground">
-                          مدفوع: {paid.toLocaleString('en-US')} ر.س — متبقي: {remaining.toLocaleString('en-US')} ر.س
+                          مدفوع: {formatCurrency(paid)} — متبقي: {formatCurrency(remaining)}
                         </div>
                         {adv.note && <p className="mt-1 text-xs text-muted-foreground">📝 {adv.note}</p>}
                       </button>
@@ -437,7 +439,7 @@ const EmployeeProfile = ({ employee, onBack }: Readonly<Props>) => {
                               {adv.advance_installments.map(inst => (
                                 <tr key={inst.id} className="border-t border-border/20">
                                   <td className="p-2">{inst.month_year}</td>
-                                  <td className="p-2">{inst.amount.toLocaleString('en-US')} ر.س</td>
+                                  <td className="p-2">{formatCurrency(inst.amount)}</td>
                                   <td className="p-2">
                                     <span className={installmentStatusStyle[inst.status] ?? ''}>
                                       {installmentStatusLabel[inst.status] || inst.status}
@@ -528,7 +530,7 @@ const EmployeeProfile = ({ employee, onBack }: Readonly<Props>) => {
                               <td className="p-3 text-muted-foreground">{s.base_salary.toLocaleString('en-US')}</td>
                               <td className="p-3 text-success">{s.allowances > 0 ? `+${s.allowances.toLocaleString('en-US')}` : EMPTY_DATA_PLACEHOLDER}</td>
                               <td className="p-3 text-destructive">{totalDed > 0 ? `-${totalDed.toLocaleString('en-US')}` : EMPTY_DATA_PLACEHOLDER}</td>
-                              <td className="p-3 font-bold text-success">{s.net_salary.toLocaleString('en-US')} ر.س</td>
+                              <td className="p-3 font-bold text-success">{formatCurrency(s.net_salary)}</td>
                               <td className="ta-td p-3">
                                 <span className={s.is_approved ? 'badge-success' : 'badge-warning'}>
                                   {s.is_approved ? 'معتمد' : 'معلق'}
@@ -545,7 +547,7 @@ const EmployeeProfile = ({ employee, onBack }: Readonly<Props>) => {
                           <td className="p-3 text-foreground">{totalBase.toLocaleString('en-US')}</td>
                           <td className="p-3 text-success">{salaries.reduce((s,r)=>s+r.allowances,0) > 0 ? `+${salaries.reduce((s,r)=>s+r.allowances,0).toLocaleString('en-US')}` : EMPTY_DATA_PLACEHOLDER}</td>
                           <td className="p-3 text-destructive">-{totalDeduct.toLocaleString('en-US')}</td>
-                          <td className="p-3 text-success text-base">{totalNet.toLocaleString('en-US')} ر.س</td>
+                          <td className="p-3 text-success text-base">{formatCurrency(totalNet)}</td>
                           <td className="ta-td p-3 text-muted-foreground">{approvedCount}/{salaries.length} معتمد</td>
                         </tr>
                       </tfoot>

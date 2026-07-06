@@ -8,8 +8,8 @@ describe('formatters', () => {
   });
 
   it('formatCurrency', () => {
-    expect(formatCurrency(12.3)).toBe('$12.30');
-    expect(formatCurrency(1, 'ر.س')).toBe('ر.س1.00');
+    expect(formatCurrency(12.3)).toBe('12.30 ر.س');
+    expect(formatCurrency(1, 'ر.س')).toBe('1.00 ر.س');
   });
 
   it('formatNumber adds thousands separators', () => {
@@ -18,7 +18,7 @@ describe('formatters', () => {
   });
 
   it('formats SAR currency correctly', () => {
-    expect(formatCurrency(1500, 'ر.س')).toBe('ر.س1500.00');
+    expect(formatCurrency(1500, 'ر.س')).toBe('1500.00 ر.س');
   });
 
   it('formatDate handles end of month', () => {
@@ -27,11 +27,11 @@ describe('formatters', () => {
   });
 
   it('formatCurrency handles zero', () => {
-    expect(formatCurrency(0)).toBe('$0.00');
+    expect(formatCurrency(0)).toBe('0.00 ر.س');
   });
 
   it('formatCurrency handles negative amounts', () => {
-    expect(formatCurrency(-500)).toBe('$-500.00');
+    expect(formatCurrency(-500)).toBe('-500.00 ر.س');
   });
 
   it('formatNumber handles zero', () => {

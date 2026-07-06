@@ -1,3 +1,5 @@
+import { formatStandardDateTime } from '@shared/lib/formatters';
+
 import { useCallback, useRef, useEffect } from 'react';
 import { todayISO } from '@shared/lib/formatters';
 import { cycleSortState } from '@shared/lib/sortTableIndicators';
@@ -266,7 +268,7 @@ export function useEmployeeActions(params: {
     if (!table) return;
     printHtmlTable(table, {
       title: 'بيانات الموظفين',
-      subtitle: `المجموع: ${filtered.length} موظف — ${new Date().toLocaleDateString('ar-SA')}`,
+      subtitle: `المجموع: ${filtered.length} موظف — ${formatStandardDateTime()}`,
     });
   };
 

@@ -1,3 +1,5 @@
+import { formatCurrency } from '@shared/lib/formatters';
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthQueryGate, authQueryUserId } from '@shared/hooks/useAuthQueryGate';
 import { treasuryService } from '@services/treasuryService';
@@ -52,7 +54,7 @@ export function useTreasury(from: string, to: string) {
       queryClient.invalidateQueries({ queryKey: ['treasury_transactions'] });
       queryClient.invalidateQueries({ queryKey: ['treasury_balances'] });
       registerAction({
-        description: `إضافة قيد — ${describeTreasuryTxType(newTx.type)} ${Number(newTx.amount).toLocaleString('en-US')} ر.س`,
+        description: `إضافة قيد — ${describeTreasuryTxType(newTx.type)} ${formatCurrency(Number(newTx.amount))}`,
         undoCommand: async () => {
           await treasuryService.deleteTransaction(newTx.id);
           queryClient.invalidateQueries({ queryKey: ['treasury_transactions'] });
@@ -72,7 +74,7 @@ export function useTreasury(from: string, to: string) {
       const prevTx = currentTxs?.find(t => t.id === variables.id);
       if (prevTx) {
         registerAction({
-          description: `تعديل قيد — ${describeTreasuryTxType(prevTx.type)} ${Number(prevTx.amount).toLocaleString('en-US')} ر.س`,
+          description: `تعديل قيد — ${describeTreasuryTxType(prevTx.type)} ${formatCurrency(Number(prevTx.amount))}`,
           undoCommand: async () => {
             await treasuryService.updateTransaction(variables.id, {
               type: prevTx.type,
@@ -101,7 +103,7 @@ export function useTreasury(from: string, to: string) {
       queryClient.invalidateQueries({ queryKey: ['treasury_transactions'] });
       queryClient.invalidateQueries({ queryKey: ['treasury_balances'] });
       registerAction({
-        description: `حذف قيد — ${describeTreasuryTxType(deletedTx.type)} ${Number(deletedTx.amount).toLocaleString('en-US')} ر.س`,
+        description: `حذف قيد — ${describeTreasuryTxType(deletedTx.type)} ${formatCurrency(Number(deletedTx.amount))}`,
         undoCommand: async () => {
           await treasuryService.createTransaction({
             type: deletedTx.type,

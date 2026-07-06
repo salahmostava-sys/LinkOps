@@ -1,3 +1,5 @@
+import { formatCurrency } from '@shared/lib/formatters';
+
 import type React from 'react';
 import { Search, AlertTriangle, XCircle, CheckCircle, CheckCircle2, RefreshCw, ListChecks, Trash2 } from 'lucide-react';
 import { Button } from '@shared/components/ui/button';
@@ -237,7 +239,7 @@ export default function ViolationSearchTab({
                     <td className="ta-td text-muted-foreground">{row.violation_details || '—'}</td>
                     <td className="ta-td text-muted-foreground">{row.violation_date}</td>
                     <td className="ta-td font-medium text-foreground">
-                      {row.amount.toLocaleString('en-US')} ر.س
+                      {formatCurrency(row.amount)}
                     </td>
                     <td className="ta-td text-muted-foreground">
                       {row.status === 'recorded' ? (

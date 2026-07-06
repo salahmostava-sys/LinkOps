@@ -1,4 +1,6 @@
 ﻿import { escapeHtml } from '@shared/lib/security';
+import { formatCurrency, formatStandardDateTime } from '@shared/lib/formatters';
+
 import { getManualDeductionTotal } from '@modules/salaries/lib/salaryDomain';
 import { getPlatformActivitySummary } from '@modules/salaries/model/salaryUtils';
 import type { MergedPdfComputed, SalaryRow } from '@modules/salaries/types/salary.types';
@@ -46,33 +48,33 @@ export function buildMergedPlatformsRowsHtml(row: SalaryRow): string {
       const metric = row.platformMetrics[app];
       const activityLabel = getPlatformActivitySummary(metric);
       const salary = row.platformSalaries[app] || 0;
-      return `<tr><td class="label">${escapeHtml(app)}</td><td style="text-align:center">${activityLabel}</td><td class="val-blue" style="text-align:center">${salary.toLocaleString('en-US')} ر.س</td></tr>`;
+      return `<tr><td class="label">${escapeHtml(app)}</td><td style="text-align:center">${activityLabel}</td><td class="val-blue" style="text-align:center">${formatCurrency(salary)}</td></tr>`;
     })
     .join('');
 }
 
 export function buildMergedAdditionsSectionHtml(row: SalaryRow, c: MergedPdfComputed): string {
   if (c.totalAdditions <= 0) return '';
-  const incentivesRow = row.incentives > 0 ? `<tr><td class="label">الحوافز</td><td class="val-green">+ ${row.incentives.toLocaleString('en-US')} ر.س</td></tr>` : '';
-  const sickAllowanceRow = row.sickAllowance > 0 ? `<tr><td class="label">بدل مرضي</td><td class="val-green">+ ${row.sickAllowance.toLocaleString('en-US')} ر.س</td></tr>` : '';
+  const incentivesRow = row.incentives > 0 ? `<tr><td class="label">الحوافز</td><td class="val-green">+ ${formatCurrency(row.incentives)}</td></tr>` : '';
+  const sickAllowanceRow = row.sickAllowance > 0 ? `<tr><td class="label">بدل مرضي</td><td class="val-green">+ ${formatCurrency(row.sickAllowance)}</td></tr>` : '';
   return `
     <h3>الإضافات</h3>
     <table>
       ${incentivesRow}
       ${sickAllowanceRow}
-      <tr class="total-row"><td class="label">المجموع مع الراتب</td><td class="val-blue">${c.totalWithSalary.toLocaleString('en-US')} ر.س</td></tr>
+      <tr class="total-row"><td class="label">المجموع مع الراتب</td><td class="val-blue">${formatCurrency(c.totalWithSalary)}</td></tr>
     </table>
   `;
 }
 
 export function buildMergedDeductionsSectionHtml(row: SalaryRow, c: MergedPdfComputed): string {
   if (c.totalDeductions <= 0) return '';
-  const advanceRow = row.advanceDeduction > 0 ? `<tr><td class="label">قسط سلفة</td><td class="val-red">- ${row.advanceDeduction.toLocaleString('en-US')} ر.س</td></tr>` : '';
-  const remainingAdvanceRow = row.advanceRemaining > 0 ? `<tr><td class="label">رصيد السلفة المتبقي</td><td class="val-orange">${row.advanceRemaining.toLocaleString('en-US')} ر.س</td></tr>` : '';
-  const externalRow = row.externalDeduction > 0 ? `<tr><td class="label">خصومات خارجية</td><td class="val-red">- ${row.externalDeduction.toLocaleString('en-US')} ر.س</td></tr>` : '';
-  const violationsRow = row.violations > 0 ? `<tr><td class="label">مخالفات</td><td class="val-red">- ${row.violations.toLocaleString('en-US')} ر.س</td></tr>` : '';
+  const advanceRow = row.advanceDeduction > 0 ? `<tr><td class="label">قسط سلفة</td><td class="val-red">- ${formatCurrency(row.advanceDeduction)}</td></tr>` : '';
+  const remainingAdvanceRow = row.advanceRemaining > 0 ? `<tr><td class="label">رصيد السلفة المتبقي</td><td class="val-orange">${formatCurrency(row.advanceRemaining)}</td></tr>` : '';
+  const externalRow = row.externalDeduction > 0 ? `<tr><td class="label">خصومات خارجية</td><td class="val-red">- ${formatCurrency(row.externalDeduction)}</td></tr>` : '';
+  const violationsRow = row.violations > 0 ? `<tr><td class="label">مخالفات</td><td class="val-red">- ${formatCurrency(row.violations)}</td></tr>` : '';
   const manual = getManualDeductionTotal(row);
-  const manualRow = manual > 0 ? `<tr><td class="label">خصومات يدوية</td><td class="val-red">- ${manual.toLocaleString('en-US')} ر.س</td></tr>` : '';
+  const manualRow = manual > 0 ? `<tr><td class="label">خصومات يدوية</td><td class="val-red">- ${formatCurrency(manual)}</td></tr>` : '';
   return `
     <h3>المستقطعات</h3>
     <table>
@@ -81,7 +83,7 @@ export function buildMergedDeductionsSectionHtml(row: SalaryRow, c: MergedPdfCom
       ${externalRow}
       ${violationsRow}
       ${manualRow}
-      <tr class="deduction-total"><td class="label">إجمالي المستقطعات</td><td class="val-red">- ${c.totalDeductions.toLocaleString('en-US')} ر.س</td></tr>
+      <tr class="deduction-total"><td class="label">إجمالي المستقطعات</td><td class="val-red">- ${formatCurrency(c.totalDeductions)}</td></tr>
     </table>
   `;
 }
@@ -104,8 +106,8 @@ export function buildMergedSalaryPageHtml({
     : (row.paymentMethod === 'bank' ? '—' : 'لا يُصرف تحويلاً'); // NOSONAR
   const transferRows =
     row.transfer > 0
-      ? `<tr><td class="label">المبلغ المحوّل</td><td>${row.transfer.toLocaleString('en-US')} ر.س</td></tr>
-       <tr><td class="label">المتبقي نقداً</td><td class="val-orange">${computed.remaining.toLocaleString('en-US')} ر.س</td></tr>`
+      ? `<tr><td class="label">المبلغ المحوّل</td><td>${formatCurrency(row.transfer)}</td></tr>
+       <tr><td class="label">المتبقي نقداً</td><td class="val-orange">${formatCurrency(computed.remaining)}</td></tr>`
       : '';
 
   return `
@@ -135,19 +137,19 @@ export function buildMergedSalaryPageHtml({
             <td style="background:#e0e7ff;color:#4338ca;font-weight:700;text-align:center">النشاط</td>
             <td style="background:#e0e7ff;color:#4338ca;font-weight:700;text-align:center">الراتب</td></tr>
         ${buildMergedPlatformsRowsHtml(row)}
-        <tr class="total-row"><td class="label">إجمالي الراتب الأساسي</td><td></td><td class="val-blue" style="text-align:center">${computed.totalPlatformSalary.toLocaleString('en-US')} ر.س</td></tr>
+        <tr class="total-row"><td class="label">إجمالي الراتب الأساسي</td><td></td><td class="val-blue" style="text-align:center">${formatCurrency(computed.totalPlatformSalary)}</td></tr>
       </table>
       ${buildMergedAdditionsSectionHtml(row, computed)}
       ${buildMergedDeductionsSectionHtml(row, computed)}
       <h3>الصافي</h3>
       <table>
-        <tr class="net-row"><td class="label">إجمالي الراتب الصافي</td><td class="val-green">${computed.netSalary.toLocaleString('en-US')} ر.س</td></tr>
+        <tr class="net-row"><td class="label">إجمالي الراتب الصافي</td><td class="val-green">${formatCurrency(computed.netSalary)}</td></tr>
         ${transferRows}
       </table>
       <div class="footer">
         <div>توقيع المندوب: _______________________</div>
         <div>اعتماد المدير: _______________________</div>
-        <div>التاريخ: ${new Date().toLocaleDateString('ar-SA')}</div>
+        <div>التاريخ: ${formatStandardDateTime()}</div>
       </div>
     </div>`;
 }

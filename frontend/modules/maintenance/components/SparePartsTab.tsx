@@ -1,3 +1,5 @@
+import { formatStandardDateTime } from '@shared/lib/formatters';
+
 import { useMemo, useState } from 'react';
 import { Edit, Trash2, Search, Package, AlertTriangle, ShoppingCart, FileText, Paperclip } from 'lucide-react';
 import { Button } from '@shared/components/ui/button';
@@ -427,7 +429,7 @@ export function SparePartsTab() {
                           {part.invoice_number && (
                             <p className="text-[11px] text-muted-foreground mt-0.5">
                               فاتورة #{part.invoice_number}
-                              {part.invoice_date && ` · ${new Date(part.invoice_date).toLocaleDateString('ar-SA')}`}
+                              {part.invoice_date && ` · ${formatStandardDateTime(part.invoice_date)}`}
                               {part.invoice_attachment_url && (
                                 <button
                                   type="button"

@@ -3,6 +3,8 @@
  * performance, comparison, trends, AI analysis, finance, and targets.
  */
 
+import { formatCurrency } from '@shared/lib/formatters';
+
 import { useMemo } from 'react';
 import {
   Target,
@@ -278,8 +280,8 @@ export function RiderProfilePerformanceCard({ data }: Readonly<RiderProfilePerfo
           </div>
           {salary ? (
             <>
-              <ProfileStatRow label="الراتب الأساسي" value={`${salary.baseSalary.toLocaleString('en-US')} ر.س`} />
-              <ProfileStatRow label="البدلات" value={`+${salary.allowances.toLocaleString('en-US')} ر.س`} />
+              <ProfileStatRow label="الراتب الأساسي" value={`${formatCurrency(salary.baseSalary)}`} />
+              <ProfileStatRow label="البدلات" value={`+${formatCurrency(salary.allowances)}`} />
               <ProfileStatRow
                 label="الاستقطاعات"
                 value={`-${(salary.attendanceDeduction + salary.advanceDeduction + salary.externalDeduction + salary.manualDeduction).toLocaleString('en-US')} ر.س`}
@@ -287,7 +289,7 @@ export function RiderProfilePerformanceCard({ data }: Readonly<RiderProfilePerfo
               <div className="flex items-center justify-between py-3 mt-1 border-t-2 border-foreground/10">
                 <span className="text-sm font-bold text-foreground">صافي الراتب</span>
                 <span className="text-lg font-black text-foreground">
-                  {salary.netSalary.toLocaleString('en-US')} ر.س
+                  {formatCurrency(salary.netSalary)}
                 </span>
               </div>
               <span

@@ -16,6 +16,8 @@
  * - Only rows within the scroll viewport are in the DOM
  * - Ctrl+F browser search won't find off-screen rows (acceptable trade-off)
  */
+import { formatCurrency } from '@shared/lib/formatters';
+
 import type React from 'react';
 import { useMemo, useRef, memo, useCallback } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
@@ -643,7 +645,7 @@ export const SalaryTable = memo(function SalaryTable(props: Readonly<SalaryTable
                     <div className="flex flex-col items-center leading-tight">
                       <span>{totalOrders.toLocaleString('en-US')} طلب</span>
                       {totalShiftDays > 0 && <span className="text-[10px] opacity-75 font-normal">{totalShiftDays.toLocaleString('en-US')} دوام</span>}
-                      <span className="text-[10px] opacity-75 font-normal">{totalSal.toLocaleString('en-US')} ر.س</span>
+                      <span className="text-[10px] opacity-75 font-normal">{formatCurrency(totalSal)}</span>
                     </div>
                   </td>
                 );

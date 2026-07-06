@@ -1,3 +1,5 @@
+import { formatStandardDateTime } from '@shared/lib/formatters';
+
 import type React from 'react';
 import { Suspense, lazy, useEffect, useRef, useState, useCallback, type Dispatch, type SetStateAction } from 'react';
 import { Search, Plus, FolderOpen, Edit, Trash2, Bike, FileText } from 'lucide-react';
@@ -482,7 +484,7 @@ const Motorcycles = () => {
     if (!table) return;
     printHtmlTable(table, {
       title: 'بيانات الدبابات',
-      subtitle: `المجموع: ${filtered.length} مركبة — ${new Date().toLocaleDateString('ar-SA')}`,
+      subtitle: `المجموع: ${filtered.length} مركبة — ${formatStandardDateTime()}`,
     });
   };
 

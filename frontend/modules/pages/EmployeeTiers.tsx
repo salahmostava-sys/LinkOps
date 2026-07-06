@@ -1,3 +1,5 @@
+import { formatStandardDateTime } from '@shared/lib/formatters';
+
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -583,7 +585,7 @@ const EmployeeTiers = () => {
     table.appendChild(tbody);
     printHtmlTable(table, {
       title: 'شرائح الشركة',
-      subtitle: `${filtered.length} سجل — تاريخ الطباعة: ${new Date().toLocaleDateString('ar-SA')}`,
+      subtitle: `${filtered.length} سجل — تاريخ الطباعة: ${formatStandardDateTime()}`,
     });
   };
 

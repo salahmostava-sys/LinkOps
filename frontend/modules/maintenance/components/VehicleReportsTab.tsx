@@ -1,3 +1,5 @@
+import { formatCurrency, formatStandardDateTime } from '@shared/lib/formatters';
+
 import { useState, useMemo, useEffect } from 'react';
 import { Search, Car, Banknote, Wrench, Calendar, Download, Printer, CheckSquare, Square } from 'lucide-react';
 import { Input } from '@shared/components/ui/input';
@@ -167,7 +169,7 @@ export function VehicleReportsTab() {
           <div class="company-name">شركة مهمة التوصيل للخدمات اللوجستية</div>
           <h1>تقرير صيانة المركبات والمخزون</h1>
           <div class="header-info">
-            <p>تاريخ الاستخراج: ${new Date().toLocaleDateString('ar-SA')} | عدد المركبات في التقرير: ${filteredGroups.length}</p>
+            <p>تاريخ الاستخراج: ${formatStandardDateTime()} | عدد المركبات في التقرير: ${filteredGroups.length}</p>
           </div>
           <table>
             <thead>
@@ -204,7 +206,7 @@ export function VehicleReportsTab() {
               }).join('')}
             </tbody>
           </table>
-          <p class="totals">إجمالي تكلفة الصيانة للمركبات المحددة: ${totalCost.toLocaleString('en-US')} ر.س</p>
+          <p class="totals">إجمالي تكلفة الصيانة للمركبات المحددة: ${formatCurrency(totalCost)}</p>
         </body>
       </html>
     `;
@@ -360,7 +362,7 @@ export function VehicleReportsTab() {
                     </div>
                     <div className="flex items-center gap-1.5 text-rose-600 dark:text-rose-400 shrink-0">
                       <Banknote size={16} className="shrink-0" />
-                      <span className="font-bold">{group.total_cost.toLocaleString('en-US')} ر.س</span>
+                      <span className="font-bold">{formatCurrency(group.total_cost)}</span>
                     </div>
                   </div>
                 </summary>
@@ -385,7 +387,7 @@ export function VehicleReportsTab() {
                               </div>
                             </div>
                             <span className="text-sm font-bold text-foreground">
-                              {Number(log.total_cost).toLocaleString('en-US')} ر.س
+                              {formatCurrency(Number(log.total_cost))}
                             </span>
                           </div>
                           {log.notes && (

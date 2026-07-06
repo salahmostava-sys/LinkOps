@@ -1,3 +1,5 @@
+import { formatCurrency } from '@shared/lib/formatters';
+
 import React, { useState, useMemo } from 'react';
 import { format, subDays } from 'date-fns';
 import { useTreasury } from '../hooks/useTreasury';
@@ -285,7 +287,7 @@ export function TreasuryTab() {
               <span className="text-sm font-semibold truncate">{b.name}</span>
             </div>
             <span className={`text-xl font-black ${b.current_balance < 0 ? 'text-rose-500' : 'text-foreground'}`}>
-              {b.current_balance.toLocaleString('en-US')} <span className="text-xs font-normal text-muted-foreground">ر.س</span>
+              {formatCurrency(b.current_balance)}
             </span>
             <div className="flex justify-between mt-2 text-[10px] text-muted-foreground border-t border-border/50 pt-2">
               <span className="text-emerald-600 flex items-center"><ArrowDownRight size={10}/> {b.total_in.toLocaleString('en-US')}</span>
@@ -305,7 +307,7 @@ export function TreasuryTab() {
             {appRevenues.map(ar => (
               <div key={ar.id} className="bg-background shadow-sm border border-border rounded-lg px-3 py-2 flex items-center gap-3">
                 <span className="text-xs font-medium text-muted-foreground">{ar.name}</span>
-                <span className="text-sm font-black text-emerald-600">{ar.amount.toLocaleString('en-US')} <span className="text-[10px] font-normal">ر.س</span></span>
+                <span className="text-sm font-black text-emerald-600">{formatCurrency(ar.amount)}</span>
               </div>
             ))}
           </div>
@@ -617,7 +619,7 @@ export function TreasuryTab() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">المبلغ:</span>
-                      <span className="font-bold">{Number(deleteTarget.amount).toLocaleString('en-US')} ر.س</span>
+                      <span className="font-bold">{formatCurrency(Number(deleteTarget.amount))}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">التاريخ:</span>

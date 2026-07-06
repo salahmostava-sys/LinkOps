@@ -37,7 +37,7 @@ export function OrderDetailsModal({ row, empPlatformScheme }: Readonly<OrderDeta
   const activityTotals = getSalaryRowActivityTotals(row);
   const platforms = row.registeredApps.filter((platform) => hasPlatformActivity(row.platformMetrics[platform]));
   
-  const formatCurrency = (val: number) => `${Math.round(val).toLocaleString('en-US')} ر.س`;
+  const formatCurrency = (val: number) => `${formatCurrency(Math.round(val))}`;
   
   return (
     <Dialog open={open} onOpenChange={setOpen}>

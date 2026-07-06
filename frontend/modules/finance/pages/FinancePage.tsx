@@ -1,3 +1,5 @@
+import { formatCurrency } from '@shared/lib/formatters';
+
 import type React from 'react';
 import { useState, type Dispatch, type SetStateAction } from 'react';
 import { format } from 'date-fns';
@@ -45,8 +47,8 @@ function PlatformProfitCard({ p }: Readonly<{ p: { name: string; revenue: number
       </div>
       <p className="text-[10px] text-muted-foreground mt-2">
         {p.orders.toLocaleString('en-US')} طلب
-        {p.revenue > 0 && p.orders > 0 && ` • متوسط الإيراد/طلب: ${(p.revenue / p.orders).toFixed(1)} ر.س`}
-        {p.salary > 0 && p.orders > 0 && ` • تكلفة الراتب/طلب: ${(p.salary / p.orders).toFixed(1)} ر.س`}
+        {p.revenue > 0 && p.orders > 0 && ` • متوسط الإيراد/طلب: ${formatCurrency((p.revenue / p.orders))}`}
+        {p.salary > 0 && p.orders > 0 && ` • تكلفة الراتب/طلب: ${formatCurrency((p.salary / p.orders))}`}
       </p>
     </div>
   );
@@ -90,7 +92,7 @@ function SmartRecommendations({
           <div className="flex items-start gap-2 bg-rose-50 dark:bg-rose-950/20 rounded-lg px-3 py-2.5">
             <span className="text-rose-500 text-lg leading-none mt-0.5">⚠️</span>
             <div>
-              <p className="text-sm font-semibold text-rose-600">أنت خسران {Math.abs(balance).toLocaleString('en-US')} ر.س هذا الشهر</p>
+              <p className="text-sm font-semibold text-rose-600">أنت خسران {formatCurrency(Math.abs(balance))} هذا الشهر</p>
               <p className="text-xs text-muted-foreground mt-0.5">
                 {platformStats && platformStats.platforms.length > 0
                   ? `ركّز على زيادة طلبات ${platformStats.platforms[0].name} أو قلل المصاريف غير الضرورية`
@@ -372,7 +374,7 @@ export default function FinancePage() {
         <div className="bg-card -2xl shadow-card overflow-hidden border border-emerald-200/50 dark:border-emerald-800/30 rounded-2xl">
           <div className="px-4 py-3 border-b border-border/50 bg-emerald-50/50 dark:bg-emerald-950/20 flex items-center justify-between">
             <h3 className="text-sm font-bold text-emerald-700 dark:text-emerald-400">💰 الإيرادات</h3>
-            <span className="text-xs text-emerald-600 font-bold">{revenue.toLocaleString('en-US')} ر.س</span>
+            <span className="text-xs text-emerald-600 font-bold">{formatCurrency(revenue)}</span>
           </div>
           <TransactionTable
             type="revenue"
@@ -388,7 +390,7 @@ export default function FinancePage() {
         <div className="bg-card -2xl shadow-card overflow-hidden border border-rose-200/50 dark:border-rose-800/30 rounded-2xl">
           <div className="px-4 py-3 border-b border-border/50 bg-rose-50/50 dark:bg-rose-950/20 flex items-center justify-between">
             <h3 className="text-sm font-bold text-rose-600 dark:text-rose-400">💸 المصاريف</h3>
-            <span className="text-xs text-rose-500 font-bold">{expenses.toLocaleString('en-US')} ر.س</span>
+            <span className="text-xs text-rose-500 font-bold">{formatCurrency(expenses)}</span>
           </div>
           <TransactionTable
             type="expense"
