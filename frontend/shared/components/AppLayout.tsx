@@ -169,9 +169,9 @@ const AppLayoutInner = ({ children }: Readonly<AppLayoutProps>) => { // NOSONAR:
           </div>
 
           {/* مسار الصفحة + بحث */}
-          <div className="order-last sm:order-none w-full sm:w-auto flex-1 flex items-center justify-center md:justify-start gap-3 lg:gap-4 min-w-0 basis-full sm:basis-auto">
+          <div className="order-last sm:order-none w-full sm:w-auto flex-1 flex items-center justify-center gap-3 lg:gap-4 min-w-0 basis-full sm:basis-auto px-4">
             <div
-              className="hidden md:flex items-center gap-1.5 text-[11px] min-w-0 max-w-[220px] lg:max-w-[280px] px-3 py-2 rounded-full bg-muted border border-border/50 shrink-0"
+              className="hidden lg:flex items-center gap-1.5 text-[11px] min-w-0 max-w-[220px] lg:max-w-[280px] px-3 py-2 rounded-full bg-muted border border-border/50 shrink-0"
               style={{ color: 'var(--ds-on-surface-variant)' }}
               aria-label="مسار الصفحة الحالية"
             >
@@ -190,7 +190,7 @@ const AppLayoutInner = ({ children }: Readonly<AppLayoutProps>) => { // NOSONAR:
                 {pageTitle}
               </span>
             </div>
-            <div className="w-full max-w-md lg:max-w-lg">
+            <div className="w-full max-w-2xl lg:max-w-3xl mx-auto flex-1">
               <GlobalSearch />
             </div>
           </div>
