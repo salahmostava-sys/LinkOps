@@ -100,9 +100,9 @@ async function getGoogleAccessToken(credentials) {
   const b64u = (obj) =>
     Buffer.from(JSON.stringify(obj))
       .toString('base64')
-      .replace(/=/g, '')
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_');
+      .replaceAll('=', '')
+      .replaceAll('+', '-')
+      .replaceAll('/', '_');
 
   const signingInput = `${b64u(header)}.${b64u(payload)}`;
 
@@ -116,15 +116,15 @@ async function getGoogleAccessToken(credentials) {
 
   if (privateKeyStr.includes('BEGIN')) {
     const b64 = privateKeyStr
-      .replace(/-----BEGIN.*?-----/g, '')
-      .replace(/-----END.*?-----/g, '')
-      .replace(/\\n/g, '')
-      .replace(/\s+/g, '');
+      .replaceAll(/-----BEGIN.*?-----/g, '')
+      .replaceAll(/-----END.*?-----/g, '')
+      .replaceAll('\\n', '')
+      .replaceAll(/\s+/g, '');
     const chunks = b64.match(/.{1,64}/g) || [];
     privateKeyStr = `-----BEGIN PRIVATE KEY-----\n${chunks.join('\n')}\n-----END PRIVATE KEY-----\n`;
   } else {
     // If it has no headers at all, assume it's raw base64
-    const b64 = privateKeyStr.replace(/\\n/g, '').replace(/\s+/g, '');
+    const b64 = privateKeyStr.replaceAll('\\n', '').replaceAll(/\s+/g, '');
     const chunks = b64.match(/.{1,64}/g) || [];
     privateKeyStr = `-----BEGIN PRIVATE KEY-----\n${chunks.join('\n')}\n-----END PRIVATE KEY-----\n`;
   }
@@ -140,9 +140,9 @@ async function getGoogleAccessToken(credentials) {
   sign.update(signingInput);
   const signature = sign
     .sign(privateKey, 'base64')
-    .replace(/=/g, '')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_');
+    .replaceAll('=', '')
+    .replaceAll('+', '-')
+    .replaceAll('/', '_');
 
   const jwt = `${signingInput}.${signature}`;
 
