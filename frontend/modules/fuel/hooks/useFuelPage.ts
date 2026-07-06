@@ -9,7 +9,6 @@ import { logError } from '@shared/lib/logger';
 import { getErrorMessage } from '@services/serviceError';
 import { orderService } from '@services/orderService';
 import { useFuel } from '@modules/fuel/hooks/useFuel';
-import { isEmployeeExcluded } from '@shared/lib/employeeVisibility';
 import {
   calcDailyStats,
   calcMonthlyStats,
