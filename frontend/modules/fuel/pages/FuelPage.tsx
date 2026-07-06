@@ -227,7 +227,7 @@ export default function FuelPage() {
 
       <FuelPageTabs pageTab={pageTab} setPageTab={setPageTab} />
 
-      {pageTab === 'summary' && apps.length > 1 && (
+      {apps.length > 1 && (
         <FuelPlatformTabs
           platformTab={platformTab}
           setPlatformTab={setPlatformTab}
