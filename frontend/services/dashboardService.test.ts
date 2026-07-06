@@ -151,7 +151,6 @@ describe('dashboardService', () => {
 
   describe('getSupervisorPerformance', () => {
     it('returns performance rows', async () => {
-      tableResults.supervisor_targets = { data: [{ supervisor_id: 's1', target_orders: 100 }], error: null };
       tableResults.profiles = { data: [{ id: 's1', name: 'Supervisor A' }], error: null };
       tableResults.supervisor_employee_assignments = {
         data: [{ supervisor_id: 's1', employee_id: 'e1', start_date: '2026-04-01', end_date: null }],
@@ -167,24 +166,14 @@ describe('dashboardService', () => {
         {
           supervisor_id: 's1',
           supervisor_name: 'Supervisor A',
-          target_orders: 100,
           actual_orders: 50,
-          achievement_percent: 50,
         },
       ]);
     });
 
-    it('throws if targets query fails', async () => {
-      tableResults.supervisor_targets = { data: null, error: new Error('targets error') };
-      tableResults.profiles = { data: [], error: null };
-      tableResults.supervisor_employee_assignments = { data: [], error: null };
-      tableResults.daily_orders = { data: [], error: null };
 
-      await expect(dashboardService.getSupervisorPerformance('2026-04')).rejects.toThrow('targets error');
-    });
     
     it('throws if profiles query fails', async () => {
-      tableResults.supervisor_targets = { data: [], error: null };
       tableResults.profiles = { data: null, error: new Error('profiles error') };
       tableResults.supervisor_employee_assignments = { data: [], error: null };
       tableResults.daily_orders = { data: [], error: null };
@@ -193,7 +182,6 @@ describe('dashboardService', () => {
     });
     
     it('throws if assignments query fails', async () => {
-      tableResults.supervisor_targets = { data: [], error: null };
       tableResults.profiles = { data: [], error: null };
       tableResults.supervisor_employee_assignments = { data: null, error: new Error('assignments error') };
       tableResults.daily_orders = { data: [], error: null };
@@ -202,7 +190,6 @@ describe('dashboardService', () => {
     });
 
     it('throws if orders query fails', async () => {
-      tableResults.supervisor_targets = { data: [], error: null };
       tableResults.profiles = { data: [], error: null };
       tableResults.supervisor_employee_assignments = { data: [], error: null };
       tableResults.daily_orders = { data: null, error: new Error('orders error') };

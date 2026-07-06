@@ -11,7 +11,7 @@ export type PagePermissionRow = {
 
 export const userPermissionService = {
   getProfiles: async () => {
-    const { data, error } = await supabase.from('profiles').select('id, name, is_active').order('name');
+    const { data, error } = await supabase.from('profiles').select('id, name, email, is_active').order('name');
     if (error) throw toServiceError(error, 'userPermissionService.getProfiles');
     return data ?? [];
   },

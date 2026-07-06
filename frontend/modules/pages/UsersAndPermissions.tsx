@@ -39,12 +39,14 @@ import { defaultQueryRetry } from '@shared/lib/query';
 type ProfileRow = {
   id: string;
   name: string | null;
+  email: string | null;
   is_active: boolean | null;
 };
 
 type UserRow = {
   id: string;
   name: string;
+  email: string | null;
   isActive: boolean;
   role: AppRole;
 };
@@ -117,6 +119,7 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
       return ((profiles || []) as ProfileRow[]).map((p) => ({
         id: p.id,
         name: p.name || 'بدون اسم',
+        email: p.email,
         isActive: p.is_active ?? true,
         role: roleMap[p.id] || 'viewer',
       }));
@@ -403,6 +406,7 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
               <thead className="bg-muted/40">
                 <tr>
                   <th className="ta-th">الاسم</th>
+                  <th className="ta-th">البريد الإلكتروني</th>
                   <th className="ta-th">الحالة</th>
                   <th className="ta-th">الدور</th>
                   <th className="ta-th">الإجراءات</th>
@@ -412,6 +416,7 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
                 {rows.map((row) => (
                   <tr key={row.id} className="border-t">
                     <td className="ta-td">{row.name}</td>
+                    <td className="ta-td" dir="ltr" style={{ textAlign: 'right' }}>{row.email || '-'}</td>
                     <td className="ta-td">{row.isActive ? 'نشط' : 'موقوف'}</td>
                     <td className="ta-td">
                       <div className="flex items-center gap-2">

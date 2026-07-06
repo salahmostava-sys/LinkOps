@@ -70,13 +70,8 @@ export function DashboardManagementTab() {
               <div key={row.supervisor_id} className="rounded-xl bg-muted/30 px-4 py-3 flex items-center justify-between gap-3">
                 <span className="text-sm font-medium text-foreground">{row.supervisor_name}</span>
                 <div className="flex items-center gap-3 text-xs">
-                  <span className="text-muted-foreground">
-                    {row.actual_orders.toLocaleString('en-US')} / {row.target_orders.toLocaleString('en-US')}
-                  </span>
-                  <span
-                    className={`font-black ${row.achievement_percent >= 100 ? 'text-emerald-600' : 'text-amber-600'}`}
-                  >
-                    {row.achievement_percent.toFixed(0)}%
+                  <span className="text-muted-foreground font-semibold">
+                    {row.actual_orders.toLocaleString('en-US')} طلب
                   </span>
                 </div>
               </div>

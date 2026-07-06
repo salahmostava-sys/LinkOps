@@ -31,9 +31,7 @@ export interface AttendanceTrendPoint {
 export interface SupervisorPerformanceRow {
   supervisor_id: string;
   supervisor_name: string;
-  target_orders: number;
   actual_orders: number;
-  achievement_percent: number;
 }
 
 export const dashboardService = {
@@ -310,8 +308,7 @@ export const dashboardService = {
       };
     };
 
-    const [targetsRes, profilesRes, assignmentsRes, ordersRes] = await Promise.all([
-      sb.from('supervisor_targets').select('supervisor_id, target_orders').eq('month_year', monthYear),
+    const [profilesRes, assignmentsRes, ordersRes] = await Promise.all([
       supabase.from('profiles').select('id, name').eq('is_active', true),
       sb
         .from('supervisor_employee_assignments')
@@ -321,12 +318,10 @@ export const dashboardService = {
       sb.from('daily_orders').select('employee_id, date, orders_count').gte('date', start).lte('date', end),
     ]);
 
-    if (targetsRes.error) handleSupabaseError(targetsRes.error, 'dashboardService.getSupervisorPerformance.targets');
     if (profilesRes.error) handleSupabaseError(profilesRes.error, 'dashboardService.getSupervisorPerformance.profiles');
     if (assignmentsRes.error) handleSupabaseError(assignmentsRes.error, 'dashboardService.getSupervisorPerformance.assignments');
     if (ordersRes.error) handleSupabaseError(ordersRes.error, 'dashboardService.getSupervisorPerformance.orders');
 
-    const targets = (targetsRes.data ?? []) as Array<{ supervisor_id: string; target_orders: number }>;
     const profiles = (profilesRes.data ?? []) as Array<{ id: string; name: string | null }>;
     const assignments = (assignmentsRes.data ?? []) as Array<{
       supervisor_id: string;
@@ -337,9 +332,6 @@ export const dashboardService = {
     const orders = (ordersRes.data ?? []) as Array<{ employee_id: string; date: string; orders_count: number }>;
 
     const profileNameById = new Map<string, string>(profiles.map((p) => [p.id, p.name || 'مشرف']));
-    const targetBySupervisor = new Map<string, number>();
-    for (const t of targets) targetBySupervisor.set(t.supervisor_id, Number(t.target_orders) || 0);
-
     const assignmentsByEmployee = new Map<string, typeof assignments>();
     for (const a of assignments) {
       const bucket = assignmentsByEmployee.get(a.employee_id);
@@ -363,24 +355,19 @@ export const dashboardService = {
     }
 
     const supervisorIds = new Set<string>([
-      ...Array.from(targetBySupervisor.keys()),
       ...Array.from(actualBySupervisor.keys()),
     ]);
 
     const rows: SupervisorPerformanceRow[] = Array.from(supervisorIds).map((id) => {
-      const target = targetBySupervisor.get(id) ?? 0;
       const actual = actualBySupervisor.get(id) ?? 0;
-      const pct = target > 0 ? Number(((actual / target) * 100).toFixed(1)) : 0;
       return {
         supervisor_id: id,
         supervisor_name: profileNameById.get(id) ?? 'مشرف',
-        target_orders: target,
         actual_orders: actual,
-        achievement_percent: pct,
       };
     });
 
-    rows.sort((a, b) => b.achievement_percent - a.achievement_percent || b.actual_orders - a.actual_orders);
+    rows.sort((a, b) => b.actual_orders - a.actual_orders);
     return rows;
   },
 
