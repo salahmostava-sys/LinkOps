@@ -1,3 +1,4 @@
+import { BaseInput } from '@shared/components/ui/base-input';
 import { useRef, useState } from 'react';
 import { FileText, Loader2, Plus, Trash2, UploadCloud } from 'lucide-react';
 import { Button } from '@shared/components/ui/button';
@@ -183,14 +184,8 @@ export function InvoiceUploadModal({
               <Label>رقم الفاتورة</Label>
               <Input placeholder="مثال: INV-2026-014" value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} />
             </div>
-            <div className="space-y-1.5">
-              <Label>تاريخ الفاتورة</Label>
-              <Input type="date" value={invoiceDate} onChange={e => setInvoiceDate(e.target.value)} />
-            </div>
-            <div className="space-y-1.5">
-              <Label>المورد</Label>
-              <Input placeholder="اسم المحل / الشركة" value={supplier} onChange={e => setSupplier(e.target.value)} />
-            </div>
+            <BaseInput label="تاريخ الفاتورة" type="date" value={invoiceDate} onChange={e => setInvoiceDate(e.target.value)} />
+            <BaseInput label="المورد" placeholder="اسم المحل / الشركة" value={supplier} onChange={e => setSupplier(e.target.value)} />
           </div>
 
           {/* Line items table */}

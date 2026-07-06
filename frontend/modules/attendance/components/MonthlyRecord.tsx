@@ -1,3 +1,4 @@
+import { BaseInput } from '@shared/components/ui/base-input';
 import type React from 'react';
 import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -98,10 +99,7 @@ const CellEditorDialog = ({
               <Label>وقت الحضور</Label>
               <Input type="time" value={checkIn} onChange={e => setCheckIn(e.target.value)} />
             </div>
-            <div className="space-y-2">
-              <Label>وقت الانصراف</Label>
-              <Input type="time" value={checkOut} onChange={e => setCheckOut(e.target.value)} />
-            </div>
+            <BaseInput label="وقت الانصراف" type="time" value={checkOut} onChange={e => setCheckOut(e.target.value)} />
           </div>
           <div className="space-y-2">
             <Label>ملاحظات</Label>

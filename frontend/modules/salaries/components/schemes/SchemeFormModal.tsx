@@ -1,3 +1,4 @@
+import { BaseInput } from '@shared/components/ui/base-input';
 import { useState, useEffect } from 'react';
 import { Plus, X, Loader2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@shared/components/ui/dialog';
@@ -134,10 +135,7 @@ export function SchemeFormModal({
           <DialogTitle>{editing ? 'تعديل السكيمة' : 'إضافة سكيمة جديدة'}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          <div className="space-y-2">
-            <Label>اسم السكيمة *</Label>
-            <Input value={name} onChange={e => setName(e.target.value)} placeholder="سكيمة هنقر Q2 2025" />
-          </div>
+          <BaseInput label="اسم السكيمة *" value={name} onChange={e => setName(e.target.value)} placeholder="سكيمة هنقر Q2 2025" />
 
           <div className="space-y-2">
             <Label>نوع السكيمة</Label>
@@ -279,8 +277,8 @@ export function SchemeFormModal({
                 </div>
                 {hasTarget && (
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1"><Label className="text-xs">عدد الطلبات المستهدف</Label><Input type="number" value={targetOrders} onChange={e => setTargetOrders(+e.target.value)} /></div>
-                    <div className="space-y-1"><Label className="text-xs">قيمة المكافأة (ر.س)</Label><Input type="number" value={targetBonus} onChange={e => setTargetBonus(+e.target.value)} /></div>
+                    <BaseInput label="عدد الطلبات المستهدف" type="number" value={targetOrders} onChange={e => setTargetOrders(+e.target.value)} />
+                    <BaseInput label="قيمة المكافأة (ر.س)" type="number" value={targetBonus} onChange={e => setTargetBonus(+e.target.value)} />
                   </div>
                 )}
               </div>

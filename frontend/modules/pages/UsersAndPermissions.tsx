@@ -1,3 +1,4 @@
+import { BaseInput } from '@shared/components/ui/base-input';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Shield, RefreshCw, Save, AlertCircle, UserPlus, Trash2 } from 'lucide-react';
@@ -573,40 +574,25 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
           </DialogHeader>
 
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="new-user-name">الاسم</Label>
-              <Input
-                id="new-user-name"
+            <BaseInput label="الاسم" id="new-user-name"
                 value={newUserForm.name}
                 onChange={(event) => updateNewUserField('name', event.target.value)}
                 placeholder="اسم المستخدم"
-                disabled={creatingUser}
-              />
-            </div>
+                disabled={creatingUser} />
 
-            <div className="space-y-2">
-              <Label htmlFor="new-user-email">البريد الإلكتروني</Label>
-              <Input
-                id="new-user-email"
+            <BaseInput label="البريد الإلكتروني" id="new-user-email"
                 type="email"
                 value={newUserForm.email}
                 onChange={(event) => updateNewUserField('email', event.target.value)}
                 placeholder="user@example.com"
-                disabled={creatingUser}
-              />
-            </div>
+                disabled={creatingUser} />
 
-            <div className="space-y-2">
-              <Label htmlFor="new-user-password">كلمة المرور</Label>
-              <Input
-                id="new-user-password"
+            <BaseInput label="كلمة المرور" id="new-user-password"
                 type="password"
                 value={newUserForm.password}
                 onChange={(event) => updateNewUserField('password', event.target.value)}
                 placeholder="8 أحرف على الأقل"
-                disabled={creatingUser}
-              />
-            </div>
+                disabled={creatingUser} />
 
             <div className="space-y-2">
               <Label>الدور</Label>

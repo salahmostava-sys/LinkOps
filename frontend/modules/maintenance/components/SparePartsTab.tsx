@@ -1,3 +1,4 @@
+import { BaseInput } from '@shared/components/ui/base-input';
 import { formatStandardDateTime } from '@shared/lib/formatters';
 
 import { useMemo, useState } from 'react';
@@ -232,24 +233,14 @@ function PurchaseModal({
           </div>
 
           {/* Supplier */}
-          <div className="space-y-1.5">
-            <Label>المورد / مكان الشراء</Label>
-            <Input
-              placeholder="مثال: شركة الغانم، سوق قطع الغيار..."
+          <BaseInput label="المورد / مكان الشراء" placeholder="مثال: شركة الغانم، سوق قطع الغيار..."
               value={form.supplier}
-              onChange={e => set('supplier', e.target.value)}
-            />
-          </div>
+              onChange={e => set('supplier', e.target.value)} />
 
           {/* Notes */}
-          <div className="space-y-1.5">
-            <Label>ملاحظات</Label>
-            <Input
-              placeholder="أي ملاحظات إضافية..."
+          <BaseInput label="ملاحظات" placeholder="أي ملاحظات إضافية..."
               value={form.notes}
-              onChange={e => set('notes', e.target.value)}
-            />
-          </div>
+              onChange={e => set('notes', e.target.value)} />
         </div>
 
         <DialogFooter className="gap-2">

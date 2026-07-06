@@ -1,3 +1,4 @@
+import { BaseInput } from '@shared/components/ui/base-input';
 import type React from 'react';
 import { Button } from '@shared/components/ui/button';
 import { Input } from '@shared/components/ui/input';
@@ -42,26 +43,16 @@ export default function ResolveViolationModal({
         </DialogHeader>
 
         <div className="space-y-4 py-2">
-          <div className="space-y-1.5">
-            <Label>المبلغ (ر.س)</Label>
-            <Input
-              type="number"
+          <BaseInput label="المبلغ (ر.س)" type="number"
               min={0}
               value={editForm.amount}
               onChange={e => setEditForm(p => ({ ...p, amount: e.target.value }))}
-              className="h-10"
-            />
-          </div>
+              className="h-10" />
 
-          <div className="space-y-1.5">
-            <Label>تاريخ المخالفة</Label>
-            <Input
-              type="date"
+          <BaseInput label="تاريخ المخالفة" type="date"
               value={editForm.incident_date}
               onChange={e => setEditForm(p => ({ ...p, incident_date: e.target.value }))}
-              className="h-10"
-            />
-          </div>
+              className="h-10" />
 
           <div className="space-y-1.5">
             <Label>الحالة</Label>

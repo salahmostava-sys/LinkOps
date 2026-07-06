@@ -1,3 +1,4 @@
+import { BaseInput } from '@shared/components/ui/base-input';
 import type React from 'react';
 const t = (isRTL: boolean, ar: string, en: string) => isRTL ? ar : en;
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -370,18 +371,8 @@ export default function ProjectSettings() {
         <ProjectSettingsSectionHeader icon={<Building2 size={14} />} title={t(isRTL, 'اسم المشروع', 'Project Name')} />
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label className="text-xs font-medium text-muted-foreground">
-                {t(isRTL, 'اسم المشروع (عربي)', 'Project Name (Arabic)')}
-              </Label>
-              <Input value={nameAr} onChange={e => setNameAr(e.target.value)} placeholder="مهمة التوصيل" dir="rtl" />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-xs font-medium text-muted-foreground">
-                {t(isRTL, 'اسم المشروع (إنجليزي)', 'Project Name (English)')}
-              </Label>
-              <Input value={nameEn} onChange={e => setNameEn(e.target.value)} placeholder="Delivery System" dir="ltr" />
-            </div>
+            <BaseInput label="{t(isRTL, 'اسم المشروع (عربي)', 'Project Name (Arabic)')}" value={nameAr} onChange={e => setNameAr(e.target.value)} placeholder="مهمة التوصيل" dir="rtl" />
+            <BaseInput label="{t(isRTL, 'اسم المشروع (إنجليزي)', 'Project Name (English)')}" value={nameEn} onChange={e => setNameEn(e.target.value)} placeholder="Delivery System" dir="ltr" />
           </div>
         </div>
       </div>

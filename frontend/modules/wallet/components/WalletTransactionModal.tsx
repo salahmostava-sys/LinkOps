@@ -1,3 +1,4 @@
+import { BaseInput } from '@shared/components/ui/base-input';
 import React, { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { format } from 'date-fns';
@@ -60,29 +61,19 @@ const WalletTransactionModal = ({ open, onOpenChange, employee, type, onSuccess 
         </DialogHeader>
         
         <div className="grid gap-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="amount">المبلغ (ريال)</Label>
-            <Input
-              id="amount"
+          <BaseInput label="المبلغ (ريال)" id="amount"
               type="number"
               min="1"
               step="any"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="مثال: 150.5"
-              autoFocus
-            />
-          </div>
+              autoFocus />
 
-          <div className="space-y-2">
-            <Label htmlFor="date">التاريخ</Label>
-            <Input
-              id="date"
+          <BaseInput label="التاريخ" id="date"
               type="date"
               value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
-          </div>
+              onChange={(e) => setDate(e.target.value)} />
 
           <div className="space-y-2">
             <Label htmlFor="notes">ملاحظات (اختياري)</Label>

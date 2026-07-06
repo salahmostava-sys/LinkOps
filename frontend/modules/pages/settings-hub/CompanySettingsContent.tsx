@@ -1,3 +1,4 @@
+import { BaseInput } from '@shared/components/ui/base-input';
 import type React from 'react';
 import { useState, useEffect } from 'react';
 import { Building2, Save, Loader2, ShieldAlert } from 'lucide-react';
@@ -118,18 +119,8 @@ export default function CompanySettingsContent() {
           اسم المؤسسة
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label className="text-xs font-medium text-muted-foreground">
-              اسم المؤسسة (بالعربية)
-            </Label>
-            <Input value={nameAr} onChange={e => setNameAr(e.target.value)} placeholder="شركة المنسق الرقمي" dir="rtl" />
-          </div>
-          <div className="space-y-2">
-            <Label className="text-xs font-medium text-muted-foreground">
-              اسم المؤسسة (بالإنجليزية)
-            </Label>
-            <Input value={nameEn} onChange={e => setNameEn(e.target.value)} placeholder="Digital Coordinator Logistics" dir="ltr" />
-          </div>
+          <BaseInput label="اسم المؤسسة (بالعربية)" value={nameAr} onChange={e => setNameAr(e.target.value)} placeholder="شركة المنسق الرقمي" dir="rtl" />
+          <BaseInput label="اسم المؤسسة (بالإنجليزية)" value={nameEn} onChange={e => setNameEn(e.target.value)} placeholder="Digital Coordinator Logistics" dir="ltr" />
         </div>
       </div>
 
@@ -139,18 +130,8 @@ export default function CompanySettingsContent() {
           الأرقام الرسمية
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label className="text-xs font-medium text-muted-foreground">
-              السجل التجاري
-            </Label>
-            <Input value={crNumber} onChange={e => setCrNumber(e.target.value)} placeholder="1010101010" dir="ltr" />
-          </div>
-          <div className="space-y-2">
-            <Label className="text-xs font-medium text-muted-foreground">
-              الرقم الضريبي
-            </Label>
-            <Input value={taxNumber} onChange={e => setTaxNumber(e.target.value)} placeholder="3000524140003" dir="ltr" />
-          </div>
+          <BaseInput label="السجل التجاري" value={crNumber} onChange={e => setCrNumber(e.target.value)} placeholder="1010101010" dir="ltr" />
+          <BaseInput label="الرقم الضريبي" value={taxNumber} onChange={e => setTaxNumber(e.target.value)} placeholder="3000524140003" dir="ltr" />
         </div>
       </div>
 
