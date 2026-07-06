@@ -7,6 +7,7 @@ import { Input } from '@shared/components/ui/input';
 import { useLanguage } from '@app/providers/LanguageContext';
 import { useAuthQueryGate } from '@shared/hooks/useAuthQueryGate';
 import walletService from '@services/walletService';
+import { QueryErrorRetry } from '@shared/components/QueryErrorRetry';
 import WalletTransactionModal from '../components/WalletTransactionModal';
 import WalletHistoryModal from '../components/WalletHistoryModal';
 
@@ -19,7 +20,7 @@ const WalletPage = () => {
   const [transactionType, setTransactionType] = useState<'collection' | 'deposit'>('collection');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { data: balances = [], isLoading, refetch } = useQuery({
+  const { data: balances = [], isLoading, error: walletError, refetch } = useQuery({
     queryKey: ['wallet-balances'],
     enabled,
     queryFn: () => walletService.getWalletBalances(),
@@ -57,7 +58,9 @@ const WalletPage = () => {
         </div>
       </div>
       <div className="bg-card border border-border shadow-sm rounded-xl overflow-hidden">
-        {isLoading ? (
+        {walletError ? (
+          <QueryErrorRetry error={walletError} onRetry={() => refetch()} title="تعذر تحميل أرصدة المحفظة" />
+        ) : isLoading ? (
           <div className="flex justify-center p-12">
             <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
           </div>
