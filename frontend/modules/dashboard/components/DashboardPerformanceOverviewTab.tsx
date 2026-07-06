@@ -1,4 +1,4 @@
-﻿/**
+/**
  * DashboardPerformanceOverviewTab — نظرة عامة على الأداء مع تحليلات ذكية
  * وتوصيات ودرجات أداء وجدول تفصيلي.
  */
@@ -140,8 +140,9 @@ function AppCard(props: Readonly<{
 export function DashboardPerformanceOverviewTab(props: Readonly<{
   loading: boolean;
   dashboard: PerformanceDashboardResponse | null;
+  onRiderClick?: (riderId: string) => void;
 }>) {
-  const { loading, dashboard } = props;
+  const { loading, dashboard, onRiderClick } = props;
 
   // Compute AI insights
   const { fleetSummary, aiInsights, allProfiles } = useMemo(() => {
@@ -337,7 +338,7 @@ export function DashboardPerformanceOverviewTab(props: Readonly<{
       </div>
 
       {/* ── AI Recommendations ───────────────────────────────────────────── */}
-      <AIRecommendationsSection recommendations={aiInsights.recommendations} />
+      <AIRecommendationsSection recommendations={aiInsights.recommendations} onRiderClick={onRiderClick} />
 
       {/* ── Smart Alerts ─────────────────────────────────────────────────── */}
       <div className="bg-card -2xl p-5 shadow-card rounded-2xl">

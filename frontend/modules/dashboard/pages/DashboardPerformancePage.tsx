@@ -14,6 +14,7 @@ import {
 import { DashboardPerformanceOverviewTab } from '@modules/dashboard/components/DashboardPerformanceOverviewTab';
 import { SystemOverviewSection } from '@modules/dashboard/components/SystemOverviewSection';
 import { DashboardManagementTab } from '@modules/dashboard/components/DashboardManagementTab';
+import { DashboardRiderProfileModal } from '@modules/dashboard/components/DashboardRiderProfileModal';
 import { Skeleton } from '@shared/components/ui/skeleton';
 
 const loadAnalyticsTab = () =>
@@ -46,6 +47,7 @@ export default function DashboardPerformancePage() {
   const queryClient = useQueryClient();
   const { selectedMonth: currentMonth } = useTemporalContext();
   const [activeTab, setActiveTab] = useState<DashboardPerformanceTabKey>('overview');
+  const [selectedRiderId, setSelectedRiderId] = useState<string | null>(null);
 
   useRealtimePostgresChanges('performance-dashboard-realtime', REALTIME_TABLES_DASHBOARD, () => {
     if (!user?.id) return;
@@ -101,6 +103,7 @@ export default function DashboardPerformancePage() {
           <DashboardPerformanceOverviewTab
             loading={dashboardQuery.isLoading}
             dashboard={dashboardQuery.data ?? null}
+            onRiderClick={setSelectedRiderId}
           />
         </div>
       ) : null}
@@ -130,6 +133,7 @@ export default function DashboardPerformancePage() {
 
       {/* المساعد الذكي */}
 
+      <DashboardRiderProfileModal riderId={selectedRiderId} onClose={() => setSelectedRiderId(null)} />
     </div>
   );
 }
