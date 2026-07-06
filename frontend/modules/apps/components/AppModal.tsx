@@ -7,6 +7,7 @@ import { toast } from '@shared/components/ui/sonner';
 import { TOAST_ERROR_GENERIC } from '@shared/lib/toastMessages';
 import { toAppFormValues } from '@modules/apps/lib/appsModel';
 import type { AppData, AppFormValues, CustomColumn } from '@modules/apps/types';
+import { getContrastText } from '@shared/hooks/useAppColors';
 
 interface AppModalProps {
   app?: AppData | null;
@@ -97,8 +98,15 @@ export const AppModal = ({ app, saving, onClose, onSave }: Readonly<AppModalProp
                 <input
                   type="color"
                   value={form.brand_color}
-                  onChange={(event) => setForm((current) => ({ ...current, brand_color: event.target.value }))}
-                  className="h-10 w-10 cursor-pointer rounded-lg border border-border"
+                  onChange={(event) => {
+                    const newColor = event.target.value;
+                    setForm((current) => ({
+                      ...current,
+                      brand_color: newColor,
+                      text_color: getContrastText(newColor)
+                    }));
+                  }}
+                  className="h-8 w-14 cursor-pointer rounded border border-border"
                 />
                 <Input
                   value={form.brand_color}

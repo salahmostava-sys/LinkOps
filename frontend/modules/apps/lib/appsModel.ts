@@ -26,6 +26,8 @@ type AppOverviewSource = {
 
 const TERMINATED_SPONSORSHIP_STATUSES = new Set(['absconded', 'terminated']);
 
+import { getContrastText } from '@shared/hooks/useAppColors';
+
 export const normalizeCustomColumns = (value: unknown): CustomColumn[] => {
   if (!Array.isArray(value)) return [];
 
@@ -48,14 +50,17 @@ export const normalizeCustomColumns = (value: unknown): CustomColumn[] => {
   });
 };
 
-export const toAppFormValues = (app?: Partial<AppData> | null): AppFormValues => ({
-  name: app?.name ?? '',
-  name_en: app?.name_en ?? '',
-  brand_color: app?.brand_color ?? '#6366f1',
-  text_color: app?.text_color ?? '#ffffff',
-  is_active: app?.is_active ?? true,
-  custom_columns: normalizeCustomColumns(app?.custom_columns),
-});
+export const toAppFormValues = (app?: Partial<AppData> | null): AppFormValues => {
+  const brand_color = app?.brand_color ?? '#6366f1';
+  return {
+    name: app?.name ?? '',
+    name_en: app?.name_en ?? '',
+    brand_color,
+    text_color: app?.text_color ?? getContrastText(brand_color),
+    is_active: app?.is_active ?? true,
+    custom_columns: normalizeCustomColumns(app?.custom_columns),
+  };
+};
 
 export const toAppUpsertPayload = (values: AppFormValues): AppUpsertPayload => ({
   name: values.name.trim(),
