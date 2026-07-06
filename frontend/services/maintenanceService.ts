@@ -59,6 +59,7 @@ export interface MaintenanceLogWithDetails {
   employees?: { name: string } | null;
   maintenance_parts: {
     id: string;
+    part_id: string;
     quantity_used: number;
     cost_at_time: number;
     spare_parts: { name_ar: string; unit: string; invoice_number?: string | null };
@@ -79,6 +80,7 @@ const logSelect = `
   employees(name),
   maintenance_parts(
     id,
+    part_id,
     quantity_used,
     cost_at_time,
     spare_parts(name_ar, unit, invoice_number)
