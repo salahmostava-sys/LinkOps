@@ -2,7 +2,6 @@ import type { ReactNode } from 'react';
 import { Loader2, ExternalLink, Trash2 } from 'lucide-react';
 import { useSignedUrl, extractStoragePath } from '@shared/hooks/useSignedUrl';
 import { isImageDocument } from './employeeProfile.utils';
-import { Button } from '@shared/components/ui/button';
 
 export const SecureDocThumb = ({
   storagePath, label, onDelete

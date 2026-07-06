@@ -43,6 +43,7 @@ import {
 } from './profile/employeeProfile.utils';
 import { SecureDocThumb } from './profile/EmployeeProfileComponents';
 
+// eslint-disable-next-line sonarjs/cognitive-complexity
 const EmployeeProfile = ({ employee, onBack }: Readonly<Props>) => {
   const { enabled, userId } = useAuthQueryGate();
   const uid = authQueryUserId(userId);

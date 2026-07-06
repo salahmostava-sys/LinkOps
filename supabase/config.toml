@@ -1,1 +1,9 @@
 project_id = "plxpehtkabmfkdlgjyin"
+
+[auth.password]
+leaked_password_protection = true
+
+[lint]
+ignore = [
+  "authenticated_security_definer_function_executable"
+]

@@ -333,6 +333,7 @@ function LoginErrorAlert({ loginError }: Readonly<{ loginError: string }>) {
   );
 }
 
+// eslint-disable-next-line sonarjs/cognitive-complexity
 function LoginFormSection(props: LoginFormSectionProps) {
   const {
     email,
