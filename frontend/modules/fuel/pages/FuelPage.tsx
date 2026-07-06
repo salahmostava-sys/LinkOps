@@ -217,7 +217,7 @@ export default function FuelPage() {
   };
 
   return (
-    <div className="flex flex-col gap-4 w-full max-w-[1600px] overflow-hidden" dir="rtl">
+    <div className="flex flex-col gap-4 w-full max-w-[1600px]" dir="rtl">
       <FuelPageHeader
         title={getPageTitle()}
         subtitle={getPageSubtitle()}
