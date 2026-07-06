@@ -42,6 +42,7 @@ export interface CreateMaintenanceLogInput {
   type: string;
   odometer_reading?: number | null;
   notes?: string | null;
+  total_cost?: number;
 }
 
 export interface MaintenanceLogWithDetails {
@@ -218,7 +219,7 @@ export async function createMaintenanceLog(
       maintenance_date: data.maintenance_date ?? new Date().toISOString().split('T')[0],
       type: data.type,
       notes: data.notes ?? null,
-      total_cost: totalCost,
+      total_cost: data.total_cost ?? totalCost,
       odometer_reading: data.odometer_reading ?? null,
       created_by: uid,
     })
@@ -251,6 +252,58 @@ export async function createMaintenanceLog(
   }
 
   return getMaintenanceLogById(logId);
+}
+
+export async function updateMaintenanceLog(
+  id: string,
+  data: Partial<CreateMaintenanceLogInput>,
+  parts?: MaintenancePartInput[]
+): Promise<MaintenanceLogWithDetails> {
+  // Update log table
+  if (Object.keys(data).length > 0) {
+    const { error: logErr } = await supabase
+      .from('maintenance_logs')
+      .update({
+        vehicle_id: data.vehicle_id,
+        maintenance_date: data.maintenance_date,
+        type: data.type,
+        notes: data.notes,
+        total_cost: data.total_cost,
+        odometer_reading: data.odometer_reading,
+      })
+      .eq('id', id);
+    if (logErr) throwMaintenanceSchemaError(logErr, 'maintenanceService.updateMaintenanceLog');
+  }
+
+  // Handle parts replacement
+  if (parts !== undefined) {
+    // 1. Delete existing parts to restore stock
+    const { error: delErr } = await supabase.from('maintenance_parts').delete().eq('maintenance_log_id', id);
+    if (delErr) throwMaintenanceSchemaError(delErr, 'maintenanceService.updateMaintenanceLog.deleteParts');
+
+    // 2. Insert new parts
+    if (parts.length > 0) {
+      const merged = new Map<string, { maintenance_log_id: string; part_id: string; quantity_used: number; cost_at_time: number }>();
+      for (const p of parts) {
+        const existing = merged.get(p.part_id);
+        if (existing) {
+          existing.quantity_used += p.quantity_used;
+        } else {
+          merged.set(p.part_id, {
+            maintenance_log_id: id,
+            part_id: p.part_id,
+            quantity_used: p.quantity_used,
+            cost_at_time: p.cost_at_time,
+          });
+        }
+      }
+      const rows = [...merged.values()];
+      const { error: insErr } = await supabase.from('maintenance_parts').insert(rows);
+      if (insErr) throwMaintenanceSchemaError(insErr, 'maintenanceService.updateMaintenanceLog.insertParts');
+    }
+  }
+
+  return getMaintenanceLogById(id);
 }
 
 export async function deleteMaintenanceLog(id: string): Promise<void> {

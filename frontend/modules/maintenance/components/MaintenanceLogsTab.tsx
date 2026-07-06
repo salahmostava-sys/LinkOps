@@ -1,7 +1,7 @@
 import { formatCurrency } from '@shared/lib/formatters';
 
 import { useState, useMemo } from 'react';
-import { Plus, Trash2, Search, Wrench, Calendar, Car, Banknote } from 'lucide-react';
+import { Plus, Trash2, Search, Wrench, Calendar, Car, Banknote, Edit2 } from 'lucide-react';
 import { Button } from '@shared/components/ui/button';
 import { Input } from '@shared/components/ui/input';
 import {
@@ -36,9 +36,11 @@ const TYPE_COLORS: Record<string, string> = {
   'أخرى':        'bg-muted text-muted-foreground',
 };
 
-function LogCard({ log, canDelete, onDelete }: Readonly<{
+function LogCard({ log, canEdit, canDelete, onEdit, onDelete }: Readonly<{
   log: MaintenanceLogWithDetails;
+  canEdit: boolean;
   canDelete: boolean;
+  onEdit: (log: MaintenanceLogWithDetails) => void;
   onDelete: (log: MaintenanceLogWithDetails) => void;
 }>) {
   const colorClass = TYPE_COLORS[log.type] ?? TYPE_COLORS['أخرى'];
@@ -59,14 +61,26 @@ function LogCard({ log, canDelete, onDelete }: Readonly<{
             </span>
           )}
         </div>
-        {canDelete && (
-          <button
-            onClick={() => onDelete(log)}
-            className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive p-1 rounded"
-          >
-            <Trash2 size={15} className="text-destructive" />
-          </button>
-        )}
+        <div className="flex items-center gap-1">
+          {canEdit && (
+            <button
+              onClick={() => onEdit(log)}
+              className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-primary p-1 rounded"
+              title="تعديل"
+            >
+              <Edit2 size={15} />
+            </button>
+          )}
+          {canDelete && (
+            <button
+              onClick={() => onDelete(log)}
+              className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive p-1 rounded"
+              title="حذف"
+            >
+              <Trash2 size={15} className="text-destructive" />
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-y-2 gap-x-4 text-sm">
@@ -126,8 +140,14 @@ export function MaintenanceLogsTab() {
 
   const [search, setSearch] = useState('');
   const [addOpen, setAddOpen] = useState(false);
+  const [editingLog, setEditingLog] = useState<MaintenanceLogWithDetails | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<MaintenanceLogWithDetails | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  const handleEdit = (log: MaintenanceLogWithDetails) => {
+    setEditingLog(log);
+    setAddOpen(true);
+  };
 
   const logs = useMemo(() => logsQ.data ?? [], [logsQ.data]);
 
@@ -239,19 +259,25 @@ export function MaintenanceLogsTab() {
             <LogCard
               key={log.id}
               log={log}
+              canEdit={permissions.can_edit}
               canDelete={permissions.can_delete}
+              onEdit={handleEdit}
               onDelete={setDeleteTarget}
             />
           ))}
         </div>
       )}
 
-      {/* Add Modal */}
+      {/* Add/Edit Modal */}
       <AddMaintenanceModal
         open={addOpen}
-        onOpenChange={setAddOpen}
+        onOpenChange={(v) => {
+          setAddOpen(v);
+          if (!v) setEditingLog(null);
+        }}
         vehicles={vehiclesQ.data ?? []}
         spareParts={partsQ.data ?? []}
+        editLog={editingLog}
       />
 
       {/* Delete Confirm */}

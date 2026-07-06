@@ -37,13 +37,14 @@ type Props = Readonly<{
   onOpenChange: (v: boolean) => void;
   vehicles: VehicleOpt[];
   spareParts: SparePart[];
+  editLog?: import('@services/maintenanceService').MaintenanceLogWithDetails | null;
 }>;
 
 function newPartRow(): PartRow {
   return { id: crypto.randomUUID(), part_id: '', quantity_used: '1', cost_at_time: '' };
 }
 
-export function AddMaintenanceModal({ open, onOpenChange, vehicles, spareParts }: Props) {
+export function AddMaintenanceModal({ open, onOpenChange, vehicles, spareParts, editLog }: Props) {
   const { toast } = useToast();
   const invalidate = useInvalidateMaintenanceQueries();
 
@@ -57,13 +58,35 @@ export function AddMaintenanceModal({ open, onOpenChange, vehicles, spareParts }
 
   useEffect(() => {
     if (!open) return;
-    setVehicleId('');
-    setMaintenanceDate(format(new Date(), 'yyyy-MM-dd'));
-    setMaintType(MAINT_TYPES[0]);
-    setTotalCostOverride('');
-    setNotes('');
-    setRows([]);
-  }, [open]);
+    if (editLog) {
+      setVehicleId(editLog.vehicle_id);
+      setMaintenanceDate(editLog.maintenance_date);
+      setMaintType(editLog.type);
+      setNotes(editLog.notes ?? '');
+      
+      const partsRows = editLog.maintenance_parts?.map(p => ({
+        id: crypto.randomUUID(),
+        part_id: p.part_id,
+        quantity_used: String(p.quantity_used),
+        cost_at_time: String(p.cost_at_time),
+      })) || [];
+      setRows(partsRows);
+
+      const partsSum = partsRows.reduce((sum, r) => sum + (Number.parseFloat(r.quantity_used) || 0) * (Number.parseFloat(r.cost_at_time) || 0), 0);
+      if (editLog.total_cost && editLog.total_cost !== partsSum) {
+        setTotalCostOverride(String(editLog.total_cost));
+      } else {
+        setTotalCostOverride('');
+      }
+    } else {
+      setVehicleId('');
+      setMaintenanceDate(format(new Date(), 'yyyy-MM-dd'));
+      setMaintType(MAINT_TYPES[0]);
+      setTotalCostOverride('');
+      setNotes('');
+      setRows([]);
+    }
+  }, [open, editLog]);
 
   // Auto-fills cost_at_time from the selected spare part's unit_cost, if applicable.
   const applyPartFieldChange = (row: PartRow, field: keyof PartRow, value: string): PartRow => {
@@ -131,15 +154,19 @@ export function AddMaintenanceModal({ open, onOpenChange, vehicles, spareParts }
       }));
 
       // If no parts but user entered total cost manually, we still create log without parts
-      await maintenanceService.createMaintenanceLog(
-        {
-          vehicle_id: vehicleId,
-          maintenance_date: maintenanceDate,
-          type: maintType,
-          notes: notes || null,
-        },
-        parts,
-      );
+      const logData = {
+        vehicle_id: vehicleId,
+        maintenance_date: maintenanceDate,
+        type: maintType,
+        notes: notes || null,
+        total_cost: finalTotalCost,
+      };
+
+      if (editLog) {
+        await maintenanceService.updateMaintenanceLog(editLog.id, logData, parts);
+      } else {
+        await maintenanceService.createMaintenanceLog(logData, parts);
+      }
 
       // If user manually entered a total cost different from parts sum, update it
       // (done by service using parts sum — if override needed we can handle separately)
@@ -160,7 +187,7 @@ export function AddMaintenanceModal({ open, onOpenChange, vehicles, spareParts }
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Wrench size={18} className="text-primary" />
-            تسجيل عملية صيانة
+            {editLog ? 'تعديل عملية صيانة' : 'تسجيل عملية صيانة'}
           </DialogTitle>
         </DialogHeader>
 
