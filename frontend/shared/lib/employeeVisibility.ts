@@ -26,7 +26,7 @@ export function isExcludedSponsorshipStatus(status: string | null | undefined): 
 }
 
 export function isEmployeeExcluded(employee: EmployeeLike): boolean {
-  return employee.status === 'inactive' || isExcludedSponsorshipStatus(employee.sponsorship_status ?? null);
+  return employee.status === 'inactive' || employee.status === 'ended' || isExcludedSponsorshipStatus(employee.sponsorship_status ?? null);
 }
 
 /**

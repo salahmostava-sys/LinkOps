@@ -12,6 +12,7 @@ import { useToast } from '@shared/hooks/use-toast';
 import { usePermissions } from '@shared/hooks/usePermissions';
 import { differenceInDays, parseISO } from 'date-fns';
 import { employeeTierService } from '@services/employeeTierService';
+import { isEmployeeExcluded } from '@shared/lib/employeeVisibility';
 
 import { authQueryUserId, useAuthQueryGate } from '@shared/hooks/useAuthQueryGate';
 import { defaultQueryRetry } from '@shared/lib/query';
@@ -193,7 +194,7 @@ const EmployeeTiers = () => {
       ]);
 
       return {
-        employees: (employeeRows || []),
+        employees: (employeeRows || []).filter(e => !isEmployeeExcluded(e)),
         apps: (appsRows || []),
         tiers: ((tiersRows || []) as TierRow[]).map((t) => {
           let parsedApps: string[] = [];

@@ -1,5 +1,6 @@
 import type React from 'react';
 import { getErrorMessage } from '@services/serviceError';
+import { isAdministrativeJobTitle } from '@modules/salaries/model/salaryUtils';
 
 /* ─── Row Types ──────────────────────────────────────────────── */
 
@@ -115,6 +116,7 @@ export const buildMonthlyRows = (
   const employeeById = buildEmployeeIndex(allEmployees);
   const allEmployeeIds = new Set<string>([
     ...baseEmployees
+      .filter(e => !isAdministrativeJobTitle((e as unknown as { job_title?: string }).job_title))
       .filter(e => !employeeIdsOnPlatform || employeeIdsOnPlatform.has(e.id))
       .map(e => e.id),
     ...Object.keys(aggMap),
