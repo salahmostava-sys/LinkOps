@@ -1,6 +1,6 @@
 import type React from 'react';
 import { useEffect, useState, forwardRef } from 'react';
-import { Check, Loader2, Pencil } from 'lucide-react';
+import { Check, Loader2, Edit } from 'lucide-react';
 import { Button } from '@shared/components/ui/button';
 import { Checkbox } from '@shared/components/ui/checkbox';
 import { Input } from '@shared/components/ui/input';
@@ -31,7 +31,7 @@ const InlineEditTrigger = forwardRef<HTMLButtonElement, Readonly<{
       {saving ? (
         <Loader2 size={12} className="animate-spin text-muted-foreground shrink-0" />
       ) : (
-        <Pencil size={12} className="shrink-0 text-muted-foreground/0 transition-opacity group-hover:text-muted-foreground/60" />
+        <Edit size={12} className="shrink-0 text-muted-foreground/0 transition-opacity group-hover:text-muted-foreground/60" />
       )}
     </button>
   );

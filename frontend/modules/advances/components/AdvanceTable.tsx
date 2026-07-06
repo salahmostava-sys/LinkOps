@@ -1,5 +1,5 @@
 import React, { type RefObject } from 'react';
-import { Edit2, Trash2 } from 'lucide-react';
+import { Edit, Trash2 } from 'lucide-react';
 import { Input } from '@shared/components/ui/input';
 import { Button } from '@shared/components/ui/button';
 import type { FilterState } from '@shared/hooks/useAdvancedFilter';
@@ -157,14 +157,14 @@ export const AdvanceTable = ({
                           className="p-1.5 rounded hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
                           title="عرض وتعديل السلف"
                         >
-                          <Edit2 size={13} />
+                          <Edit size={13} />
                         </button>
                         <button
                           onClick={() => setDeleteEmployeeAdvancesId(s.employeeId)}
                           className="p-1.5 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
                           title="حذف جميع سلف هذا المندوب"
                         >
-                          <Trash2 size={14} />
+                          <Trash2 size={14} className="text-destructive" />
                         </button>
                       </div>
                     </td>

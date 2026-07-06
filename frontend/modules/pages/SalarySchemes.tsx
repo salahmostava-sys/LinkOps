@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, Pencil, Trash2, Check, X, Loader2, Link2, Settings } from 'lucide-react';
+import { Plus, Edit, Trash2, Check, X, Loader2, Link2, Settings } from 'lucide-react';
 import { Button } from '@shared/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@shared/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/components/ui/select';
@@ -359,9 +359,9 @@ const SalarySchemes = () => {
                     <span className={s.status === 'active' ? 'badge-success' : 'badge-warning'}>{s.status === 'active' ? 'نشطة' : 'مؤرشفة'}</span>
                     {perms.can_edit && (
                       <>
-                        <button aria-label="تعديل" onClick={() => openEdit(s)} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground transition-colors"><Pencil size={14} /></button>
+                        <button aria-label="تعديل" onClick={() => openEdit(s)} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground transition-colors"><Edit size={14} /></button>
                         <button aria-label={s.status === 'active' ? 'أرشفة' : 'تفعيل'} onClick={() => handleArchive(s.id, s.status)} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground transition-colors" title={s.status === 'active' ? 'أرشفة' : 'تفعيل'}>
-                          {s.status === 'active' ? <Trash2 size={14} /> : <Check size={14} />}
+                          {s.status === 'active' ? <Trash2 size={14} className="text-destructive" /> : <Check size={14} />}
                         </button>
                       </>
                     )}

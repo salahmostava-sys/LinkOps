@@ -245,7 +245,7 @@ function renderActionsCell(ctx: CellContext): React.ReactNode {
             <>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => setDeleteEmployee(emp)} className="text-destructive focus:text-destructive">
-                <Trash2 size={14} className="me-2" /> حذف الموظف
+                <Trash2 size={14} className="me-2 text-destructive" /> حذف الموظف
               </DropdownMenuItem>
             </>
           )}

@@ -842,7 +842,7 @@ const EmployeeTiers = () => {
                                 className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                                 title="حذف"
                               >
-                                <Trash2 size={13} />
+                                <Trash2 size={13} className="text-destructive" />
                               </button>
                             )}
                           </div>

@@ -270,7 +270,7 @@ export default function ViolationSearchTab({
                               disabled={!perms.can_delete || deletingSearchDeductionId === row.external_deduction_id}
                               onClick={() => { handleDeleteSearchResultRow(row); }}
                             >
-                              <Trash2 size={12} />
+                              <Trash2 size={12} className="text-destructive" />
                               {deletingSearchDeductionId === row.external_deduction_id ? '...' : 'حذف'}
                             </Button>
                             <Button

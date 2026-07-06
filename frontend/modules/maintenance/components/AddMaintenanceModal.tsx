@@ -298,7 +298,7 @@ export function AddMaintenanceModal({ open, onOpenChange, vehicles, spareParts }
                             onClick={() => removePartRow(row.id)}
                             className="text-muted-foreground hover:text-destructive transition-colors p-1"
                           >
-                            <Trash2 size={14} />
+                            <Trash2 size={14} className="text-destructive" />
                           </button>
                         </td>
                       </tr>

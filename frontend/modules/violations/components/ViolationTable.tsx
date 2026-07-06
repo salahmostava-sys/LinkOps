@@ -1,5 +1,5 @@
 ﻿import { Button } from '@shared/components/ui/button';
-import { CheckCircle2, Pencil, Trash2, CreditCard } from 'lucide-react';
+import { CheckCircle2, Edit, Trash2, CreditCard } from 'lucide-react';
 import { sortArrowOrNeutral } from '@shared/lib/sortTableIndicators';
 import type { ViolationRecord, ViolationSortFieldKey } from '@modules/violations/types/violation.types';
 import { ViolationAdvanceStatusCell } from '@modules/violations/components/ViolationAdvanceStatusCell';
@@ -108,7 +108,7 @@ export default function ViolationTable({
                       disabled={!perms.can_edit}
                       onClick={() => openEditViolation(v)}
                     >
-                      <Pencil size={14} /> تعديل
+                      <Edit size={14} /> تعديل
                     </Button>
                     <Button
                       size="sm"
@@ -117,7 +117,7 @@ export default function ViolationTable({
                       disabled={!perms.can_delete || deletingId === v.id}
                       onClick={() => handleDeleteViolation(v.id)}
                     >
-                      <Trash2 size={14} /> {deleteViolationButtonLabel(deletingId, v.id)}
+                      <Trash2 size={14} className="text-destructive" /> {deleteViolationButtonLabel(deletingId, v.id)}
                     </Button>
                     <Button
                       size="sm"

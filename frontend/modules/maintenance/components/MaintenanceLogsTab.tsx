@@ -62,7 +62,7 @@ function LogCard({ log, canDelete, onDelete }: Readonly<{
             onClick={() => onDelete(log)}
             className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive p-1 rounded"
           >
-            <Trash2 size={15} />
+            <Trash2 size={15} className="text-destructive" />
           </button>
         )}
       </div>

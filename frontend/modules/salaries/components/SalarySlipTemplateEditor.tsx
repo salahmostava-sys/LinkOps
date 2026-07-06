@@ -237,7 +237,7 @@ export function SalarySlipTemplateEditor() {
                   }}
                   aria-label={`حذف قالب ${t.name}`}
                 >
-                  <Trash2 size={14} />
+                  <Trash2 size={14} className="text-destructive" />
                 </Button>
               </button>
             ))}

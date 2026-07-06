@@ -113,7 +113,7 @@ export const UploadArea = ({ label, icon, file, existingStoragePath, onFile, onR
             <p className="text-xs text-foreground truncate max-w-[120px] mx-auto">{file ? file.name : 'مرفوع مسبقاً 🔒'}</p>
             {statusBadge}
             <button type="button" onClick={e => { e.stopPropagation(); onRemove(); }} className="text-xs text-destructive hover:underline flex items-center gap-1 mx-auto">
-              <Trash2 size={10} /> حذف
+              <Trash2 size={10} className="text-destructive" /> حذف
             </button>
           </div>
         ) : (

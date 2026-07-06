@@ -91,7 +91,7 @@ export function TreasurySettingsTab() {
                   className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive p-1 rounded"
                   title="حذف الحساب"
                 >
-                  <Trash2 size={14} />
+                  <Trash2 size={14} className="text-destructive" />
                 </button>
               </div>
             </div>
@@ -139,7 +139,7 @@ export function TreasurySettingsTab() {
                   className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive p-1 rounded"
                   title="حذف البند"
                 >
-                  <Trash2 size={14} />
+                  <Trash2 size={14} className="text-destructive" />
                 </button>
               </div>
             </div>

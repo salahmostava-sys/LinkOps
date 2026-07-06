@@ -776,7 +776,7 @@ const Motorcycles = () => {
                             className="p-1.5 rounded-lg hover:bg-destructive/10 transition-colors text-muted-foreground hover:text-destructive"
                             title="حذف"
                           >
-                            <Trash2 size={14} />
+                            <Trash2 size={14} className="text-destructive" />
                           </button>
                         )}
                       </div>

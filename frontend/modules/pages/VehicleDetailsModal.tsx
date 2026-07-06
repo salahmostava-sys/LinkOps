@@ -228,7 +228,7 @@ export function VehicleDetailsModal({ vehicle, canEdit, canDelete, onClose }: Re
                           title="حذف"
                           onClick={() => setDeleteTarget(doc)}
                         >
-                          <Trash2 size={15} />
+                          <Trash2 size={15} className="text-destructive" />
                         </Button>
                       )}
                     </div>

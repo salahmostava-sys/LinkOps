@@ -596,7 +596,7 @@ const VehicleAssignment = () => {
                             onClick={() => setDeleteAssignmentTarget(a)}
                             title="حذف السجل"
                           >
-                            <Trash2 size={12} />
+                            <Trash2 size={12} className="text-destructive" />
                           </Button>
                         )}
                       </div>

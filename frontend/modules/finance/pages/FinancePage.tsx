@@ -197,7 +197,7 @@ function TransactionTable(props: Readonly<TransactionTableProps>) {
                 <td className="ta-td">
                   {t.is_auto && isRev ? <Lock size={12} className="mx-auto text-muted-foreground/40" /> : (
                     (!t.is_auto || isRev) && (
-                      <button aria-label="حذف" type="button" onClick={() => { deleteTransaction(t.id); }} disabled={isDeleting} className="p-1 rounded hover:bg-destructive/10 text-destructive/60 hover:text-destructive"><Trash2 size={13} /></button>
+                      <button aria-label="حذف" type="button" onClick={() => { deleteTransaction(t.id); }} disabled={isDeleting} className="p-1 rounded hover:bg-destructive/10 text-destructive/60 hover:text-destructive"><Trash2 size={13} className="text-destructive" /></button>
                     )
                   )}
                 </td>

@@ -62,7 +62,7 @@ export const SecureDocThumb = ({
             onClick={onDelete}
             className="flex items-center gap-0.5 text-[10px] text-destructive hover:underline"
           >
-            <Trash2 size={9} /> حذف
+            <Trash2 size={9} className="text-destructive" /> حذف
           </button>
         )}
       </div>

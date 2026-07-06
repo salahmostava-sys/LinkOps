@@ -445,7 +445,7 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
                           onClick={() => setDeleteTarget(row)}
                           title={row.id === currentUserId ? 'لا يمكن حذف الحساب الحالي' : 'حذف المستخدم'}
                         >
-                          <Trash2 size={14} />
+                          <Trash2 size={14} className="text-destructive" />
                           حذف
                         </Button>
                       ) : (

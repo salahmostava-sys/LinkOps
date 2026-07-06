@@ -76,7 +76,7 @@ export function BulkDeleteOrdersDialog({ open, employees, apps, year, month, onC
       <DialogContent className="sm:max-w-md" dir="rtl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-destructive">
-            <Trash2 size={18} />
+            <Trash2 size={18} className="text-destructive" />
             حذف طلبات بشكل جماعي
           </DialogTitle>
           <DialogDescription>

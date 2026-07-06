@@ -226,7 +226,7 @@ export function InvoiceUploadModal({
                         </td>
                         <td className="p-1.5 text-center">
                           <button type="button" onClick={() => removeRow(idx)} className="text-muted-foreground hover:text-destructive p-1 rounded hover:bg-muted">
-                            <Trash2 size={13} />
+                            <Trash2 size={13} className="text-destructive" />
                           </button>
                         </td>
                       </tr>

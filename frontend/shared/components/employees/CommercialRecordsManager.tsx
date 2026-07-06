@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Building2, Loader2, Pencil, Plus, Save, Trash2, X } from 'lucide-react';
+import { Building2, Loader2, Edit, Plus, Save, Trash2, X } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@shared/components/ui/dialog';
 import { Button } from '@shared/components/ui/button';
 import { Input } from '@shared/components/ui/input';
@@ -236,7 +236,7 @@ export function CommercialRecordsManager({
                                 }}
                                 disabled={!canMutate}
                               >
-                                <Pencil size={13} />
+                                <Edit size={13} />
                                 تعديل
                               </Button>
                               <Button
@@ -251,7 +251,7 @@ export function CommercialRecordsManager({
                                 }}
                                 disabled={!canMutate}
                               >
-                                {rowBusy ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
+                                {rowBusy ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} className="text-destructive" />}
                                 حذف
                               </Button>
                             </>

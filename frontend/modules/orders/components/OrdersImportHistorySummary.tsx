@@ -111,7 +111,7 @@ export function OrdersImportHistorySummary(props: Readonly<OrdersImportHistorySu
                       onClick={() => onDelete(batch.id)}
                       title="حذف السجل"
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={16} className="text-destructive" />
                     </Button>
                   )}
                 </div>

@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Plus, Edit2, FileText, Printer, AlertTriangle, Check, X, RotateCcw, UserPlus, Search, Trash2, Paperclip, ExternalLink } from 'lucide-react';
+import { Plus, Edit, FileText, Printer, AlertTriangle, Check, X, RotateCcw, UserPlus, Search, Trash2, Paperclip, ExternalLink } from 'lucide-react';
 import { Input } from '@shared/components/ui/input';
 import { Button } from '@shared/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@shared/components/ui/dialog';
@@ -518,7 +518,7 @@ export const TransactionsModal = ({ employeeId, employeeName, nationalId, totalD
                         onEditAdvance(activeAdv);
                       }}
                     >
-                      <Edit2 size={12} /> تعديل
+                      <Edit size={12} /> تعديل
                     </Button>
                   )}
                   {empAdvances.length > 0 && (
@@ -532,7 +532,7 @@ export const TransactionsModal = ({ employeeId, employeeName, nationalId, totalD
                         setDeleteAdvanceId(activeAdv.id);
                       }}
                     >
-                      <Trash2 size={12} /> حذف السلفة
+                      <Trash2 size={12} className="text-destructive" /> حذف السلفة
                     </Button>
                   )}
                   {remaining > 0 && onWriteOff && (
@@ -656,7 +656,7 @@ export const TransactionsModal = ({ employeeId, employeeName, nationalId, totalD
                             className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
                             title="حذف هذا الصف"
                           >
-                            <Trash2 size={13} />
+                            <Trash2 size={13} className="text-destructive" />
                           </button>
                         )}
                       </td>

@@ -8,7 +8,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@shared/components/ui/alert-dialog';
-import { Landmark, Wallet, Banknote, ArrowLeftRight, Paperclip, ArrowUpRight, ArrowDownRight, Trash2, Pencil, Loader2, Download, TrendingUp, X, SlidersHorizontal, Check } from 'lucide-react';
+import { Landmark, Wallet, Banknote, ArrowLeftRight, Paperclip, ArrowUpRight, ArrowDownRight, Trash2, Edit, Loader2, Download, TrendingUp, X, SlidersHorizontal, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { storageService } from '@services/storageService';
 
@@ -203,7 +203,7 @@ export function TreasuryTab() {
     const editCatType = editType === 'income' ? 'income' : 'expense';
     return (
       <tr key={t.id} className="border-b-2 border-primary/20 bg-primary/5">
-        <td className="ta-td text-center text-muted-foreground"><Pencil size={11} className="inline" /></td>
+        <td className="ta-td text-center text-muted-foreground"><Edit size={11} className="inline" /></td>
         <td className="ta-td"><Input type="date" value={editDate} onChange={e => setEditDate(e.target.value)} className="h-8 text-xs px-1.5 w-28" /></td>
         <td className="ta-td"><Input value={editDescription} onChange={e => setEditDescription(e.target.value)} placeholder="وصف..." className="h-8 text-xs px-1.5" /></td>
         <td className="ta-td">
@@ -580,10 +580,10 @@ export function TreasuryTab() {
                       <td className="ta-td">
                         <div className="flex items-center gap-0.5 justify-center">
                           <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-primary hover:bg-primary/10" title="تعديل القيد" onClick={() => handleOpenEdit(t)}>
-                            <Pencil size={12} />
+                            <Edit size={12} />
                           </Button>
                           <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-destructive hover:bg-destructive/10" title={`حذف — ${typeLabel(t)} ${t.amount?.toLocaleString('en-US')} ر.س`} onClick={() => setDeleteTarget(t)}>
-                            <Trash2 size={12} />
+                            <Trash2 size={12} className="text-destructive" />
                           </Button>
                         </div>
                       </td>

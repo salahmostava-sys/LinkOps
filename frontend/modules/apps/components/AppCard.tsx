@@ -1,5 +1,5 @@
 import type React from 'react';
-import { Edit2, Plus, Power, PowerOff, Trash2 } from 'lucide-react';
+import { Edit, Plus, Power, PowerOff, Trash2 } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -66,7 +66,7 @@ export const AppCard = ({
               title="تعديل"
               type="button"
             >
-              <Edit2 size={12} />
+              <Edit size={12} />
             </button>
             <button
               onClick={(event) => onToggleActive(app, event)}
@@ -86,7 +86,7 @@ export const AppCard = ({
               title="أرشفة نهائية"
               type="button"
             >
-              <Trash2 size={12} />
+              <Trash2 size={12} className="text-destructive" />
             </button>
           </div>
         )}

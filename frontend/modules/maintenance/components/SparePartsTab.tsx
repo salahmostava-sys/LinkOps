@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Pencil, Trash2, Search, Package, AlertTriangle, ShoppingCart, FileText, Paperclip } from 'lucide-react';
+import { Edit, Trash2, Search, Package, AlertTriangle, ShoppingCart, FileText, Paperclip } from 'lucide-react';
 import { Button } from '@shared/components/ui/button';
 import { Input } from '@shared/components/ui/input';
 import { Label } from '@shared/components/ui/label';
@@ -466,7 +466,7 @@ export function SparePartsTab() {
                               className="text-muted-foreground hover:text-foreground transition-colors p-1.5 rounded hover:bg-muted"
                               title="تعديل"
                             >
-                              <Pencil size={13} />
+                              <Edit size={13} />
                             </button>
                           )}
                           {permissions.can_delete && (
@@ -475,7 +475,7 @@ export function SparePartsTab() {
                               className="text-muted-foreground hover:text-destructive transition-colors p-1.5 rounded hover:bg-muted"
                               title="حذف"
                             >
-                              <Trash2 size={13} />
+                              <Trash2 size={13} className="text-destructive" />
                             </button>
                           )}
                         </div>

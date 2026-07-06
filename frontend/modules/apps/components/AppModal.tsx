@@ -170,7 +170,7 @@ export const AppModal = ({ app, saving, onClose, onSave }: Readonly<AppModalProp
                     title="حذف"
                     type="button"
                   >
-                    <Trash2 size={14} />
+                    <Trash2 size={14} className="text-destructive" />
                   </button>
                 </div>
               ))}
