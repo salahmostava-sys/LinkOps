@@ -1,5 +1,6 @@
 import type React from 'react';
 import { useState, useCallback, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, ChevronLeft } from 'lucide-react';
 import { Button } from '@shared/components/ui/button';
 import { Input } from '@shared/components/ui/input';
@@ -172,7 +173,7 @@ const AddEmployeeModal = ({ onClose, onSuccess, editEmployee }: Readonly<Props>)
   };
   const footerActionContent = getFooterActionContent(step, saving, isEdit);
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
       <div className="bg-card -2xl shadow-2xl w-full max-w-2xl max-h-[92vh] overflow-hidden flex flex-col border border-border/50 rounded-2xl">
         {/* Header */}
@@ -501,9 +502,9 @@ const AddEmployeeModal = ({ onClose, onSuccess, editEmployee }: Readonly<Props>)
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
 export default AddEmployeeModal;
-

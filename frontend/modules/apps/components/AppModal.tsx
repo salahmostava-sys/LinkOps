@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Check, Columns, PlusCircle, Trash2, X } from 'lucide-react';
 import { Input } from '@shared/components/ui/input';
 import { Button } from '@shared/components/ui/button';
@@ -53,7 +54,7 @@ export const AppModal = ({ app, saving, onClose, onSave }: Readonly<AppModalProp
     await onSave(form);
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
       <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto -2xl border border-border/50 bg-card shadow-2xl rounded-2xl">
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-card px-6 py-4 rounded-2xl">
@@ -217,6 +218,7 @@ export const AppModal = ({ app, saving, onClose, onSave }: Readonly<AppModalProp
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
