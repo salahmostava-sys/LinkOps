@@ -16,6 +16,7 @@ import { usePermissions } from '@shared/hooks/usePermissions';
 import { usePagePresence } from '@shared/hooks/usePagePresence';
 import { PresenceAvatars } from '@shared/components/PresenceAvatars';
 import { useAuthQueryGate } from '@shared/hooks/useAuthQueryGate';
+import { useAuth } from '@app/providers/AuthContext';
 import { useRealtimePostgresChanges, REALTIME_TABLES_DASHBOARD } from '@shared/hooks/useRealtimePostgresChanges';
 import { QueryErrorRetry } from '@shared/components/QueryErrorRetry';
 import { isEmployeeVisibleInMonth } from '@shared/lib/employeeVisibility';
@@ -54,6 +55,7 @@ const Employees = () => {
   const { toast } = useToast();
   useSystemSettings();
   const { permissions } = usePermissions('employees');
+  const { role } = useAuth();
   const presence = usePagePresence('employees');
   const [data, setData] = useState<Employee[]>([]);
   const {
