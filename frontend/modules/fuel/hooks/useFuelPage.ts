@@ -133,9 +133,9 @@ export function useFuelPage() { // NOSONAR: page data layer with many independen
 
   useEffect(() => {
     if (!fuelBaseData) return;
-    // For fuel page, show all active employees regardless of monthly activity
-    // This ensures couriers with vehicles are visible even if they have no orders/attendance in the month
-    setEmployees(fuelBaseData.employees.filter(e => !isEmployeeExcluded(e)));
+    // بناءً على طلب المستخدم، يجب أن تظهر جميع الأسماء في صفحة الاستهلاك (حتى لو كانت حالتهم غير نشط/إنهاء خدمات)
+    // لأن هذه صفحة مالية وتاريخية. الإخفاء يكون في "الصفحات التانية" فقط.
+    setEmployees(fuelBaseData.employees);
     setApps(fuelBaseData.apps);
     setEmployeeAppLinks(fuelBaseData.links);
   }, [fuelBaseData]);
