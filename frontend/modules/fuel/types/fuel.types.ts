@@ -1,6 +1,7 @@
 import type React from 'react';
 import { getErrorMessage } from '@services/serviceError';
 import { isAdministrativeJobTitle } from '@modules/salaries/model/salaryUtils';
+import { isEmployeeExcluded } from '@shared/lib/employeeVisibility';
 
 /* ─── Row Types ──────────────────────────────────────────────── */
 
@@ -115,12 +116,19 @@ export const buildMonthlyRows = (
 ): MonthlyRow[] => {
   const employeeById = buildEmployeeIndex(allEmployees);
   const isAdminEmployeeId = (id: string): boolean => isAdministrativeJobTitle(employeeById[id]?.job_title);
+  // موظف منتهي الخدمة/بلاغ هروب يُستبعد من جدول الشهر حتى لو كان له سجل كيلومترات/بنزين
+  // متبقٍّ من قبل انتهاء خدمته، إلا إذا كان له طلبات فعلية في هذا الشهر تحديداً.
+  const isHiddenExcludedEmployeeId = (id: string): boolean => {
+    const emp = employeeById[id];
+    if (!emp || !isEmployeeExcluded(emp)) return false;
+    return !((ordersMap[id] || 0) > 0);
+  };
   const allEmployeeIds = new Set<string>([
     ...baseEmployees
       .filter(e => !isAdministrativeJobTitle(e.job_title))
       .filter(e => !employeeIdsOnPlatform || employeeIdsOnPlatform.has(e.id))
       .map(e => e.id),
-    ...Object.keys(aggMap).filter((id) => !isAdminEmployeeId(id)),
+    ...Object.keys(aggMap).filter((id) => !isAdminEmployeeId(id) && !isHiddenExcludedEmployeeId(id)),
     ...Object.keys(ordersMap).filter((id) => (ordersMap[id] || 0) > 0 && !isAdminEmployeeId(id)),
   ]);
   return Array.from(allEmployeeIds).map((employeeId) => {
