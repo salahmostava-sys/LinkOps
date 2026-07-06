@@ -28,6 +28,17 @@ export const storageService = {
     return data.signedUrl;
   },
 
+  createSignedDownloadUrl: async (bucket: string, path: string, expiresInSeconds = 300) => {
+    const safePath = storageService.sanitizePathOrThrow(path);
+    const { data, error } = await supabase.storage.from(bucket).createSignedUrl(safePath, expiresInSeconds, { download: true });
+
+    if (error) {
+      throw toServiceError(error, 'storageService.createSignedDownloadUrl');
+    }
+
+    return data.signedUrl;
+  },
+
   uploadFile: async (bucket: string, path: string, file: File, options?: { upsert?: boolean }) => {
     const safePath = storageService.sanitizePathOrThrow(path);
     const { data, error } = await supabase.storage.from(bucket).upload(safePath, file, {

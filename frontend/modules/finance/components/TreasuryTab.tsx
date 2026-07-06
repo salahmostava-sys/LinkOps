@@ -9,7 +9,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@shared/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@shared/components/ui/dialog';
-import { Landmark, Wallet, Banknote, ArrowLeftRight, Paperclip, ArrowUpRight, ArrowDownRight, Trash2, Pencil, Loader2 } from 'lucide-react';
+import { Landmark, Wallet, Banknote, ArrowLeftRight, Paperclip, ArrowUpRight, ArrowDownRight, Trash2, Pencil, Loader2, Download } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { storageService } from '@services/storageService';
 
@@ -231,14 +231,29 @@ export function TreasuryTab() {
                       </td>
                       <td className="ta-td">
                         {t.attachment_url ? (
-                          <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground" aria-label="عرض المرفق" onClick={async () => {
-                            try {
-                              const url = await storageService.createSignedUrl('advance-attachments', t.attachment_url!);
-                              window.open(url, '_blank');
-                            } catch { toast.error('فشل فتح المرفق'); }
-                          }}>
-                            <Paperclip size={14} />
-                          </Button>
+                          <div className="flex items-center justify-center gap-1">
+                            <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground" aria-label="عرض المرفق" onClick={async () => {
+                              try {
+                                const url = await storageService.createSignedUrl('advance-attachments', t.attachment_url!);
+                                window.open(url, '_blank');
+                              } catch { toast.error('فشل فتح المرفق'); }
+                            }}>
+                              <Paperclip size={14} />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground" aria-label="تحميل المرفق" onClick={async () => {
+                              try {
+                                const url = await storageService.createSignedDownloadUrl('advance-attachments', t.attachment_url!);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = t.attachment_url!.split('/').pop() || 'download';
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                              } catch { toast.error('فشل تحميل المرفق'); }
+                            }}>
+                              <Download size={14} />
+                            </Button>
+                          </div>
                         ) : '—'}
                       </td>
                       <td className="ta-td">
