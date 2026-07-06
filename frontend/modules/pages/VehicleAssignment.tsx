@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, Plus, RotateCcw, ClipboardList, CheckCircle, Clock, FolderOpen, AlertCircle } from 'lucide-react';
+import { Search, Plus, RotateCcw, ClipboardList, CheckCircle, Clock, FolderOpen, AlertCircle, Trash2 } from 'lucide-react';
 import { Input } from '@shared/components/ui/input';
 import { Button } from '@shared/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@shared/components/ui/dialog';
@@ -252,6 +252,56 @@ const ReturnModal = ({
   );
 };
 
+// ─── Delete Confirm Modal ──────────────────────────────────────────────────────
+const DeleteAssignmentModal = ({
+  open, onClose, onSaved, assignment,
+}: {
+  open: boolean; onClose: () => void; onSaved: () => void; assignment: Assignment | null;
+}) => {
+  const { toast } = useToast();
+  const [saving, setSaving] = useState(false);
+
+  const handleDelete = async () => {
+    if (!assignment) return;
+    setSaving(true);
+    try {
+      await vehicleService.deleteAssignment(assignment.id);
+      toast({ title: '✅ تم حذف السجل بنجاح' });
+      onSaved(); onClose();
+    } catch (e) {
+      logError('[VehicleAssignment] delete failed', e);
+      const message = getErrorMessage(e, 'حدث خطأ غير متوقع');
+      toast({ title: 'حدث خطأ', description: message, variant: 'destructive' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={v => !v && onClose()}>
+      <DialogContent className="max-w-sm" dir="rtl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Trash2 size={18} className="text-destructive" />
+            حذف سجل التسليم
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3">
+          <div className="bg-muted/40 rounded-lg p-3 text-sm">
+            <div><span className="text-muted-foreground">المركبة: </span><span className="font-bold">{assignment?.vehicles?.plate_number}</span></div>
+            <div><span className="text-muted-foreground">المندوب: </span><span className="font-bold">{assignment?.employees?.name}</span></div>
+          </div>
+          <p className="text-sm text-destructive">هل أنت متأكد من حذف هذا السجل؟ لا يمكن التراجع عن هذا الإجراء.</p>
+        </div>
+        <DialogFooter className="mt-4 gap-2">
+          <Button variant="outline" onClick={onClose}>إلغاء</Button>
+          <Button variant="destructive" onClick={handleDelete} disabled={saving}>{saving ? 'جاري الحذف...' : 'حذف نهائي'}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 // ─── Skeleton Row ─────────────────────────────────────────────────────────────
 const SkeletonRow = () => (
   <tr className="border-b border-border/30">
@@ -283,6 +333,7 @@ const VehicleAssignment = () => {
     v === 'all' || v === 'active' || v === 'returned';
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [returnAssignment, setReturnAssignment] = useState<Assignment | null>(null);
+  const [deleteAssignmentTarget, setDeleteAssignmentTarget] = useState<Assignment | null>(null);
   const tableRef = useRef<HTMLTableElement>(null);
 
   // Local state mirrors React Query data — kept because freeVehicles, stats, and filtered
@@ -420,7 +471,7 @@ const VehicleAssignment = () => {
 
       {(assignments.length >= VEHICLES_QUERY_MAX_ROWS || vehicles.length >= VEHICLES_QUERY_MAX_ROWS) && (
         <p className="text-xs text-amber-800 dark:text-amber-300/95 bg-amber-500/12 border border-amber-500/30 rounded-lg px-3 py-2">
-          يُعرض حتى {VEHICLES_QUERY_MAX_ROWS.toLocaleString('ar-SA')} سجلّ تسليم و{VEHICLES_QUERY_MAX_ROWS.toLocaleString('ar-SA')} مركبة كحد أقصى في الصفحة. إذا كان العدد أكبر في النظام قد لا تظهر كل المركبات أو السجلات — راجع تقارير أخرى أو زد الحد من إعدادات الخادم لاحقاً.
+          يُعرض حتى {VEHICLES_QUERY_MAX_ROWS.toLocaleString('en-US')} سجلّ تسليم و{VEHICLES_QUERY_MAX_ROWS.toLocaleString('en-US')} مركبة كحد أقصى في الصفحة. إذا كان العدد أكبر في النظام قد لا تظهر كل المركبات أو السجلات — راجع تقارير أخرى أو زد الحد من إعدادات الخادم لاحقاً.
         </p>
       )}
 
@@ -495,7 +546,7 @@ const VehicleAssignment = () => {
                   <tr key={a.id} className={`border-b border-border/30 hover:bg-muted/20 transition-colors ${isActive ? 'bg-primary/2' : ''}`}>
                     <td className="ta-td">
                       <span className="font-bold font-mono text-foreground whitespace-nowrap">
-                        {a.vehicles?.type === 'motorcycle' ? '🏍️' : '🚗'} {a.vehicles?.plate_number || '—'}
+                        {a.vehicles?.plate_number || '—'}
                       </span>
                     </td>
                     <td className="ta-td">
@@ -527,16 +578,29 @@ const VehicleAssignment = () => {
                       }
                     </td>
                     <td className="ta-td">
-                      {isActive && permissions.can_edit && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="gap-1 h-7 text-xs"
-                          onClick={() => setReturnAssignment(a)}
-                        >
-                          <RotateCcw size={12} /> تسجيل إعادة
-                        </Button>
-                      )}
+                      <div className="flex items-center gap-1.5">
+                        {isActive && permissions.can_edit && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="gap-1 h-7 text-xs"
+                            onClick={() => setReturnAssignment(a)}
+                          >
+                            <RotateCcw size={12} /> تسجيل إعادة
+                          </Button>
+                        )}
+                        {permissions.can_delete && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="gap-1 h-7 w-7 p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                            onClick={() => setDeleteAssignmentTarget(a)}
+                            title="حذف السجل"
+                          >
+                            <Trash2 size={12} />
+                          </Button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );
@@ -559,6 +623,12 @@ const VehicleAssignment = () => {
         onClose={() => setReturnAssignment(null)}
         onSaved={() => refetchAssignmentData().catch(() => {})}
         assignment={returnAssignment}
+      />
+      <DeleteAssignmentModal
+        open={!!deleteAssignmentTarget}
+        onClose={() => setDeleteAssignmentTarget(null)}
+        onSaved={() => refetchAssignmentData().catch(() => {})}
+        assignment={deleteAssignmentTarget}
       />
     </div>
   );

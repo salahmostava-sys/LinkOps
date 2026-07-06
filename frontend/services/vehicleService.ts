@@ -201,6 +201,11 @@ export const vehicleService = {
     return data;
   },
 
+  deleteAssignment: async (id: string) => {
+    const { error } = await supabase.from('vehicle_assignments').delete().eq('id', id);
+    if (error) handleSupabaseError(error, 'vehicleService.deleteAssignment');
+  },
+
   closeActiveAssignment: async (vehicleId: string, endDate: string) => {
     const { error } = await supabase
       .from('vehicle_assignments')
