@@ -21,7 +21,7 @@ const PAGE_TABS: { key: PageTab; label: string }[] = [
 
 function FuelPageTabs({ pageTab, setPageTab }: Readonly<{ pageTab: PageTab; setPageTab: (v: PageTab) => void }>) {
   return (
-    <div className="flex flex-wrap gap-2 items-center border-b border-border/50 pb-2">
+    <div className="flex flex-wrap gap-2 items-center">
       {PAGE_TABS.map((t) => (
         <button
           key={t.key}
@@ -225,15 +225,17 @@ export default function FuelPage() {
         }
       />
 
-      <FuelPageTabs pageTab={pageTab} setPageTab={setPageTab} />
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border/50 pb-2">
+        <FuelPageTabs pageTab={pageTab} setPageTab={setPageTab} />
 
-      {apps.length > 1 && (
-        <FuelPlatformTabs
-          platformTab={platformTab}
-          setPlatformTab={setPlatformTab}
-          apps={apps}
-        />
-      )}
+        {apps.length > 1 && (
+          <FuelPlatformTabs
+            platformTab={platformTab}
+            setPlatformTab={setPlatformTab}
+            apps={apps}
+          />
+        )}
+      </div>
 
       {/* Top Stats: Totals for the month */}
       <FuelMonthlyStats
