@@ -11,15 +11,21 @@ type FuelPageHeaderProps = {
   selectedMonth: string;
   selectedYear: string;
   toolbarEnd?: ReactNode;
+  title?: string;
+  subtitle?: string;
 };
 
 export function FuelPageHeader({
   selectedMonth,
   selectedYear,
   toolbarEnd,
+  title,
+  subtitle,
 }: Readonly<FuelPageHeaderProps>) {
   const { t } = useTranslation();
   const monthLabel = FUEL_PAGE_MONTHS.find(m => m.v === selectedMonth)?.l || selectedMonth;
+  const pageTitle = title || t('fuelPageTitle');
+  const pageSubtitle = subtitle || t('fuelPageSubtitle');
 
   return (
     <div className="flex items-center justify-between flex-wrap gap-3">
@@ -27,15 +33,15 @@ export function FuelPageHeader({
         <nav className="page-breadcrumb">
           <span>الرئيسية</span>
           <span className="page-breadcrumb-sep">/</span>
-          <span>{t('fuelPageTitle')}</span>
+          <span>{pageTitle}</span>
         </nav>
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
             <Activity size={20} />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-foreground">{t('fuelPageTitle')}</h1>
-            <p className="text-sm text-muted-foreground">{t('fuelPageSubtitle')}</p>
+            <h1 className="text-xl font-bold text-foreground">{pageTitle}</h1>
+            <p className="text-sm text-muted-foreground">{pageSubtitle}</p>
           </div>
         </div>
       </div>

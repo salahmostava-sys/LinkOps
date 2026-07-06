@@ -199,9 +199,27 @@ export default function FuelPage() {
   const dayArr = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   const activeMetric: 'km' | 'fuel' = pageTab === 'km' ? 'km' : 'fuel';
 
+  const getPageTitle = () => {
+    switch(pageTab) {
+      case 'fuel': return 'استهلاك البنزين';
+      case 'km': return 'سجل الكيلومترات';
+      default: return 'استهلاك المناديب';
+    }
+  };
+
+  const getPageSubtitle = () => {
+    switch(pageTab) {
+      case 'fuel': return 'سجل فواتير وتكاليف البنزين الخاصة بالمناديب';
+      case 'km': return 'سجل قراءات العداد والمسافات المقطوعة';
+      default: return 'ملخص شامل للكيلومترات وتكلفة الوقود للمناديب';
+    }
+  };
+
   return (
     <div className="flex flex-col gap-4 w-full max-w-[1600px] overflow-hidden" dir="rtl">
       <FuelPageHeader
+        title={getPageTitle()}
+        subtitle={getPageSubtitle()}
         view={view}
         onViewChange={setView}
         selectedMonth={selectedMonth}
