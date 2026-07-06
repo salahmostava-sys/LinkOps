@@ -15,7 +15,7 @@ import { format } from 'date-fns';
 import { usePermissions } from '@shared/hooks/usePermissions';
 import { useAuth } from '@app/providers/AuthContext';
 import { validateUploadFile } from '@shared/lib/validation';
-import { settingsHubService } from '@services/settingsHubService';
+import { settingsHubService, BACKUP_TABLES } from '@services/settingsHubService';
 import { brandLogoSrc } from '@shared/lib/brandLogo';
 import { getErrorMessage } from '@shared/lib/query';
 import { logError } from '@shared/lib/logger';
@@ -64,11 +64,7 @@ function ProjectSettingsSectionHeader({ icon, title }: Readonly<{ icon: React.Re
 
 async function exportBackupFiles(): Promise<number> {
   const timestamp = format(new Date(), 'yyyy-MM-dd_HH-mm');
-  const tables = [
-    'employees', 'attendance', 'advances', 'advance_installments', 'daily_orders',
-    'employee_apps', 'apps', 'salary_schemes', 'salary_records', 'external_deductions',
-    'vehicles', 'vehicle_assignments', 'alerts',
-  ] as const;
+  const tables = BACKUP_TABLES;
 
   const results: Record<string, unknown[]> = {};
   await Promise.all(
@@ -97,6 +93,48 @@ async function exportBackupFiles(): Promise<number> {
   XLSX.writeFile(wb, `backup_${timestamp}.xlsx`);
 
   return exportedCount;
+}
+
+/** Result of restoring a single table from a backup JSON file. */
+interface RestoreTableResult {
+  table: string;
+  restored: number;
+  error?: string;
+}
+
+/**
+ * Restore rows from a previously downloaded backup JSON file (as produced by
+ * exportBackupFiles). Only recognized backup tables are processed; unknown keys
+ * in the file are ignored. Existing rows are matched/updated by `id` (upsert),
+ * new rows are inserted; nothing is deleted.
+ */
+async function importBackupFile(file: File): Promise<RestoreTableResult[]> {
+  const text = await file.text();
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    throw new Error('invalid-json');
+  }
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new Error('invalid-json');
+  }
+
+  const data = parsed as Record<string, unknown>;
+  const results: RestoreTableResult[] = [];
+
+  for (const table of BACKUP_TABLES) {
+    const rows = data[table];
+    if (!Array.isArray(rows) || rows.length === 0) continue;
+    try {
+      const restored = await settingsHubService.importTableRows(table, rows as Record<string, unknown>[]);
+      results.push({ table, restored });
+    } catch (err: unknown) {
+      results.push({ table, restored: 0, error: getErrorMessage(err) });
+    }
+  }
+
+  return results;
 }
 
 function renderLanguageButtons(
@@ -168,6 +206,8 @@ export default function ProjectSettings() {
   const [iqamaAlertDays, setIqamaAlertDays] = useState(90);
   const [saving, setSaving] = useState(false);
   const [backupLoading, setBackupLoading] = useState(false);
+  const [restoreLoading, setRestoreLoading] = useState(false);
+  const restoreInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const logoObjectUrlRef = useRef<string | null>(null);
 
@@ -263,6 +303,64 @@ export default function ProjectSettings() {
       toast.error(TOAST_ERROR_GENERIC, { description: getErrorMessage(err) });
     }
     setBackupLoading(false);
+  };
+
+  // Restore handler
+  const handleRestoreFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+
+    const validation = validateUploadFile(file, { allowedTypes: ['application/json'] });
+    if (!validation.valid && !file.name.toLowerCase().endsWith('.json')) {
+      toast.error(TOAST_ERROR_GENERIC, {
+        description: t(isRTL, 'من فضلك اختر ملف نسخة احتياطية بصيغة JSON.', 'Please select a JSON backup file.'),
+      });
+      return;
+    }
+
+    const confirmed = window.confirm(
+      t(
+        isRTL,
+        'سيتم استرجاع البيانات من ملف النسخة الاحتياطية. السجلات المطابقة سيتم تحديثها والسجلات الجديدة ستُضاف، ولن يتم حذف أي بيانات حالية. هل تريد المتابعة؟',
+        'Data will be restored from the backup file. Matching records will be updated and new ones added; no existing data will be deleted. Continue?',
+      ),
+    );
+    if (!confirmed) return;
+
+    setRestoreLoading(true);
+    try {
+      const results = await importBackupFile(file);
+      const totalRestored = results.reduce((sum, r) => sum + r.restored, 0);
+      const failed = results.filter(r => r.error);
+
+      if (results.length === 0) {
+        toast.error(TOAST_ERROR_GENERIC, {
+          description: t(isRTL, 'لم يتم العثور على بيانات قابلة للاسترجاع في هذا الملف.', 'No restorable data found in this file.'),
+        });
+      } else if (failed.length > 0) {
+        toast.error(TOAST_ERROR_GENERIC, {
+          description: isRTL
+            ? `تم استرجاع ${totalRestored} سجل، لكن فشل استرجاع: ${failed.map(f => f.table).join('، ')}`
+            : `Restored ${totalRestored} records, but failed for: ${failed.map(f => f.table).join(', ')}`,
+        });
+      } else {
+        toast.success(TOAST_SUCCESS_ACTION, {
+          description: isRTL
+            ? `تم استرجاع ${totalRestored} سجل من ${results.length} جدول بنجاح`
+            : `Restored ${totalRestored} records across ${results.length} tables`,
+        });
+      }
+    } catch (err: unknown) {
+      logError('[ProjectSettings] restore failed', err);
+      const isInvalidJson = err instanceof Error && err.message === 'invalid-json';
+      toast.error(TOAST_ERROR_GENERIC, {
+        description: isInvalidJson
+          ? t(isRTL, 'الملف غير صالح. من فضلك اختر ملف JSON صادر من زر تحميل النسخة الاحتياطية.', 'Invalid file. Please select a JSON file exported from the backup download button.')
+          : getErrorMessage(err),
+      });
+    }
+    setRestoreLoading(false);
   };
 
   return (
@@ -398,19 +496,48 @@ export default function ProjectSettings() {
                 {t(isRTL, 'يُصدر ملفين: JSON + Excel', 'Exports two files: JSON + Excel')}
               </p>
             </div>
-            <Button
-              onClick={handleBackup}
-              disabled={backupLoading}
-              variant="outline"
-              className="gap-2 min-w-44 flex-shrink-0"
-            >
-              {backupLoading ? (
-                <><Loader2 size={14} className="animate-spin" /> {t(isRTL, 'جاري التصدير...', 'Exporting...')}</>
-              ) : (
-                <><Download size={14} /> {t(isRTL, 'تحميل نسخة احتياطية', 'Download Backup')}</>
-              )}
-            </Button>
+            <div className="flex flex-col gap-2 min-w-44 flex-shrink-0">
+              <Button
+                onClick={handleBackup}
+                disabled={backupLoading}
+                variant="outline"
+                className="gap-2"
+              >
+                {backupLoading ? (
+                  <><Loader2 size={14} className="animate-spin" /> {t(isRTL, 'جاري التصدير...', 'Exporting...')}</>
+                ) : (
+                  <><Download size={14} /> {t(isRTL, 'تحميل نسخة احتياطية', 'Download Backup')}</>
+                )}
+              </Button>
+              <input
+                ref={restoreInputRef}
+                type="file"
+                accept="application/json,.json"
+                className="sr-only"
+                aria-label={t(isRTL, 'اختيار ملف نسخة احتياطية', 'Choose backup file')}
+                onChange={handleRestoreFileChange}
+              />
+              <Button
+                onClick={() => restoreInputRef.current?.click()}
+                disabled={restoreLoading}
+                variant="outline"
+                className="gap-2"
+              >
+                {restoreLoading ? (
+                  <><Loader2 size={14} className="animate-spin" /> {t(isRTL, 'جاري الاسترجاع...', 'Restoring...')}</>
+                ) : (
+                  <><Upload size={14} /> {t(isRTL, 'رفع نسخة احتياطية', 'Upload Backup')}</>
+                )}
+              </Button>
+            </div>
           </div>
+          <p className="text-xs text-muted-foreground mt-3">
+            {t(
+              isRTL,
+              'يقبل رفع النسخة الاحتياطية ملف JSON الصادر من زر التحميل أعلاه فقط. السجلات المطابقة (بنفس المعرّف) تُحدَّث، والجديدة تُضاف، ولا يُحذف أي شيء تلقائيًا.',
+              'Only accepts the JSON file exported by the download button above. Matching records (by ID) are updated, new ones are added, and nothing is deleted automatically.',
+            )}
+          </p>
         </div>
       )}
 

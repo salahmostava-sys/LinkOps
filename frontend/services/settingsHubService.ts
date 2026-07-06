@@ -25,6 +25,24 @@ const EXPORT_TABLE_ALLOWLIST = new Set([
 const EXPORT_MAX_ROWS = 10_000;
 const EXPORT_PAGE_SIZE = 1_000;
 
+/**
+ * Tables included in the full project backup (download + restore).
+ * Kept separate from EXPORT_TABLE_ALLOWLIST (used by the audit-log export screen),
+ * since the full backup intentionally excludes sensitive/system-only tables like
+ * `profiles`, `audit_log`, and `system_settings`.
+ */
+export const BACKUP_TABLES = [
+  'employees', 'attendance', 'advances', 'advance_installments', 'daily_orders',
+  'employee_apps', 'apps', 'salary_schemes', 'salary_records', 'external_deductions',
+  'vehicles', 'vehicle_assignments', 'alerts',
+] as const;
+
+const BACKUP_TABLE_SET = new Set<string>(BACKUP_TABLES);
+
+/** Max rows restored per table per call, and batch size for upserts. */
+const RESTORE_MAX_ROWS_PER_TABLE = 10_000;
+const RESTORE_BATCH_SIZE = 500;
+
 export const settingsHubService = {
   getCurrentUserId: async () => {
     const { data, error } = await supabase.auth.getSession();
@@ -262,5 +280,35 @@ export const settingsHubService = {
     }
 
     return allRows;
+  },
+
+  /**
+   * Restore (upsert) rows into one of the backup tables. Rows are matched by their
+   * existing `id` column (as produced by exportBackupFiles), so re-running a restore
+   * updates already-existing records instead of duplicating them. Rows that no longer
+   * have a matching table in the current schema, or that are missing an `id`, are skipped.
+   * Does NOT delete rows that exist in the database but are absent from the backup file.
+   */
+  importTableRows: async (table: string, rows: Record<string, unknown>[]): Promise<number> => {
+    if (!BACKUP_TABLE_SET.has(table)) {
+      throw toServiceError(new Error(`Table "${table}" is not allowed for restore`), 'settingsHubService.importTableRows');
+    }
+    if (!Array.isArray(rows) || rows.length === 0) return 0;
+    if (rows.length > RESTORE_MAX_ROWS_PER_TABLE) {
+      throw toServiceError(
+        new Error(`Restore limit exceeded (${RESTORE_MAX_ROWS_PER_TABLE} rows) for table "${table}".`),
+        'settingsHubService.importTableRows',
+      );
+    }
+
+    const validRows = rows.filter(r => r && typeof r === 'object' && 'id' in r && r.id != null);
+    let restored = 0;
+    for (let i = 0; i < validRows.length; i += RESTORE_BATCH_SIZE) {
+      const batch = validRows.slice(i, i + RESTORE_BATCH_SIZE);
+      const { error } = await supabase.from(table as never).upsert(batch as never, { onConflict: 'id' });
+      if (error) throw toServiceError(error, `settingsHubService.importTableRows[${table}]`);
+      restored += batch.length;
+    }
+    return restored;
   },
 };
