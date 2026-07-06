@@ -22,6 +22,8 @@ import { brandLogoSrc } from '@shared/lib/brandLogo';
 import { logError } from '@shared/lib/logger';
 import { profileService } from '@services/profileService';
 import GlobalMonthPicker from '@shared/components/Temporal/GlobalMonthPicker';
+import { usePagePresence } from '@shared/hooks/usePagePresence';
+import { PresenceAvatars } from '@shared/components/PresenceAvatars';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -55,6 +57,9 @@ const AppLayoutInner = ({ children }: Readonly<AppLayoutProps>) => { // NOSONAR:
   );
   const [pageKey, setPageKey] = useState(0);
   const prevPathRef = useRef(location.pathname);
+  
+  // تتبع المستخدمين المتواجدين في النظام بشكل عام
+  const { onlineUsers } = usePagePresence('global');
 
   useEffect(() => {
     const onStorage = () => setSidebarCollapsed(localStorage.getItem('sidebar_collapsed') === 'true');
@@ -195,8 +200,12 @@ const AppLayoutInner = ({ children }: Readonly<AppLayoutProps>) => { // NOSONAR:
             </div>
           </div>
 
-          {/* إشعارات + ثيم + مستخدم */}
+          {/* إشعارات + المتواجدون + ثيم + مستخدم */}
           <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 shrink-0 ms-auto sm:ms-0">
+            <div className="hidden sm:flex items-center me-2">
+              <PresenceAvatars users={onlineUsers} maxVisible={4} />
+            </div>
+            
             <div className="hidden sm:block">
               <GlobalMonthPicker />
             </div>

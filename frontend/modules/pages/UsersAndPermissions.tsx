@@ -85,8 +85,265 @@ function mergeMatrix(
   return out;
 }
 
+function getPermissionUpdates(matrix: Record<string, PagePermission>, userId: string, roleDefaults: Record<string, PagePermission>) {
+  return PERMISSION_PAGE_ENTRIES.map(({ key }) => {
+    const cur = matrix[key];
+    if (!cur) return Promise.resolve();
+    const def = roleDefaults[key] ?? { can_view: false, can_edit: false, can_delete: false };
+    const same =
+      cur.can_view === def.can_view && cur.can_edit === def.can_edit && cur.can_delete === def.can_delete;
+    if (same) {
+      return userPermissionService.deletePermission(userId, key);
+    }
+    return userPermissionService.upsertPermission(userId, key, cur);
+  });
+}
+
+function validateUserForm(name: string, email: string, password?: string): string | null {
+  if (!name) return 'الاسم مطلوب';
+  if (!email?.includes('@')) return 'البريد الإلكتروني غير صالح';
+  if (password !== undefined && password && password.length < 8) return 'يجب أن تكون كلمة المرور 8 أحرف على الأقل.';
+  if (password === '' && arguments.length === 3) return 'يجب أن تكون كلمة المرور 8 أحرف على الأقل.'; // For create
+  return null;
+}
+
+async function handleUserDeletion(
+  target: UserRow | null,
+  currentUserId: string | null,
+  authService: typeof import('@services/authService').authService,
+  setDeletingUserId: (id: string | null) => void,
+  setPermUserId: (id: string | null) => void,
+  setDeleteTarget: (target: null) => void,
+  refetchUsersData: () => Promise<unknown>,
+  toast: (props: { title: string; description?: string; variant?: 'default' | 'destructive' }) => void,
+  permUserId: string | null
+) {
+  if (!target) return;
+  if (target.id === currentUserId) {
+    toast({
+      title: 'غير مسموح',
+      description: 'لا يمكن حذف الحساب الحالي.',
+      variant: 'destructive',
+    });
+    return;
+  }
+
+  setDeletingUserId(target.id);
+  try {
+    await authService.deleteManagedUser(target.id);
+    toast({ title: 'تم حذف المستخدم بنجاح' });
+    if (permUserId === target.id) {
+      setPermUserId(null);
+    }
+    setDeleteTarget(null);
+    await refetchUsersData();
+  } catch (err: unknown) {
+    const message = getErrorMessage(err, 'تعذر حذف المستخدم');
+    toast({
+      title: 'فشل حذف المستخدم',
+      description: message,
+      variant: 'destructive',
+    });
+  } finally {
+    setDeletingUserId(null);
+  }
+}
+
 interface UsersAndPermissionsProps {
   embedded?: boolean;
+}
+
+interface UsersTableProps {
+  rows: UserRow[];
+  canEdit: boolean;
+  canDelete: boolean;
+  currentUserId: string | null;
+  savingId: string | null;
+  deletingUserId: string | null;
+  updateRole: (id: string, role: AppRole) => void;
+  setDeleteTarget: (target: UserRow) => void;
+  openEditModal: (target: UserRow) => void;
+}
+
+function UsersTable({ rows, canEdit, canDelete, currentUserId, savingId, deletingUserId, updateRole, setDeleteTarget, openEditModal }: UsersTableProps) {
+  return (
+    <table className="w-full text-sm">
+      <thead className="bg-muted/40">
+        <tr>
+          <th className="ta-th">الاسم</th>
+          <th className="ta-th">البريد الإلكتروني</th>
+          <th className="ta-th">الحالة</th>
+          <th className="ta-th">الدور</th>
+          <th className="ta-th">الإجراءات</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((row) => (
+          <tr key={row.id} className="border-t">
+            <td className="ta-td">{row.name}</td>
+            <td className="ta-td" dir="ltr" style={{ textAlign: 'right' }}>{row.email || '-'}</td>
+            <td className="ta-td">{row.isActive ? 'نشط' : 'موقوف'}</td>
+            <td className="ta-td">
+              <div className="flex items-center gap-2">
+                <Select
+                  value={row.role}
+                  onValueChange={(value) => updateRole(row.id, value as AppRole)}
+                  disabled={!canEdit || savingId === row.id}
+                >
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue placeholder="اختر الدور" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ROLES.map((r) => (
+                      <SelectItem key={r} value={r}>
+                        {ROLE_LABELS_AR[r]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {savingId === row.id && <Save size={14} className="animate-pulse text-muted-foreground" />}
+              </div>
+            </td>
+            <td className="ta-td">
+              {canDelete ? (
+                <>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 text-destructive hover:text-destructive"
+                  disabled={row.id === currentUserId || deletingUserId === row.id}
+                  onClick={() => setDeleteTarget(row)}
+                  title={row.id === currentUserId ? 'لا يمكن حذف الحساب الحالي' : 'حذف المستخدم'}
+                >
+                  <Trash2 size={14} className="text-destructive" />
+                  حذف
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                  disabled={savingId === row.id}
+                  onClick={() => openEditModal(row)}
+                  title="تعديل المستخدم"
+                >
+                  <Pencil size={14} />
+                  تعديل
+                </Button>
+              </>
+              ) : (
+                <span className="text-muted-foreground">—</span>
+              )}
+            </td>
+          </tr>
+        ))}
+        {rows.length === 0 && (
+          <tr>
+            <td colSpan={4} className="ta-td text-muted-foreground">
+              لا يوجد مستخدمون.
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+  );
+}
+
+function CreateUserDialog({
+  open,
+  setOpen,
+  creatingUser,
+  newUserForm,
+  updateNewUserField,
+  resetNewUserForm,
+  createUser
+}: {
+  open: boolean;
+  setOpen: (o: boolean) => void;
+  creatingUser: boolean;
+  newUserForm: typeof EMPTY_NEW_USER_FORM;
+  updateNewUserField: <K extends keyof typeof EMPTY_NEW_USER_FORM>(key: K, value: (typeof EMPTY_NEW_USER_FORM)[K]) => void;
+  resetNewUserForm: () => void;
+  createUser: () => void;
+}) {
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        setOpen(isOpen);
+        if (!isOpen && !creatingUser) resetNewUserForm();
+      }}
+    >
+      <DialogContent className="sm:max-w-md" dir="rtl">
+        <DialogHeader>
+          <DialogTitle>إضافة مستخدم جديد</DialogTitle>
+          <DialogDescription>
+            سيتم إنشاء حساب جديد يمكنه تسجيل الدخول مباشرة، ثم يُسند له الدور الذي تختاره.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <BaseInput label="الاسم" id="new-user-name"
+              value={newUserForm.name}
+              onChange={(event) => updateNewUserField('name', event.target.value)}
+              placeholder="اسم المستخدم"
+              disabled={creatingUser} />
+
+          <BaseInput label="البريد الإلكتروني" id="new-user-email"
+              type="email"
+              value={newUserForm.email}
+              onChange={(event) => updateNewUserField('email', event.target.value)}
+              placeholder="user@example.com"
+              disabled={creatingUser} />
+
+          <BaseInput label="كلمة المرور" id="new-user-password"
+              type="password"
+              value={newUserForm.password}
+              onChange={(event) => updateNewUserField('password', event.target.value)}
+              placeholder="8 أحرف على الأقل"
+              disabled={creatingUser} />
+
+          <div className="space-y-2">
+            <Label>الدور</Label>
+            <Select
+              value={newUserForm.role}
+              onValueChange={(value) => updateNewUserField('role', value as AppRole)}
+              disabled={creatingUser}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="اختر الدور" />
+              </SelectTrigger>
+              <SelectContent>
+                {ROLES.map((role) => (
+                  <SelectItem key={role} value={role}>
+                    {ROLE_LABELS_AR[role]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <DialogFooter className="gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setOpen(false);
+              resetNewUserForm();
+            }}
+            disabled={creatingUser}
+          >
+            إلغاء
+          </Button>
+          <Button type="button" onClick={() => { createUser(); }} disabled={creatingUser}>
+            {creatingUser ? 'جارٍ الإنشاء...' : 'إنشاء المستخدم'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
 }
 
 const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsProps>) => {
@@ -228,19 +485,7 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
     try {
       const roleDefaults = DEFAULT_PERMISSIONS[selectedUser.role] || DEFAULT_PERMISSIONS.viewer;
       // Execute all permission updates in parallel instead of sequentially
-      await Promise.all(
-        PERMISSION_PAGE_ENTRIES.map(({ key }) => {
-          const cur = matrix[key];
-          if (!cur) return Promise.resolve();
-          const def = roleDefaults[key] ?? { can_view: false, can_edit: false, can_delete: false };
-          const same =
-            cur.can_view === def.can_view && cur.can_edit === def.can_edit && cur.can_delete === def.can_delete;
-          if (same) {
-            return userPermissionService.deletePermission(selectedUser.id, key);
-          }
-          return userPermissionService.upsertPermission(selectedUser.id, key, cur);
-        })
-      );
+      await Promise.all(getPermissionUpdates(matrix, selectedUser.id, roleDefaults));
       toast({ title: 'تم حفظ الصلاحيات' });
       await loadMatrix(selectedUser.id, selectedUser.role);
     } catch (err: unknown) {
@@ -268,20 +513,9 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
     const email = newUserForm.email.trim().toLowerCase();
     const password = newUserForm.password;
 
-    if (!name) {
-      toast({ title: 'الاسم مطلوب', variant: 'destructive' });
-      return;
-    }
-    if (!email?.includes('@')) {
-      toast({ title: 'البريد الإلكتروني غير صالح', variant: 'destructive' });
-      return;
-    }
-    if (password.length < 8) {
-      toast({
-        title: 'كلمة المرور ضعيفة',
-        description: 'يجب أن تكون كلمة المرور 8 أحرف على الأقل.',
-        variant: 'destructive',
-      });
+    const errorMsg = validateUserForm(name, email, password);
+    if (errorMsg) {
+      toast({ title: errorMsg, variant: 'destructive' });
       return;
     }
 
@@ -329,16 +563,9 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
     const email = editUserForm.email.trim().toLowerCase();
     const password = editUserForm.password;
 
-    if (!name) {
-      toast({ title: 'الاسم مطلوب', variant: 'destructive' });
-      return;
-    }
-    if (!email?.includes('@')) {
-      toast({ title: 'البريد الإلكتروني غير صالح', variant: 'destructive' });
-      return;
-    }
-    if (password && password.length < 8) {
-      toast({ title: 'كلمة المرور يجب أن تكون 8 أحرف على الأقل', variant: 'destructive' });
+    const errorMsg = validateUserForm(name, email, password || undefined);
+    if (errorMsg) {
+      toast({ title: errorMsg, variant: 'destructive' });
       return;
     }
 
@@ -368,34 +595,17 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
 
   const deleteUser = async () => {
     if (!canDelete || !deleteTarget) return;
-    if (deleteTarget.id === currentUserId) {
-      toast({
-        title: 'غير مسموح',
-        description: 'لا يمكن حذف الحساب الحالي.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    setDeletingUserId(deleteTarget.id);
-    try {
-      await authService.deleteManagedUser(deleteTarget.id);
-      toast({ title: 'تم حذف المستخدم بنجاح' });
-      if (permUserId === deleteTarget.id) {
-        setPermUserId(null);
-      }
-      setDeleteTarget(null);
-      await refetchUsersData();
-    } catch (err: unknown) {
-      const message = getErrorMessage(err, 'تعذر حذف المستخدم');
-      toast({
-        title: 'فشل حذف المستخدم',
-        description: message,
-        variant: 'destructive',
-      });
-    } finally {
-      setDeletingUserId(null);
-    }
+    await handleUserDeletion(
+      deleteTarget,
+      currentUserId,
+      authService,
+      setDeletingUserId,
+      setPermUserId,
+      setDeleteTarget,
+      refetchUsersData,
+      toast,
+      permUserId
+    );
   };
 
   if (authLoading) {
@@ -460,86 +670,17 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
 
         <TabsContent value="users" className="space-y-4">
           <div className="rounded-xl border overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/40">
-                <tr>
-                  <th className="ta-th">الاسم</th>
-                  <th className="ta-th">البريد الإلكتروني</th>
-                  <th className="ta-th">الحالة</th>
-                  <th className="ta-th">الدور</th>
-                  <th className="ta-th">الإجراءات</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((row) => (
-                  <tr key={row.id} className="border-t">
-                    <td className="ta-td">{row.name}</td>
-                    <td className="ta-td" dir="ltr" style={{ textAlign: 'right' }}>{row.email || '-'}</td>
-                    <td className="ta-td">{row.isActive ? 'نشط' : 'موقوف'}</td>
-                    <td className="ta-td">
-                      <div className="flex items-center gap-2">
-                        <Select
-                          value={row.role}
-                          onValueChange={(value) => updateRole(row.id, value as AppRole)}
-                          disabled={!canEdit || savingId === row.id}
-                        >
-                          <SelectTrigger className="w-[200px]">
-                            <SelectValue placeholder="اختر الدور" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {ROLES.map((r) => (
-                              <SelectItem key={r} value={r}>
-                                {ROLE_LABELS_AR[r]}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        {savingId === row.id && <Save size={14} className="animate-pulse text-muted-foreground" />}
-                      </div>
-                    </td>
-                    <td className="ta-td">
-                      {canDelete ? (
-                        <>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="gap-2 text-destructive hover:text-destructive"
-                          disabled={row.id === currentUserId || deletingUserId === row.id}
-                          onClick={() => setDeleteTarget(row)}
-                          title={row.id === currentUserId ? 'لا يمكن حذف الحساب الحالي' : 'حذف المستخدم'}
-                        >
-                          <Trash2 size={14} className="text-destructive" />
-                          حذف
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="gap-2"
-                          disabled={savingId === row.id}
-                          onClick={() => openEditModal(row)}
-                          title="تعديل المستخدم"
-                        >
-                          <Pencil size={14} />
-                          تعديل
-                        </Button>
-                      </>
-                      ) : (
-                        <span className="text-muted-foreground">—</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-                {rows.length === 0 && (
-                  <tr>
-                    <td colSpan={4} className="ta-td text-muted-foreground">
-                      لا يوجد مستخدمون.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+            <UsersTable
+              rows={rows}
+              canEdit={canEdit}
+              canDelete={canDelete}
+              currentUserId={currentUserId}
+              savingId={savingId}
+              deletingUserId={deletingUserId}
+              updateRole={updateRole}
+              setDeleteTarget={setDeleteTarget}
+              openEditModal={openEditModal}
+            />
           </div>
         </TabsContent>
 
@@ -634,81 +775,15 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
         </TabsContent>
       </Tabs>
 
-      <Dialog
+      <CreateUserDialog
         open={createUserOpen}
-        onOpenChange={(open) => {
-          setCreateUserOpen(open);
-          if (!open && !creatingUser) resetNewUserForm();
-        }}
-      >
-        <DialogContent className="sm:max-w-md" dir="rtl">
-          <DialogHeader>
-            <DialogTitle>إضافة مستخدم جديد</DialogTitle>
-            <DialogDescription>
-              سيتم إنشاء حساب جديد يمكنه تسجيل الدخول مباشرة، ثم يُسند له الدور الذي تختاره.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <BaseInput label="الاسم" id="new-user-name"
-                value={newUserForm.name}
-                onChange={(event) => updateNewUserField('name', event.target.value)}
-                placeholder="اسم المستخدم"
-                disabled={creatingUser} />
-
-            <BaseInput label="البريد الإلكتروني" id="new-user-email"
-                type="email"
-                value={newUserForm.email}
-                onChange={(event) => updateNewUserField('email', event.target.value)}
-                placeholder="user@example.com"
-                disabled={creatingUser} />
-
-            <BaseInput label="كلمة المرور" id="new-user-password"
-                type="password"
-                value={newUserForm.password}
-                onChange={(event) => updateNewUserField('password', event.target.value)}
-                placeholder="8 أحرف على الأقل"
-                disabled={creatingUser} />
-
-            <div className="space-y-2">
-              <Label>الدور</Label>
-              <Select
-                value={newUserForm.role}
-                onValueChange={(value) => updateNewUserField('role', value as AppRole)}
-                disabled={creatingUser}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="اختر الدور" />
-                </SelectTrigger>
-                <SelectContent>
-                  {ROLES.map((role) => (
-                    <SelectItem key={role} value={role}>
-                      {ROLE_LABELS_AR[role]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <DialogFooter className="gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                setCreateUserOpen(false);
-                resetNewUserForm();
-              }}
-              disabled={creatingUser}
-            >
-              إلغاء
-            </Button>
-            <Button type="button" onClick={() => { createUser(); }} disabled={creatingUser}>
-              {creatingUser ? 'جارٍ الإنشاء...' : 'إنشاء المستخدم'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        setOpen={setCreateUserOpen}
+        creatingUser={creatingUser}
+        newUserForm={newUserForm}
+        updateNewUserField={updateNewUserField}
+        resetNewUserForm={resetNewUserForm}
+        createUser={createUser}
+      />
 
       <Dialog
         open={editTarget !== null}
