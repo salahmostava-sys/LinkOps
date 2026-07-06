@@ -143,6 +143,24 @@ describe('employeeUtils', () => {
       const result = applyEmployeeFilters(employees, { national_id: '1234567890' });
       expect(result).toHaveLength(1);
     });
+
+    it('should filter by birth_date, probation_end_date, and residency_combined', () => {
+      // modify employee 2 so it doesn't match employee 1's fields
+      employees[1].birth_date = '1980-01-01';
+      employees[1].residency_expiry = '2023-01-01';
+      employees[1].email = 'other@test.com';
+
+      expect(applyEmployeeFilters(employees, { birth_date: '1990-05-20' })).toHaveLength(1);
+      expect(applyEmployeeFilters(employees, { probation_end_date: '2024-04-15' })).toHaveLength(0);
+      expect(applyEmployeeFilters(employees, { residency_combined: '2025-12-31' })).toHaveLength(1);
+      expect(applyEmployeeFilters(employees, { health_insurance_expiry: '2026-01-01' })).toHaveLength(0);
+      expect(applyEmployeeFilters(employees, { license_expiry: '2026-01-01' })).toHaveLength(0);
+    });
+
+    it('should filter by email and bank_account_number', () => {
+      expect(applyEmployeeFilters(employees, { email: 'test@example.com' })).toHaveLength(1);
+      expect(applyEmployeeFilters(employees, { bank_account_number: 'SA1234' })).toHaveLength(0);
+    });
   });
 
   describe('sortEmployees', () => {

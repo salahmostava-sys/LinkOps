@@ -40,3 +40,36 @@ describe('logger monitoring smoke', () => {
     expect(registeredHandlers.filter((name) => name === 'unhandledrejection')).toHaveLength(1);
   });
 });
+
+describe('logError and runSafe', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    vi.resetModules();
+    sentryMocks.captureException.mockClear();
+    sentryMocks.captureMessage.mockClear();
+  });
+
+  it('logError calls logger.error by default', async () => {
+    const { logError } = await import('./logger');
+    logError('test error');
+    expect(sentryMocks.captureException).toHaveBeenCalled();
+  });
+
+  it('logError calls logger.warn when level is warn', async () => {
+    const { logError } = await import('./logger');
+    logError('test warn', undefined, { level: 'warn' });
+    expect(sentryMocks.captureMessage).toHaveBeenCalled();
+  });
+
+  it('runSafe handles rejected promises', async () => {
+    const { runSafe } = await import('./logger');
+    const rejected = Promise.reject(new Error('fail'));
+    
+    runSafe(rejected, 'async task');
+    
+    // Wait a tick for catch
+    await new Promise(r => setTimeout(r, 0));
+    
+    expect(sentryMocks.captureMessage).toHaveBeenCalled();
+  });
+});

@@ -201,4 +201,106 @@ describe('orderService', () => {
       await expect(orderService.unlockMonth('2024-01')).resolves.toBeUndefined();
     });
   });
+
+  describe('month locking', () => {
+    it('getMonthLockStatus', async () => {
+      tableResults['locked_months'] = { data: { id: 1 }, error: null };
+      const res = await orderService.getMonthLockStatus('2026-03');
+      expect(res).toEqual({ locked: true });
+      
+      tableResults['locked_months'] = { data: null, error: null };
+      const res2 = await orderService.getMonthLockStatus('2026-04');
+      expect(res2).toEqual({ locked: false });
+    });
+
+    it('lockMonth', async () => {
+      tableResults['locked_months'] = { data: null, error: null };
+      await orderService.lockMonth('2026-03');
+      expect(fromMock).toHaveBeenCalledWith('locked_months');
+    });
+
+    it('unlockMonth', async () => {
+      tableResults['locked_months'] = { data: null, error: null };
+      await orderService.unlockMonth('2026-03');
+      expect(fromMock).toHaveBeenCalledWith('locked_months');
+    });
+  });
+
+  describe('fetch helpers', () => {
+    it('getOrdersByEmployeeMonth', async () => {
+      tableResults['daily_orders'] = { data: [{ id: 1 }], error: null };
+      const res = await orderService.getOrdersByEmployeeMonth('emp1', '2026-03');
+      expect(res).toEqual([{ id: 1 }]);
+    });
+
+    it('getActiveApps', async () => {
+      tableResults['apps'] = { data: [{ id: 'app1', name: 'App 1' }], error: null };
+      const res = await orderService.getActiveApps();
+      expect(res).toEqual([{ id: 'app1', name: 'App 1' }]);
+    });
+
+    it('throws when getActiveApps fails', async () => {
+      tableResults['apps'] = { data: null, error: new Error('getActiveApps failed') };
+      await expect(orderService.getActiveApps()).rejects.toThrow('getActiveApps failed');
+    });
+
+    it('getEmployeeAppAssignments', async () => {
+      tableResults['employee_apps'] = { data: [{ employee_id: 'emp1', app_id: 'app1' }], error: null };
+      const res = await orderService.getEmployeeAppAssignments();
+      expect(res).toEqual([{ employee_id: 'emp1', app_id: 'app1' }]);
+    });
+
+    it('throws when getEmployeeAppAssignments fails', async () => {
+      tableResults['employee_apps'] = { data: null, error: new Error('getEmployeeAppAssignments failed') };
+      await expect(orderService.getEmployeeAppAssignments()).rejects.toThrow('getEmployeeAppAssignments failed');
+    });
+
+    it('getSalaryContextOrdersByMonth', async () => {
+      tableResults['daily_orders'] = { data: [{ employee_id: '1', app_id: '2', orders_count: 5 }], error: null };
+      const res = await orderService.getSalaryContextOrdersByMonth('2026-03');
+      expect(res.length).toBe(1);
+    });
+
+    it('getByMonth', async () => {
+      tableResults['daily_orders'] = { data: [{ id: 1 }], error: null };
+      const res = await orderService.getByMonth('2026-03', { employeeId: 'emp1' });
+      expect(res.length).toBe(1);
+    });
+
+    it('getAppTargets', async () => {
+      tableResults['app_targets'] = { data: [{ app_id: 'app1', target_value: 100 }], error: null };
+      const res = await orderService.getAppTargets('2026-03');
+      expect(res[0].app_id).toBe('app1');
+    });
+
+    it('getBaseEmployees', async () => {
+      tableResults['employees'] = { data: [{ id: 'emp1' }], error: null };
+      const res = await orderService.getBaseEmployees();
+      expect(res.length).toBe(1);
+    });
+
+    it('delete', async () => {
+      tableResults['daily_orders'] = { data: null, error: null };
+      await orderService.delete('ord1');
+      expect(fromMock).toHaveBeenCalledWith('daily_orders');
+    });
+  });
+
+  describe('getBaseEmployees looping', () => {
+    it('loops when rows.length === PAGE_SIZE', async () => {
+      let callCount = 0;
+      tableResults['employees'] = {
+        get data() {
+          callCount++;
+          if (callCount === 1) return Array.from({ length: 1000 }).map((_, i) => ({ id: `emp${i}` }));
+          return [];
+        },
+        error: null
+      };
+
+      const res = await orderService.getBaseEmployees();
+      expect(res.length).toBe(1000);
+      expect(callCount).toBe(2);
+    });
+  });
 });

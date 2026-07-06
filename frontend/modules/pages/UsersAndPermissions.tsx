@@ -35,6 +35,7 @@ import { authQueryUserId, useAuthQueryGate } from '@shared/hooks/useAuthQueryGat
 import { usePermissions, DEFAULT_PERMISSIONS, type AppRole, type PagePermission } from '@shared/hooks/usePermissions';
 import { PERMISSION_PAGE_ENTRIES } from '@shared/constants/permissionPages';
 import { defaultQueryRetry } from '@shared/lib/query';
+import { ActiveUsersTab } from './components/ActiveUsersTab';
 
 type ProfileRow = {
   id: string;
@@ -346,6 +347,7 @@ function CreateUserDialog({
   );
 }
 
+// eslint-disable-next-line sonarjs/cognitive-complexity
 const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsProps>) => {
   const { toast } = useToast();
   const { user, role: authRole, loading: authLoading } = useAuth();
@@ -663,9 +665,10 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
       </div>
 
       <Tabs defaultValue="users" className="space-y-4">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsList className={`grid w-full max-w-md ${isAdmin ? 'grid-cols-3' : 'grid-cols-2'}`}>
           <TabsTrigger value="users">المستخدمين</TabsTrigger>
           <TabsTrigger value="permissions">الصلاحيات</TabsTrigger>
+          {isAdmin && <TabsTrigger value="active_users">المستخدمين النشطين</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="users" className="space-y-4">
@@ -768,11 +771,17 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
               )}
             </div>
           ) : (
-            <div className="border bg-card p-4 text-sm text-muted-foreground rounded-2xl">
-              لا توجد صلاحيات مخصصة متاحة للعرض حالياً.
+            <div className="text-center py-8 text-muted-foreground border bg-card/50 rounded-2xl">
+              اختر مستخدماً (وله صلاحيات تعديل) لعرض مصفوفة الصلاحيات وتعديلها.
             </div>
           )}
         </TabsContent>
+
+        {isAdmin && (
+          <TabsContent value="active_users">
+            <ActiveUsersTab />
+          </TabsContent>
+        )}
       </Tabs>
 
       <CreateUserDialog

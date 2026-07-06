@@ -110,6 +110,11 @@ describe('advanceService', () => {
       await advanceService.delete('1');
       expect(fromMock).toHaveBeenCalledWith('advances');
     });
+
+    it('throws when delete fails', async () => {
+      tableResults.advances = { data: null, error: new Error('delete fail') };
+      await expect(advanceService.delete('1')).rejects.toThrow('delete fail');
+    });
   });
 
   describe('deleteMany', () => {
@@ -117,6 +122,11 @@ describe('advanceService', () => {
       tableResults.advances = { data: null, error: null };
       await advanceService.deleteMany(['1']);
       expect(fromMock).toHaveBeenCalledWith('advances');
+    });
+
+    it('throws when deleteMany fails', async () => {
+      tableResults.advances = { data: null, error: new Error('deleteMany fail') };
+      await expect(advanceService.deleteMany(['1'])).rejects.toThrow('deleteMany fail');
     });
   });
 
@@ -126,6 +136,11 @@ describe('advanceService', () => {
       await advanceService.writeOffMany(['1'], 'reason');
       expect(fromMock).toHaveBeenCalledWith('advances');
     });
+
+    it('throws when writeOffMany fails', async () => {
+      tableResults.advances = { data: null, error: new Error('writeOffMany fail') };
+      await expect(advanceService.writeOffMany(['1'], 'reason')).rejects.toThrow('writeOffMany fail');
+    });
   });
 
   describe('restoreWrittenOffMany', () => {
@@ -134,6 +149,11 @@ describe('advanceService', () => {
       await advanceService.restoreWrittenOffMany(['1']);
       expect(fromMock).toHaveBeenCalledWith('advances');
     });
+
+    it('throws when restore fails', async () => {
+      tableResults.advances = { data: null, error: new Error('restore fail') };
+      await expect(advanceService.restoreWrittenOffMany(['1'])).rejects.toThrow('restore fail');
+    });
   });
 
   describe('getInstallments', () => {
@@ -141,6 +161,11 @@ describe('advanceService', () => {
       tableResults.advance_installments = { data: [{ id: 'i1' }], error: null };
       const res = await advanceService.getInstallments('a1');
       expect(res).toEqual([{ id: 'i1' }]);
+    });
+
+    it('throws when getInstallments fails', async () => {
+      tableResults.advance_installments = { data: null, error: new Error('getInstallments fail') };
+      await expect(advanceService.getInstallments('a1')).rejects.toThrow('getInstallments fail');
     });
   });
 

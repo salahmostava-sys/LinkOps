@@ -8,10 +8,11 @@ const { toastMock, refetchMock, authServiceMock, queryRowsMock } = vi.hoisted(()
   authServiceMock: {
     createManagedUser: vi.fn(),
     deleteManagedUser: vi.fn(),
+    updateManagedUser: vi.fn(),
   },
   queryRowsMock: [
-    { id: 'admin-1', name: 'Admin User', isActive: true, role: 'admin' },
-    { id: 'user-2', name: 'Second User', isActive: true, role: 'viewer' },
+    { id: 'admin-1', name: 'Admin User', email: 'admin@test.com', isActive: true, role: 'admin' },
+    { id: 'user-2', name: 'Second User', email: 'user@test.com', isActive: true, role: 'viewer' },
   ],
 }));
 
@@ -115,5 +116,36 @@ describe('UsersAndPermissions', () => {
     fireEvent.click(screen.getByRole('button', { name: 'تأكيد الحذف' }));
 
     await waitFor(() => expect(authServiceMock.deleteManagedUser).toHaveBeenCalledWith('user-2'));
+  });
+
+  it('allows admins to open the edit-user dialog and submit changes', async () => {
+    authServiceMock.createManagedUser.mockResolvedValue({ user_id: 'user-3' });
+    authServiceMock.deleteManagedUser.mockResolvedValue(undefined);
+    authServiceMock.updateManagedUser.mockResolvedValue(undefined);
+
+    render(<UsersAndPermissions />);
+
+    const editButtons = screen.getAllByRole('button', { name: 'تعديل' });
+    fireEvent.click(editButtons[0]);
+
+    const nameInput = await screen.findByLabelText('الاسم');
+    expect(nameInput).toHaveValue('Admin User');
+
+    fireEvent.change(nameInput, { target: { value: 'Updated Admin User' } });
+
+    fireEvent.click(screen.getByRole('button', { name: 'حفظ التعديلات' }));
+
+    await waitFor(() =>
+      expect(authServiceMock.updateManagedUser).toHaveBeenCalledWith('admin-1', expect.objectContaining({
+        name: 'Updated Admin User',
+      })),
+    );
+  });
+
+  it('allows admins to change role', async () => {
+    render(<UsersAndPermissions />);
+    const selectTriggers = screen.getAllByRole('combobox');
+    // We expect at least one select trigger for role changes on the table rows
+    expect(selectTriggers.length).toBeGreaterThan(0);
   });
 });

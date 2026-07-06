@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cn, safeStr } from './utils';
+import { cn, safeStr, fmtNum, fmtCurrency } from './utils';
 
 describe('cn', () => {
   it('merges class names with tailwind-merge', () => {
@@ -58,3 +58,33 @@ describe('safeStr — [object Object] guard for salary slips', () => {
   });
 });
 
+describe('fmtNum', () => {
+  it('formats numbers properly', () => {
+    expect(fmtNum(12500)).toBe('12,500');
+    expect(fmtNum(12500.5)).toBe('12,500.5');
+  });
+
+  it('handles decimals option', () => {
+    expect(fmtNum(12500.555, 2)).toBe('12,500.56');
+    expect(fmtNum(12500, 2)).toBe('12,500.00');
+  });
+
+  it('returns dash for null/undefined/invalid', () => {
+    expect(fmtNum(null)).toBe('—');
+    expect(fmtNum(undefined)).toBe('—');
+    expect(fmtNum(NaN)).toBe('—');
+    expect(fmtNum(Infinity)).toBe('—');
+  });
+});
+
+describe('fmtCurrency', () => {
+  it('formats currency without decimals', () => {
+    expect(fmtCurrency(1500)).toBe('1,500');
+    expect(fmtCurrency(1500.9)).toBe('1,501');
+  });
+
+  it('returns dash for null/undefined', () => {
+    expect(fmtCurrency(null)).toBe('—');
+    expect(fmtCurrency(undefined)).toBe('—');
+  });
+});
