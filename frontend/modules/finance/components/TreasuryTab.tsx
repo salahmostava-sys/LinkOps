@@ -8,7 +8,6 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@shared/components/ui/alert-dialog';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@shared/components/ui/dialog';
 import { Landmark, Wallet, Banknote, ArrowLeftRight, Paperclip, ArrowUpRight, ArrowDownRight, Trash2, Pencil, Loader2, Download } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { storageService } from '@services/storageService';
@@ -37,6 +36,7 @@ export function TreasuryTab() {
   } = useTreasury(from, to);
 
   // New Transaction Form State
+  const [isAddingRow, setIsAddingRow] = useState(false);
   const [type, setType] = useState<TreasuryTransactionType>('expense');
   const [accountId, setAccountId] = useState('');
   const [categoryId, setCategoryId] = useState('');
@@ -44,6 +44,7 @@ export function TreasuryTab() {
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [file, setFile] = useState<File | null>(null);
+  const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
 
   // Delete & Edit confirmation state
   const [deleteTarget, setDeleteTarget] = useState<TreasuryTransaction | null>(null);
@@ -117,12 +118,13 @@ export function TreasuryTab() {
         amount: Number(amount),
         description: description || null,
         attachment_url,
-        transaction_date: format(new Date(), 'yyyy-MM-dd'),
+        transaction_date: date,
       });
 
       setAmount('');
       setDescription('');
       setFile(null);
+      setIsAddingRow(false);
       toast.success('تم تسجيل العملية بنجاح');
     } catch {
       toast.error('فشل في تسجيل العملية');
@@ -174,13 +176,16 @@ export function TreasuryTab() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="space-y-6">
 
         {/* ── Ledger Table (سجل الحركة) ──────────────── */}
-        <div className="lg:col-span-2 bg-card shadow-sm border border-border rounded-xl flex flex-col">
+        <div className="bg-card shadow-sm border border-border rounded-xl flex flex-col">
           <div className="p-4 border-b border-border/50 flex flex-wrap items-center justify-between gap-3 bg-muted/20">
             <h3 className="font-bold flex items-center gap-2">سجل الحركة (دفتر الأستاذ)</h3>
             <div className="flex items-center gap-2">
+              <Button onClick={() => setIsAddingRow(true)} disabled={isAddingRow} size="sm" className="h-8 gap-1">
+                <span className="text-lg leading-none">+</span> تسجيل عملية
+              </Button>
               <Input type="date" value={from} onChange={e => setFrom(e.target.value)} className="h-8 text-xs w-32" />
               <span className="text-xs text-muted-foreground">إلى</span>
               <Input type="date" value={to} onChange={e => setTo(e.target.value)} className="h-8 text-xs w-32" />
@@ -192,163 +197,280 @@ export function TreasuryTab() {
               <thead className="bg-muted/40 text-xs">
                 <tr>
                   <th className="ta-th w-10">م</th>
-                  <th className="ta-th w-24">التاريخ</th>
+                  <th className="ta-th w-32">التاريخ</th>
                   <th className="ta-th">البيان</th>
-                  <th className="ta-th">الحساب</th>
-                  <th className="ta-th">البند</th>
-                  <th className="ta-th w-24">مدين (إيراد)</th>
-                  <th className="ta-th w-24">دائن (مصروف)</th>
+                  <th className="ta-th w-40">الحساب (ونوع العملية)</th>
+                  <th className="ta-th w-40">البند</th>
+                  <th className="ta-th w-28">مدين (إيراد)</th>
+                  <th className="ta-th w-28">دائن (مصروف)</th>
                   <th className="ta-th w-12">المرفق</th>
                   <th className="ta-th w-24">إجراءات</th>
                 </tr>
               </thead>
               <tbody>
+                {isAddingRow && (
+                  <tr className="border-b-2 border-primary/20 bg-primary/5">
+                    <td className="ta-td align-top text-center text-xs text-muted-foreground pt-3">
+                      *
+                    </td>
+                    <td className="ta-td align-top">
+                      <Input type="date" value={date} onChange={e => setDate(e.target.value)} className="h-8 text-xs px-2" />
+                    </td>
+                    <td className="ta-td align-top">
+                      <Input value={description} onChange={e => setDescription(e.target.value)} placeholder="وصف..." className="h-8 text-xs px-2" />
+                    </td>
+                    <td className="ta-td align-top space-y-1.5">
+                      <select value={type} onChange={e => {
+                        setType(e.target.value as TreasuryTransactionType);
+                        if (e.target.value === 'transfer') setCategoryId('');
+                        else setTransferToId('');
+                      }} className="w-full h-8 text-xs rounded border border-input bg-background px-2">
+                        <option value="expense">مصروف</option>
+                        <option value="income">إيراد</option>
+                        <option value="transfer">تحويل</option>
+                      </select>
+                      <select value={accountId} onChange={e => setAccountId(e.target.value)} className="w-full h-8 text-xs rounded border border-input bg-background px-2">
+                        <option value="">{type === 'transfer' ? 'من حساب...' : 'الحساب...'}</option>
+                        {accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+                      </select>
+                    </td>
+                    <td className="ta-td align-top pt-3">
+                      {type === 'transfer' ? (
+                        <select value={transferToId} onChange={e => setTransferToId(e.target.value)} className="w-full h-8 text-xs rounded border border-input bg-background px-2">
+                          <option value="">إلى حساب...</option>
+                          {accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+                        </select>
+                      ) : (
+                        <select value={categoryId} onChange={e => setCategoryId(e.target.value)} className="w-full h-8 text-xs rounded border border-input bg-background px-2">
+                          <option value="">البند...</option>
+                          {categories.filter(c => c.type === type).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                        </select>
+                      )}
+                    </td>
+                    <td className="ta-td align-top pt-3">
+                      <Input 
+                        type="number" min="0" placeholder="0" className="h-8 text-xs px-2 text-center" 
+                        value={type === 'income' ? amount : ''}
+                        onChange={e => {
+                          if (type !== 'income') setType('income');
+                          setAmount(e.target.value);
+                        }} 
+                      />
+                    </td>
+                    <td className="ta-td align-top pt-3">
+                      <Input 
+                        type="number" min="0" placeholder="0" className="h-8 text-xs px-2 text-center" 
+                        value={type === 'expense' || type === 'transfer' ? amount : ''}
+                        onChange={e => {
+                          if (type === 'income') setType('expense'); // Default to expense if typing here
+                          setAmount(e.target.value);
+                        }} 
+                      />
+                    </td>
+                    <td className="ta-td align-top pt-3">
+                      <label className="flex items-center justify-center h-8 w-8 mx-auto rounded border cursor-pointer hover:bg-muted transition-colors relative" title="إرفاق ملف">
+                        <Paperclip size={14} className={file ? 'text-primary' : 'text-muted-foreground'} />
+                        <input type="file" className="hidden" onChange={e => setFile(e.target.files?.[0] || null)} accept="image/*,.pdf" />
+                        {file && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-primary rounded-full" />}
+                      </label>
+                    </td>
+                    <td className="ta-td align-top pt-3">
+                      <div className="flex items-center gap-1 justify-center">
+                        <Button 
+                          onClick={handleAddTransaction} 
+                          disabled={isCreatingTransaction || !accountId || !amount} 
+                          size="icon" variant="ghost" className="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                        >
+                          {isCreatingTransaction ? <Loader2 size={14} className="animate-spin" /> : <span className="text-sm font-bold">✔</span>}
+                        </Button>
+                        <Button 
+                          onClick={() => {
+                            setIsAddingRow(false);
+                            setFile(null);
+                            setAmount('');
+                            setDescription('');
+                          }} 
+                          disabled={isCreatingTransaction} 
+                          size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-rose-500 hover:bg-rose-50"
+                        >
+                          <span className="text-sm font-bold">✖</span>
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                )}
                 {transactions.length === 0 ? (
                   <tr><td colSpan={9} className="ta-td text-center text-muted-foreground py-8">لا توجد حركات في هذه الفترة</td></tr>
                 ) : (
-                  transactions.map((t, i) => (
-                    <tr key={t.id} className="border-b border-border/30 hover:bg-muted/20">
-                      <td className="ta-td text-muted-foreground text-xs">{i + 1}</td>
-                      <td className="ta-td text-xs" dir="ltr">{t.transaction_date}</td>
-                      <td className="ta-td max-w-xs truncate" title={t.description || ''}>{t.description || '—'}</td>
-                      <td className="ta-td font-medium text-xs">
-                        {t.type === 'transfer' ? (
-                          <div className="flex items-center gap-1">
-                            <span className="text-rose-500">{t.account?.name}</span>
-                            <ArrowLeftRight size={10} className="text-muted-foreground" />
-                            <span className="text-emerald-600">{t.transfer_to_account?.name}</span>
-                          </div>
-                        ) : (
-                          t.account?.name
-                        )}
-                      </td>
-                      <td className="ta-td text-xs">{t.category?.name || '—'}</td>
-                      <td className="ta-td text-emerald-600 font-bold">
-                        {t.type === 'income' ? t.amount.toLocaleString('en-US') : '—'}
-                      </td>
-                      <td className="ta-td text-rose-500 font-bold">
-                        {t.type === 'expense' || t.type === 'transfer' ? t.amount.toLocaleString('en-US') : '—'}
-                      </td>
-                      <td className="ta-td">
-                        {t.attachment_url ? (
-                          <div className="flex items-center justify-center gap-1">
-                            <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground" aria-label="عرض المرفق" onClick={async () => {
-                              try {
-                                const url = await storageService.createSignedUrl('advance-attachments', t.attachment_url!);
-                                window.open(url, '_blank');
-                              } catch { toast.error('فشل فتح المرفق'); }
-                            }}>
-                              <Paperclip size={14} />
+                  transactions.map((t, i) => {
+                    if (editTarget?.id === t.id) {
+                      return (
+                        <tr key={t.id} className="border-b-2 border-primary/20 bg-primary/5">
+                          <td className="ta-td align-top text-center text-xs text-muted-foreground pt-3">
+                            <Pencil size={12} className="inline" />
+                          </td>
+                          <td className="ta-td align-top">
+                            <Input type="date" value={editDate} onChange={e => setEditDate(e.target.value)} className="h-8 text-xs px-2" />
+                          </td>
+                          <td className="ta-td align-top">
+                            <Input value={editDescription} onChange={e => setEditDescription(e.target.value)} placeholder="وصف..." className="h-8 text-xs px-2" />
+                          </td>
+                          <td className="ta-td align-top space-y-1.5">
+                            <select value={editType} onChange={e => {
+                              setEditType(e.target.value as TreasuryTransactionType);
+                              if (e.target.value === 'transfer') setEditCategoryId('');
+                              else setEditTransferToId('');
+                            }} className="w-full h-8 text-xs rounded border border-input bg-background px-2">
+                              <option value="expense">مصروف</option>
+                              <option value="income">إيراد</option>
+                              <option value="transfer">تحويل</option>
+                            </select>
+                            <select value={editAccountId} onChange={e => setEditAccountId(e.target.value)} className="w-full h-8 text-xs rounded border border-input bg-background px-2">
+                              <option value="">{editType === 'transfer' ? 'من حساب...' : 'الحساب...'}</option>
+                              {accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+                            </select>
+                          </td>
+                          <td className="ta-td align-top pt-3">
+                            {editType === 'transfer' ? (
+                              <select value={editTransferToId} onChange={e => setEditTransferToId(e.target.value)} className="w-full h-8 text-xs rounded border border-input bg-background px-2">
+                                <option value="">إلى حساب...</option>
+                                {accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+                              </select>
+                            ) : (
+                              <select value={editCategoryId} onChange={e => setEditCategoryId(e.target.value)} className="w-full h-8 text-xs rounded border border-input bg-background px-2">
+                                <option value="">البند...</option>
+                                {categories.filter(c => c.type === editType).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                              </select>
+                            )}
+                          </td>
+                          <td className="ta-td align-top pt-3">
+                            <Input 
+                              type="number" min="0" placeholder="0" className="h-8 text-xs px-2 text-center" 
+                              value={editType === 'income' ? editAmount : ''}
+                              onChange={e => {
+                                if (editType !== 'income') setEditType('income');
+                                setEditAmount(e.target.value);
+                              }} 
+                            />
+                          </td>
+                          <td className="ta-td align-top pt-3">
+                            <Input 
+                              type="number" min="0" placeholder="0" className="h-8 text-xs px-2 text-center" 
+                              value={editType === 'expense' || editType === 'transfer' ? editAmount : ''}
+                              onChange={e => {
+                                if (editType === 'income') setEditType('expense');
+                                setEditAmount(e.target.value);
+                              }} 
+                            />
+                          </td>
+                          <td className="ta-td align-top pt-3 text-center text-xs text-muted-foreground">
+                            —
+                          </td>
+                          <td className="ta-td align-top pt-3">
+                            <div className="flex items-center gap-1 justify-center">
+                              <Button 
+                                onClick={handleConfirmEdit} 
+                                disabled={isUpdatingTransaction || !editAccountId || !editAmount} 
+                                size="icon" variant="ghost" className="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                                title="حفظ التعديلات"
+                              >
+                                {isUpdatingTransaction ? <Loader2 size={14} className="animate-spin" /> : <span className="text-sm font-bold">✔</span>}
+                              </Button>
+                              <Button 
+                                onClick={() => setEditTarget(null)} 
+                                disabled={isUpdatingTransaction} 
+                                size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-rose-500 hover:bg-rose-50"
+                                title="إلغاء التعديل"
+                              >
+                                <span className="text-sm font-bold">✖</span>
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    }
+
+                    return (
+                      <tr key={t.id} className="border-b border-border/30 hover:bg-muted/20">
+                        <td className="ta-td text-muted-foreground text-xs">{i + 1}</td>
+                        <td className="ta-td text-xs" dir="ltr">{t.transaction_date}</td>
+                        <td className="ta-td max-w-xs truncate" title={t.description || ''}>{t.description || '—'}</td>
+                        <td className="ta-td font-medium text-xs">
+                          {t.type === 'transfer' ? (
+                            <div className="flex items-center gap-1">
+                              <span className="text-rose-500">{t.account?.name}</span>
+                              <ArrowLeftRight size={10} className="text-muted-foreground" />
+                              <span className="text-emerald-600">{t.transfer_to_account?.name}</span>
+                            </div>
+                          ) : (
+                            t.account?.name
+                          )}
+                        </td>
+                        <td className="ta-td text-xs">{t.category?.name || '—'}</td>
+                        <td className="ta-td text-emerald-600 font-bold">
+                          {t.type === 'income' ? t.amount.toLocaleString('en-US') : '—'}
+                        </td>
+                        <td className="ta-td text-rose-500 font-bold">
+                          {t.type === 'expense' || t.type === 'transfer' ? t.amount.toLocaleString('en-US') : '—'}
+                        </td>
+                        <td className="ta-td">
+                          {t.attachment_url ? (
+                            <div className="flex items-center justify-center gap-1">
+                              <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground" aria-label="عرض المرفق" onClick={async () => {
+                                try {
+                                  const url = await storageService.createSignedUrl('advance-attachments', t.attachment_url!);
+                                  window.open(url, '_blank');
+                                } catch { toast.error('فشل فتح المرفق'); }
+                              }}>
+                                <Paperclip size={14} />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground" aria-label="تحميل المرفق" onClick={async () => {
+                                try {
+                                  const url = await storageService.createSignedDownloadUrl('advance-attachments', t.attachment_url!);
+                                  const a = document.createElement('a');
+                                  a.href = url;
+                                  a.download = t.attachment_url!.split('/').pop() || 'download';
+                                  document.body.appendChild(a);
+                                  a.click();
+                                  document.body.removeChild(a);
+                                } catch { toast.error('فشل تحميل المرفق'); }
+                              }}>
+                                <Download size={14} />
+                              </Button>
+                            </div>
+                          ) : '—'}
+                        </td>
+                        <td className="ta-td">
+                          <div className="flex items-center gap-1 justify-center">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 text-muted-foreground hover:text-primary hover:bg-primary/10"
+                              title="تعديل القيد"
+                              onClick={() => handleOpenEdit(t)}
+                            >
+                              <Pencil size={13} />
                             </Button>
-                            <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground" aria-label="تحميل المرفق" onClick={async () => {
-                              try {
-                                const url = await storageService.createSignedDownloadUrl('advance-attachments', t.attachment_url!);
-                                const a = document.createElement('a');
-                                a.href = url;
-                                a.download = t.attachment_url!.split('/').pop() || 'download';
-                                document.body.appendChild(a);
-                                a.click();
-                                document.body.removeChild(a);
-                              } catch { toast.error('فشل تحميل المرفق'); }
-                            }}>
-                              <Download size={14} />
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                              title={`حذف القيد — ${typeLabel(t)} ${t.amount?.toLocaleString('en-US')} ر.س`}
+                              onClick={() => setDeleteTarget(t)}
+                            >
+                              <Trash2 size={13} />
                             </Button>
                           </div>
-                        ) : '—'}
-                      </td>
-                      <td className="ta-td">
-                        <div className="flex items-center gap-1 justify-center">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6 text-muted-foreground hover:text-primary hover:bg-primary/10"
-                            title="تعديل القيد"
-                            onClick={() => handleOpenEdit(t)}
-                          >
-                            <Pencil size={13} />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                            title={`حذف القيد — ${typeLabel(t)} ${t.amount?.toLocaleString('en-US')} ر.س`}
-                            onClick={() => setDeleteTarget(t)}
-                          >
-                            <Trash2 size={13} />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
           </div>
         </div>
 
-        {/* ── Add Transaction & Categories Summary ─────── */}
-        <div className="space-y-6">
-
-          {/* Add Form */}
-          <div className="bg-card shadow-sm border border-border rounded-xl p-4">
-            <h3 className="font-bold mb-4 flex items-center gap-2 border-b border-border/50 pb-2">تسجيل عملية جديدة</h3>
-
-            <div className="space-y-3">
-              <div className="flex bg-muted p-1 rounded-lg">
-                <button type="button" className={`flex-1 text-xs py-1.5 rounded-md font-medium transition-colors ${type === 'expense' ? 'bg-background shadow-sm text-rose-500' : 'text-muted-foreground hover:text-foreground'}`} onClick={() => setType('expense')}>مصروف</button>
-                <button type="button" className={`flex-1 text-xs py-1.5 rounded-md font-medium transition-colors ${type === 'income' ? 'bg-background shadow-sm text-emerald-600' : 'text-muted-foreground hover:text-foreground'}`} onClick={() => setType('income')}>إيراد</button>
-                <button type="button" className={`flex-1 text-xs py-1.5 rounded-md font-medium transition-colors ${type === 'transfer' ? 'bg-background shadow-sm text-info' : 'text-muted-foreground hover:text-foreground'}`} onClick={() => setType('transfer')}>تحويل</button>
-              </div>
-
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block" htmlFor="treasury-field-1">من حساب (المنصرف منه)</label>
-                <select id="treasury-field-1" value={accountId} onChange={e => setAccountId(e.target.value)} className="w-full bg-background border border-input rounded-md px-3 h-9 text-sm">
-                  <option value="">اختر الحساب...</option>
-                  {accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
-                </select>
-              </div>
-
-              {type === 'transfer' ? (
-                <div>
-                  <label className="text-xs text-muted-foreground mb-1 block" htmlFor="treasury-field-2">إلى حساب (المحول إليه)</label>
-                  <select id="treasury-field-2" value={transferToId} onChange={e => setTransferToId(e.target.value)} className="w-full bg-background border border-input rounded-md px-3 h-9 text-sm">
-                    <option value="">اختر الحساب...</option>
-                    {accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
-                  </select>
-                </div>
-              ) : (
-                <div>
-                  <label className="text-xs text-muted-foreground mb-1 block" htmlFor="treasury-field-3">البند</label>
-                  <select id="treasury-field-3" value={categoryId} onChange={e => setCategoryId(e.target.value)} className="w-full bg-background border border-input rounded-md px-3 h-9 text-sm">
-                    <option value="">اختر البند...</option>
-                    {categories.filter(c => c.type === type).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                  </select>
-                </div>
-              )}
-
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block" htmlFor="treasury-field-4">المبلغ</label>
-                <Input id="treasury-field-4" type="number" min="0" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0.00" className="text-end font-bold" />
-              </div>
-
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block" htmlFor="treasury-field-5">البيان / الوصف</label>
-                <Input id="treasury-field-5" value={description} onChange={e => setDescription(e.target.value)} placeholder="تفاصيل العملية..." />
-              </div>
-
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block" htmlFor="treasury-field-6">المرفق (اختياري)</label>
-                <Input id="treasury-field-6" type="file" onChange={e => setFile(e.target.files?.[0] || null)} className="text-xs h-9 cursor-pointer" accept="image/*,.pdf" />
-              </div>
-
-              <Button onClick={handleAddTransaction} disabled={isCreatingTransaction || !accountId || !amount} className="w-full mt-2">
-                {isCreatingTransaction ? 'جاري الحفظ...' : 'حفظ العملية'}
-              </Button>
-            </div>
-          </div>
-
-
-        </div>
       </div>
 
       {/* ── Delete Confirmation Dialog ─────────────── */}
@@ -403,71 +525,6 @@ export function TreasuryTab() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* ── Edit Transaction Dialog ────────────────── */}
-      <Dialog open={!!editTarget} onOpenChange={open => !open && setEditTarget(null)}>
-        <DialogContent dir="rtl" className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>تعديل القيد</DialogTitle>
-          </DialogHeader>
-          {editTarget && (
-            <div className="space-y-4 py-4">
-              <div className="flex bg-muted p-1 rounded-lg">
-                <button type="button" className={`flex-1 text-xs py-1.5 rounded-md font-medium transition-colors ${editType === 'expense' ? 'bg-background shadow-sm text-rose-500' : 'text-muted-foreground hover:text-foreground'}`} onClick={() => setEditType('expense')}>مصروف</button>
-                <button type="button" className={`flex-1 text-xs py-1.5 rounded-md font-medium transition-colors ${editType === 'income' ? 'bg-background shadow-sm text-emerald-600' : 'text-muted-foreground hover:text-foreground'}`} onClick={() => setEditType('income')}>إيراد</button>
-                <button type="button" className={`flex-1 text-xs py-1.5 rounded-md font-medium transition-colors ${editType === 'transfer' ? 'bg-background shadow-sm text-info' : 'text-muted-foreground hover:text-foreground'}`} onClick={() => setEditType('transfer')}>تحويل</button>
-              </div>
-
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block" htmlFor="treasury-field-7">التاريخ</label>
-                <Input id="treasury-field-7" type="date" value={editDate} onChange={e => setEditDate(e.target.value)} className="h-9 text-sm" />
-              </div>
-
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block" htmlFor="treasury-field-8">من حساب (المنصرف منه)</label>
-                <select id="treasury-field-8" value={editAccountId} onChange={e => setEditAccountId(e.target.value)} className="w-full bg-background border border-input rounded-md px-3 h-9 text-sm">
-                  <option value="">اختر الحساب...</option>
-                  {accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
-                </select>
-              </div>
-
-              {editType === 'transfer' ? (
-                <div>
-                  <label className="text-xs text-muted-foreground mb-1 block" htmlFor="treasury-field-9">إلى حساب (المحول إليه)</label>
-                  <select id="treasury-field-9" value={editTransferToId} onChange={e => setEditTransferToId(e.target.value)} className="w-full bg-background border border-input rounded-md px-3 h-9 text-sm">
-                    <option value="">اختر الحساب...</option>
-                    {accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
-                  </select>
-                </div>
-              ) : (
-                <div>
-                  <label className="text-xs text-muted-foreground mb-1 block" htmlFor="treasury-field-10">البند</label>
-                  <select id="treasury-field-10" value={editCategoryId} onChange={e => setEditCategoryId(e.target.value)} className="w-full bg-background border border-input rounded-md px-3 h-9 text-sm">
-                    <option value="">اختر البند...</option>
-                    {categories.filter(c => c.type === editType).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                  </select>
-                </div>
-              )}
-
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block" htmlFor="treasury-field-11">المبلغ</label>
-                <Input id="treasury-field-11" type="number" min="0" value={editAmount} onChange={e => setEditAmount(e.target.value)} placeholder="0.00" className="text-end font-bold" />
-              </div>
-
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block" htmlFor="treasury-field-12">البيان / الوصف</label>
-                <Input id="treasury-field-12" value={editDescription} onChange={e => setEditDescription(e.target.value)} placeholder="تفاصيل العملية..." />
-              </div>
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditTarget(null)} disabled={isUpdatingTransaction}>إلغاء</Button>
-            <Button onClick={handleConfirmEdit} disabled={isUpdatingTransaction || !editAccountId || !editAmount}>
-              {isUpdatingTransaction ? <Loader2 size={14} className="animate-spin me-1" /> : null}
-              حفظ التعديلات
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
