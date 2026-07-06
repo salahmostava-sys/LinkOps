@@ -209,7 +209,7 @@ export function PerformanceDetailedTable({
                     </div>
                   </td>
                   <td className="ta-td font-bold text-foreground">
-                    {rider.totalOrders.toLocaleString('ar-SA')}
+                    {rider.totalOrders.toLocaleString('en-US')}
                   </td>
                   <td className="ta-td text-foreground">
                     {rider.avgOrdersPerDay.toFixed(1)}

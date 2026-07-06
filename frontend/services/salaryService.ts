@@ -198,7 +198,7 @@ export function getTierSalaryExplanationLines(
   }
 
   if (targetOrders && targetBonus && orders >= targetOrders) {
-    lines.push(`مكافأة الهدف (≥${targetOrders} طلب): +${targetBonus.toLocaleString('ar-SA')} ر.س`);
+    lines.push(`مكافأة الهدف (≥${targetOrders} طلب): +${targetBonus.toLocaleString('en-US')} ر.س`);
   }
   return lines;
 }

@@ -307,7 +307,7 @@ export default function ActivityLogContent() {
             سجل النشاطات
           </h2>
           <p className="text-xs text-muted-foreground" >
-            {`${totalCount.toLocaleString('ar-EG')} سجل محفوظ`}
+            {`${totalCount.toLocaleString('en-US')} سجل محفوظ`}
           </p>
         </div>
         <div className="flex items-center gap-2 ms-auto">
@@ -658,7 +658,7 @@ export default function ActivityLogContent() {
             
           >
             <p className="text-xs text-muted-foreground" >
-              {`${(page * PAGE_SIZE + 1).toLocaleString('ar-EG')}–${Math.min((page + 1) * PAGE_SIZE, totalCount).toLocaleString('ar-EG')} من ${totalCount.toLocaleString('ar-EG')}`}
+              {`${(page * PAGE_SIZE + 1).toLocaleString('en-US')}–${Math.min((page + 1) * PAGE_SIZE, totalCount).toLocaleString('en-US')} من ${totalCount.toLocaleString('en-US')}`}
             </p>
             <div className="flex items-center gap-1">
               <button

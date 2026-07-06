@@ -121,7 +121,7 @@ function buildInsights(
   if (summary.topPerformer) {
     insights.push({
       id: 'top-performer',
-      text: `أفضل مندوب: ${getFirstTwoNames(summary.topPerformer.employeeName)} — ${summary.topPerformer.totalOrders.toLocaleString('ar-SA')} طلب (${tierLabel(summary.topPerformer.tier)})`,
+      text: `أفضل مندوب: ${getFirstTwoNames(summary.topPerformer.employeeName)} — ${summary.topPerformer.totalOrders.toLocaleString('en-US')} طلب (${tierLabel(summary.topPerformer.tier)})`,
       severity: 'success',
       icon: '🏆',
     });
@@ -511,7 +511,7 @@ function buildSummaryText(
   const delta = summary.totalOrdersDelta;
   parts.push(
     `الفريق يضم ${summary.activeRiders} مندوب نشط`,
-    `بإجمالي ${summary.totalOrders.toLocaleString('ar-SA')} طلب (${delta.formattedDelta})`,
+    `بإجمالي ${summary.totalOrders.toLocaleString('en-US')} طلب (${delta.formattedDelta})`,
     `متوسط التقييم: ${summary.avgPerformanceScore}/100`,
   );
 

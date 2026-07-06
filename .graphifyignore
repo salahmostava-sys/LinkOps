@@ -1,0 +1,8 @@
+*.test.ts
+*.test.tsx
+*.spec.ts
+__tests__/
+mocks/
+node_modules/
+build/
+dist/

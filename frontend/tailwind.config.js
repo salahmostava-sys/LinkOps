@@ -21,6 +21,7 @@ const config = {
       fontFamily: {
         sans: ['Tajawal', '"IBM Plex Sans Arabic"', 'sans-serif'],
         arabic: ['Tajawal', '"IBM Plex Sans Arabic"', 'sans-serif'],
+        mono: ['Tajawal', '"IBM Plex Sans Arabic"', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",

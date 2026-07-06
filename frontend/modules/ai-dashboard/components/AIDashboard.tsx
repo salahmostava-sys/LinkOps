@@ -59,17 +59,17 @@ function renderSalaryForecastContent(
       <div className="space-y-4">
         <div className="text-center">
           <div className="text-2xl font-bold text-primary">
-            {salaryForecast.predicted_monthly_salary.toLocaleString('ar-SA')} ر.س
+            {salaryForecast.predicted_monthly_salary.toLocaleString('en-US')} ر.س
           </div>
           <div className="text-xs text-muted-foreground">الراتب المتوقع لهذا الشهر</div>
         </div>
         <div className="grid grid-cols-2 gap-2 text-xs">
           <div className="rounded bg-muted p-2 text-center">
-            <div className="font-medium">{salaryForecast.projected_monthly_orders.toLocaleString('ar-SA')}</div>
+            <div className="font-medium">{salaryForecast.projected_monthly_orders.toLocaleString('en-US')}</div>
             <div className="text-muted-foreground">طلب متوقع</div>
           </div>
           <div className="rounded bg-muted p-2 text-center">
-            <div className="font-medium">{salaryForecast.current_daily_avg.toLocaleString('ar-SA')}</div>
+            <div className="font-medium">{salaryForecast.current_daily_avg.toLocaleString('en-US')}</div>
             <div className="text-muted-foreground">متوسط يومي</div>
           </div>
         </div>
@@ -81,7 +81,7 @@ function renderSalaryForecastContent(
           {getConfidenceBadge(salaryForecast.confidence)}
         </div>
         <div className="text-xs text-muted-foreground">
-          متبقي {salaryForecast.days_remaining.toLocaleString('ar-SA')} يوم في الشهر
+          متبقي {salaryForecast.days_remaining.toLocaleString('en-US')} يوم في الشهر
         </div>
       </div>
     );
@@ -134,7 +134,7 @@ function renderBestEmployeesContent(
               {TIER_LABEL[emp.performance_tier] ?? emp.performance_tier}
             </Badge>
             <span className="w-12 text-end tabular-nums text-muted-foreground">
-              {emp.total_orders.toLocaleString('ar-SA')}
+              {emp.total_orders.toLocaleString('en-US')}
             </span>
           </div>
         ))}
@@ -316,21 +316,21 @@ export function AIDashboard({
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div className="rounded bg-muted p-3 text-center">
-                    <div className="text-lg font-semibold">{normalizedOrders.toLocaleString('ar-SA')}</div>
+                    <div className="text-lg font-semibold">{normalizedOrders.toLocaleString('en-US')}</div>
                     <div className="text-muted-foreground">طلبات الشهر الحالي</div>
                   </div>
                   <div className="rounded bg-muted p-3 text-center">
-                    <div className="text-lg font-semibold">{normalizedDaysPassed.toLocaleString('ar-SA')}</div>
+                    <div className="text-lg font-semibold">{normalizedDaysPassed.toLocaleString('en-US')}</div>
                     <div className="text-muted-foreground">أيام منقضية</div>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div className="rounded bg-muted p-3 text-center">
-                    <div className="text-lg font-semibold">{topPerformers.length.toLocaleString('ar-SA')}</div>
+                    <div className="text-lg font-semibold">{topPerformers.length.toLocaleString('en-US')}</div>
                     <div className="text-muted-foreground">مناديب نشطون</div>
                   </div>
                   <div className="rounded bg-muted p-3 text-center">
-                    <div className="text-lg font-semibold">{monthlyTrend.length.toLocaleString('ar-SA')}</div>
+                    <div className="text-lg font-semibold">{monthlyTrend.length.toLocaleString('en-US')}</div>
                     <div className="text-muted-foreground">أشهر في السجل</div>
                   </div>
                 </div>

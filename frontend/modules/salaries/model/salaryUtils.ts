@@ -8,7 +8,7 @@ export const toCityArabicLabel = (city?: string | null) => {
 
 export type FastApprovedFilter = 'all' | 'approved' | 'pending';
 
-const formatArabicCount = (count: number, noun: string) => `${count.toLocaleString('ar-SA')} ${noun}`;
+const formatArabicCount = (count: number, noun: string) => `${count.toLocaleString('en-US')} ${noun}`;
 
 export const hasPlatformActivity = (metric?: PlatformSalaryMetric | null) =>
   Boolean(metric && (metric.ordersCount > 0 || metric.shiftDays > 0 || metric.salary > 0));
@@ -117,19 +117,19 @@ export const getPlatformActivityCompactSummary = (metric?: PlatformSalaryMetric 
   const shiftDays = metric.shiftDays || 0;
 
   if (metric.workType === 'shift') {
-    return shiftDays > 0 ? `${shiftDays.toLocaleString('ar-SA')} د` : '—';
+    return shiftDays > 0 ? `${shiftDays.toLocaleString('en-US')} د` : '—';
   }
 
   if (metric.workType === 'hybrid') {
     if (shiftDays > 0 && orders > 0) {
-      return `${shiftDays.toLocaleString('ar-SA')} د + ${orders.toLocaleString('ar-SA')} ط`;
+      return `${shiftDays.toLocaleString('en-US')} د + ${orders.toLocaleString('en-US')} ط`;
     }
-    if (shiftDays > 0) return `${shiftDays.toLocaleString('ar-SA')} د`;
-    if (orders > 0) return `${orders.toLocaleString('ar-SA')} ط`;
+    if (shiftDays > 0) return `${shiftDays.toLocaleString('en-US')} د`;
+    if (orders > 0) return `${orders.toLocaleString('en-US')} ط`;
     return metric.salary > 0 ? 'مختلط' : '—';
   }
 
-  return orders > 0 ? `${orders.toLocaleString('ar-SA')} ط` : '—';
+  return orders > 0 ? `${orders.toLocaleString('en-US')} ط` : '—';
 };
 
 export const getSalaryRowActivityTotals = (row: Pick<SalaryRow, 'platformMetrics'>) => {
@@ -146,9 +146,9 @@ export const getSalaryRowActivityTotals = (row: Pick<SalaryRow, 'platformMetrics
 export const getSalaryRowActivitySummary = (row: Pick<SalaryRow, 'platformMetrics'>) => {
   const totals = getSalaryRowActivityTotals(row);
   if (totals.orders > 0 && totals.shiftDays > 0) {
-    return `${totals.orders.toLocaleString('ar-SA')} طلب + ${totals.shiftDays.toLocaleString('ar-SA')} دوام`;
+    return `${totals.orders.toLocaleString('en-US')} طلب + ${totals.shiftDays.toLocaleString('en-US')} دوام`;
   }
-  if (totals.shiftDays > 0) return `${totals.shiftDays.toLocaleString('ar-SA')} دوام`;
-  if (totals.orders > 0) return `${totals.orders.toLocaleString('ar-SA')} طلب`;
+  if (totals.shiftDays > 0) return `${totals.shiftDays.toLocaleString('en-US')} دوام`;
+  if (totals.orders > 0) return `${totals.orders.toLocaleString('en-US')} طلب`;
   return '—';
 };

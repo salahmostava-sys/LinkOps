@@ -435,8 +435,8 @@ const AppSidebar = () => {
                 </CollapsibleTrigger>
                 <CollapsibleContent className="overflow-hidden space-y-0.5">
                   <div className={cn(
-                    "mt-1 space-y-0.5 relative before:absolute before:inset-y-1 before:w-[2px] before:bg-border/60 before:rounded-full",
-                    isRTL ? "pe-4 before:right-2" : "ps-4 before:left-2"
+                    "mt-1 space-y-0.5",
+                    isRTL ? "pe-4" : "ps-4"
                   )}>
                     {group.items.map((item) => (
                       <SidebarNavLink

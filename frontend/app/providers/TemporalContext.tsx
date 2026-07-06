@@ -19,28 +19,13 @@ const currentMonth = (): string => format(new Date(), 'yyyy-MM');
 
 export const TemporalProvider = ({ children }: { children: ReactNode }) => {
   // Always start with current month on fresh page load.
-  // Use sessionStorage to persist selection within the same browser session
-  // (navigating between pages keeps the month), but resets when opening new tab/window.
-  const [selectedMonth, setSelectedMonth] = useState(() => {
-    try {
-      const saved = sessionStorage.getItem('global_selected_month');
-      // Validate before trusting the stored value — corrupt/stale data falls back to current month
-      return isValidMonthString(saved) ? saved : currentMonth();
-    } catch {
-      // sessionStorage may be unavailable in some sandboxed contexts
-      return currentMonth();
-    }
-  });
+  // Removed sessionStorage persistence based on user request to always open on current month.
+  const [selectedMonth, setSelectedMonth] = useState(() => currentMonth());
 
   const changeSelectedMonth = (month: string) => {
     // Guard against invalid month strings before storing or updating state
     if (!isValidMonthString(month)) return;
     setSelectedMonth(month);
-    try {
-      sessionStorage.setItem('global_selected_month', month);
-    } catch {
-      // best-effort — sessionStorage may be unavailable
-    }
   };
 
   useEffect(() => {

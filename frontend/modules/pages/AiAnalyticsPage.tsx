@@ -97,7 +97,7 @@ function PerformanceSummaryCards({ perf, growthPct, targetPct }: Readonly<{
         </CardHeader>
         <CardContent>
           <p className="text-2xl font-bold tabular-nums">
-            {(perf?.summary?.totalOrders ?? 0).toLocaleString('ar-SA')}
+            {(perf?.summary?.totalOrders ?? 0).toLocaleString('en-US')}
           </p>
         </CardContent>
       </Card>
@@ -110,7 +110,7 @@ function PerformanceSummaryCards({ perf, growthPct, targetPct }: Readonly<{
         </CardHeader>
         <CardContent>
           <p className="text-2xl font-bold tabular-nums">
-            {(perf?.summary?.activeRiders ?? 0).toLocaleString('ar-SA')}
+            {(perf?.summary?.activeRiders ?? 0).toLocaleString('en-US')}
           </p>
         </CardContent>
       </Card>
@@ -199,7 +199,7 @@ function DistributionPieChart({ pieData }: Readonly<{ pieData: { name: string; v
                 ))}
               </Pie>
               <Tooltip
-                formatter={(v: number) => v.toLocaleString('ar-SA')}
+                formatter={(v: number) => v.toLocaleString('en-US')}
                 contentStyle={{ direction: 'rtl' }}
               />
             </PieChart>
@@ -223,7 +223,7 @@ function OrdersByAppChart({ barData }: Readonly<{ barData: { name: string; order
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={barData} layout="vertical" margin={{ left: 8, right: 16 }}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" horizontal={false} />
-              <XAxis type="number" tick={{ fontSize: 11 }} tickFormatter={(v) => Number(v).toLocaleString('ar-SA')} />
+              <XAxis type="number" tick={{ fontSize: 11 }} tickFormatter={(v) => Number(v).toLocaleString('en-US')} />
               <YAxis
                 type="category"
                 dataKey="name"
@@ -231,7 +231,7 @@ function OrdersByAppChart({ barData }: Readonly<{ barData: { name: string; order
                 tick={{ fontSize: 10 }}
               />
               <Tooltip
-                formatter={(v: number) => [v.toLocaleString('ar-SA'), 'طلبات']}
+                formatter={(v: number) => [v.toLocaleString('en-US'), 'طلبات']}
                 contentStyle={{ direction: 'rtl' }}
               />
               <Bar dataKey="orders" radius={[0, 4, 4, 0]}>
@@ -282,13 +282,13 @@ function AiAnalyticsForecastSection({
         <TrendingUp className="h-5 w-5 text-primary" />
         <span className="font-semibold">تنبؤ الطلبات للشهر القادم:</span>
         <span className="text-2xl font-bold tabular-nums">
-          {forecast === null ? '—' : forecast.next.toLocaleString('ar-SA')}
+          {forecast === null ? '—' : forecast.next.toLocaleString('en-US')}
         </span>
       </div>
       {forecast !== null && (
         <span className="text-xs text-muted-foreground">
           التغيّر بين آخر شهرين: {forecast.lastGrowth >= 0 ? '+' : ''}
-          {Math.round(forecast.lastGrowth).toLocaleString('ar-SA')} طلب
+          {Math.round(forecast.lastGrowth).toLocaleString('en-US')} طلب
         </span>
       )}
     </div>
@@ -329,11 +329,11 @@ function AiAnalyticsOrdersLineChartSection({
       <LineChart data={chartData} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
         <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
         <XAxis dataKey="month" tick={{ fontSize: 11 }} interval={0} angle={-22} textAnchor="end" height={72} />
-        <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => Number(v).toLocaleString('ar-SA')} />
+        <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => Number(v).toLocaleString('en-US')} />
         <Tooltip
           formatter={(value: number | undefined, name: string) => {
             const label = name === 'actual' ? 'فعلي' : 'تنبؤ';
-            return [value !== null && value !== undefined ? value.toLocaleString('ar-SA') : '—', label];
+            return [value !== null && value !== undefined ? value.toLocaleString('en-US') : '—', label];
           }}
           contentStyle={{ direction: 'rtl' }}
         />

@@ -291,7 +291,7 @@ export function enrichWithDelta(
   previous: number | null | undefined,
   unit = '',
 ): EnrichedValue {
-  const formatted = value.toLocaleString('ar-SA') + (unit ? ` ${unit}` : '');
+  const formatted = value.toLocaleString('en-US') + (unit ? ` ${unit}` : '');
 
   if (previous === null || previous === 0) {
     return { value, formatted, delta: null, enrichedText: formatted };

@@ -26,19 +26,9 @@ describe('TemporalContext', () => {
     expect(result.current.selectedMonth).toBe(format(new Date(), 'yyyy-MM'));
   });
 
-  it('initializes with sessionStorage value if valid', () => {
-    sessionStorage.setItem('global_selected_month', '2026-05');
-    const { result } = renderHook(() => useTemporalContext(), { wrapper });
-    expect(result.current.selectedMonth).toBe('2026-05');
-  });
 
-  it('initializes with current month if sessionStorage value is invalid', () => {
-    sessionStorage.setItem('global_selected_month', 'invalid-date');
-    const { result } = renderHook(() => useTemporalContext(), { wrapper });
-    expect(result.current.selectedMonth).toBe(format(new Date(), 'yyyy-MM'));
-  });
 
-  it('updates selected month and sets sessionStorage on setSelectedMonth', () => {
+  it('updates selected month on setSelectedMonth', () => {
     const { result } = renderHook(() => useTemporalContext(), { wrapper });
     
     act(() => {
@@ -46,7 +36,6 @@ describe('TemporalContext', () => {
     });
 
     expect(result.current.selectedMonth).toBe('2026-08');
-    expect(sessionStorage.getItem('global_selected_month')).toBe('2026-08');
   });
 
   it('ignores invalid month string in setSelectedMonth', () => {

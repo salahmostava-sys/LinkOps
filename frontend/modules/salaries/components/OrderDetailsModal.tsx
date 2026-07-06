@@ -37,7 +37,7 @@ export function OrderDetailsModal({ row, empPlatformScheme }: Readonly<OrderDeta
   const activityTotals = getSalaryRowActivityTotals(row);
   const platforms = row.registeredApps.filter((platform) => hasPlatformActivity(row.platformMetrics[platform]));
   
-  const formatCurrency = (val: number) => `${Math.round(val).toLocaleString('ar-SA')} ر.س`;
+  const formatCurrency = (val: number) => `${Math.round(val).toLocaleString('en-US')} ر.س`;
   
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -49,7 +49,7 @@ export function OrderDetailsModal({ row, empPlatformScheme }: Readonly<OrderDeta
           onClick={(e) => e.stopPropagation()}
         >
           <Package className="h-3.5 w-3.5" />
-          <span>{totalActivity.toLocaleString('ar-SA')}</span>
+          <span>{totalActivity.toLocaleString('en-US')}</span>
           <span className="text-muted-foreground">نشاط</span>
         </Button>
       </DialogTrigger>
@@ -166,9 +166,9 @@ export function OrderDetailsModal({ row, empPlatformScheme }: Readonly<OrderDeta
 
         {(activityTotals.orders > 0 || activityTotals.shiftDays > 0) && (
           <div className="px-1 pb-2 text-[11px] text-muted-foreground">
-            {activityTotals.orders > 0 && <span>{activityTotals.orders.toLocaleString('ar-SA')} طلب</span>}
+            {activityTotals.orders > 0 && <span>{activityTotals.orders.toLocaleString('en-US')} طلب</span>}
             {activityTotals.orders > 0 && activityTotals.shiftDays > 0 && <span> • </span>}
-            {activityTotals.shiftDays > 0 && <span>{activityTotals.shiftDays.toLocaleString('ar-SA')} دوام</span>}
+            {activityTotals.shiftDays > 0 && <span>{activityTotals.shiftDays.toLocaleString('en-US')} دوام</span>}
           </div>
         )}
 
