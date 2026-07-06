@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Search, Plus, RotateCcw, ClipboardList, CheckCircle, Clock, FolderOpen, AlertCircle, Trash2 } from 'lucide-react';
 import { Input } from '@shared/components/ui/input';
 import { Button } from '@shared/components/ui/button';
@@ -311,8 +312,6 @@ const SkeletonRow = () => (
   </tr>
 );
 
-import { useTemporalContext } from '@app/providers/TemporalContext';
-
 // ─── Main Component ───────────────────────────────────────────────────────────
 const VehicleAssignment = () => {
   const { toast } = useToast();
@@ -320,14 +319,14 @@ const VehicleAssignment = () => {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
-  const { selectedMonth } = useTemporalContext();
   const {
     data: assignmentData,
     isLoading: loading,
     error: assignmentError,
     refetch: refetchAssignmentData,
-  } = useVehicleAssignmentData(selectedMonth);
-  const [search, setSearch] = useState('');
+  } = useVehicleAssignmentData();
+  const [searchParams] = useSearchParams();
+  const [search, setSearch] = useState(searchParams.get('search') || '');
   const [showActive, setShowActive] = useState<'all' | 'active' | 'returned'>('all');
   const isShowActiveKey = (v: string): v is 'all' | 'active' | 'returned' =>
     v === 'all' || v === 'active' || v === 'returned';

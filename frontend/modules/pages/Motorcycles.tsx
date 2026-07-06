@@ -1,6 +1,7 @@
 import type React from 'react';
 import { Suspense, lazy, useEffect, useRef, useState, useCallback, type Dispatch, type SetStateAction } from 'react';
 import { Search, Plus, FolderOpen, Edit, Trash2, Bike } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Input } from '@shared/components/ui/input';
 import { Button } from '@shared/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/components/ui/select';
@@ -672,10 +673,14 @@ const Motorcycles = () => {
                   <tr key={v.id} className="border-b border-border/30 hover:bg-muted/20 transition-colors">
                     <td className="ta-td text-muted-foreground align-top whitespace-normal break-words">{idx + 1}</td>
                     <td className="ta-td align-top whitespace-normal break-words">
-                      <span className="font-bold text-foreground font-mono whitespace-normal break-all leading-tight">{v.plate_number}</span>
+                      <Link to={`/vehicle-assignment?search=${encodeURIComponent(v.plate_number)}`} className="font-bold text-primary hover:underline font-mono whitespace-normal break-all leading-tight block">
+                        {v.plate_number}
+                      </Link>
                     </td>
                     <td className="ta-td align-top whitespace-normal break-words">
-                      <span className="text-sm text-muted-foreground font-mono whitespace-normal break-all leading-tight" dir="ltr">{v.plate_number_en || '—'}</span>
+                      <Link to={`/vehicle-assignment?search=${encodeURIComponent(v.plate_number)}`} className="text-sm text-muted-foreground hover:text-primary hover:underline font-mono whitespace-normal break-all leading-tight block" dir="ltr">
+                        {v.plate_number_en || '—'}
+                      </Link>
                     </td>
                     <td className="ta-td align-top whitespace-normal break-words">
                       <span className="text-sm text-muted-foreground whitespace-normal break-words leading-tight">{typeLabels[v.type]}</span>
@@ -690,7 +695,9 @@ const Motorcycles = () => {
                      <td className="ta-td align-top whitespace-normal break-words max-w-[15rem]">
                         {v.current_rider ? (
                           <div className="flex items-center gap-1.5">
-                            <span className="text-sm font-medium text-foreground whitespace-normal break-words leading-tight">{v.current_rider}</span>
+                            <Link to={`/vehicle-assignment?search=${encodeURIComponent(v.current_rider)}`} className="text-sm font-medium text-primary hover:underline whitespace-normal break-words leading-tight">
+                              {v.current_rider}
+                            </Link>
                          </div>
                        ) : (
                          <span className="text-muted-foreground/40 text-xs">—</span>

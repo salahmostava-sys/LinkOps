@@ -89,3 +89,4 @@ sonar_issues*.json
 sonar_report.md
 pg.zip
 scratch/
+graphify-out/
