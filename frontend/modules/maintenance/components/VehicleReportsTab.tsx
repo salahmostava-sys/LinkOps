@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { Search, Car, Banknote, Wrench, Calendar, Download, Printer } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
+import { Search, Car, Banknote, Wrench, Calendar, Download, Printer, Eye, CheckSquare, Square } from 'lucide-react';
 import { Input } from '@shared/components/ui/input';
 import { Button } from '@shared/components/ui/button';
 import { Skeleton } from '@shared/components/ui/skeleton';
@@ -30,6 +30,7 @@ type VehicleGroup = {
 export function VehicleReportsTab() {
   const logsQ = useMaintenanceLogs();
   const [search, setSearch] = useState('');
+  const [selectedIds, setSelectedIds] = useState<Set<string> | null>(null); // null = لم يُهيّأ بعد (كل المركبات محددة)
 
   const logs = useMemo(() => logsQ.data ?? [], [logsQ.data]);
 
@@ -54,14 +55,38 @@ export function VehicleReportsTab() {
     return Array.from(groups.values()).sort((a, b) => b.total_cost - a.total_cost);
   }, [logs]);
 
+  // بمجرد توفر بيانات المركبات، حدد الكل افتراضياً (المستخدم يقدر يلغي تحديد مركبات بعينها)
+  useEffect(() => {
+    if (vehicleGroups.length > 0 && selectedIds === null) {
+      setSelectedIds(new Set(vehicleGroups.map(g => g.vehicle_id)));
+    }
+  }, [vehicleGroups, selectedIds]);
+
+  const activeSelection = useMemo(
+    () => selectedIds ?? new Set(vehicleGroups.map(g => g.vehicle_id)),
+    [selectedIds, vehicleGroups]
+  );
+
+  const toggleVehicle = (vehicleId: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev ?? vehicleGroups.map(g => g.vehicle_id));
+      if (next.has(vehicleId)) next.delete(vehicleId);
+      else next.add(vehicleId);
+      return next;
+    });
+  };
+
+  const selectAll = () => setSelectedIds(new Set(vehicleGroups.map(g => g.vehicle_id)));
+  const clearAll = () => setSelectedIds(new Set());
+
   const filteredGroups = useMemo(() => {
     const t = search.trim().toLowerCase();
-    if (!t) return vehicleGroups;
-    return vehicleGroups.filter(g =>
-      g.plate_number.toLowerCase().includes(t) ||
-      g.type.toLowerCase().includes(t)
-    );
-  }, [vehicleGroups, search]);
+    return vehicleGroups.filter(g => {
+      if (!activeSelection.has(g.vehicle_id)) return false;
+      if (!t) return true;
+      return g.plate_number.toLowerCase().includes(t) || g.type.toLowerCase().includes(t);
+    });
+  }, [vehicleGroups, search, activeSelection]);
 
   const exportToExcel = async () => {
     try {
@@ -99,21 +124,37 @@ export function VehicleReportsTab() {
     }
   };
 
-  const exportToPdf = async () => {
+  /** يمنع كسر جدول الـ PDF أو حقن HTML عند وجود رموز خاصة في الملاحظات/أسماء القطع */
+  const escapeHtml = (value: string) =>
+    value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+
+  const partsSummary = (log: MaintenanceLogWithDetails) =>
+    (log.maintenance_parts ?? [])
+      .map(p => `${escapeHtml(p.spare_parts?.name_ar ?? '—')} ×${p.quantity_used}`)
+      .join('، ');
+
+  /** ينشئ مستند jsPDF من المركبات المحددة حالياً (filteredGroups) دون حفظه أو فتحه */
+  const buildReportPdf = async () => {
+    const { default: JsPdf } = await import('jspdf');
+
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.left = '-10000px';
+    iframe.style.top = '-10000px';
+    iframe.style.width = '794px';
+    iframe.style.height = '1123px';
+    iframe.style.border = 'none';
+    document.body.appendChild(iframe);
+
     try {
-      const { default: JsPdf } = await import('jspdf');
-
-      const iframe = document.createElement('iframe');
-      iframe.style.position = 'fixed';
-      iframe.style.left = '-10000px';
-      iframe.style.top = '-10000px';
-      iframe.style.width = '794px';
-      iframe.style.height = '1123px';
-      iframe.style.border = 'none';
-      document.body.appendChild(iframe);
-
       const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-      if (!iframeDoc) return;
+      if (!iframeDoc) throw new Error('تعذر تجهيز مستند التقرير');
+
+      const totalCost = filteredGroups.reduce((s, g) => s + g.total_cost, 0);
 
       const html = `
         <html dir="rtl" lang="ar">
@@ -125,10 +166,11 @@ export function VehicleReportsTab() {
               .company-name { text-align: center; font-size: 22px; font-weight: bold; margin-bottom: 5px; color: #1e293b; }
               h1 { text-align: center; margin-bottom: 5px; color: #0f172a; font-size: 18px; }
               .header-info { text-align: center; margin-bottom: 20px; font-size: 13px; color: #64748b; }
-              table { width: 100%; border-collapse: collapse; margin-top: 10px; text-align: right; font-size: 13px; }
-              th, td { border: 1px solid #cbd5e1; padding: 10px; }
+              table { width: 100%; border-collapse: collapse; margin-top: 10px; text-align: right; font-size: 12px; }
+              th, td { border: 1px solid #cbd5e1; padding: 8px; }
               th { background-color: #f8fafc; font-weight: bold; color: #334155; }
               tr:nth-child(even) { background-color: #f8fafc; }
+              .totals { text-align: left; margin-top: 12px; font-size: 13px; font-weight: bold; color: #0f172a; }
             </style>
           </head>
           <body>
@@ -136,7 +178,7 @@ export function VehicleReportsTab() {
               <div class="company-name">شركة مهمة التوصيل للخدمات اللوجستية</div>
               <h1>تقرير صيانة المركبات والمخزون</h1>
               <div class="header-info">
-                <p>تاريخ الاستخراج: ${new Date().toLocaleDateString('ar-SA')} | إجمالي المركبات: ${filteredGroups.length}</p>
+                <p>تاريخ الاستخراج: ${new Date().toLocaleDateString('ar-SA')} | عدد المركبات في التقرير: ${filteredGroups.length}</p>
               </div>
               <table>
                 <thead>
@@ -145,6 +187,7 @@ export function VehicleReportsTab() {
                     <th>نوع المركبة</th>
                     <th>تاريخ الصيانة</th>
                     <th>نوع الصيانة</th>
+                    <th>القطع المستخدمة</th>
                     <th>التكلفة</th>
                     <th>ملاحظات</th>
                   </tr>
@@ -153,24 +196,26 @@ export function VehicleReportsTab() {
                   ${filteredGroups.map(g => {
                     if (g.logs.length === 0) {
                       return `<tr>
-                        <td>${g.plate_number}</td>
-                        <td>${g.type}</td>
-                        <td colspan="4" style="text-align: center; color: #94a3b8;">لا توجد صيانات مسجلة</td>
+                        <td>${escapeHtml(g.plate_number)}</td>
+                        <td>${escapeHtml(g.type)}</td>
+                        <td colspan="5" style="text-align: center; color: #94a3b8;">لا توجد صيانات مسجلة</td>
                       </tr>`;
                     }
                     return g.logs.map(log => `
                       <tr>
-                        <td>${g.plate_number}</td>
-                        <td>${g.type}</td>
+                        <td>${escapeHtml(g.plate_number)}</td>
+                        <td>${escapeHtml(g.type)}</td>
                         <td>${log.maintenance_date ? new Date(log.maintenance_date).toLocaleDateString('ar-SA') : ''}</td>
-                        <td>${log.type}</td>
-                        <td>${Number(log.total_cost) || 0} ر.س</td>
-                        <td>${log.notes || ''}</td>
+                        <td>${escapeHtml(log.type)}</td>
+                        <td>${partsSummary(log) || '—'}</td>
+                        <td>${(Number(log.total_cost) || 0).toLocaleString('en-US')} ر.س</td>
+                        <td>${escapeHtml(log.notes || '')}</td>
                       </tr>
                     `).join('');
                   }).join('')}
                 </tbody>
               </table>
+              <p class="totals">إجمالي تكلفة الصيانة للمركبات المحددة: ${totalCost.toLocaleString('en-US')} ر.س</p>
             </div>
           </body>
         </html>
@@ -180,30 +225,50 @@ export function VehicleReportsTab() {
       iframeDoc.write(html);
       iframeDoc.close();
 
-      iframe.addEventListener('load', () => {
-        // Wait briefly for the Google font to render
-        setTimeout(async () => {
-          try {
-            const container = iframeDoc.querySelector('.pdf-container') as HTMLElement;
-            const pdf = new JsPdf({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-            await pdf.html(container, {
-              callback: () => {},
-              x: 10,
-              y: 10,
-              width: 190,
-              windowWidth: 700,
-              html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
-            });
-            pdf.save('تقرير_صيانة_المركبات.pdf');
-          } catch (e) {
-            console.error('PDF Generation error:', e);
-          } finally {
-            document.body.removeChild(iframe);
-          }
-        }, 1000);
+      await new Promise<void>(resolve => {
+        iframe.addEventListener('load', () => setTimeout(resolve, 1000), { once: true });
       });
+
+      const container = iframeDoc.querySelector('.pdf-container') as HTMLElement;
+      const pdf = new JsPdf({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      await pdf.html(container, {
+        callback: () => {},
+        x: 10,
+        y: 10,
+        width: 190,
+        windowWidth: 700,
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+      });
+      return pdf;
+    } finally {
+      document.body.removeChild(iframe);
+    }
+  };
+
+  const [generatingPdf, setGeneratingPdf] = useState<'view' | 'download' | null>(null);
+
+  const previewPdf = async () => {
+    setGeneratingPdf('view');
+    try {
+      const pdf = await buildReportPdf();
+      const blobUrl = pdf.output('bloburl');
+      window.open(blobUrl, '_blank', 'noopener,noreferrer');
+    } catch (error) {
+      console.error('Failed to preview PDF', error);
+    } finally {
+      setGeneratingPdf(null);
+    }
+  };
+
+  const downloadPdf = async () => {
+    setGeneratingPdf('download');
+    try {
+      const pdf = await buildReportPdf();
+      pdf.save('تقرير_صيانة_المركبات.pdf');
     } catch (error) {
       console.error('Failed to export to PDF', error);
+    } finally {
+      setGeneratingPdf(null);
     }
   };
 
@@ -241,10 +306,22 @@ export function VehicleReportsTab() {
               className="pr-9"
             />
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={exportToPdf} disabled={logsQ.isLoading || filteredGroups.length === 0}>
+          <div className="flex gap-2 flex-wrap">
+            <Button
+              variant="outline"
+              onClick={previewPdf}
+              disabled={logsQ.isLoading || filteredGroups.length === 0 || generatingPdf !== null}
+            >
+              <Eye size={16} className="ml-2" />
+              {generatingPdf === 'view' ? 'جاري التحضير...' : 'معاينة PDF'}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={downloadPdf}
+              disabled={logsQ.isLoading || filteredGroups.length === 0 || generatingPdf !== null}
+            >
               <Printer size={16} className="ml-2" />
-              PDF طباعة / 
+              {generatingPdf === 'download' ? 'جاري التحضير...' : 'تنزيل PDF'}
             </Button>
             <Button variant="outline" onClick={exportToExcel} disabled={logsQ.isLoading || filteredGroups.length === 0}>
               <Download size={16} className="ml-2" />
@@ -253,6 +330,43 @@ export function VehicleReportsTab() {
           </div>
         </div>
       </div>
+
+      {/* Vehicle selection */}
+      {!logsQ.isLoading && vehicleGroups.length > 0 && (
+        <div className="bg-card border border-border/60 rounded-xl p-3 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-semibold text-foreground">اختر المركبات المطلوبة في التقرير</span>
+            <div className="flex gap-2">
+              <Button variant="ghost" size="sm" onClick={selectAll} className="h-7 gap-1 text-xs">
+                <CheckSquare size={13} /> تحديد الكل
+              </Button>
+              <Button variant="ghost" size="sm" onClick={clearAll} className="h-7 gap-1 text-xs">
+                <Square size={13} /> إلغاء التحديد
+              </Button>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
+            {vehicleGroups.map(g => {
+              const checked = activeSelection.has(g.vehicle_id);
+              return (
+                <button
+                  key={g.vehicle_id}
+                  type="button"
+                  onClick={() => toggleVehicle(g.vehicle_id)}
+                  className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-full border transition-colors ${
+                    checked
+                      ? 'bg-primary/10 border-primary text-primary'
+                      : 'bg-muted/40 border-border text-muted-foreground'
+                  }`}
+                >
+                  {checked ? <CheckSquare size={12} /> : <Square size={12} />}
+                  {g.plate_number}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {logsQ.isLoading ? (
         <div className="space-y-3">

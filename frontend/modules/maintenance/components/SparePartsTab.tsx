@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Pencil, Trash2, Search, Package, AlertTriangle, ShoppingCart } from 'lucide-react';
+import { Pencil, Trash2, Search, Package, AlertTriangle, ShoppingCart, FileText, Paperclip } from 'lucide-react';
 import { Button } from '@shared/components/ui/button';
 import { Input } from '@shared/components/ui/input';
 import { Label } from '@shared/components/ui/label';
@@ -27,6 +27,9 @@ import { usePermissions } from '@shared/hooks/usePermissions';
 import { useSpareParts, useInvalidateMaintenanceQueries } from '@modules/maintenance/hooks/useMaintenanceData';
 import * as maintenanceService from '@services/maintenanceService';
 import type { SparePart } from '@services/maintenanceService';
+import { storageService } from '@services/storageService';
+import { getErrorMessage } from '@services/serviceError';
+import { InvoiceUploadModal } from '@modules/maintenance/components/InvoiceUploadModal';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -269,9 +272,20 @@ export function SparePartsTab() {
 
   const [search, setSearch] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
+  const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
   const [editing, setEditing] = useState<SparePart | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<SparePart | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  const viewInvoice = async (part: SparePart) => {
+    if (!part.invoice_attachment_url) return;
+    try {
+      const url = await storageService.createSignedUrl('invoice-attachments', part.invoice_attachment_url);
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } catch (err) {
+      toast({ title: 'تعذر فتح صورة الفاتورة', description: getErrorMessage(err), variant: 'destructive' });
+    }
+  };
 
   const filtered = useMemo(() => {
     const t = search.trim().toLowerCase();
@@ -362,9 +376,14 @@ export function SparePartsTab() {
           />
         </div>
         {permissions.can_edit && (
-          <Button onClick={openAdd} className="gap-1.5 shrink-0">
-            <ShoppingCart size={16} /> تسجيل شراء قطعة
-          </Button>
+          <div className="flex gap-2 shrink-0">
+            <Button variant="outline" onClick={() => setInvoiceModalOpen(true)} className="gap-1.5">
+              <FileText size={16} /> رفع فاتورة
+            </Button>
+            <Button onClick={openAdd} className="gap-1.5">
+              <ShoppingCart size={16} /> تسجيل شراء قطعة
+            </Button>
+          </div>
         )}
       </div>
 
@@ -404,6 +423,22 @@ export function SparePartsTab() {
                           <p className="font-medium text-foreground">{part.name_ar}</p>
                           {part.part_number && (
                             <p className="text-xs text-muted-foreground font-mono">{part.part_number}</p>
+                          )}
+                          {part.invoice_number && (
+                            <p className="text-[11px] text-muted-foreground mt-0.5">
+                              فاتورة #{part.invoice_number}
+                              {part.invoice_date && ` · ${new Date(part.invoice_date).toLocaleDateString('ar-SA')}`}
+                              {part.invoice_attachment_url && (
+                                <button
+                                  type="button"
+                                  onClick={() => viewInvoice(part)}
+                                  className="inline-flex items-center gap-0.5 text-primary hover:underline mr-1"
+                                  title="عرض صورة الفاتورة"
+                                >
+                                  <Paperclip size={11} /> عرض
+                                </button>
+                              )}
+                            </p>
                           )}
                         </div>
                       </div>
@@ -459,6 +494,13 @@ export function SparePartsTab() {
         open={modalOpen}
         onOpenChange={setModalOpen}
         editing={editing}
+        onSaved={invalidate}
+      />
+
+      {/* Invoice Upload Modal */}
+      <InvoiceUploadModal
+        open={invoiceModalOpen}
+        onOpenChange={setInvoiceModalOpen}
         onSaved={invalidate}
       />
 

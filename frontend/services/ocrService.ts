@@ -276,6 +276,60 @@ export function parseLicenseData(rawText: string): LicenseData {
   return result;
 }
 
+// ─── تحليل فواتير قطع الغيار ──────────────────────────────────────────────────
+
+export interface InvoiceLineItem {
+  name: string;
+  quantity: number;
+  unitPrice: number;
+}
+
+/** رقم عشري بأرقام عربية أو إنجليزية، بفواصل عشرية أو آلاف اختيارية */
+const NUMBER_TOKEN_RE = /-?\d[\d,]*(?:\.\d+)?/g;
+
+function toNumber(token: string): number {
+  const n = Number.parseFloat(normalizeArabicNumerals(token).replace(/,/g, ''));
+  return Number.isFinite(n) ? n : 0;
+}
+
+/** كلمات لا تُعتبر أبداً اسم صنف (رؤوس أعمدة، إجماليات...) */
+const IGNORED_LINE_RE = /^(الإجمالي|الاجمالي|المجموع|الضريبة|ضريبة|القيمة المضافة|VAT|Total|Subtotal|Tax|السعر|الكمية|الصنف|الوصف|Item|Description|Qty|Price|فاتورة|Invoice|التاريخ|Date|رقم|Bill|Net|الصافي)/i;
+
+/**
+ * يحاول استخراج بنود الفاتورة (اسم الصنف / الكمية / سعر الوحدة) من نص OCR خام.
+ *
+ * الفواتير تختلف كثيراً في شكلها، لذا هذه دالة "أفضل تخمين" فقط: تبحث عن كل
+ * سطر يحتوي على رقمين على الأقل (كمية وسعر) بجانب نص، وتتجاهل أسطر العناوين
+ * والإجماليات المعروفة. النتيجة دائماً قابلة للمراجعة والتعديل يدوياً قبل
+ * الحفظ في المخزون — لا تُستخدم مباشرة بدون تأكيد من المستخدم.
+ */
+export function parseInvoiceLineItems(rawText: string): InvoiceLineItem[] {
+  const text = normalizeArabicNumerals(rawText);
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  const items: InvoiceLineItem[] = [];
+
+  for (const line of lines) {
+    if (IGNORED_LINE_RE.test(line)) continue;
+
+    const numbers = [...line.matchAll(NUMBER_TOKEN_RE)].map(m => m[0]);
+    if (numbers.length < 2) continue;
+
+    // اسم الصنف = النص المتبقي بعد إزالة كل الأرقام والرموز الشائعة
+    const name = line.replace(NUMBER_TOKEN_RE, '').replace(/[|_*#]/g, '').replace(/\s+/g, ' ').trim();
+    if (name.length < 2) continue;
+
+    // نفترض أن آخر رقمين على السطر هما (الكمية، سعر الوحدة) أو (سعر الوحدة، الإجمالي)
+    const [qtyToken, priceToken] = numbers.slice(0, 2);
+    const quantity = toNumber(qtyToken) || 1;
+    const unitPrice = toNumber(priceToken);
+    if (unitPrice <= 0 && numbers.length < 2) continue;
+
+    items.push({ name, quantity, unitPrice });
+  }
+
+  return items;
+}
+
 // ─── دوال مساعدة ─────────────────────────────────────────────────────────────
 
 /** تحوّل التاريخ إلى صيغة YYYY-MM-DD إن أمكن */

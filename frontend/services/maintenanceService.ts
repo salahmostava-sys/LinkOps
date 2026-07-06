@@ -11,6 +11,9 @@ export interface SparePart {
   unit_cost: number;
   supplier?: string | null;
   notes?: string | null;
+  invoice_number?: string | null;
+  invoice_date?: string | null;
+  invoice_attachment_url?: string | null;
 }
 
 export interface CreateSparePartInput {
@@ -22,6 +25,9 @@ export interface CreateSparePartInput {
   unit_cost?: number;
   supplier?: string | null;
   notes?: string | null;
+  invoice_number?: string | null;
+  invoice_date?: string | null;
+  invoice_attachment_url?: string | null;
 }
 
 export interface MaintenancePartInput {
@@ -54,7 +60,7 @@ export interface MaintenanceLogWithDetails {
     id: string;
     quantity_used: number;
     cost_at_time: number;
-    spare_parts: { name_ar: string; unit: string };
+    spare_parts: { name_ar: string; unit: string; invoice_number?: string | null };
   }[];
 }
 
@@ -74,7 +80,7 @@ const logSelect = `
     id,
     quantity_used,
     cost_at_time,
-    spare_parts(name_ar, unit)
+    spare_parts(name_ar, unit, invoice_number)
   )
 `;
 
@@ -122,7 +128,7 @@ function throwMaintenanceSchemaError(error: unknown, context: string): never {
 export async function getSpareparts(): Promise<SparePart[]> {
   const { data, error } = await supabase
     .from('spare_parts')
-    .select('id, name_ar, part_number, stock_quantity, min_stock_alert, unit, unit_cost, supplier, notes')
+    .select('id, name_ar, part_number, stock_quantity, min_stock_alert, unit, unit_cost, supplier, notes, invoice_number, invoice_date, invoice_attachment_url')
     .order('name_ar');
   if (error) throwMaintenanceSchemaError(error, 'maintenanceService.getSpareparts');
   return (data ?? []) as SparePart[];
@@ -140,6 +146,9 @@ export async function createSparePart(data: CreateSparePartInput): Promise<Spare
       unit_cost: data.unit_cost ?? 0,
       supplier: data.supplier ?? null,
       notes: data.notes ?? null,
+      invoice_number: data.invoice_number ?? null,
+      invoice_date: data.invoice_date ?? null,
+      invoice_attachment_url: data.invoice_attachment_url ?? null,
     })
     .select()
     .single();
