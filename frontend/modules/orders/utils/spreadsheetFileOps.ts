@@ -145,7 +145,7 @@ export async function exportDailyAppReportExcel(params: {
   const results = employees.map(emp => {
     let total = 0;
     for (let d = startDay; d <= endDay; d++) {
-      const key = `${emp.id}_${appId}_${dateStr(year, month, d)}`;
+      const key = `${emp.id}::${appId}::${d}`;
       total += data[key] || 0;
     }
     return { name: emp.name, total };
@@ -195,7 +195,7 @@ export async function printDailyAppReportTable(params: {
   const results = employees.map(emp => {
     let total = 0;
     for (let d = startDay; d <= endDay; d++) {
-      const key = `${emp.id}_${appId}_${dateStr(year, month, d)}`;
+      const key = `${emp.id}::${appId}::${d}`;
       total += data[key] || 0;
     }
     return { name: emp.name, total };
