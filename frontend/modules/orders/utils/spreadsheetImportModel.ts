@@ -152,8 +152,8 @@ export function mergeImportedOrdersFromMatrixWithMapping(params: {
 }): SpreadsheetMergeResult {
   const { headerRow = [], matrixRows, dayArr, apps, prev, targetAppId, nameMapping, appEmployeeIds } = params;
 
-  let imported = 0;
-  let skipped = 0;
+  const imported = 0;
+  const skipped = 0;
   const errors: string[] = [];
   const newData = { ...prev };
 
