@@ -33,6 +33,7 @@ vi.mock('@shared/lib/toastMessages', () => ({
 vi.mock('@services/orderService', () => ({
   orderService: {
     bulkUpsert: vi.fn(),
+    getMonthTargets: vi.fn(),
   },
 }));
 
@@ -68,6 +69,7 @@ vi.mock('@modules/orders/utils/xlsx', () => ({
 describe('spreadsheetFileOps', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    aoaToSheetMock.mockReturnValue({});
   });
 
   describe('exportSpreadsheetExcel', () => {
@@ -91,6 +93,40 @@ describe('spreadsheetFileOps', () => {
       expect(bookAppendSheetMock).toHaveBeenCalled();
       expect(writeFileMock).toHaveBeenCalledWith(undefined, 'طلبات_3_2026.xlsx');
       expect(toastSuccessMock).toHaveBeenCalledWith('Success Action');
+    });
+
+    it('exports the daily app report with correct totals', async () => {
+      vi.mocked(orderService.getMonthTargets).mockResolvedValue([{ app_id: 'app1', target_orders: 10 }]);
+      const employees = [
+        { id: 'emp1', name: 'John', platform_accounts: [], identity_id: '', is_active: true, avatar_url: '', created_at: '', updated_at: '' },
+        { id: 'emp2', name: 'Jane', platform_accounts: [], identity_id: '', is_active: true, avatar_url: '', created_at: '', updated_at: '' },
+      ];
+      const apps = [{ id: 'app1', name: 'App1', created_at: '', updated_at: '' }];
+      const data = {
+        'emp1::app1::1': 5,
+        'emp2::app1::2': 3,
+        'emp2::app1::3': 2,
+      };
+
+      await import('./spreadsheetFileOps').then(async ({ exportDailyAppReportExcel }) => {
+        await exportDailyAppReportExcel({
+          year: 2026,
+          month: 3,
+          startDay: 1,
+          endDay: 3,
+          appId: 'app1',
+          employees,
+          data,
+          apps,
+        });
+      });
+
+      expect(aoaToSheetMock).toHaveBeenCalled();
+      const exportedRows = aoaToSheetMock.mock.calls[0][0] as Array<Array<string | number>>;
+      expect(exportedRows[2]).toEqual(['اسم المندوب', 'إجمالي الطلبات', 'تارجت المندوب', 'المتبقي للوصول للتارجت', 'التوصيات']);
+      expect(exportedRows).toContainEqual(['John', 5, 10, 5, '']);
+      expect(exportedRows).toContainEqual(['Jane', 5, 10, 5, '']);
+      expect(writeFileMock).toHaveBeenCalledWith(undefined, 'تقرير_App1_1_إلى_3.xlsx');
     });
   });
 
@@ -129,6 +165,53 @@ describe('spreadsheetFileOps', () => {
       
       if (mockWindow.onafterprint) mockWindow.onafterprint(new Event('afterprint'));
       expect(mockWindow.close).toHaveBeenCalled();
+    });
+
+    it('prints the daily app report with totals from data keys', async () => {
+      vi.mocked(orderService.getMonthTargets).mockResolvedValue([{ app_id: 'app1', target_orders: 10 }]);
+      const mockWindow = {
+        document: {
+          documentElement: { setAttribute: vi.fn() },
+          head: { appendChild: vi.fn() },
+          body: { replaceChildren: vi.fn(), appendChild: vi.fn() },
+          createElement: vi.fn().mockReturnValue({ setAttribute: vi.fn() }),
+          write: vi.fn(),
+          close: vi.fn(),
+        },
+        onload: null as any,
+        print: vi.fn(),
+        onafterprint: null as any,
+        close: vi.fn(),
+      };
+      vi.spyOn(globalThis, 'open').mockReturnValue(mockWindow as any);
+      const { printDailyAppReportTable } = await import('./spreadsheetFileOps');
+
+      await printDailyAppReportTable({
+        year: 2026,
+        month: 3,
+        startDay: 1,
+        endDay: 3,
+        appId: 'app1',
+        employees: [
+          { id: 'emp1', name: 'John', platform_accounts: [], identity_id: '', is_active: true, avatar_url: '', created_at: '', updated_at: '' },
+          { id: 'emp2', name: 'Jane', platform_accounts: [], identity_id: '', is_active: true, avatar_url: '', created_at: '', updated_at: '' },
+        ],
+        data: {
+          'emp1::app1::1': 5,
+          'emp2::app1::2': 3,
+          'emp2::app1::3': 2,
+        },
+        apps: [{ id: 'app1', name: 'App1', created_at: '', updated_at: '' }],
+      });
+
+      expect(globalThis.open).toHaveBeenCalled();
+      expect(mockWindow.document.write).toHaveBeenCalled();
+      const html = mockWindow.document.write.mock.calls[0][0] as string;
+      expect(html).toContain('John');
+      expect(html).toContain('Jane');
+      expect(html).toContain('5');
+      expect(mockWindow.document.write).toHaveBeenCalled();
+      expect(mockWindow.document.close).toHaveBeenCalled();
     });
   });
 
