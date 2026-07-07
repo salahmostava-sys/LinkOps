@@ -44,6 +44,7 @@ function getFriendlyLoginErrorMessage(message: string): string {
     normalized.includes(':timeout') ||
     normalized.includes('timed out') ||
     normalized.includes('failed to fetch') ||
+    normalized.includes('fetch failed') ||
     normalized.includes('network') ||
     normalized.includes('مهلة')
   ) {
