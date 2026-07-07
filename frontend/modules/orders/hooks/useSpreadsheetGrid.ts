@@ -15,7 +15,7 @@ import type { UnmatchedEmployeeName } from '@shared/lib/nameMatching';
 import { useSpreadsheetQueries } from '@modules/orders/hooks/useSpreadsheetQueries';
 import { buildDailyDataMap, calculatePlatformTotals, collectEmployeeIdsWithOrdersOnApp } from '@modules/orders/utils/gridHelpers';
 import { getErrorMessage } from '@services/serviceError';
-import { exportSpreadsheetExcel, runSpreadsheetImport, downloadSpreadsheetTemplate, printSpreadsheetTable, saveSpreadsheetMonth } from '@modules/orders/utils/spreadsheetFileOps';
+import { exportSpreadsheetExcel, runSpreadsheetImport, downloadSpreadsheetTemplate, printSpreadsheetTable, saveSpreadsheetMonth, exportDailyAppReportExcel, printDailyAppReportTable } from '@modules/orders/utils/spreadsheetFileOps';
 import { getDaysInMonth, monthYear, shiftMonth, isPastMonth } from '@modules/orders/utils/dateMonth';
 import { useTemporalContext } from '@app/providers/TemporalContext';
 
@@ -45,6 +45,7 @@ export function useSpreadsheetGrid() {
   const [pendingImportFile, setPendingImportFile] = useState<File | null>(null);
   const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
   const [showNameMappingDialog, setShowNameMappingDialog] = useState(false);
+  const [showDailyReportDialog, setShowDailyReportDialog] = useState(false);
   const [unmatchedNames, setUnmatchedNames] = useState<UnmatchedEmployeeName[]>([]);
   const [nameMappingCallback, setNameMappingCallback] = useState<((mapping: Map<string, string>) => void) | null>(null);
 
@@ -237,6 +238,22 @@ export function useSpreadsheetGrid() {
       empDayTotal,
       empMonthTotal,
     });
+
+  const exportDailyReportExcel = (appId: string, startDay: number, endDay: number) => {
+    exportDailyAppReportExcel({
+      year, month, startDay, endDay, appId,
+      employees: filteredEmployees,
+      data, apps: sq.apps
+    });
+  };
+
+  const printDailyReportPdf = (appId: string, startDay: number, endDay: number) => {
+    printDailyAppReportTable({
+      year, month, startDay, endDay, appId,
+      employees: filteredEmployees,
+      data, apps: sq.apps
+    });
+  };
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -453,6 +470,10 @@ export function useSpreadsheetGrid() {
     handleCellClick,
     handlePopoverApply,
     exportExcel,
+    exportDailyReportExcel,
+    printDailyReportPdf,
+    showDailyReportDialog,
+    setShowDailyReportDialog,
     handleImport,
     handleImportConfirm,
     handleImportCancel,

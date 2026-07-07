@@ -10,6 +10,7 @@ import { ImportPlatformDialog } from '@modules/orders/components/ImportPlatformD
 import { BulkDeleteOrdersDialog } from '@modules/orders/components/BulkDeleteOrdersDialog';
 import { NameMappingDialog } from '@modules/orders/components/NameMappingDialog';
 import { OrdersImportHistorySummary } from '@modules/orders/components/OrdersImportHistorySummary';
+import { DailyAppReportDialog } from '@modules/orders/components/DailyAppReportDialog';
 
 export const SpreadsheetGridTab = React.memo(() => {
   const g = useSpreadsheetGrid();
@@ -35,6 +36,7 @@ export const SpreadsheetGridTab = React.memo(() => {
         importRef={g.importRef}
         onImportChange={g.handleImport}
         onExport={g.exportExcel}
+        onOpenDailyReport={() => g.setShowDailyReportDialog(true)}
         onTemplate={g.handleTemplate}
         onPickImport={() => g.importRef.current?.click()}
         onPrint={g.handlePrint}
@@ -112,6 +114,15 @@ export const SpreadsheetGridTab = React.memo(() => {
         unmatched={g.unmatchedNames}
         onConfirm={g.handleNameMappingConfirm}
         onCancel={g.handleNameMappingCancel}
+      />
+
+      <DailyAppReportDialog
+        open={g.showDailyReportDialog}
+        onOpenChange={g.setShowDailyReportDialog}
+        apps={g.apps}
+        daysInMonth={g.daysInMonth}
+        onExportExcel={g.exportDailyReportExcel}
+        onPrintPdf={g.printDailyReportPdf}
       />
     </div>
   );

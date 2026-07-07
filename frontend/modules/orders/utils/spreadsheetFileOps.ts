@@ -122,6 +122,152 @@ export async function exportSpreadsheetExcel(params: {
   toast.success(TOAST_SUCCESS_ACTION);
 }
 
+export async function exportDailyAppReportExcel(params: {
+  year: number;
+  month: number;
+  startDay: number;
+  endDay: number;
+  appId: string;
+  employees: Employee[];
+  data: DailyData;
+  apps: App[];
+}): Promise<void> {
+  const XLSX = await loadXlsx();
+  const { year, month, startDay, endDay, appId, employees, data, apps } = params;
+  
+  const appName = apps.find(a => a.id === appId)?.name || 'غير معروف';
+  
+  const my = monthYear(year, month);
+  const targets = await orderService.getMonthTargets(my);
+  const targetRow = targets.find((t) => t.app_id === appId);
+  const target = targetRow ? targetRow.target_orders : 0;
+  
+  const results = employees.map(emp => {
+    let total = 0;
+    for (let d = startDay; d <= endDay; d++) {
+      const key = `${emp.id}_${appId}_${dateStr(year, month, d)}`;
+      total += data[key] || 0;
+    }
+    return { name: emp.name, total };
+  }).filter(r => r.total > 0).sort((a, b) => b.total - a.total);
+
+  const titleText = `تقرير تطبيق ${appName} من يوم ${startDay} إلى ${endDay} (${year}-${String(month).padStart(2, '0')})`;
+  
+  const rows: Array<Array<string | number>> = [
+    [titleText],
+    [],
+    ['اسم المندوب', 'إجمالي الطلبات', 'تارجت المندوب', 'المتبقي للوصول للتارجت', 'التوصيات']
+  ];
+
+  results.forEach(r => {
+    const remaining = target - r.total;
+    rows.push([r.name, r.total, target, remaining, '']);
+  });
+
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  if (!ws['!merges']) ws['!merges'] = [];
+  ws['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 0, c: 4 } });
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'التقرير');
+  XLSX.writeFile(wb, `تقرير_${appName}_${startDay}_إلى_${endDay}.xlsx`);
+  toast.success(TOAST_SUCCESS_ACTION);
+}
+
+export async function printDailyAppReportTable(params: {
+  year: number;
+  month: number;
+  startDay: number;
+  endDay: number;
+  appId: string;
+  employees: Employee[];
+  data: DailyData;
+  apps: App[];
+}) {
+  const { year, month, startDay, endDay, appId, employees, data, apps } = params;
+  const appName = apps.find(a => a.id === appId)?.name || 'غير معروف';
+
+  const my = monthYear(year, month);
+  const targets = await orderService.getMonthTargets(my);
+  const targetRow = targets.find((t) => t.app_id === appId);
+  const target = targetRow ? targetRow.target_orders : 0;
+
+  const results = employees.map(emp => {
+    let total = 0;
+    for (let d = startDay; d <= endDay; d++) {
+      const key = `${emp.id}_${appId}_${dateStr(year, month, d)}`;
+      total += data[key] || 0;
+    }
+    return { name: emp.name, total };
+  }).filter(r => r.total > 0).sort((a, b) => b.total - a.total);
+
+  const titleText = `تقرير تطبيق ${appName} من يوم ${startDay} إلى ${endDay} (${year}-${String(month).padStart(2, '0')})`;
+
+  const newWin = window.open('', '_blank');
+  if (!newWin) {
+    toast.error('يرجى السماح بالنوافذ المنبثقة (Pop-ups) للطباعة');
+    return;
+  }
+
+  let html = `
+    <html dir="rtl">
+    <head>
+      <title>${titleText}</title>
+      <style>
+        body { font-family: system-ui, -apple-system, sans-serif; padding: 20px; }
+        h1 { text-align: center; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: right; }
+        th { background-color: #f1f5f9; }
+        @media print {
+          button { display: none; }
+        }
+      </style>
+    </head>
+    <body>
+      <h1>${titleText}</h1>
+      <table>
+        <thead>
+          <tr>
+            <th>اسم المندوب</th>
+            <th>إجمالي الطلبات</th>
+            <th>تارجت المندوب</th>
+            <th>المتبقي</th>
+            <th>التوصيات</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
+
+  results.forEach(r => {
+    const remaining = target - r.total;
+    html += `
+      <tr>
+        <td>${r.name}</td>
+        <td>${r.total}</td>
+        <td>${target}</td>
+        <td dir="ltr" style="text-align: right;">${remaining}</td>
+        <td></td>
+      </tr>
+    `;
+  });
+
+  html += `
+        </tbody>
+      </table>
+      <script>
+        setTimeout(() => {
+          window.print();
+        }, 500);
+      </script>
+    </body>
+    </html>
+  `;
+
+  newWin.document.write(html);
+  newWin.document.close();
+}
+
 export async function runSpreadsheetImport(params: {
   file: File;
   dayArr: number[];

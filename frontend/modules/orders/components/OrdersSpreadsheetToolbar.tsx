@@ -55,6 +55,7 @@ type Props = Readonly<{
   importRef: React.RefObject<HTMLInputElement>;
   onImportChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onExport: () => void;
+  onOpenDailyReport: () => void;
   onTemplate: () => void;
   onPickImport: () => void;
   onPrint: () => void;
@@ -88,6 +89,7 @@ export function OrdersSpreadsheetToolbar(props: Readonly<Props>) {
     importRef,
     onImportChange,
     onExport,
+    onOpenDailyReport,
     onTemplate,
     onPickImport,
     onPrint,
@@ -208,6 +210,7 @@ export function OrdersSpreadsheetToolbar(props: Readonly<Props>) {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={onExport}>📊 تصدير Excel</DropdownMenuItem>
+            <DropdownMenuItem onClick={onOpenDailyReport}>📄 تقرير مخصص لمنصة</DropdownMenuItem>
             <DropdownMenuItem onClick={onTemplate}>📋 تحميل قالب الاستيراد</DropdownMenuItem>
             <DropdownMenuItem onClick={onPickImport}>⬆️ استيراد Excel</DropdownMenuItem>
             <DropdownMenuSeparator />
