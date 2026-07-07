@@ -54,8 +54,11 @@ export function MonthSummaryStats(props: Readonly<Props>) {
         {apps.map((app) => {
           const c = getAppColor(appColorsList, app.name);
           const total = appGrandTotal(app.id);
-          const targetVal = Number.parseInt(targets[app.id] || '0', 10) || 0;
-          const overTarget = targetVal > 0 && total >= targetVal;
+          const platformTarget = Number.parseInt(targets[app.id] || '0', 10) || 0;
+          const empTarget = Number.parseInt(employeeTargets[app.id] || '0', 10) || 0;
+          // إذا كان هدف المندوب محدداً → الهدف الفعّال = هدف المندوب × عدد المناديب في الملخص
+          const effectiveTarget = empTarget > 0 ? empTarget * employeesCount : platformTarget;
+          const overTarget = effectiveTarget > 0 && total >= effectiveTarget;
           const isSaving = savingTarget === app.id;
 
           return (
@@ -71,8 +74,8 @@ export function MonthSummaryStats(props: Readonly<Props>) {
               </span>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-bold" style={{ color: c.solid }}>{total.toLocaleString('en-US')}</span>
-                {targetVal > 0 && (
-                  <span className="text-[10px] text-muted-foreground">/ {targetVal.toLocaleString('en-US')}</span>
+                {effectiveTarget > 0 && (
+                  <span className="text-[10px] text-muted-foreground">/ {effectiveTarget.toLocaleString('en-US')}</span>
                 )}
                 {overTarget && <span className="text-[9px] text-success font-bold">✓</span>}
               </div>
