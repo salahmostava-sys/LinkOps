@@ -10,13 +10,19 @@ import { getDaysInMonth, monthYear } from '@modules/orders/utils/dateMonth';
 import { exportDailyAppReportExcel, printDailyAppReportTable } from '@modules/orders/utils/spreadsheetFileOps';
 import { toast } from '@shared/components/ui/sonner';
 import { getErrorMessage } from '@services/serviceError';
-import { useAppColors } from '@shared/hooks/useAppColors';
+import { useAppColors, getAppColor as getAppColorFunction } from '@shared/hooks/useAppColors';
 
 export function useDailyAppReportTab() {
   const { enabled, userId } = useAuthQueryGate();
   const uid = authQueryUserId(userId);
   const { selectedMonth: globalMonth, setSelectedMonth: setGlobalMonth } = useTemporalContext();
-  const { getAppColor } = useAppColors();
+  const { apps: colorApps } = useAppColors();
+
+  const getAppColor = (appId: string) => {
+    const app = sq.apps.find((a) => a.id === appId);
+    if (!app) return '#2563eb';
+    return getAppColorFunction(colorApps, app.name).solid;
+  };
 
   const [yearStr, monthStr] = globalMonth.split('-');
   const year = Number(yearStr);
