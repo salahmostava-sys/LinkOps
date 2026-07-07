@@ -139,6 +139,8 @@ export function MaintenanceLogsTab() {
   });
 
   const [search, setSearch] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   const [addOpen, setAddOpen] = useState(false);
   const [editingLog, setEditingLog] = useState<MaintenanceLogWithDetails | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<MaintenanceLogWithDetails | null>(null);
@@ -152,12 +154,21 @@ export function MaintenanceLogsTab() {
   const logs = useMemo(() => logsQ.data ?? [], [logsQ.data]);
 
   const filtered = useMemo(() => {
+    let result = logs;
     const t = search.trim().toLowerCase();
-    if (!t) return logs;
-    return logs.filter(l =>
-      [l.vehicles?.plate_number, l.type, l.notes ?? ''].join(' ').toLowerCase().includes(t)
-    );
-  }, [logs, search]);
+    if (t) {
+      result = result.filter(l =>
+        [l.vehicles?.plate_number, l.type, l.notes ?? ''].join(' ').toLowerCase().includes(t)
+      );
+    }
+    if (dateFrom) {
+      result = result.filter(l => l.maintenance_date >= dateFrom);
+    }
+    if (dateTo) {
+      result = result.filter(l => l.maintenance_date <= dateTo);
+    }
+    return result;
+  }, [logs, search, dateFrom, dateTo]);
 
   const totalCost = useMemo(() =>
     logs.reduce((s, l) => s + Number(l.total_cost ?? 0), 0), [logs]
@@ -236,6 +247,18 @@ export function MaintenanceLogsTab() {
               className="pr-8"
             />
           </div>
+          <Input
+            type="date"
+            value={dateFrom}
+            onChange={e => setDateFrom(e.target.value)}
+            className="w-32"
+          />
+          <Input
+            type="date"
+            value={dateTo}
+            onChange={e => setDateTo(e.target.value)}
+            className="w-32"
+          />
           {permissions.can_edit && (
             <Button onClick={() => setAddOpen(true)} className="gap-1.5 shrink-0">
               <Plus size={16} /> إضافة صيانة

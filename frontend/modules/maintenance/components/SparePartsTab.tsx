@@ -264,6 +264,8 @@ export function SparePartsTab() {
   const rows = useMemo(() => q.data ?? [], [q.data]);
 
   const [search, setSearch] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
   const [editing, setEditing] = useState<SparePart | null>(null);
@@ -281,12 +283,21 @@ export function SparePartsTab() {
   };
 
   const filtered = useMemo(() => {
+    let result = rows;
     const t = search.trim().toLowerCase();
-    if (!t) return rows;
-    return rows.filter(p =>
-      [p.name_ar, p.part_number ?? '', p.supplier ?? ''].join(' ').toLowerCase().includes(t)
-    );
-  }, [rows, search]);
+    if (t) {
+      result = result.filter(p =>
+        [p.name_ar, p.part_number ?? '', p.supplier ?? ''].join(' ').toLowerCase().includes(t)
+      );
+    }
+    if (dateFrom) {
+      result = result.filter(p => p.invoice_date && p.invoice_date >= dateFrom);
+    }
+    if (dateTo) {
+      result = result.filter(p => p.invoice_date && p.invoice_date <= dateTo);
+    }
+    return result;
+  }, [rows, search, dateFrom, dateTo]);
 
   const summary = useMemo(() => {
     const low = rows.filter(p => Number(p.stock_quantity) < Number(p.min_stock_alert ?? 5) && Number(p.stock_quantity) > 0).length;
@@ -359,13 +370,27 @@ export function SparePartsTab() {
 
       {/* Toolbar */}
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-        <div className="relative flex-1 sm:w-64">
-          <Search size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        <div className="flex gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+          <div className="relative flex-1 sm:w-64">
+            <Search size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="بحث باسم القطعة أو المورد..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="pr-8 min-w-[200px]"
+            />
+          </div>
           <Input
-            placeholder="بحث باسم القطعة أو المورد..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="pr-8"
+            type="date"
+            value={dateFrom}
+            onChange={e => setDateFrom(e.target.value)}
+            className="w-32 min-w-[120px]"
+          />
+          <Input
+            type="date"
+            value={dateTo}
+            onChange={e => setDateTo(e.target.value)}
+            className="w-32 min-w-[120px]"
           />
         </div>
         {permissions.can_edit && (
