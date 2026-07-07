@@ -31,7 +31,7 @@ export const alertsService = {
     const fetchAll = Promise.all([
       supabase
         .from("employees")
-        .select("id, name, commercial_record, residency_expiry, probation_end_date, health_insurance_expiry, license_expiry, sponsorship_status")
+        .select("id, name, commercial_record, residency_expiry, probation_end_date, health_insurance_expiry, license_expiry, sponsorship_status, status")
         .eq("status", "active")
         .or(
           `residency_expiry.lte.${expiryHorizon},probation_end_date.lte.${expiryHorizon},health_insurance_expiry.lte.${expiryHorizon},license_expiry.lte.${expiryHorizon}`,
@@ -52,7 +52,7 @@ export const alertsService = {
         .select("id, type, due_date, is_resolved, message, details")
         .order("created_at", { ascending: false })
         .limit(500),
-      supabase.from("spare_parts").select("id, name_ar, stock_quantity, min_stock_alert, unit"),
+      Promise.resolve({ data: [], error: null }), // Disabled spare_parts query per user request
       supabase
         .from("employees")
         .select(

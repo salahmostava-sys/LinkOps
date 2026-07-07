@@ -21,6 +21,7 @@ export type EmployeeAlertRow = {
   health_insurance_expiry?: string | null;
   license_expiry?: string | null;
   sponsorship_status?: string | null;
+  status?: string | null;
 };
 
 export type AbscondedEmployeeAlertRow = {
@@ -87,6 +88,17 @@ const pushEmployeeExpiryAlerts = (
   threshold: string,
   today: Date
 ) => {
+  // Ignore inactive or terminated employees
+  if (emp.status && emp.status.toLowerCase() !== 'active') {
+    return;
+  }
+  
+  // Ignore employees with absconded, expired, or terminated sponsorship statuses
+  const invalidStatuses = ['absconded', 'expired', 'terminated', 'inactive', 'canceled', 'final_exit'];
+  if (emp.sponsorship_status && invalidStatuses.includes(emp.sponsorship_status.toLowerCase())) {
+    return;
+  }
+
   const employeeLabel = emp.commercial_record?.trim()
     ? `${emp.name} • السجل: ${emp.commercial_record.trim()}`
     : emp.name;
@@ -237,22 +249,7 @@ const pushPlatformAccountAlerts = (out: Alert[], rows: PlatformAccountAlertRow[]
   }
 };
 
-const pushLowStockSparePartAlerts = (out: Alert[], rows: LowStockSparePartAlertRow[] | null | undefined, today: Date) => {
-  if (!rows?.length) return;
-  const dueDate = format(today, ISO_DATE_FORMAT);
-  for (const p of rows) {
-    if (Number(p.stock_quantity) >= Number(p.min_stock_alert ?? 0)) continue;
-    out.push({
-      id: `lowstock-${p.id}`,
-      type: "low_stock",
-      entityName: `قطعة "${p.name_ar}" وصلت للحد الأدنى (متبقي: ${p.stock_quantity} ${p.unit})`,
-      dueDate,
-      daysLeft: 0,
-      severity: "warning",
-      resolved: false,
-    });
-  }
-};
+
 
 const pushPersistedDbAlerts = (out: Alert[], rows: PersistedAlertRow[], today: Date) => {
   for (const a of rows) {
@@ -292,12 +289,11 @@ export function buildAlertsFromResponses(
   const employees = employeesRes.data ?? [];
   const platformAccounts = platformAccountsRes.data ?? [];
   const dbAlerts = dbAlertsRes.data ?? [];
-  const spareParts = sparePartsRes.data ?? [];
   const absconded = abscondedRes.data ?? [];
   employees.forEach((emp) => pushEmployeeExpiryAlerts(generatedAlerts, emp, threshold, today));
   pushVehicleExpiryAlerts(generatedAlerts, vehiclesRes.data, threshold, today);
   pushPlatformAccountAlerts(generatedAlerts, platformAccounts, today);
-  pushLowStockSparePartAlerts(generatedAlerts, spareParts, today);
+  // Inventory alerts disabled per user request
   pushPersistedDbAlerts(generatedAlerts, dbAlerts, today);
   pushAbscondedSummaryAlerts(generatedAlerts, absconded, today);
   generatedAlerts.sort((a, b) => a.daysLeft - b.daysLeft);
