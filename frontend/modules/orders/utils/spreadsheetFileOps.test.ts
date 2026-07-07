@@ -96,7 +96,7 @@ describe('spreadsheetFileOps', () => {
     });
 
     it('exports the daily app report with correct totals', async () => {
-      vi.mocked(orderService.getMonthTargets).mockResolvedValue([{ app_id: 'app1', target_orders: 10 }]);
+      vi.mocked(orderService.getMonthTargets).mockResolvedValue([{ app_id: 'app1', target_orders: 10, employee_target_orders: 10 }]);
       const employees = [
         { id: 'emp1', name: 'John', platform_accounts: [], identity_id: '', is_active: true, avatar_url: '', created_at: '', updated_at: '' },
         { id: 'emp2', name: 'Jane', platform_accounts: [], identity_id: '', is_active: true, avatar_url: '', created_at: '', updated_at: '' },

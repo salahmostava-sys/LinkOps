@@ -141,7 +141,7 @@ export async function exportDailyAppReportExcel(params: {
   const my = monthYear(year, month);
   const targets = await orderService.getMonthTargets(my);
   const targetRow = targets.find((t) => t.app_id === appId);
-  const target = targetRow ? targetRow.target_orders : 0;
+  const empTarget = targetRow?.employee_target_orders ?? null;
   
   const results = employees.map(emp => {
     let total = 0;
@@ -161,8 +161,9 @@ export async function exportDailyAppReportExcel(params: {
   ];
 
   results.forEach(r => {
-    const remaining = target - r.total;
-    rows.push([r.name, r.total, target, remaining, '']);
+    const remaining = empTarget != null ? empTarget - r.total : '—';
+    const displayTarget = empTarget != null ? empTarget : 'بدون هدف';
+    rows.push([r.name, r.total, displayTarget, remaining, '']);
   });
 
   const ws = XLSX.utils.aoa_to_sheet(rows);
@@ -191,7 +192,7 @@ export async function printDailyAppReportTable(params: {
   const my = monthYear(year, month);
   const targets = await orderService.getMonthTargets(my);
   const targetRow = targets.find((t) => t.app_id === appId);
-  const target = targetRow ? targetRow.target_orders : 0;
+  const empTarget = targetRow?.employee_target_orders ?? null;
 
   const results = employees.map(emp => {
     let total = 0;
@@ -241,12 +242,13 @@ export async function printDailyAppReportTable(params: {
   `;
 
   results.forEach(r => {
-    const remaining = target - r.total;
+    const remaining = empTarget != null ? empTarget - r.total : '—';
+    const displayTarget = empTarget != null ? empTarget : 'بدون هدف';
     html += `
       <tr>
         <td>${r.name}</td>
         <td>${r.total}</td>
-        <td>${target}</td>
+        <td>${displayTarget}</td>
         <td dir="ltr" style="text-align: right;">${remaining}</td>
         <td></td>
       </tr>
