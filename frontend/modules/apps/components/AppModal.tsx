@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Check, Columns, PlusCircle, Trash2, X } from 'lucide-react';
 import { Input } from '@shared/components/ui/input';

@@ -561,7 +561,7 @@ export function TreasuryTab() {
                         {t.attachment_url ? (
                           <div className="flex items-center justify-center gap-0.5">
                             <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground" aria-label="عرض المرفق" onClick={async () => {
-                              try { const url = await storageService.createSignedUrl('advance-attachments', t.attachment_url!); window.open(url, '_blank'); }
+                              try { const url = await storageService.createSignedUrl('advance-attachments', t.attachment_url!); window.open(url, '_blank', 'noopener,noreferrer'); }
                               catch { toast.error('فشل فتح المرفق'); }
                             }}>
                               <Paperclip size={13} />

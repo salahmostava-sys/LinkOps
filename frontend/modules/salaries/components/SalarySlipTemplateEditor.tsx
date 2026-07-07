@@ -8,6 +8,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@shar
 import { ScrollArea } from '@shared/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/components/ui/tabs';
 import { toast } from '@shared/components/ui/sonner';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@shared/components/ui/alert-dialog';
 import { salarySlipTemplateService, SalarySlipTemplate } from '@services/salarySlipTemplateService';
 import { buildSalarySlipHTML } from '../lib/buildSalarySlipHTML';
 import { previewSlipInIframe } from '../lib/salarySlipActions';
@@ -73,6 +77,7 @@ export function SalarySlipTemplateEditor() {
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [deleteTemplateId, setDeleteTemplateId] = useState<string | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   const previewTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -144,13 +149,19 @@ export function SalarySlipTemplateEditor() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!globalThis.confirm('هل أنت متأكد من حذف هذا القالب؟')) return;
+    setDeleteTemplateId(id);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTemplateId) return;
     try {
-      await salarySlipTemplateService.delete(id);
+      await salarySlipTemplateService.delete(deleteTemplateId);
       toast.success('تم حذف القالب');
       loadTemplates();
     } catch {
       toast.error('فشل حذف القالب');
+    } finally {
+      setDeleteTemplateId(null);
     }
   };
 
@@ -204,7 +215,28 @@ export function SalarySlipTemplateEditor() {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-4">
+    <>
+      <AlertDialog open={Boolean(deleteTemplateId)} onOpenChange={(v) => { if (!v) setDeleteTemplateId(null); }}>
+        <AlertDialogContent dir="rtl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>حذف القالب</AlertDialogTitle>
+            <AlertDialogDescription>
+              هل أنت متأكد من حذف هذا القالب؟ لا يمكن التراجع عن هذا الإجراء.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={handleConfirmDelete}
+            >
+              حذف
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-4">
       {/* Sidebar: Template List */}
       <div className="lg:col-span-3 space-y-4">
         <Card className="border-primary/20 shadow-sm overflow-hidden bg-white/50 backdrop-blur-sm">
@@ -360,6 +392,7 @@ export function SalarySlipTemplateEditor() {
           </Card>
         </Tabs>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
