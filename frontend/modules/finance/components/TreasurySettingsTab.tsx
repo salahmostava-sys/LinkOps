@@ -52,7 +52,7 @@ export function TreasurySettingsTab() {
           إدارة الحسابات والعهد
         </h3>
         
-        <div className="flex gap-2 mb-4">
+        <div className="flex flex-col md:flex-row gap-2 mb-4">
           <Input 
             value={newAccName} 
             onChange={e => setNewAccName(e.target.value)} 
@@ -106,7 +106,7 @@ export function TreasurySettingsTab() {
           إدارة بنود المصاريف والإيرادات
         </h3>
         
-        <div className="flex gap-2 mb-4">
+        <div className="flex flex-col md:flex-row gap-2 mb-4">
           <Input 
             value={newCatName} 
             onChange={e => setNewCatName(e.target.value)} 

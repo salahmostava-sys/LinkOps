@@ -151,7 +151,8 @@ function TransactionTable(props: Readonly<TransactionTableProps>) {
   const descPlaceholder = isRev ? 'وصف الإيراد...' : 'وصف المصروف...';
 
   return (
-    <table className="w-full text-sm">
+    <div className="w-full overflow-x-auto">
+      <table className="w-full text-sm min-w-[300px]">
       <thead>
         <tr className="bg-muted/30">
           <th className="ta-th text-[11px] w-36">المبلغ (ر.س)</th>
@@ -223,6 +224,7 @@ function TransactionTable(props: Readonly<TransactionTableProps>) {
         </tr>
       </tbody>
     </table>
+    </div>
   );
 }
 
@@ -329,16 +331,18 @@ export default function FinancePage() {
       </div>
 
       <Tabs defaultValue="monthly" className="w-full">
-        <TabsList className="bg-muted">
-          <TabsTrigger value="monthly">التحليلات الشهرية</TabsTrigger>
-          {treasuryPerms.can_view && <TabsTrigger value="treasury">حركة الخزينة والعهد</TabsTrigger>}
-          <TabsTrigger value="category-summary">ملخص البنود</TabsTrigger>
-          {treasuryPerms.can_view && <TabsTrigger value="settings">إعدادات الحسابات</TabsTrigger>}
-        </TabsList>
+        <div className="w-full overflow-x-auto pb-2 scrollbar-hide">
+          <TabsList className="bg-muted inline-flex min-w-max h-auto p-1">
+            <TabsTrigger value="monthly">التحليلات الشهرية</TabsTrigger>
+            {treasuryPerms.can_view && <TabsTrigger value="treasury">حركة الخزينة والعهد</TabsTrigger>}
+            <TabsTrigger value="category-summary">ملخص البنود</TabsTrigger>
+            {treasuryPerms.can_view && <TabsTrigger value="settings">إعدادات الحسابات</TabsTrigger>}
+          </TabsList>
+        </div>
 
         <TabsContent value="monthly" className="mt-4 space-y-5">
           {/* ── Summary ────────────────────────────────────── */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-card -2xl shadow-card p-5 flex items-center gap-4 rounded-2xl">
           <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-950/40 flex items-center justify-center"><TrendingUp size={22} className="text-emerald-600" /></div>
           <div>
