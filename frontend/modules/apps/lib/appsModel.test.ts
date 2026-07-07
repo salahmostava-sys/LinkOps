@@ -130,8 +130,8 @@ describe('appsModel', () => {
       const result = buildAppEmployees({
         assignments,
         orderRows: orders,
-        targetOrders: 100, // 1 rider -> target is 100
-        employeeTargetOrders: null,
+        targetOrders: null,
+        employeeTargetOrders: 100,
         daysInMonth: 30,
         daysPassed: 15,
       });

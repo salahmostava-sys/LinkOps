@@ -54,11 +54,8 @@ export function MonthSummaryStats(props: Readonly<Props>) {
         {apps.map((app) => {
           const c = getAppColor(appColorsList, app.name);
           const total = appGrandTotal(app.id);
-          const platformTarget = Number.parseInt(targets[app.id] || '0', 10) || 0;
-          const empTarget = Number.parseInt(employeeTargets[app.id] || '0', 10) || 0;
-          // إذا كان هدف المندوب محدداً → الهدف الفعّال = هدف المندوب × عدد المناديب في الملخص
-          const effectiveTarget = empTarget > 0 ? empTarget * employeesCount : platformTarget;
-          const overTarget = effectiveTarget > 0 && total >= effectiveTarget;
+          const targetVal = Number.parseInt(targets[app.id] || '0', 10) || 0;
+          const overTarget = targetVal > 0 && total >= targetVal;
           const isSaving = savingTarget === app.id;
 
           return (

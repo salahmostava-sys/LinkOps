@@ -163,9 +163,7 @@ export const buildAppEmployees = ({
   });
 
   const riderCount = visibleEmployees.length;
-  const targetShare = employeeTargetOrders != null 
-    ? employeeTargetOrders 
-    : (targetOrders !== null && riderCount > 0 ? targetOrders / riderCount : null);
+  const targetShare = employeeTargetOrders != null ? employeeTargetOrders : null;
 
   return visibleEmployees.map((employee) => {
     const monthOrders = totalsByEmployee.get(employee.id) ?? 0;
