@@ -291,10 +291,16 @@ export function SparePartsTab() {
       );
     }
     if (dateFrom) {
-      result = result.filter(p => p.invoice_date && p.invoice_date >= dateFrom);
+      result = result.filter(p => {
+        const d = p.invoice_date || (p.created_at ? p.created_at.substring(0, 10) : '');
+        return d && d >= dateFrom;
+      });
     }
     if (dateTo) {
-      result = result.filter(p => p.invoice_date && p.invoice_date <= dateTo);
+      result = result.filter(p => {
+        const d = p.invoice_date || (p.created_at ? p.created_at.substring(0, 10) : '');
+        return d && d <= dateTo;
+      });
     }
     return result;
   }, [rows, search, dateFrom, dateTo]);

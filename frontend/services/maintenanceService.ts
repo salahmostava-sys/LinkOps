@@ -14,6 +14,7 @@ export interface SparePart {
   invoice_number?: string | null;
   invoice_date?: string | null;
   invoice_attachment_url?: string | null;
+  created_at?: string;
 }
 
 export interface CreateSparePartInput {
@@ -131,7 +132,7 @@ function throwMaintenanceSchemaError(error: unknown, context: string): never {
 export async function getSpareparts(): Promise<SparePart[]> {
   const { data, error } = await supabase
     .from('spare_parts')
-    .select('id, name_ar, part_number, stock_quantity, min_stock_alert, unit, unit_cost, supplier, notes, invoice_number, invoice_date, invoice_attachment_url')
+    .select('id, name_ar, part_number, stock_quantity, min_stock_alert, unit, unit_cost, supplier, notes, invoice_number, invoice_date, invoice_attachment_url, created_at')
     .order('name_ar');
   if (error) throwMaintenanceSchemaError(error, 'maintenanceService.getSpareparts');
   return (data ?? []) as SparePart[];
