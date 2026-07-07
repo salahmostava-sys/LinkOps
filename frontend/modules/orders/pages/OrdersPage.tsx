@@ -71,7 +71,7 @@ const WalletTab = lazy(() =>
   })),
 );
 
-const ORDER_TABS = ['grid', 'shifts', 'summary', 'wallet'] as const;
+const ORDER_TABS = ['grid', 'shifts', 'app-report', 'summary', 'wallet'] as const;
 type OrderTab = (typeof ORDER_TABS)[number];
 
 const isOrderTab = (v: string | null): v is OrderTab =>
