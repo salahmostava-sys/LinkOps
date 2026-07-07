@@ -10,7 +10,6 @@ import { buildOrdersIoHeaders } from '@shared/constants/excelSchemas';
 import { logError, logger } from '@shared/lib/logger';
 import { orderService, type ReplaceMonthDataMeta } from '@services/orderService';
 import type { App, DailyData, Employee } from '@modules/orders/types';
-import { ordersImportHeadersMatch } from '@modules/orders/utils/importHelpers';
 
 /** Maximum orders per cell — values above this are rejected during import/save. */
 const MAX_ORDERS_PER_CELL = 10_000;
@@ -313,7 +312,6 @@ export async function runSpreadsheetImport(params: {
       return null;
     }
 
-    const expectedHeaders = buildOrdersIoHeaders(dayArr);
     const actualHeaders = (matrix[0] || []).map((h) => String(h ?? '').trim());
 
     const { ImportFactory } = await import('./import/importFactory');

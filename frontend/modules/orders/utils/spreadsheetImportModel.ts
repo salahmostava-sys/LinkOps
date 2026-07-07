@@ -100,45 +100,7 @@ export function validateCellValue(cellValue: unknown, rowIdx: number, day: numbe
   return { valid: true, value: val };
 }
 
-function processRowCellsForMappedImport(
-  line: unknown[],
-  dayArr: number[],
-  rowIdx: number,
-  empId: string,
-  targetApps: App[],
-  newData: DailyData,
-  clearedScopes: Set<string>,
-): { imported: number; hasValidData: boolean; errors: string[] } {
-  let imported = 0;
-  let hasValidData = false;
-  const errors: string[] = [];
 
-  // Clear previous data for this employee+app scope
-  for (const app of targetApps) {
-    const scopeKey = `${empId}::${app.id}`;
-    if (clearedScopes.has(scopeKey)) continue;
-    clearEmployeeAppMonthData(newData, empId, app.id, dayArr);
-    clearedScopes.add(scopeKey);
-  }
-
-  // Process each day cell
-  for (let idx = 0; idx < dayArr.length; idx++) {
-    const d = dayArr[idx];
-    const cellValue = line[idx + 1];
-    const result = validateCellValue(cellValue, rowIdx, d);
-
-    if (result.error) errors.push(result.error);
-    if (!result.valid) continue;
-
-    hasValidData = true;
-    for (const app of targetApps) {
-      newData[`${empId}::${app.id}::${d}`] = result.value;
-      imported++;
-    }
-  }
-
-  return { imported, hasValidData, errors };
-}
 
 export function mergeImportedOrdersFromMatrixWithMapping(params: {
   headerRow?: string[];
