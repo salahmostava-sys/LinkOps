@@ -30,6 +30,7 @@ import {
 import { useToast } from '@shared/hooks/use-toast';
 import { authService } from '@services/authService';
 import { userPermissionService } from '@services/userPermissionService';
+import { auditService } from '@services/auditService';
 import { useAuth } from '@app/providers/AuthContext';
 import { authQueryUserId, useAuthQueryGate } from '@shared/hooks/useAuthQueryGate';
 import { usePermissions, DEFAULT_PERMISSIONS, type AppRole, type PagePermission } from '@shared/hooks/usePermissions';
@@ -488,6 +489,12 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
       const roleDefaults = DEFAULT_PERMISSIONS[selectedUser.role] || DEFAULT_PERMISSIONS.viewer;
       // Execute all permission updates in parallel instead of sequentially
       await Promise.all(getPermissionUpdates(matrix, selectedUser.id, roleDefaults));
+      await auditService.logAdminAction({
+        action: 'permissions.update',
+        table_name: 'user_permissions',
+        record_id: selectedUser.id,
+        meta: { target_user_role: selectedUser.role },
+      });
       toast({ title: 'تم حفظ الصلاحيات' });
       await loadMatrix(selectedUser.id, selectedUser.role);
     } catch (err: unknown) {
@@ -579,6 +586,12 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
         password: password || undefined,
         role: editUserForm.role,
         is_active: editUserForm.isActive,
+      });
+      await auditService.logAdminAction({
+        action: 'users.update',
+        table_name: 'auth.users',
+        record_id: editTarget.id,
+        meta: { name, email, role: editUserForm.role, is_active: editUserForm.isActive },
       });
       toast({ title: 'تم التحديث بنجاح' });
       setEditTarget(null);

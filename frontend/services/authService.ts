@@ -72,6 +72,14 @@ export const authService = {
   signIn: async (email: string, password: string): Promise<{ session: Session | null; user: User | null }> => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     throwIfError(error, "authService.signIn");
+    if (data.user) {
+      await supabase.from('admin_action_log').insert({
+        user_id: data.user.id,
+        action: 'auth.login',
+        table_name: 'auth.users',
+        meta: { email },
+      }).catch(err => console.warn('[authService] Failed to log login action:', err));
+    }
     return { session: data.session, user: data.user };
   },
 
