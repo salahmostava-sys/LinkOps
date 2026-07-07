@@ -57,6 +57,29 @@ const walletService = {
 
     if (error) throw error;
     return data as WalletTransaction[];
+  },
+  /**
+   * Delete a specific wallet transaction
+   */
+  async deleteTransaction(id: string): Promise<void> {
+    const { error } = await supabase
+      .from('employee_wallet_transactions')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+  },
+
+  /**
+   * Clear all transactions for an employee
+   */
+  async clearWallet(employeeId: string): Promise<void> {
+    const { error } = await supabase
+      .from('employee_wallet_transactions')
+      .delete()
+      .eq('employee_id', employeeId);
+
+    if (error) throw error;
   }
 };
 
