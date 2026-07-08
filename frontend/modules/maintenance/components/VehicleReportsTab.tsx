@@ -75,11 +75,11 @@ export function VehicleReportsTab() {
     if (vehicleGroups.length > 0 && selectedIds === null) {
       setSelectedIds(new Set(vehicleGroups.map(g => g.vehicle_id)));
     }
-  }, [vehicleGroups]);
+  }, [vehicleGroups, selectedIds]);
 
   const activeSelection = useMemo(
     () => selectedIds ?? new Set(vehicleGroups.map(g => g.vehicle_id)),
-    [vehicleGroups]
+    [vehicleGroups, selectedIds]
   );
 
   const toggleVehicle = (vehicleId: string) => {
