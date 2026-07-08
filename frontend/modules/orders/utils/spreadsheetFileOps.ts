@@ -9,7 +9,6 @@ import { getErrorMessage } from '@services/serviceError';
 import { buildOrdersIoHeaders } from '@shared/constants/excelSchemas';
 import { logError, logger } from '@shared/lib/logger';
 import { orderService, type ReplaceMonthDataMeta } from '@services/orderService';
-import { performanceService } from '@services/performanceService';
 import type { App, DailyData, Employee } from '@modules/orders/types';
 
 /** Maximum orders per cell — values above this are rejected during import/save. */
@@ -143,8 +142,7 @@ export async function exportDailyAppReportExcel(params: {
   const targets = await orderService.getMonthTargets(my);
   const targetRow = targets.find((t) => t.app_id === appId);
   const appTarget = targetRow?.target_orders ?? 0;
-
-  const employeeTargets = await performanceService.getEmployeeTargets(my);
+  const empTarget = targetRow?.employee_target_orders ?? null;
 
   const results = employees.map(emp => {
     let total = 0;
@@ -152,8 +150,6 @@ export async function exportDailyAppReportExcel(params: {
       const key = `${emp.id}::${appId}::${d}`;
       total += data[key] || 0;
     }
-    const empTargetRow = employeeTargets.find((t: { employee_id: string; monthly_target_orders: number }) => t.employee_id === emp.id);
-    const empTarget = empTargetRow ? empTargetRow.monthly_target_orders : null;
     return { name: emp.name, total, appTarget, empTarget };
   }).filter(r => r.total > 0).sort((a, b) => b.total - a.total);
 
@@ -166,7 +162,7 @@ export async function exportDailyAppReportExcel(params: {
   ];
 
   results.forEach(r => {
-    const remaining = r.empTarget != null ? r.empTarget - r.total : r.appTarget - r.total;
+    const remaining = r.empTarget != null ? r.empTarget - r.total : '—';
     const displayEmpTarget = r.empTarget != null ? r.empTarget : 'بدون هدف';
     const displayAppTarget = r.appTarget > 0 ? r.appTarget : '—';
     rows.push([r.name, r.total, displayAppTarget, displayEmpTarget, remaining, '']);
@@ -199,8 +195,7 @@ export async function printDailyAppReportTable(params: {
   const targets = await orderService.getMonthTargets(my);
   const targetRow = targets.find((t) => t.app_id === appId);
   const appTarget = targetRow?.target_orders ?? 0;
-
-  const employeeTargets = await performanceService.getEmployeeTargets(my);
+  const empTarget = targetRow?.employee_target_orders ?? null;
 
   const results = employees.map(emp => {
     let total = 0;
@@ -208,8 +203,6 @@ export async function printDailyAppReportTable(params: {
       const key = `${emp.id}::${appId}::${d}`;
       total += data[key] || 0;
     }
-    const empTargetRow = employeeTargets.find((t: { employee_id: string; monthly_target_orders: number }) => t.employee_id === emp.id);
-    const empTarget = empTargetRow ? empTargetRow.monthly_target_orders : null;
     return { name: emp.name, total, appTarget, empTarget };
   }).filter(r => r.total > 0).sort((a, b) => b.total - a.total);
 
@@ -253,7 +246,7 @@ export async function printDailyAppReportTable(params: {
   `;
 
   results.forEach(r => {
-    const remaining = r.empTarget != null ? r.empTarget - r.total : r.appTarget - r.total;
+    const remaining = r.empTarget != null ? r.empTarget - r.total : '—';
     const displayEmpTarget = r.empTarget != null ? r.empTarget : 'بدون هدف';
     const displayAppTarget = r.appTarget > 0 ? r.appTarget : '—';
     html += `

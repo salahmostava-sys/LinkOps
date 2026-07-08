@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { exportSpreadsheetExcel, runSpreadsheetImport, downloadSpreadsheetTemplate, printSpreadsheetTable, saveSpreadsheetMonth } from './spreadsheetFileOps';
 import { orderService } from '@services/orderService';
-import { performanceService } from '@services/performanceService';
 import { buildOrdersIoHeaders } from '@shared/constants/excelSchemas';
 import { mergeImportedOrdersFromMatrixWithMapping } from './spreadsheetImportModel';
 import { matchEmployeeNames } from '@shared/lib/nameMatching';
@@ -38,11 +37,6 @@ vi.mock('@services/orderService', () => ({
   },
 }));
 
-vi.mock('@services/performanceService', () => ({
-  performanceService: {
-    getEmployeeTargets: vi.fn(),
-  },
-}));
 
 vi.mock('./spreadsheetImportModel', async (importOriginal) => {
   const actual = await importOriginal<typeof import('./spreadsheetImportModel')>();
@@ -104,10 +98,6 @@ describe('spreadsheetFileOps', () => {
 
     it('exports the daily app report with correct totals', async () => {
       vi.mocked(orderService.getMonthTargets).mockResolvedValue([{ app_id: 'app1', target_orders: 10, employee_target_orders: 10 }]);
-      vi.mocked(performanceService.getEmployeeTargets).mockResolvedValue([
-        { employee_id: 'emp1', monthly_target_orders: 10 },
-        { employee_id: 'emp2', monthly_target_orders: 10 },
-      ] as any);
       const employees = [
         { id: 'emp1', name: 'John', platform_accounts: [], identity_id: '', is_active: true, avatar_url: '', created_at: '', updated_at: '' },
         { id: 'emp2', name: 'Jane', platform_accounts: [], identity_id: '', is_active: true, avatar_url: '', created_at: '', updated_at: '' },

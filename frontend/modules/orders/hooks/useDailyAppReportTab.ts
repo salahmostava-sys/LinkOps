@@ -1,7 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { orderService } from '@services/orderService';
-import { performanceService } from '@services/performanceService';
 
 import { useAuthQueryGate, authQueryUserId } from '@shared/hooks/useAuthQueryGate';
 import { useTemporalContext } from '@app/providers/TemporalContext';
@@ -46,11 +45,6 @@ export function useDailyAppReportTab() {
     enabled: enabled && !!monthKey,
   });
 
-  const { data: employeeTargetsData } = useQuery({
-    queryKey: ['employeeTargets', monthKey],
-    queryFn: () => performanceService.getEmployeeTargets(monthKey),
-    enabled: enabled && !!monthKey,
-  });
 
   // Auto select first app if not selected
   useEffect(() => {
@@ -109,6 +103,7 @@ export function useDailyAppReportTab() {
 
     const targetRow = targetsData?.find((t) => t.app_id === selectedApp);
     const appTarget = targetRow ? targetRow.target_orders : 0;
+    const employeeTarget = targetRow ? targetRow.employee_target_orders : null;
 
     const reportData = [];
     const dayArr = Array.from({ length: endDay - startDay + 1 }, (_, i) => startDay + i);
@@ -125,11 +120,8 @@ export function useDailyAppReportTab() {
         if (val > 0) hasAnyOrdersInPeriod = true;
       }
 
-      const employeeTargetRow = employeeTargetsData?.find((t: { employee_id: string; monthly_target_orders: number }) => t.employee_id === emp.id);
-      const employeeTarget = employeeTargetRow ? employeeTargetRow.monthly_target_orders : null;
-
       const note = '';
-      const remaining = employeeTarget != null ? employeeTarget - total : appTarget - total;
+      const remaining = employeeTarget != null ? employeeTarget - total : null;
 
       if (hasAnyOrdersInPeriod) {
         reportData.push({
@@ -147,7 +139,7 @@ export function useDailyAppReportTab() {
     // Sort descending by total
     reportData.sort((a, b) => b.total - a.total);
     return reportData;
-  }, [selectedApp, sq.loading, sq.employees, sq.spreadsheetMonthData, startDay, endDay, targetsData, employeeTargetsData]);
+  }, [selectedApp, sq.loading, sq.employees, sq.spreadsheetMonthData, startDay, endDay, targetsData]);
 
   return {
     loading: sq.loading,
