@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Check } from 'lucide-react';
 import { Button } from '@shared/components/ui/button';
 import { getAppColor, type AppColorData } from '@shared/hooks/useAppColors';
@@ -97,7 +98,7 @@ export const OrdersCellPopover = ({ state, apps, data, appColorsList, canEdit, o
     onClose();
   };
 
-  return (
+  return createPortal(
     <dialog
       ref={popRef}
       open
@@ -150,6 +151,7 @@ export const OrdersCellPopover = ({ state, apps, data, appColorsList, canEdit, o
           <Check size={12} /> تطبيق
         </Button>
       )}
-    </dialog>
+    </dialog>,
+    document.body
   );
 };
