@@ -154,25 +154,27 @@ export const OrdersGridTable = React.memo(({
                       }}
                       onClick={() => activeApps.length > 0 && toggleExpand(emp.id)}
                     >
-                      <div className="flex items-center gap-1">
-                        {activeApps.length > 0 && (
-                          <span className="text-muted-foreground flex-shrink-0">
-                            {isExpanded ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
-                          </span>
-                        )}
-                        <span className="font-medium text-foreground truncate max-w-[7.5rem]" title={emp.name}>{shortName(emp.name)}</span>
-                      </div>
-                      {activeApps.length > 0 && (
-                        <div className="flex gap-0.5 flex-wrap mt-0.5 pr-7">
-                          {activeApps.slice(0, 3).map(a => {
-                            const c = getAppColor(appColorsList, a.name);
-                            return (
-                              <ColorBadge key={a.id} label={a.name.slice(0, 4)} bg={c.solid} fg={c.solidText} className="text-[9px] px-1 py-0 rounded" />
-                            );
-                          })}
-                          {activeApps.length > 3 && <span className="text-[9px] text-muted-foreground">+{activeApps.length - 3}</span>}
+                      <div className="flex flex-col justify-center">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {activeApps.length > 0 && (
+                            <span className="text-muted-foreground flex-shrink-0">
+                              {isExpanded ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
+                            </span>
+                          )}
+                          <span className="font-medium text-foreground truncate max-w-[7.5rem]" title={emp.name}>{shortName(emp.name)}</span>
+                          {activeApps.length > 0 && (
+                            <div className="flex items-center gap-0.5 flex-wrap">
+                              {activeApps.slice(0, 3).map(a => {
+                                const c = getAppColor(appColorsList, a.name);
+                                return (
+                                  <ColorBadge key={a.id} label={a.name.slice(0, 4)} bg={c.solid} fg={c.solidText} className="text-[9px] px-1 py-0 rounded" />
+                                );
+                              })}
+                              {activeApps.length > 3 && <span className="text-[9px] text-muted-foreground">+{activeApps.length - 3}</span>}
+                            </div>
+                          )}
                         </div>
-                      )}
+                      </div>
                     </td>
 
                     {dayArr.map(d => {

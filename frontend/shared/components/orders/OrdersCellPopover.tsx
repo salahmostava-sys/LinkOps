@@ -119,29 +119,31 @@ export const OrdersCellPopover = ({ state, apps, data, appColorsList, canEdit, o
           handleApply();
         }}
       >
-        {apps.map((app) => {
-          const c = getAppColor(appColorsList, app.name);
-          return (
-            <div key={app.id} className="flex items-center gap-2">
-              <ColorBadge
-                label={app.name}
-                bg={c.solid}
-                fg={c.solidText}
-                className="min-w-[70px] text-center"
-              />
-              <input
-                type="number" min={0} placeholder="0"
-                {...register(`vals.${app.id}` as const)}
-                disabled={!canEdit}
-                className="w-16 h-7 text-center text-xs rounded border border-border bg-background focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-                onKeyDown={e => {
-                  if (e.key === 'Enter') handleApply();
-                  if (e.key === 'Escape') onClose();
-                }}
-              />
-            </div>
-          );
-        })}
+        <div className="grid grid-cols-2 gap-3">
+          {apps.map((app) => {
+            const c = getAppColor(appColorsList, app.name);
+            return (
+              <div key={app.id} className="flex flex-col gap-1.5">
+                <ColorBadge
+                  label={app.name}
+                  bg={c.solid}
+                  fg={c.solidText}
+                  className="w-full justify-center text-center py-1"
+                />
+                <input
+                  type="number" min={0} placeholder="0"
+                  {...register(`vals.${app.id}` as const)}
+                  disabled={!canEdit}
+                  className="w-full h-8 text-center text-sm rounded border border-border bg-background focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') handleApply();
+                    if (e.key === 'Escape') onClose();
+                  }}
+                />
+              </div>
+            );
+          })}
+        </div>
         {canEdit && formState.isSubmitted && formState.isValid === false && (
           <p className="text-[11px] text-destructive mt-2">تأكد أن القيم أرقام صحيحة (0 أو أكثر).</p>
         )}
