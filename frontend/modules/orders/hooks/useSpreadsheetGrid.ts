@@ -211,7 +211,7 @@ export function useSpreadsheetGrid() {
     (e: React.MouseEvent, empId: string, day: number) => {
       if (!canEditMonth) return;
       const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-      setCellPopover({ empId, day, x: rect.left, y: rect.bottom });
+      setCellPopover({ empId, day, x: rect.left + rect.width / 2, y: rect.bottom });
     },
     [canEditMonth],
   );
