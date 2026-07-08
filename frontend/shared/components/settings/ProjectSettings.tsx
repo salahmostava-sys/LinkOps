@@ -452,10 +452,10 @@ export default function ProjectSettings() {
         <div className="flex items-center gap-4">
           <div className="flex-1">
             <Label className="text-xs font-medium text-muted-foreground">
-              {t(isRTL, 'التنبيه بانتهاء الإقامة (حسابات المنصات) قبل', 'Iqama expiry alert (platform accounts) before')}
+              {t(isRTL, 'التنبيه بانتهاء الإقامة (للموظفين) قبل', 'Iqama expiry alert (employees) before')}
             </Label>
             <p className="text-xs text-muted-foreground mt-0.5">
-              {t(isRTL, 'سيظهر تنبيه تلقائي عند اقتراب انتهاء إقامة حساب المنصة بهذا العدد من الأيام أو أقل.', 'An automatic alert shows when a platform account iqama expires within this many days.')}
+              {t(isRTL, 'سيظهر تنبيه تلقائي عند اقتراب انتهاء إقامة الموظف بهذا العدد من الأيام أو أقل.', 'An automatic alert shows when an employee iqama expires within this many days.')}
             </p>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">

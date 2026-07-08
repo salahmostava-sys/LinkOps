@@ -1,7 +1,7 @@
 import { formatCurrency, formatStandardDateTime } from '@shared/lib/formatters';
 
 import { useState, useMemo, useEffect } from 'react';
-import { Search, Car, Banknote, Wrench, Calendar, Download, Printer, CheckSquare, Square, ChevronDown } from 'lucide-react';
+import { Search, Car, Banknote, Wrench, Calendar, Download, Printer, CheckSquare, Square, FileText } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@shared/components/ui/dropdown-menu';
 import { Input } from '@shared/components/ui/input';
 import { Button } from '@shared/components/ui/button';
@@ -33,13 +33,24 @@ type VehicleGroup = {
 export function VehicleReportsTab() {
   const logsQ = useMaintenanceLogs();
   const [search, setSearch] = useState('');
-  const [selectedIds, setSelectedIds] = useState<Set<string> | null>(null); // null = لم يُهيّأ بعد (كل المركبات محددة)
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
 
   const logs = useMemo(() => logsQ.data ?? [], [logsQ.data]);
 
+  const filteredLogsByDate = useMemo(() => {
+    return logs.filter((log) => {
+      if (!log.maintenance_date) return true;
+      const logD = log.maintenance_date.split('T')[0];
+      if (fromDate && logD < fromDate) return false;
+      if (toDate && logD > toDate) return false;
+      return true;
+    });
+  }, [logs, fromDate, toDate]);
+
   const vehicleGroups = useMemo(() => {
     const groups = new Map<string, VehicleGroup>();
-    for (const log of logs) {
+    for (const log of filteredLogsByDate) {
       if (!log.vehicles) continue;
       const vId = log.vehicle_id;
       if (!groups.has(vId)) {
@@ -166,6 +177,7 @@ export function VehicleReportsTab() {
           <h1>تقرير صيانة المركبات والمخزون</h1>
           <div class="header-info">
             <p>تاريخ الاستخراج: ${formatStandardDateTime()}</p>
+            ${fromDate || toDate ? `<p>الفترة: من ${fromDate || 'البداية'} إلى ${toDate || 'النهاية'}</p>` : ''}
             <p style="font-size: 15px; font-weight: bold; color: #0f172a; margin-top: 10px;">المركبة: ${escapeHtml(g.type)} - لوحة: <span style="direction: ltr; display: inline-block;">${escapeHtml(g.plate_number)}</span></p>
           </div>
           <table>
@@ -214,6 +226,7 @@ export function VehicleReportsTab() {
           <h1>تقرير صيانة المركبات والمخزون المجمع</h1>
           <div class="header-info">
             <p>تاريخ الاستخراج: ${formatStandardDateTime()}</p>
+            ${fromDate || toDate ? `<p>الفترة: من ${fromDate || 'البداية'} إلى ${toDate || 'النهاية'}</p>` : ''}
           </div>
           <table>
             <thead>
@@ -322,34 +335,53 @@ export function VehicleReportsTab() {
           </div>
         </div>
         <div className="flex gap-2 w-full sm:w-auto shrink-0">
-          <div className="relative w-full sm:w-72 shrink-0">
+          <div className="flex items-center gap-2 w-full sm:w-auto shrink-0 bg-card border border-border/60 p-1 rounded-xl">
+            <Input 
+              type="date" 
+              value={fromDate}
+              onChange={e => setFromDate(e.target.value)}
+              className="h-8 text-xs bg-transparent border-none w-full sm:w-32 focus-visible:ring-0"
+              title="من تاريخ"
+            />
+            <span className="text-muted-foreground text-xs">-</span>
+            <Input 
+              type="date" 
+              value={toDate}
+              onChange={e => setToDate(e.target.value)}
+              className="h-8 text-xs bg-transparent border-none w-full sm:w-32 focus-visible:ring-0"
+              title="إلى تاريخ"
+            />
+          </div>
+
+          <div className="relative w-full sm:w-48 shrink-0">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
             <Input
               placeholder="بحث برقم اللوحة..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pr-9"
+              className="pr-9 h-10 rounded-xl bg-card border-border/60"
             />
           </div>
           <div className="flex gap-2 flex-wrap">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" disabled={logsQ.isLoading || filteredGroups.length === 0}>
+                <Button className="h-10 rounded-xl" disabled={logsQ.isLoading || filteredGroups.length === 0}>
                   <Printer size={16} className="ml-2" />
-                  طباعة / حفظ PDF
-                  <ChevronDown size={14} className="mr-2" />
+                  معاينة و PDF
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => printReport('combined')}>
-                  طباعة مجمعة للمركبات المحددة
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem onClick={() => printReport('combined')} className="py-3 cursor-pointer">
+                  <FileText size={16} className="ml-2 text-muted-foreground" />
+                  <span>طباعة مجمعة للمركبات</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => printReport('separated')}>
-                  طباعة ملف لكل دباب (صفحات منفصلة)
+                <DropdownMenuItem onClick={() => printReport('separated')} className="py-3 cursor-pointer">
+                  <Printer size={16} className="ml-2 text-muted-foreground" />
+                  <span>طباعة ملف لكل دباب منفصل</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button variant="outline" onClick={exportToExcel} disabled={logsQ.isLoading || filteredGroups.length === 0}>
+            <Button variant="outline" className="h-10 rounded-xl" onClick={exportToExcel} disabled={logsQ.isLoading || filteredGroups.length === 0}>
               <Download size={16} className="ml-2" />
               Excel
             </Button>

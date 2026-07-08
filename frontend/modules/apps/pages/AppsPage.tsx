@@ -1,3 +1,4 @@
+import React from 'react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { Package } from 'lucide-react';
@@ -100,38 +101,40 @@ const AppsPage = () => {
             {apps.map((app) => {
               const isAppSelected = selectedApp?.id === app.id;
               return (
-                <AppCard
-                  key={app.id}
-                  app={app}
-                  selected={isAppSelected}
-                  canEdit={permissions.can_edit}
-                  onSelect={toggleSelectApp}
-                  onEdit={openingEditModal}
-                  onToggleActive={(item, event) => {
-                    event.stopPropagation();
-                    toggleMonthlyActive(item);
-                  }}
-                  onDelete={(item, event) => {
-                    event.stopPropagation();
-                    setDeleteApp(item);
-                  }}
-                  onWorkTypeChange={handleWorkTypeChange}
-                />
+                <React.Fragment key={app.id}>
+                  <AppCard
+                    app={app}
+                    selected={isAppSelected}
+                    canEdit={permissions.can_edit}
+                    onSelect={toggleSelectApp}
+                    onEdit={openingEditModal}
+                    onToggleActive={(item, event) => {
+                      event.stopPropagation();
+                      toggleMonthlyActive(item);
+                    }}
+                    onDelete={(item, event) => {
+                      event.stopPropagation();
+                      setDeleteApp(item);
+                    }}
+                    onWorkTypeChange={handleWorkTypeChange}
+                  />
+                  {isAppSelected && (
+                    <div className="col-span-2 md:col-span-3 lg:col-span-5 w-full mt-2 mb-4">
+                      <AppEmployeesPanel
+                        app={selectedApp}
+                        monthYear={monthYear}
+                        employees={appEmployees}
+                        loading={loadingEmployees}
+                        onClose={closeSelectedApp}
+                      />
+                    </div>
+                  )}
+                </React.Fragment>
               );
             })}
 
             {permissions.can_edit && <AddAppCard onClick={openingCreateModal} />}
           </div>
-        )}
-
-        {selectedApp && (
-          <AppEmployeesPanel
-            app={selectedApp}
-            monthYear={monthYear}
-            employees={appEmployees}
-            loading={loadingEmployees}
-            onClose={closeSelectedApp}
-          />
         )}
       </PageSection>
 
