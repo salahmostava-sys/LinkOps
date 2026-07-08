@@ -50,7 +50,7 @@ export function isEmployeeExcluded(employee: EmployeeLike): boolean {
  */
 export function isEmployeeVisibleInMonth(
   employee: EmployeeLike,
-  activeEmployeeIdsInMonth: ReadonlySet<string> | null | undefined
+  _activeEmployeeIdsInMonth: ReadonlySet<string> | null | undefined
 ): boolean {
   // STRICT FILTERING: Never show excluded employees regardless of historical activity.
   if (isEmployeeExcluded(employee)) return false;
