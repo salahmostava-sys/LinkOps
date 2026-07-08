@@ -34,6 +34,7 @@ const Salaries = lazy(() => import("@modules/salaries/pages/SalariesPage"));
 const Advances = lazy(() => import("@modules/advances/pages/AdvancesPage"));
 const FuelPage = lazy(() => import("@modules/fuel/pages/FuelPage"));
 const MaintenancePage = lazy(() => import("@modules/maintenance/pages/MaintenancePage"));
+const VehicleReportPage = lazy(() => import("@modules/maintenance/pages/VehicleReportPage"));
 const Apps = lazy(() => import("@modules/pages/Apps"));
 const AppSettingsPage = lazy(() => import("@modules/apps/pages/AppSettingsPage").then(m => ({ default: m.AppSettingsPage })));
 const Alerts = lazy(() => import("@modules/pages/Alerts"));
@@ -143,6 +144,7 @@ const router = createBrowserRouter([
           },
           { path: "fuel", element: <PageGuard pageKey="fuel"><FuelPage /></PageGuard> },
           { path: "maintenance", element: <PageGuard pageKey="maintenance"><MaintenancePage /></PageGuard> },
+          { path: "maintenance/vehicle-report", element: <PageGuard pageKey="maintenance"><VehicleReportPage /></PageGuard> },
           { path: "apps", element: <PageGuard pageKey="apps"><Apps /></PageGuard> },
           { path: "apps/settings", element: <PageGuard pageKey="apps"><AppSettingsPage /></PageGuard> },
           { path: "alerts", element: <PageGuard pageKey="alerts"><Alerts /></PageGuard> },

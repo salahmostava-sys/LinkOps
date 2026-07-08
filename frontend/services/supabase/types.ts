@@ -14,115 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      hr_performance_reviews: {
-        Row: {
-          attendance_score: number
-          behavior_score: number
-          commitment_score: number
-          created_at: string | null
-          employee_id: string
-          id: string
-          month_year: string
-          notes: string | null
-          performance_score: number
-          reviewer_id: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          attendance_score?: number
-          behavior_score?: number
-          commitment_score?: number
-          created_at?: string | null
-          employee_id: string
-          id?: string
-          month_year: string
-          notes?: string | null
-          performance_score?: number
-          reviewer_id?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          attendance_score?: number
-          behavior_score?: number
-          commitment_score?: number
-          created_at?: string | null
-          employee_id?: string
-          id?: string
-          month_year?: string
-          notes?: string | null
-          performance_score?: number
-          reviewer_id?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "hr_performance_reviews_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      leave_requests: {
-        Row: {
-          created_at: string | null
-          created_by: string | null
-          days_count: number
-          employee_id: string
-          end_date: string
-          id: string
-          reason: string | null
-          review_note: string | null
-          reviewed_at: string | null
-          reviewer_id: string | null
-          start_date: string
-          status: string
-          type: string
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          created_by?: string | null
-          days_count: number
-          employee_id: string
-          end_date: string
-          id?: string
-          reason?: string | null
-          review_note?: string | null
-          reviewed_at?: string | null
-          reviewer_id?: string | null
-          start_date: string
-          status?: string
-          type: string
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          created_by?: string | null
-          days_count?: number
-          employee_id?: string
-          end_date?: string
-          id?: string
-          reason?: string | null
-          review_note?: string | null
-          reviewed_at?: string | null
-          reviewer_id?: string | null
-          start_date?: string
-          status?: string
-          type?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "leave_requests_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       account_assignments: {
         Row: {
           account_id: string
@@ -167,6 +58,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "platform_accounts"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "account_assignments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employee_wallet_balances"
+            referencedColumns: ["employee_id"]
           },
           {
             foreignKeyName: "account_assignments_employee_id_fkey"
@@ -255,6 +153,7 @@ export type Database = {
         Row: {
           amount: number
           approved_by: string | null
+          attachment_url: string | null
           created_at: string
           created_by: string | null
           disbursement_date: string
@@ -274,6 +173,7 @@ export type Database = {
         Insert: {
           amount: number
           approved_by?: string | null
+          attachment_url?: string | null
           created_at?: string
           created_by?: string | null
           disbursement_date?: string
@@ -293,6 +193,7 @@ export type Database = {
         Update: {
           amount?: number
           approved_by?: string | null
+          attachment_url?: string | null
           created_at?: string
           created_by?: string | null
           disbursement_date?: string
@@ -310,6 +211,13 @@ export type Database = {
           written_off_reason?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "advances_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employee_wallet_balances"
+            referencedColumns: ["employee_id"]
+          },
           {
             foreignKeyName: "advances_employee_id_fkey"
             columns: ["employee_id"]
@@ -455,6 +363,7 @@ export type Database = {
           custom_columns?: Json | null
           id?: string
           is_active?: boolean
+          is_archived?: boolean
           logo_url?: string | null
           name: string
           name_en?: string | null
@@ -468,6 +377,7 @@ export type Database = {
           custom_columns?: Json | null
           id?: string
           is_active?: boolean
+          is_archived?: boolean
           logo_url?: string | null
           name?: string
           name_en?: string | null
@@ -532,6 +442,13 @@ export type Database = {
           updated_by?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "attendance_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employee_wallet_balances"
+            referencedColumns: ["employee_id"]
+          },
           {
             foreignKeyName: "attendance_employee_id_fkey"
             columns: ["employee_id"]
@@ -671,6 +588,13 @@ export type Database = {
             foreignKeyName: "daily_orders_employee_id_fkey"
             columns: ["employee_id"]
             isOneToOne: false
+            referencedRelation: "employee_wallet_balances"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "daily_orders_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
           },
@@ -721,6 +645,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "apps"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "daily_shifts_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employee_wallet_balances"
+            referencedColumns: ["employee_id"]
           },
           {
             foreignKeyName: "daily_shifts_employee_id_fkey"
@@ -819,6 +750,13 @@ export type Database = {
             foreignKeyName: "employee_apps_employee_id_fkey"
             columns: ["employee_id"]
             isOneToOne: false
+            referencedRelation: "employee_wallet_balances"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "employee_apps_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
           },
@@ -861,6 +799,13 @@ export type Database = {
             foreignKeyName: "employee_roles_employee_id_fkey"
             columns: ["employee_id"]
             isOneToOne: false
+            referencedRelation: "employee_wallet_balances"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "employee_roles_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
           },
@@ -896,6 +841,13 @@ export type Database = {
           scheme_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "employee_scheme_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employee_wallet_balances"
+            referencedColumns: ["employee_id"]
+          },
           {
             foreignKeyName: "employee_scheme_employee_id_fkey"
             columns: ["employee_id"]
@@ -948,6 +900,13 @@ export type Database = {
             foreignKeyName: "employee_targets_employee_id_fkey"
             columns: ["employee_id"]
             isOneToOne: false
+            referencedRelation: "employee_wallet_balances"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "employee_targets_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
           },
@@ -996,6 +955,64 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "employee_tiers_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employee_wallet_balances"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "employee_tiers_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_wallet_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          employee_id: string
+          id: string
+          notes: string | null
+          transaction_date: string
+          transaction_type: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          employee_id: string
+          id?: string
+          notes?: string | null
+          transaction_date?: string
+          transaction_type: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          employee_id?: string
+          id?: string
+          notes?: string | null
+          transaction_date?: string
+          transaction_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_wallet_transactions_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employee_wallet_balances"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "employee_wallet_transactions_employee_id_fkey"
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "employees"
@@ -1220,6 +1237,13 @@ export type Database = {
             foreignKeyName: "external_deductions_employee_id_fkey"
             columns: ["employee_id"]
             isOneToOne: false
+            referencedRelation: "employee_wallet_balances"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "external_deductions_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
           },
@@ -1290,6 +1314,129 @@ export type Database = {
         }
         Relationships: []
       }
+      hr_performance_reviews: {
+        Row: {
+          attendance_score: number
+          behavior_score: number
+          commitment_score: number
+          created_at: string | null
+          employee_id: string
+          id: string
+          month_year: string
+          notes: string | null
+          performance_score: number
+          reviewer_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          attendance_score?: number
+          behavior_score?: number
+          commitment_score?: number
+          created_at?: string | null
+          employee_id: string
+          id?: string
+          month_year: string
+          notes?: string | null
+          performance_score?: number
+          reviewer_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          attendance_score?: number
+          behavior_score?: number
+          commitment_score?: number
+          created_at?: string | null
+          employee_id?: string
+          id?: string
+          month_year?: string
+          notes?: string | null
+          performance_score?: number
+          reviewer_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_performance_reviews_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employee_wallet_balances"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "hr_performance_reviews_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leave_requests: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          days_count: number
+          employee_id: string
+          end_date: string
+          id: string
+          reason: string | null
+          review_note: string | null
+          reviewed_at: string | null
+          reviewer_id: string | null
+          start_date: string
+          status: string
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          days_count: number
+          employee_id: string
+          end_date: string
+          id?: string
+          reason?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          start_date: string
+          status?: string
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          days_count?: number
+          employee_id?: string
+          end_date?: string
+          id?: string
+          reason?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          start_date?: string
+          status?: string
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_requests_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employee_wallet_balances"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "leave_requests_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       locked_months: {
         Row: {
           id: string
@@ -1312,6 +1459,73 @@ export type Database = {
         Relationships: []
       }
       maintenance_logs: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          employee_id: string | null
+          id: string
+          maintenance_date: string
+          notes: string | null
+          odometer_reading: number | null
+          status: string
+          total_cost: number
+          type: string
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          employee_id?: string | null
+          id?: string
+          maintenance_date?: string
+          notes?: string | null
+          odometer_reading?: number | null
+          status?: string
+          total_cost?: number
+          type: string
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          employee_id?: string | null
+          id?: string
+          maintenance_date?: string
+          notes?: string | null
+          odometer_reading?: number | null
+          status?: string
+          total_cost?: number
+          type?: string
+          updated_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_logs_employee_id_fkey1"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employee_wallet_balances"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "maintenance_logs_employee_id_fkey1"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_logs_vehicle_id_fkey1"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      maintenance_logs_legacy_pre_fleet: {
         Row: {
           cost: number | null
           created_at: string
@@ -1367,6 +1581,13 @@ export type Database = {
           vehicle_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "maintenance_logs_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employee_wallet_balances"
+            referencedColumns: ["employee_id"]
+          },
           {
             foreignKeyName: "maintenance_logs_employee_id_fkey"
             columns: ["employee_id"]
@@ -1590,6 +1811,13 @@ export type Database = {
             foreignKeyName: "platform_accounts_employee_id_fkey"
             columns: ["employee_id"]
             isOneToOne: false
+            referencedRelation: "employee_wallet_balances"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "platform_accounts_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
           },
@@ -1782,6 +2010,13 @@ export type Database = {
             foreignKeyName: "salary_drafts_employee_id_fkey"
             columns: ["employee_id"]
             isOneToOne: false
+            referencedRelation: "employee_wallet_balances"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "salary_drafts_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
           },
@@ -1897,6 +2132,13 @@ export type Database = {
           version?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "salary_records_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employee_wallet_balances"
+            referencedColumns: ["employee_id"]
+          },
           {
             foreignKeyName: "salary_records_employee_id_fkey"
             columns: ["employee_id"]
@@ -2128,6 +2370,9 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          invoice_attachment_url: string | null
+          invoice_date: string | null
+          invoice_number: string | null
           min_stock_alert: number | null
           name_ar: string
           notes: string | null
@@ -2141,6 +2386,9 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          invoice_attachment_url?: string | null
+          invoice_date?: string | null
+          invoice_number?: string | null
           min_stock_alert?: number | null
           name_ar: string
           notes?: string | null
@@ -2154,6 +2402,9 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          invoice_attachment_url?: string | null
+          invoice_date?: string | null
+          invoice_number?: string | null
           min_stock_alert?: number | null
           name_ar?: string
           notes?: string | null
@@ -2212,6 +2463,13 @@ export type Database = {
             foreignKeyName: "supervisor_employee_assignments_employee_id_fkey"
             columns: ["employee_id"]
             isOneToOne: false
+            referencedRelation: "employee_wallet_balances"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "supervisor_employee_assignments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
           },
@@ -2224,7 +2482,6 @@ export type Database = {
           },
         ]
       }
-
       system_settings: {
         Row: {
           created_at: string
@@ -2293,6 +2550,140 @@ export type Database = {
           notes?: string | null
         }
         Relationships: []
+      }
+      treasury_accounts: {
+        Row: {
+          created_at: string
+          id: string
+          initial_balance: number
+          is_active: boolean
+          name: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          initial_balance?: number
+          is_active?: boolean
+          name: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          initial_balance?: number
+          is_active?: boolean
+          name?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      treasury_categories: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      treasury_transactions: {
+        Row: {
+          account_id: string
+          amount: number
+          app_id: string | null
+          attachment_url: string | null
+          category_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          transaction_date: string
+          transfer_to_account_id: string | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          amount: number
+          app_id?: string | null
+          attachment_url?: string | null
+          category_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          transaction_date?: string
+          transfer_to_account_id?: string | null
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          amount?: number
+          app_id?: string | null
+          attachment_url?: string | null
+          category_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          transaction_date?: string
+          transfer_to_account_id?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "treasury_transactions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "treasury_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "treasury_transactions_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "apps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "treasury_transactions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "treasury_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "treasury_transactions_transfer_to_account_id_fkey"
+            columns: ["transfer_to_account_id"]
+            isOneToOne: false
+            referencedRelation: "treasury_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_permissions: {
         Row: {
@@ -2401,6 +2792,13 @@ export type Database = {
             foreignKeyName: "vehicle_assignments_employee_id_fkey"
             columns: ["employee_id"]
             isOneToOne: false
+            referencedRelation: "employee_wallet_balances"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "vehicle_assignments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
           },
@@ -2500,6 +2898,13 @@ export type Database = {
             foreignKeyName: "vehicle_mileage_employee_id_fkey"
             columns: ["employee_id"]
             isOneToOne: false
+            referencedRelation: "employee_wallet_balances"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "vehicle_mileage_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
           },
@@ -2537,6 +2942,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "vehicle_mileage_daily_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employee_wallet_balances"
+            referencedColumns: ["employee_id"]
+          },
           {
             foreignKeyName: "vehicle_mileage_daily_employee_id_fkey"
             columns: ["employee_id"]
@@ -2608,6 +3020,15 @@ export type Database = {
       }
     }
     Views: {
+      employee_wallet_balances: {
+        Row: {
+          balance: number | null
+          employee_id: string | null
+          employee_name: string | null
+          employee_status: Database["public"]["Enums"]["employee_status"] | null
+        }
+        Relationships: []
+      }
       v_rider_daily_performance: {
         Row: {
           active_platforms: number | null
@@ -2619,6 +3040,13 @@ export type Database = {
           total_orders: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "daily_orders_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employee_wallet_balances"
+            referencedColumns: ["employee_id"]
+          },
           {
             foreignKeyName: "daily_orders_employee_id_fkey"
             columns: ["employee_id"]
@@ -2651,186 +3079,16 @@ export type Database = {
             foreignKeyName: "daily_orders_employee_id_fkey"
             columns: ["employee_id"]
             isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
+            referencedRelation: "employee_wallet_balances"
+            referencedColumns: ["employee_id"]
           },
-        ]
-      }
-      employee_wallet_transactions: {
-        Row: {
-          amount: number
-          created_at: string
-          created_by: string | null
-          employee_id: string
-          id: string
-          notes: string | null
-          transaction_date: string
-          transaction_type: string
-          updated_at: string
-        }
-        Insert: {
-          amount: number
-          created_at?: string
-          created_by?: string | null
-          employee_id: string
-          id?: string
-          notes?: string | null
-          transaction_date?: string
-          transaction_type: string
-          updated_at?: string
-        }
-        Update: {
-          amount?: number
-          created_at?: string
-          created_by?: string | null
-          employee_id?: string
-          id?: string
-          notes?: string | null
-          transaction_date?: string
-          transaction_type?: string
-          updated_at?: string
-        }
-        Relationships: [
           {
-            foreignKeyName: "employee_wallet_transactions_employee_id_fkey"
+            foreignKeyName: "daily_orders_employee_id_fkey"
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
-          }
-        ]
-      }
-      employee_wallet_balances: {
-        Row: {
-          balance: number | null
-          employee_id: string | null
-          employee_name: string | null
-          employee_status: string | null
-        }
-        Relationships: []
-      }
-      treasury_accounts: {
-        Row: {
-          created_at: string
-          id: string
-          initial_balance: number
-          is_active: boolean
-          name: string
-          type: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          initial_balance?: number
-          is_active?: boolean
-          name: string
-          type: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          initial_balance?: number
-          is_active?: boolean
-          name?: string
-          type?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      treasury_categories: {
-        Row: {
-          created_at: string
-          id: string
-          is_active: boolean
-          name: string
-          type: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          name: string
-          type: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          name?: string
-          type?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      treasury_transactions: {
-        Row: {
-          account_id: string
-          amount: number
-          attachment_url: string | null
-          category_id: string | null
-          created_at: string
-          created_by: string | null
-          description: string | null
-          id: string
-          transaction_date: string
-          transfer_to_account_id: string | null
-          type: string
-          updated_at: string
-        }
-        Insert: {
-          account_id: string
-          amount: number
-          attachment_url?: string | null
-          category_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          id?: string
-          transaction_date?: string
-          transfer_to_account_id?: string | null
-          type: string
-          updated_at?: string
-        }
-        Update: {
-          account_id?: string
-          amount?: number
-          attachment_url?: string | null
-          category_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          id?: string
-          transaction_date?: string
-          transfer_to_account_id?: string | null
-          type?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "treasury_transactions_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "treasury_accounts"
-            referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "treasury_transactions_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "treasury_categories"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "treasury_transactions_transfer_to_account_id_fkey"
-            columns: ["transfer_to_account_id"]
-            isOneToOne: false
-            referencedRelation: "treasury_accounts"
-            referencedColumns: ["id"]
-          }
         ]
       }
       v_rider_monthly_performance: {
@@ -2855,6 +3113,13 @@ export type Database = {
             foreignKeyName: "daily_orders_employee_id_fkey"
             columns: ["employee_id"]
             isOneToOne: false
+            referencedRelation: "employee_wallet_balances"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "daily_orders_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
           },
@@ -2862,7 +3127,76 @@ export type Database = {
       }
     }
     Functions: {
+      _const_approval_approved: { Args: never; Returns: string }
+      _const_calc_calculated: { Args: never; Returns: string }
+      _const_calc_method_mixed: { Args: never; Returns: string }
+      _const_calc_method_orders: { Args: never; Returns: string }
+      _const_calc_method_orders_fallback: { Args: never; Returns: string }
+      _const_calc_method_shift: { Args: never; Returns: string }
+      _const_calc_method_shift_fixed: { Args: never; Returns: string }
+      _const_calc_method_shift_full_month: { Args: never; Returns: string }
+      _const_calc_source_v6: { Args: never; Returns: string }
+      _const_calc_source_v7: { Args: never; Returns: string }
+      _const_days_per_month: { Args: never; Returns: number }
+      _const_employee_active: { Args: never; Returns: string }
+      _const_installment_deferred: { Args: never; Returns: string }
+      _const_installment_pending: { Args: never; Returns: string }
+      _const_order_cancelled: { Args: never; Returns: string }
+      _const_payment_bank: { Args: never; Returns: string }
+      _const_payment_cash: { Args: never; Returns: string }
+      _const_role_admin: {
+        Args: never
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
+      _const_role_finance: {
+        Args: never
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
+      _const_role_hr: {
+        Args: never
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
+      _const_role_operations: {
+        Args: never
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
+      _const_role_viewer: {
+        Args: never
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
+      _const_tier_fixed: { Args: never; Returns: string }
+      _const_tier_incremental: { Args: never; Returns: string }
+      _const_work_hybrid: { Args: never; Returns: string }
+      _const_work_orders: { Args: never; Returns: string }
+      _const_work_shift: { Args: never; Returns: string }
       advance_in_my_company: { Args: { _advance_id: string }; Returns: boolean }
+      assign_platform_account: {
+        Args: {
+          p_account_id: string
+          p_created_by?: string
+          p_employee_id: string
+          p_notes?: string
+          p_start_date: string
+        }
+        Returns: {
+          account_id: string
+          created_at: string
+          created_by: string | null
+          employee_id: string
+          end_date: string | null
+          id: string
+          month_year: string
+          notes: string | null
+          start_date: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "account_assignments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       calc_tier_salary: {
         Args: { p_orders: number; p_scheme_id?: string }
         Returns: number
@@ -2937,17 +3271,17 @@ export type Database = {
           p_payment_method?: string
         }
         Returns: {
-          out_advance_deduction: number
-          out_attendance_deduction: number
-          out_base_salary: number
-          out_calc_status: string
-          out_employee_id: string
-          out_external_deduction: number
-          out_manual_deduction: number
-          out_month_year: string
-          out_net_salary: number
-          out_total_orders: number
-          out_total_shift_days: number
+          advance_deduction: number
+          attendance_deduction: number
+          base_salary: number
+          calc_status: string
+          employee_id: string
+          external_deduction: number
+          manual_deduction: number
+          month_year: string
+          net_salary: number
+          total_orders: number
+          total_shift_days: number
         }[]
       }
       calculate_salary_for_month: {
@@ -3071,10 +3405,153 @@ export type Database = {
           reset_at: string
         }[]
       }
-      get_my_role: {
-        Args: never
-        Returns: Database["public"]["Enums"]["app_role"]
+      eq_advance_status_text: {
+        Args: { a: Database["public"]["Enums"]["advance_status"]; b: string }
+        Returns: boolean
       }
+      eq_app_role_text: {
+        Args: { a: Database["public"]["Enums"]["app_role"]; b: string }
+        Returns: boolean
+      }
+      eq_approval_status_text: {
+        Args: { a: Database["public"]["Enums"]["approval_status"]; b: string }
+        Returns: boolean
+      }
+      eq_attendance_status_text: {
+        Args: { a: Database["public"]["Enums"]["attendance_status"]; b: string }
+        Returns: boolean
+      }
+      eq_city_enum_text: {
+        Args: { a: Database["public"]["Enums"]["city_enum"]; b: string }
+        Returns: boolean
+      }
+      eq_deduction_type_text: {
+        Args: { a: Database["public"]["Enums"]["deduction_type"]; b: string }
+        Returns: boolean
+      }
+      eq_emp_status_text: {
+        Args: { a: Database["public"]["Enums"]["employee_status"]; b: string }
+        Returns: boolean
+      }
+      eq_employee_status_text: {
+        Args: { a: Database["public"]["Enums"]["employee_status"]; b: string }
+        Returns: boolean
+      }
+      eq_installment_status_text: {
+        Args: {
+          a: Database["public"]["Enums"]["installment_status"]
+          b: string
+        }
+        Returns: boolean
+      }
+      eq_license_status_enum_text: {
+        Args: {
+          a: Database["public"]["Enums"]["license_status_enum"]
+          b: string
+        }
+        Returns: boolean
+      }
+      eq_maintenance_type_text: {
+        Args: { a: Database["public"]["Enums"]["maintenance_type"]; b: string }
+        Returns: boolean
+      }
+      eq_salary_type_text: {
+        Args: { a: Database["public"]["Enums"]["salary_type"]; b: string }
+        Returns: boolean
+      }
+      eq_scheme_status_text: {
+        Args: { a: Database["public"]["Enums"]["scheme_status"]; b: string }
+        Returns: boolean
+      }
+      eq_sponsorship_status_enum_text: {
+        Args: {
+          a: Database["public"]["Enums"]["sponsorship_status_enum"]
+          b: string
+        }
+        Returns: boolean
+      }
+      eq_text_advance_status: {
+        Args: { a: string; b: Database["public"]["Enums"]["advance_status"] }
+        Returns: boolean
+      }
+      eq_text_app_role: {
+        Args: { a: string; b: Database["public"]["Enums"]["app_role"] }
+        Returns: boolean
+      }
+      eq_text_approval_status: {
+        Args: { a: string; b: Database["public"]["Enums"]["approval_status"] }
+        Returns: boolean
+      }
+      eq_text_attendance_status: {
+        Args: { a: string; b: Database["public"]["Enums"]["attendance_status"] }
+        Returns: boolean
+      }
+      eq_text_city_enum: {
+        Args: { a: string; b: Database["public"]["Enums"]["city_enum"] }
+        Returns: boolean
+      }
+      eq_text_deduction_type: {
+        Args: { a: string; b: Database["public"]["Enums"]["deduction_type"] }
+        Returns: boolean
+      }
+      eq_text_emp_status: {
+        Args: { a: string; b: Database["public"]["Enums"]["employee_status"] }
+        Returns: boolean
+      }
+      eq_text_employee_status: {
+        Args: { a: string; b: Database["public"]["Enums"]["employee_status"] }
+        Returns: boolean
+      }
+      eq_text_installment_status: {
+        Args: {
+          a: string
+          b: Database["public"]["Enums"]["installment_status"]
+        }
+        Returns: boolean
+      }
+      eq_text_license_status_enum: {
+        Args: {
+          a: string
+          b: Database["public"]["Enums"]["license_status_enum"]
+        }
+        Returns: boolean
+      }
+      eq_text_maintenance_type: {
+        Args: { a: string; b: Database["public"]["Enums"]["maintenance_type"] }
+        Returns: boolean
+      }
+      eq_text_salary_type: {
+        Args: { a: string; b: Database["public"]["Enums"]["salary_type"] }
+        Returns: boolean
+      }
+      eq_text_scheme_status: {
+        Args: { a: string; b: Database["public"]["Enums"]["scheme_status"] }
+        Returns: boolean
+      }
+      eq_text_sponsorship_status_enum: {
+        Args: {
+          a: string
+          b: Database["public"]["Enums"]["sponsorship_status_enum"]
+        }
+        Returns: boolean
+      }
+      eq_text_vehicle_status: {
+        Args: { a: string; b: Database["public"]["Enums"]["vehicle_status"] }
+        Returns: boolean
+      }
+      eq_text_vehicle_type: {
+        Args: { a: string; b: Database["public"]["Enums"]["vehicle_type"] }
+        Returns: boolean
+      }
+      eq_vehicle_status_text: {
+        Args: { a: Database["public"]["Enums"]["vehicle_status"]; b: string }
+        Returns: boolean
+      }
+      eq_vehicle_type_text: {
+        Args: { a: Database["public"]["Enums"]["vehicle_type"]; b: string }
+        Returns: boolean
+      }
+      get_my_role: { Args: never; Returns: string }
       has_permission: {
         Args: { p_action: string; p_resource: string }
         Returns: boolean
@@ -3087,6 +3564,7 @@ export type Database = {
         Returns: boolean
       }
       is_active_user: { Args: { _user_id: string }; Returns: boolean }
+      is_admin_or_hr: { Args: { uid: string }; Returns: boolean }
       is_internal_user: { Args: never; Returns: boolean }
       is_salary_admin_job_title: {
         Args: { p_job_title: string }
@@ -3103,6 +3581,152 @@ export type Database = {
         Returns: boolean
       }
       jwt_company_id: { Args: never; Returns: string }
+      neq_advance_status_text: {
+        Args: { a: Database["public"]["Enums"]["advance_status"]; b: string }
+        Returns: boolean
+      }
+      neq_app_role_text: {
+        Args: { a: Database["public"]["Enums"]["app_role"]; b: string }
+        Returns: boolean
+      }
+      neq_approval_status_text: {
+        Args: { a: Database["public"]["Enums"]["approval_status"]; b: string }
+        Returns: boolean
+      }
+      neq_attendance_status_text: {
+        Args: { a: Database["public"]["Enums"]["attendance_status"]; b: string }
+        Returns: boolean
+      }
+      neq_city_enum_text: {
+        Args: { a: Database["public"]["Enums"]["city_enum"]; b: string }
+        Returns: boolean
+      }
+      neq_deduction_type_text: {
+        Args: { a: Database["public"]["Enums"]["deduction_type"]; b: string }
+        Returns: boolean
+      }
+      neq_emp_status_text: {
+        Args: { a: Database["public"]["Enums"]["employee_status"]; b: string }
+        Returns: boolean
+      }
+      neq_employee_status_text: {
+        Args: { a: Database["public"]["Enums"]["employee_status"]; b: string }
+        Returns: boolean
+      }
+      neq_installment_status_text: {
+        Args: {
+          a: Database["public"]["Enums"]["installment_status"]
+          b: string
+        }
+        Returns: boolean
+      }
+      neq_license_status_enum_text: {
+        Args: {
+          a: Database["public"]["Enums"]["license_status_enum"]
+          b: string
+        }
+        Returns: boolean
+      }
+      neq_maintenance_type_text: {
+        Args: { a: Database["public"]["Enums"]["maintenance_type"]; b: string }
+        Returns: boolean
+      }
+      neq_salary_type_text: {
+        Args: { a: Database["public"]["Enums"]["salary_type"]; b: string }
+        Returns: boolean
+      }
+      neq_scheme_status_text: {
+        Args: { a: Database["public"]["Enums"]["scheme_status"]; b: string }
+        Returns: boolean
+      }
+      neq_sponsorship_status_enum_text: {
+        Args: {
+          a: Database["public"]["Enums"]["sponsorship_status_enum"]
+          b: string
+        }
+        Returns: boolean
+      }
+      neq_text_advance_status: {
+        Args: { a: string; b: Database["public"]["Enums"]["advance_status"] }
+        Returns: boolean
+      }
+      neq_text_app_role: {
+        Args: { a: string; b: Database["public"]["Enums"]["app_role"] }
+        Returns: boolean
+      }
+      neq_text_approval_status: {
+        Args: { a: string; b: Database["public"]["Enums"]["approval_status"] }
+        Returns: boolean
+      }
+      neq_text_attendance_status: {
+        Args: { a: string; b: Database["public"]["Enums"]["attendance_status"] }
+        Returns: boolean
+      }
+      neq_text_city_enum: {
+        Args: { a: string; b: Database["public"]["Enums"]["city_enum"] }
+        Returns: boolean
+      }
+      neq_text_deduction_type: {
+        Args: { a: string; b: Database["public"]["Enums"]["deduction_type"] }
+        Returns: boolean
+      }
+      neq_text_emp_status: {
+        Args: { a: string; b: Database["public"]["Enums"]["employee_status"] }
+        Returns: boolean
+      }
+      neq_text_employee_status: {
+        Args: { a: string; b: Database["public"]["Enums"]["employee_status"] }
+        Returns: boolean
+      }
+      neq_text_installment_status: {
+        Args: {
+          a: string
+          b: Database["public"]["Enums"]["installment_status"]
+        }
+        Returns: boolean
+      }
+      neq_text_license_status_enum: {
+        Args: {
+          a: string
+          b: Database["public"]["Enums"]["license_status_enum"]
+        }
+        Returns: boolean
+      }
+      neq_text_maintenance_type: {
+        Args: { a: string; b: Database["public"]["Enums"]["maintenance_type"] }
+        Returns: boolean
+      }
+      neq_text_salary_type: {
+        Args: { a: string; b: Database["public"]["Enums"]["salary_type"] }
+        Returns: boolean
+      }
+      neq_text_scheme_status: {
+        Args: { a: string; b: Database["public"]["Enums"]["scheme_status"] }
+        Returns: boolean
+      }
+      neq_text_sponsorship_status_enum: {
+        Args: {
+          a: string
+          b: Database["public"]["Enums"]["sponsorship_status_enum"]
+        }
+        Returns: boolean
+      }
+      neq_text_vehicle_status: {
+        Args: { a: string; b: Database["public"]["Enums"]["vehicle_status"] }
+        Returns: boolean
+      }
+      neq_text_vehicle_type: {
+        Args: { a: string; b: Database["public"]["Enums"]["vehicle_type"] }
+        Returns: boolean
+      }
+      neq_vehicle_status_text: {
+        Args: { a: Database["public"]["Enums"]["vehicle_status"]; b: string }
+        Returns: boolean
+      }
+      neq_vehicle_type_text: {
+        Args: { a: Database["public"]["Enums"]["vehicle_type"]; b: string }
+        Returns: boolean
+      }
       performance_dashboard_rpc: {
         Args: { p_month_year: string; p_today?: string }
         Returns: Json
@@ -3118,6 +3742,15 @@ export type Database = {
           platform_breakdown: Json
           total_orders: number
           total_shift_days: number
+        }[]
+      }
+      preview_salary_for_month_v2: {
+        Args: { p_month_year: string }
+        Returns: {
+          base_salary: number
+          employee_id: string
+          net_salary: number
+          total_orders: number
         }[]
       }
       replace_daily_orders_month_rpc: {
@@ -3138,14 +3771,34 @@ export type Database = {
         Args: { p_employee_id: string; p_month_year: string; p_today?: string }
         Returns: Json
       }
-      test_shift_salary: {
-        Args: never
+      sync_salaries_as_expenses: {
+        Args: { p_month_year: string }
         Returns: {
-          app_name: string
-          daily_rate: number
-          monthly_amount: number
-          scheme_name: string
-        }[]
+          amount: number
+          category: string
+          created_at: string
+          created_by: string | null
+          date: string
+          description: string | null
+          id: string
+          is_auto: boolean
+          month_year: string
+          notes: string | null
+          reference_id: string | null
+          reference_type: string | null
+          type: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "finance_transactions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      text_to_employee_status: {
+        Args: { "": string }
+        Returns: Database["public"]["Enums"]["employee_status"]
       }
     }
     Enums: {

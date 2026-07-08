@@ -28,7 +28,7 @@ export function MonthSummaryStats(props: Readonly<Props>) {
     employeesCount,
     grandTotal,
     targets,
-    setTargets,
+    _setTargets,
     employeeTargets,
     setEmployeeTargets,
     appGrandTotal,
@@ -55,7 +55,7 @@ export function MonthSummaryStats(props: Readonly<Props>) {
           const c = getAppColor(appColorsList, app.name);
           const total = appGrandTotal(app.id);
           const targetVal = Number.parseInt(targets[app.id] || '0', 10) || 0;
-          const overTarget = targetVal > 0 && total >= targetVal;
+          const _overTarget = targetVal > 0 && total >= targetVal;
           const isSaving = savingTarget === app.id;
 
           return (

@@ -67,18 +67,18 @@ export function VehicleReportsTab() {
       g.total_cost += Number(log.total_cost) || 0;
     }
     return Array.from(groups.values()).sort((a, b) => b.total_cost - a.total_cost);
-  }, [logs]);
+  }, [filteredLogsByDate]);
 
   // بمجرد توفر بيانات المركبات، حدد الكل افتراضياً (المستخدم يقدر يلغي تحديد مركبات بعينها)
   useEffect(() => {
     if (vehicleGroups.length > 0 && selectedIds === null) {
       setSelectedIds(new Set(vehicleGroups.map(g => g.vehicle_id)));
     }
-  }, [vehicleGroups, selectedIds]);
+  }, [vehicleGroups]);
 
   const activeSelection = useMemo(
     () => selectedIds ?? new Set(vehicleGroups.map(g => g.vehicle_id)),
-    [selectedIds, vehicleGroups]
+    [vehicleGroups]
   );
 
   const toggleVehicle = (vehicleId: string) => {
