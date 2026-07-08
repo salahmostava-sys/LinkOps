@@ -315,7 +315,7 @@ const Employees = () => {
 
       {/* ── KPI tab ── */}
       {activeTab === 'kpi' && (
-        <EmployeeKPIs allEmployees={allEmployeesData} />
+        <EmployeeKPIs allEmployees={allEmployeesData} onSelectEmployee={setSelectedEmployee} />
       )}
 
       {/* ── Table tab ── */}

@@ -1,13 +1,16 @@
 import type React from 'react';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { differenceInDays, differenceInYears, parseISO, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { Users, UserCheck, UserX, UserMinus, ShieldCheck, ShieldOff, Car, AlertTriangle, CalendarClock, MapPin, Globe2, TrendingUp } from 'lucide-react';
 import type { Employee } from '@modules/employees/model/employeeUtils';
 import { getEmployeeCities } from '@modules/employees/model/employeeUtils';
 import { SPONSORSHIP_LABELS, LICENSE_LABELS } from '@modules/employees/types/employee.types';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@shared/components/ui/dialog';
+import { ScrollArea } from '@shared/components/ui/scroll-area';
 
 interface Props {
   allEmployees: Employee[];
+  onSelectEmployee?: (id: string) => void;
 }
 
 const today = new Date();
@@ -17,22 +20,51 @@ const daysDiff = (dateStr?: string | null): number | null => {
   try { return differenceInDays(parseISO(dateStr), today); } catch { return null; }
 };
 
+const isExcluded = (e: Employee) => {
+  if (e.status === 'ended' || e.status === 'inactive') return true;
+  if (e.sponsorship_status === 'absconded' || e.sponsorship_status === 'terminated') return true;
+  return false;
+};
 
+export function EmployeeKPIs({ allEmployees, onSelectEmployee }: Readonly<Props>) {
+  const [detailModal, setDetailModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    employees: Employee[];
+  }>({
+    isOpen: false,
+    title: '',
+    employees: [],
+  });
 
-export function EmployeeKPIs({ allEmployees }: Readonly<Props>) {
+  const showDetails = (title: string, list: Employee[]) => {
+    setDetailModal({
+      isOpen: true,
+      title,
+      employees: list,
+    });
+  };
+
   const stats = useMemo(() => {
-    const active   = allEmployees.filter(e => e.status === 'active');
+    // 1. General raw counts (must keep all employees for basic summary tabs status overview)
+    const activeRaw   = allEmployees.filter(e => e.status === 'active');
     const inactive = allEmployees.filter(e => e.status === 'inactive');
     const ended    = allEmployees.filter(e => e.status === 'ended');
 
-    const sponsored    = allEmployees.filter(e => e.sponsorship_status === 'sponsored');
-    const notSponsored = allEmployees.filter(e => e.sponsorship_status === 'not_sponsored');
+    const sponsoredRaw    = allEmployees.filter(e => e.sponsorship_status === 'sponsored');
+    const notSponsoredRaw = allEmployees.filter(e => e.sponsorship_status === 'not_sponsored');
     const absconded    = allEmployees.filter(e => e.sponsorship_status === 'absconded');
     const terminated   = allEmployees.filter(e => e.sponsorship_status === 'terminated');
 
-    const hasLicense = allEmployees.filter(e => e.license_status === 'has_license');
-    const noLicense  = allEmployees.filter(e => e.license_status === 'no_license');
-    const applied    = allEmployees.filter(e => e.license_status === 'applied');
+    // 2. Active & non-excluded employees list (use this for all other stats, alerts and distributions)
+    const active = allEmployees.filter(e => !isExcluded(e));
+
+    const sponsored    = active.filter(e => e.sponsorship_status === 'sponsored');
+    const notSponsored = active.filter(e => e.sponsorship_status === 'not_sponsored');
+
+    const hasLicense = active.filter(e => e.license_status === 'has_license');
+    const noLicense  = active.filter(e => e.license_status === 'no_license');
+    const applied    = active.filter(e => e.license_status === 'applied');
 
     const residencyExpired   = active.filter(e => { const d = daysDiff(e.residency_expiry); return d !== null && d < 0; });
     const residencyExpiring30 = active.filter(e => { const d = daysDiff(e.residency_expiry); return d !== null && d >= 0 && d <= 30; });
@@ -49,7 +81,7 @@ export function EmployeeKPIs({ allEmployees }: Readonly<Props>) {
 
     const monthStart = startOfMonth(today);
     const monthEnd   = endOfMonth(today);
-    const newThisMonth = allEmployees.filter(e => {
+    const newThisMonth = active.filter(e => {
       if (!e.join_date) return false;
       try { return isWithinInterval(parseISO(e.join_date), { start: monthStart, end: monthEnd }); } catch { return false; }
     });
@@ -76,16 +108,59 @@ export function EmployeeKPIs({ allEmployees }: Readonly<Props>) {
     });
 
     return {
-      total: allEmployees.length, active: active.length, inactive: inactive.length, ended: ended.length,
-      sponsored: sponsored.length, notSponsored: notSponsored.length, absconded: absconded.length, terminated: terminated.length,
-      hasLicense: hasLicense.length, noLicense: noLicense.length, applied: applied.length,
-      residencyExpired: residencyExpired.length, residencyExpiring30: residencyExpiring30.length, residencyExpiring60: residencyExpiring60.length,
-      insuranceExpired: insuranceExpired.length, insuranceExpiring30: insuranceExpiring30.length,
-      licenseExpired: licenseExpired.length, licenseExpiring30: licenseExpiring30.length,
-      probationExpiring7: probationExpiring7.length, probationExpiring30: probationExpiring30.length,
+      lists: {
+        all: allEmployees,
+        activeRaw: activeRaw,
+        active: active,
+        inactive,
+        ended,
+        sponsoredRaw,
+        notSponsoredRaw,
+        sponsored,
+        notSponsored,
+        absconded,
+        terminated,
+        hasLicense,
+        noLicense,
+        applied,
+        residencyExpired,
+        residencyExpiring30,
+        residencyExpiring60,
+        insuranceExpired,
+        insuranceExpiring30,
+        licenseExpired,
+        licenseExpiring30,
+        probationExpiring7,
+        probationExpiring30,
+        newThisMonth,
+      },
+      total: allEmployees.length, 
+      active: activeRaw.length, 
+      inactive: inactive.length, 
+      ended: ended.length,
+      sponsoredRawCount: sponsoredRaw.length,
+      notSponsoredRawCount: notSponsoredRaw.length,
+      sponsored: sponsored.length, 
+      notSponsored: notSponsored.length,
+      absconded: absconded.length, 
+      terminated: terminated.length,
+      hasLicense: hasLicense.length, 
+      noLicense: noLicense.length, 
+      applied: applied.length,
+      residencyExpired: residencyExpired.length, 
+      residencyExpiring30: residencyExpiring30.length, 
+      residencyExpiring60: residencyExpiring60.length,
+      insuranceExpired: insuranceExpired.length, 
+      insuranceExpiring30: insuranceExpiring30.length,
+      licenseExpired: licenseExpired.length, 
+      licenseExpiring30: licenseExpiring30.length,
+      probationExpiring7: probationExpiring7.length, 
+      probationExpiring30: probationExpiring30.length,
       newThisMonth: newThisMonth.length,
       avgAge,
-      cityCount, natCount, jobCount,
+      cityCount, 
+      natCount, 
+      jobCount,
       activeCount: active.length,
     };
   }, [allEmployees]);
@@ -104,19 +179,34 @@ export function EmployeeKPIs({ allEmployees }: Readonly<Props>) {
     );
   }
 
+  const handleCityClick = (city: string) => {
+    const list = stats.lists.active.filter(e => getEmployeeCities(e).includes(city));
+    showDetails(`توزيع الموظفين في مدينة: ${CITY_LABELS[city] ?? city}`, list);
+  };
+
+  const handleNationalityClick = (nationality: string) => {
+    const list = stats.lists.active.filter(e => e.nationality === nationality);
+    showDetails(`توزيع الموظفين من الجنسية: ${nationality}`, list);
+  };
+
+  const handleJobClick = (job: string) => {
+    const list = stats.lists.active.filter(e => e.job_title === job);
+    showDetails(`توزيع الموظفين بمسمى وظيفي: ${job}`, list);
+  };
+
   return (
     <div className="space-y-6" dir="rtl">
 
       {/* ── القسم الأول: الملخص العام ── */}
       <Section title="الملخص العام" icon={<TrendingUp size={16} />}>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <KpiCard icon={<Users size={20} />} label="إجمالي الموظفين" value={stats.total} color="blue" />
-          <KpiCard icon={<UserCheck size={20} />} label="نشط" value={stats.active} color="green" />
-          <KpiCard icon={<UserMinus size={20} />} label="غير نشط" value={stats.inactive} color="yellow" />
-          <KpiCard icon={<UserX size={20} />} label="منتهي" value={stats.ended} color="gray" />
+          <KpiCard icon={<Users size={20} />} label="إجمالي الموظفين" value={stats.total} color="blue" onClick={() => showDetails("إجمالي الموظفين", stats.lists.all)} />
+          <KpiCard icon={<UserCheck size={20} />} label="نشط" value={stats.active} color="green" onClick={() => showDetails("الموظفين النشطين", stats.lists.activeRaw)} />
+          <KpiCard icon={<UserMinus size={20} />} label="غير نشط" value={stats.inactive} color="yellow" onClick={() => showDetails("الموظفين غير النشطين", stats.lists.inactive)} />
+          <KpiCard icon={<UserX size={20} />} label="منتهي" value={stats.ended} color="gray" onClick={() => showDetails("الموظفين منتهية خدمتهم", stats.lists.ended)} />
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-3">
-          <KpiCard icon={<CalendarClock size={20} />} label="موظفون جدد هذا الشهر" value={stats.newThisMonth} color="purple" />
+          <KpiCard icon={<CalendarClock size={20} />} label="موظفون جدد هذا الشهر" value={stats.newThisMonth} color="purple" onClick={() => showDetails("الموظفين الجدد هذا الشهر", stats.lists.newThisMonth)} />
           {stats.avgAge !== null && (
             <KpiCard icon={<Users size={20} />} label="متوسط العمر" value={`${stats.avgAge} سنة`} color="blue" />
           )}
@@ -126,14 +216,14 @@ export function EmployeeKPIs({ allEmployees }: Readonly<Props>) {
       {/* ── القسم الثاني: حالة الكفالة ── */}
       <Section title="حالة الكفالة" icon={<ShieldCheck size={16} />}>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <KpiCard label={SPONSORSHIP_LABELS['sponsored']}    value={stats.sponsored}    color="green"  icon={<ShieldCheck size={20} />} />
-          <KpiCard label={SPONSORSHIP_LABELS['not_sponsored']} value={stats.notSponsored} color="gray"   icon={<ShieldOff size={20} />} />
-          <KpiCard label={SPONSORSHIP_LABELS['absconded']}    value={stats.absconded}    color="red"    icon={<UserX size={20} />} />
-          <KpiCard label={SPONSORSHIP_LABELS['terminated']}   value={stats.terminated}   color="orange" icon={<UserMinus size={20} />} />
+          <KpiCard label={SPONSORSHIP_LABELS['sponsored']}    value={stats.sponsoredRawCount}    color="green"  icon={<ShieldCheck size={20} />} onClick={() => showDetails(SPONSORSHIP_LABELS['sponsored'], stats.lists.sponsoredRaw)} />
+          <KpiCard label={SPONSORSHIP_LABELS['not_sponsored']} value={stats.notSponsoredRawCount} color="gray"   icon={<ShieldOff size={20} />} onClick={() => showDetails(SPONSORSHIP_LABELS['not_sponsored'], stats.lists.notSponsoredRaw)} />
+          <KpiCard label={SPONSORSHIP_LABELS['absconded']}    value={stats.absconded}    color="red"    icon={<UserX size={20} />} onClick={() => showDetails(SPONSORSHIP_LABELS['absconded'], stats.lists.absconded)} />
+          <KpiCard label={SPONSORSHIP_LABELS['terminated']}   value={stats.terminated}   color="orange" icon={<UserMinus size={20} />} onClick={() => showDetails(SPONSORSHIP_LABELS['terminated'], stats.lists.terminated)} />
         </div>
         <div className="mt-2">
           <SponsorshipBar
-            sponsored={stats.sponsored} notSponsored={stats.notSponsored}
+            sponsored={stats.sponsoredRawCount} notSponsored={stats.notSponsoredRawCount}
             absconded={stats.absconded} terminated={stats.terminated}
             total={stats.total}
           />
@@ -143,24 +233,24 @@ export function EmployeeKPIs({ allEmployees }: Readonly<Props>) {
       {/* ── القسم الثالث: حالة الرخصة ── */}
       <Section title="حالة الرخصة" icon={<Car size={16} />}>
         <div className="grid grid-cols-3 gap-3">
-          <KpiCard label={LICENSE_LABELS['has_license']} value={stats.hasLicense} color="green"  icon={<Car size={20} />} />
-          <KpiCard label={LICENSE_LABELS['no_license']}  value={stats.noLicense}  color="red"    icon={<Car size={20} />} />
-          <KpiCard label={LICENSE_LABELS['applied']}     value={stats.applied}    color="yellow" icon={<Car size={20} />} />
+          <KpiCard label={LICENSE_LABELS['has_license']} value={stats.hasLicense} color="green"  icon={<Car size={20} />} onClick={() => showDetails(LICENSE_LABELS['has_license'], stats.lists.hasLicense)} />
+          <KpiCard label={LICENSE_LABELS['no_license']}  value={stats.noLicense}  color="red"    icon={<Car size={20} />} onClick={() => showDetails(LICENSE_LABELS['no_license'], stats.lists.noLicense)} />
+          <KpiCard label={LICENSE_LABELS['applied']}     value={stats.applied}    color="yellow" icon={<Car size={20} />} onClick={() => showDetails(LICENSE_LABELS['applied'], stats.lists.applied)} />
         </div>
       </Section>
 
       {/* ── القسم الرابع: تنبيهات الوثائق ── */}
       <Section title="تنبيهات الوثائق" icon={<AlertTriangle size={16} />}>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          <AlertCard label="إقامة منتهية"          value={stats.residencyExpired}   severity="danger" />
-          <AlertCard label="إقامة تنتهي خلال 30 يوم" value={stats.residencyExpiring30} severity="warning" />
-          <AlertCard label="إقامة تنتهي خلال 60 يوم" value={stats.residencyExpiring60} severity="info" />
-          <AlertCard label="تأمين صحي منتهٍ"       value={stats.insuranceExpired}   severity="danger" />
-          <AlertCard label="تأمين ينتهي خلال 30 يوم" value={stats.insuranceExpiring30} severity="warning" />
-          <AlertCard label="رخصة قيادة منتهية"     value={stats.licenseExpired}    severity="danger" />
-          <AlertCard label="رخصة تنتهي خلال 30 يوم"  value={stats.licenseExpiring30}  severity="warning" />
-          <AlertCard label="تجربة تنتهي خلال 7 أيام" value={stats.probationExpiring7}  severity="danger" />
-          <AlertCard label="تجربة تنتهي خلال 30 يوم" value={stats.probationExpiring30} severity="warning" />
+          <AlertCard label="إقامة منتهية"          value={stats.residencyExpired}   severity="danger" onClick={() => showDetails("الموظفين ذوي الإقامة المنتهية", stats.lists.residencyExpired)} />
+          <AlertCard label="إقامة تنتهي خلال 30 يوم" value={stats.residencyExpiring30} severity="warning" onClick={() => showDetails("الموظفين الذين تنتهي إقامتهم خلال 30 يوم", stats.lists.residencyExpiring30)} />
+          <AlertCard label="إقامة تنتهي خلال 60 يوم" value={stats.residencyExpiring60} severity="info" onClick={() => showDetails("الموظفين الذين تنتهي إقامتهم خلال 60 يوم", stats.lists.residencyExpiring60)} />
+          <AlertCard label="تأمين صحي منتهٍ"       value={stats.insuranceExpired}   severity="danger" onClick={() => showDetails("الموظفين ذوي التأمين الصحي المنتهي", stats.lists.insuranceExpired)} />
+          <AlertCard label="تأمين ينتهي خلال 30 يوم" value={stats.insuranceExpiring30} severity="warning" onClick={() => showDetails("الموظفين الذين ينتهي تأمينهم خلال 30 يوم", stats.lists.insuranceExpiring30)} />
+          <AlertCard label="رخصة قيادة منتهية"     value={stats.licenseExpired}    severity="danger" onClick={() => showDetails("الموظفين ذوي رخصة القيادة المنتهية", stats.lists.licenseExpired)} />
+          <AlertCard label="رخصة تنتهي خلال 30 يوم"  value={stats.licenseExpiring30}  severity="warning" onClick={() => showDetails("الموظفين الذين تنتهي رخصهم خلال 30 يوم", stats.lists.licenseExpiring30)} />
+          <AlertCard label="تجربة تنتهي خلال 7 أيام" value={stats.probationExpiring7}  severity="danger" onClick={() => showDetails("الموظفين الذين تنتهي فترة تجريبتهم خلال 7 أيام", stats.lists.probationExpiring7)} />
+          <AlertCard label="تجربة تنتهي خلال 30 يوم" value={stats.probationExpiring30} severity="warning" onClick={() => showDetails("الموظفين الذين تنتهي فترة تجريبتهم خلال 30 يوم", stats.lists.probationExpiring30)} />
         </div>
       </Section>
 
@@ -180,6 +270,7 @@ export function EmployeeKPIs({ allEmployees }: Readonly<Props>) {
                     max={cityMax}
                     total={stats.activeCount}
                     color="bg-primary"
+                    onClick={() => handleCityClick(city)}
                   />
                 ))}
             </div>
@@ -201,6 +292,7 @@ export function EmployeeKPIs({ allEmployees }: Readonly<Props>) {
                     max={natMax}
                     total={stats.activeCount}
                     color="bg-sky-500"
+                    onClick={() => handleNationalityClick(nat)}
                   />
                 ))}
             </div>
@@ -222,12 +314,57 @@ export function EmployeeKPIs({ allEmployees }: Readonly<Props>) {
                     max={Math.max(1, ...Object.values(stats.jobCount))}
                     total={stats.activeCount}
                     color="bg-violet-500"
+                    onClick={() => handleJobClick(job)}
                   />
                 ))}
             </div>
           </Section>
         )}
       </div>
+
+      {/* Modal to show list of employees */}
+      <Dialog open={detailModal.isOpen} onOpenChange={(open) => setDetailModal(prev => ({ ...prev, isOpen: open }))}>
+        <DialogContent className="max-w-lg w-[90vw] max-h-[85vh] flex flex-col p-6 rounded-2xl border bg-card text-foreground" dir="rtl">
+          <DialogHeader className="pb-3 border-b text-right">
+            <DialogTitle className="text-lg font-bold text-foreground">
+              {detailModal.title}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <ScrollArea className="flex-1 mt-4 overflow-y-auto pr-1">
+            <div className="space-y-2">
+              {detailModal.employees.length === 0 ? (
+                <p className="text-center text-sm text-muted-foreground py-6">لا يوجد موظفين</p>
+              ) : (
+                detailModal.employees.map((emp) => (
+                  <div 
+                    key={emp.id} 
+                    onClick={() => {
+                      setDetailModal(prev => ({ ...prev, isOpen: false }));
+                      onSelectEmployee?.(emp.id);
+                    }}
+                    className="flex items-center justify-between p-3 rounded-xl hover:bg-muted/50 cursor-pointer transition-colors border border-transparent hover:border-border/40"
+                  >
+                    <div className="flex flex-col text-right">
+                      <span className="font-semibold text-sm text-foreground hover:text-primary transition-colors">
+                        {emp.name}
+                      </span>
+                      <span className="text-xs text-muted-foreground mt-0.5">
+                        {emp.job_title || 'بدون مسمى وظيفي'} {emp.nationality ? `• ${emp.nationality}` : ''}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary font-medium">
+                        عرض الملف
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -257,16 +394,20 @@ const COLOR_MAP = {
 };
 
 function KpiCard({
-  icon, label, value, color = 'blue',
+  icon, label, value, color = 'blue', onClick,
 }: Readonly<{
   icon: React.ReactNode;
   label: string;
   value: number | string;
   color?: keyof typeof COLOR_MAP;
+  onClick?: () => void;
 }>) {
   const c = COLOR_MAP[color];
   return (
-    <div className={`rounded-lg p-3 flex flex-col gap-1.5 ${c.bg}`}>
+    <div 
+      onClick={onClick}
+      className={`rounded-lg p-3 flex flex-col gap-1.5 ${c.bg} ${onClick ? 'cursor-pointer hover:opacity-85 transition-opacity' : ''}`}
+    >
       <div className={`${c.icon}`}>{icon}</div>
       <div className={`text-2xl font-bold tabular-nums ${c.val}`}>{value}</div>
       <div className="text-xs text-muted-foreground leading-tight">{label}</div>
@@ -280,22 +421,28 @@ const SEVERITY = {
   info:    { bg: 'bg-blue-50 dark:bg-blue-950/30',     border: 'border-blue-200 dark:border-blue-800',  val: 'text-blue-600 dark:text-blue-400',  label: 'text-blue-700 dark:text-blue-300'  },
 };
 
-function AlertCard({ label, value, severity }: Readonly<{ label: string; value: number; severity: keyof typeof SEVERITY }>) {
+function AlertCard({ label, value, severity, onClick }: Readonly<{ label: string; value: number; severity: keyof typeof SEVERITY; onClick?: () => void }>) {
   const s = SEVERITY[severity];
   const isEmpty = value === 0;
   return (
-    <div className={`rounded-lg border p-3 flex flex-col gap-1 ${isEmpty ? 'bg-muted/20 border-border opacity-60' : s.bg + ' ' + s.border}`}>
+    <div 
+      onClick={!isEmpty ? onClick : undefined}
+      className={`rounded-lg border p-3 flex flex-col gap-1 ${isEmpty ? 'bg-muted/20 border-border opacity-60' : s.bg + ' ' + s.border} ${onClick && !isEmpty ? 'cursor-pointer hover:opacity-85 transition-opacity' : ''}`}
+    >
       <div className={`text-2xl font-bold tabular-nums ${isEmpty ? 'text-muted-foreground' : s.val}`}>{value}</div>
       <div className={`text-xs leading-tight ${isEmpty ? 'text-muted-foreground' : s.label}`}>{label}</div>
     </div>
   );
 }
 
-function BarRow({ label, value, max, total, color }: Readonly<{ label: string; value: number; max: number; total: number; color: string }>) {
+function BarRow({ label, value, max, total, color, onClick }: Readonly<{ label: string; value: number; max: number; total: number; color: string; onClick?: () => void }>) {
   const pct = Math.round((value / Math.max(1, max)) * 100);
   const share = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
   return (
-    <div className="flex items-center gap-3">
+    <div 
+      onClick={onClick}
+      className={`flex items-center gap-3 p-1 rounded-lg ${onClick ? 'cursor-pointer hover:bg-muted/40 transition-colors' : ''}`}
+    >
       <div className="w-28 text-xs text-muted-foreground truncate text-start shrink-0">{label}</div>
       <div className="flex-1 h-5 bg-muted rounded-full overflow-hidden">
         <div className={`h-full rounded-full transition-all ${color}`} style={{ width: `${pct}%` }} />
