@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { exportSpreadsheetExcel, runSpreadsheetImport, downloadSpreadsheetTemplate, printSpreadsheetTable, saveSpreadsheetMonth } from './spreadsheetFileOps';
 import { orderService } from '@services/orderService';
+import { performanceService } from '@services/performanceService';
 import { buildOrdersIoHeaders } from '@shared/constants/excelSchemas';
 import { mergeImportedOrdersFromMatrixWithMapping } from './spreadsheetImportModel';
 import { matchEmployeeNames } from '@shared/lib/nameMatching';
@@ -34,6 +35,12 @@ vi.mock('@services/orderService', () => ({
   orderService: {
     bulkUpsert: vi.fn(),
     getMonthTargets: vi.fn(),
+  },
+}));
+
+vi.mock('@services/performanceService', () => ({
+  performanceService: {
+    getEmployeeTargets: vi.fn(),
   },
 }));
 
@@ -97,6 +104,10 @@ describe('spreadsheetFileOps', () => {
 
     it('exports the daily app report with correct totals', async () => {
       vi.mocked(orderService.getMonthTargets).mockResolvedValue([{ app_id: 'app1', target_orders: 10, employee_target_orders: 10 }]);
+      vi.mocked(performanceService.getEmployeeTargets).mockResolvedValue([
+        { employee_id: 'emp1', monthly_target_orders: 10 },
+        { employee_id: 'emp2', monthly_target_orders: 10 },
+      ] as any);
       const employees = [
         { id: 'emp1', name: 'John', platform_accounts: [], identity_id: '', is_active: true, avatar_url: '', created_at: '', updated_at: '' },
         { id: 'emp2', name: 'Jane', platform_accounts: [], identity_id: '', is_active: true, avatar_url: '', created_at: '', updated_at: '' },
@@ -123,9 +134,9 @@ describe('spreadsheetFileOps', () => {
 
       expect(aoaToSheetMock).toHaveBeenCalled();
       const exportedRows = aoaToSheetMock.mock.calls[0][0] as Array<Array<string | number>>;
-      expect(exportedRows[2]).toEqual(['اسم المندوب', 'إجمالي الطلبات', 'تارجت المندوب', 'المتبقي للوصول للتارجت', 'التوصيات']);
-      expect(exportedRows).toContainEqual(['John', 5, 10, 5, '']);
-      expect(exportedRows).toContainEqual(['Jane', 5, 10, 5, '']);
+      expect(exportedRows[2]).toEqual(['اسم المندوب', 'إجمالي الطلبات', 'تارجت المنصة', 'تارجت المندوب', 'المتبقي للوصول للتارجت', 'التوصيات']);
+      expect(exportedRows).toContainEqual(['John', 5, 10, 10, 5, '']);
+      expect(exportedRows).toContainEqual(['Jane', 5, 10, 10, 5, '']);
       expect(writeFileMock).toHaveBeenCalledWith(undefined, 'تقرير_App1_1_إلى_3.xlsx');
     });
   });

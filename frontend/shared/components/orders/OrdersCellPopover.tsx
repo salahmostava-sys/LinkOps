@@ -66,8 +66,9 @@ export const OrdersCellPopover = ({ state, apps, data, appColorsList, canEdit, o
   useLayoutEffect(() => {
     if (!popRef.current) return;
     const rect = popRef.current.getBoundingClientRect();
-    let left = state.x;
+    let left = state.x - (rect.width / 2);
     let top = state.y + 6;
+    if (left < 8) left = 8;
     if (left + rect.width > globalThis.innerWidth - 8) left = globalThis.innerWidth - rect.width - 8;
     if (top + rect.height > globalThis.innerHeight - 8) top = state.y - rect.height - 6;
     setPos({ top, left });

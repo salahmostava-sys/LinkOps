@@ -518,6 +518,19 @@ export const performanceService = {
     return data;
   },
 
+  getEmployeeTargets: async (monthYear: string) => {
+    const { data, error } = await sb
+      .from('employee_targets')
+      .select('employee_id, monthly_target_orders')
+      .eq('month_year', monthYear);
+
+    if (error) {
+      throw toServiceError(error, 'performanceService.getEmployeeTargets');
+    }
+
+    return data ?? [];
+  },
+
   getImportHistory: async (monthYear: string): Promise<OrderImportBatch[]> => {
     const { data, error } = await sb
       .from('order_import_batches')

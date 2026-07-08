@@ -132,7 +132,8 @@ export const DailyAppReportTab = React.memo(() => {
                       </th>
                     ))}
                     <th className="p-3 font-semibold text-primary text-center">الإجمالي</th>
-                    <th className="p-3 font-semibold text-muted-foreground text-center">التارجت</th>
+                    <th className="p-3 font-semibold text-muted-foreground text-center">تارجت المنصة</th>
+                    <th className="p-3 font-semibold text-muted-foreground text-center">تارجت المندوب</th>
                     <th className="p-3 font-semibold text-muted-foreground text-center">المتبقي</th>
                     <th className="p-3 font-semibold text-muted-foreground min-w-[200px]">الملاحظات (التوصيات)</th>
                   </tr>
@@ -157,10 +158,13 @@ export const DailyAppReportTab = React.memo(() => {
                           {row.total}
                         </td>
                         <td className="p-3 text-center font-medium text-muted-foreground">
-                          {row.target > 0 ? row.target : '-'}
+                          {row.appTarget > 0 ? row.appTarget : '-'}
+                        </td>
+                        <td className="p-3 text-center font-medium text-muted-foreground">
+                          {row.employeeTarget != null ? row.employeeTarget : '-'}
                         </td>
                         <td className="p-3 text-center">
-                          {row.target > 0 ? (
+                          {row.employeeTarget != null ? (
                             <span className={row.remaining <= 0 ? 'text-emerald-500 font-bold' : 'text-amber-500 font-medium'}>
                               {row.remaining <= 0 ? '✔️ مكتمل' : row.remaining}
                             </span>
@@ -175,7 +179,7 @@ export const DailyAppReportTab = React.memo(() => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={dayArr.length + 3} className="p-8 text-center text-muted-foreground">
+                      <td colSpan={dayArr.length + 4} className="p-8 text-center text-muted-foreground">
                         لا توجد طلبات مسجلة لهذه المنصة في النطاق الزمني المحدد.
                       </td>
                     </tr>
