@@ -258,13 +258,13 @@ describe('orderService', () => {
     it('getSalaryContextOrdersByMonth', async () => {
       tableResults['daily_orders'] = { data: [{ employee_id: '1', app_id: '2', orders_count: 5 }], error: null };
       const res = await orderService.getSalaryContextOrdersByMonth('2026-03');
-      expect(res.length).toBe(1);
+      expect(res).toHaveLength(1);
     });
 
     it('getByMonth', async () => {
       tableResults['daily_orders'] = { data: [{ id: 1 }], error: null };
       const res = await orderService.getByMonth('2026-03', { employeeId: 'emp1' });
-      expect(res.length).toBe(1);
+      expect(res).toHaveLength(1);
     });
 
     it('getAppTargets', async () => {
@@ -276,7 +276,7 @@ describe('orderService', () => {
     it('getBaseEmployees', async () => {
       tableResults['employees'] = { data: [{ id: 'emp1' }], error: null };
       const res = await orderService.getBaseEmployees();
-      expect(res.length).toBe(1);
+      expect(res).toHaveLength(1);
     });
 
     it('delete', async () => {
@@ -299,7 +299,7 @@ describe('orderService', () => {
       };
 
       const res = await orderService.getBaseEmployees();
-      expect(res.length).toBe(1000);
+      expect(res).toHaveLength(1000);
       expect(callCount).toBe(2);
     });
   });

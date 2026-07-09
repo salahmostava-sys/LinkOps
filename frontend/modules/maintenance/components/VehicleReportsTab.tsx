@@ -1,7 +1,7 @@
 import { formatCurrency, formatStandardDateTime } from '@shared/lib/formatters';
 
-import { useState, useMemo, useEffect } from 'react';
-import { Search, Car, Banknote, Wrench, Calendar, Download, Printer, CheckSquare, Square, FileText } from 'lucide-react';
+import { useState, useMemo, useEffect, useRef } from 'react';
+import { Search, Car, Banknote, Wrench, Calendar, Download, Printer, CheckSquare, Square, FileText, ChevronDown, X } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@shared/components/ui/dropdown-menu';
 import { Input } from '@shared/components/ui/input';
 import { Button } from '@shared/components/ui/button';
@@ -29,6 +29,246 @@ type VehicleGroup = {
   logs: MaintenanceLogWithDetails[];
   total_cost: number;
 };
+
+interface VehicleDropdownProps {
+  vehicleGroups: VehicleGroup[];
+  activeSelection: Set<string>;
+  toggleVehicle: (id: string) => void;
+  selectAll: () => void;
+  clearAll: () => void;
+}
+
+function VehicleDropdown({ vehicleGroups, activeSelection, toggleVehicle, selectAll, clearAll }: VehicleDropdownProps) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const ref = useRef<HTMLDivElement>(null);
+
+  const filtered = vehicleGroups.filter(g =>
+    g.plate_number.toLowerCase().includes(search.toLowerCase()),
+  );
+
+  const selectedCount = activeSelection.size;
+  const total = vehicleGroups.length;
+  const allSelected = selectedCount === total;
+
+  // Close on outside click
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative">
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setOpen(o => !o)}
+          className="flex items-center gap-2 h-9 px-3 rounded-xl border border-border bg-card text-sm hover:border-primary/50 transition-colors"
+        >
+          <Car size={14} className="text-muted-foreground shrink-0" />
+          <span className="text-muted-foreground">
+            {allSelected
+              ? 'جميع المركبات'
+              : selectedCount === 0
+              ? 'اختر المركبات…'
+              : `${selectedCount} من ${total} مركبة`}
+          </span>
+          <ChevronDown size={14} className={`text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`} />
+        </button>
+
+        {!allSelected && selectedCount > 0 && (
+          <button
+            type="button"
+            onClick={clearAll}
+            className="flex items-center gap-1 h-9 px-2.5 rounded-xl border border-border bg-card text-xs text-muted-foreground hover:text-destructive hover:border-destructive/40 transition-colors"
+            title="إلغاء التحديد"
+          >
+            <X size={13} />
+          </button>
+        )}
+      </div>
+
+      {open && (
+        <div className="absolute top-11 right-0 z-50 w-80 max-h-80 bg-popover border border-border rounded-xl shadow-lg overflow-hidden flex flex-col">
+          {/* Search */}
+          <div className="p-2 border-b border-border/50">
+            <div className="relative">
+              <Search size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <input
+                autoFocus
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="ابحث عن رقم لوحة…"
+                className="w-full h-8 pr-8 pl-2 text-xs rounded-lg border border-border bg-background focus:outline-none focus:ring-1 focus:ring-primary/40"
+              />
+            </div>
+          </div>
+
+          {/* Select all / Clear */}
+          <div className="flex gap-1 px-2 py-1.5 border-b border-border/30">
+            <button
+              type="button"
+              onClick={selectAll}
+              className="flex-1 text-xs py-1 rounded-lg hover:bg-muted/60 transition-colors text-center"
+            >
+              <CheckSquare size={11} className="inline ml-1" />
+              تحديد الكل
+            </button>
+            <button
+              type="button"
+              onClick={clearAll}
+              className="flex-1 text-xs py-1 rounded-lg hover:bg-muted/60 transition-colors text-center"
+            >
+              <Square size={11} className="inline ml-1" />
+              إلغاء التحديد
+            </button>
+          </div>
+
+          {/* Vehicle list */}
+          <div className="overflow-y-auto flex-1">
+            {filtered.length === 0 ? (
+              <p className="text-xs text-muted-foreground text-center py-6">لا توجد نتائج</p>
+            ) : (
+              filtered.map(g => {
+                const checked = activeSelection.has(g.vehicle_id);
+                return (
+                  <button
+                    key={g.vehicle_id}
+                    type="button"
+                    onClick={() => toggleVehicle(g.vehicle_id)}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs text-right hover:bg-muted/50 transition-colors ${
+                      checked ? 'bg-primary/5 text-primary' : 'text-foreground'
+                    }`}
+                  >
+                    {checked
+                      ? <CheckSquare size={13} className="shrink-0 text-primary" />
+                      : <Square size={13} className="shrink-0 text-muted-foreground" />}
+                    <span className="font-mono">{g.plate_number}</span>
+                    <span className="text-muted-foreground mr-auto">{g.logs.length} عملية</span>
+                  </button>
+                );
+              })
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+interface VehicleGroupCardProps {
+  group: VehicleGroup;
+}
+
+function VehicleGroupCard({ group }: VehicleGroupCardProps) {
+  const uniqueTypes = useMemo(() => Array.from(new Set(group.logs.map(l => l.type))), [group.logs]);
+  
+  const uniqueParts = useMemo(() => {
+    const parts = group.logs
+      .flatMap(l => l.maintenance_parts ?? [])
+      .map(p => p.spare_parts?.name_ar)
+      .filter((name): name is string => typeof name === 'string' && name.trim() !== '');
+    return Array.from(new Set(parts));
+  }, [group.logs]);
+
+  const typesText = uniqueTypes.join('، ') || 'صيانة عامة';
+
+  return (
+    <details className="group bg-card border border-border/60 rounded-xl overflow-hidden">
+      <summary className="px-4 py-4 hover:bg-muted/50 transition-colors cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+        <div className="flex flex-col md:flex-row md:items-center justify-between w-full pr-2 gap-4">
+          
+          {/* Right side: Vehicle plate number & icon */}
+          <div className="flex items-center gap-3 min-w-[180px] shrink-0">
+            <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 flex items-center justify-center shrink-0">
+              <Car size={20} />
+            </div>
+            <div className="flex flex-col items-start text-right min-w-0">
+              <span className="font-bold text-base truncate">{group.plate_number}</span>
+              <span className="text-xs text-muted-foreground">{group.type} • {group.logs.length} عمليات صيانة</span>
+            </div>
+          </div>
+
+          {/* Middle side: Repairs and parts summary */}
+          <div className="flex-1 min-w-0 text-right md:px-4">
+            <span className="text-sm font-semibold text-foreground truncate block">
+              {typesText}
+            </span>
+            {uniqueParts.length > 0 && (
+              <span className="text-xs text-muted-foreground truncate block mt-0.5" title={uniqueParts.join('، ')}>
+                قطع: {uniqueParts.join('، ')}
+              </span>
+            )}
+          </div>
+
+          {/* Left side: Cost & Expand Indicator */}
+          <div className="flex items-center justify-between md:justify-end gap-4 shrink-0 border-t md:border-t-0 pt-2 md:pt-0 border-border/30">
+            <div className="flex items-center gap-1.5 text-rose-600 dark:text-rose-400">
+              <Banknote size={16} className="shrink-0" />
+              <span className="font-bold text-lg">{formatCurrency(group.total_cost)}</span>
+            </div>
+            <ChevronDown size={18} className="text-muted-foreground transition-transform duration-200 group-open:rotate-180" />
+          </div>
+
+        </div>
+      </summary>
+      <div className="px-4 pb-4 pt-1 bg-muted/10 border-t border-border/40 shadow-inner group-open:block hidden">
+        <div className="space-y-3 mt-3">
+          {group.logs.map(log => {
+            const colorClass = TYPE_COLORS[log.type] ?? TYPE_COLORS['أخرى'];
+            const dateFormatted = log.maintenance_date
+              ? new Date(log.maintenance_date).toLocaleDateString('ar-SA', { year: 'numeric', month: 'short', day: 'numeric' })
+              : '—';
+            
+            return (
+              <div key={log.id} className="bg-background border border-border/60 rounded-lg p-3 shadow-sm">
+                <div className="flex items-start justify-between gap-3 mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${colorClass}`}>
+                      {log.type}
+                    </span>
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Calendar size={12} />
+                      {dateFormatted}
+                    </div>
+                  </div>
+                  <span className="text-sm font-bold text-foreground">
+                    {formatCurrency(Number(log.total_cost))}
+                  </span>
+                </div>
+                {log.notes && (
+                  <p className="text-xs text-muted-foreground mb-2 leading-relaxed">
+                    {log.notes}
+                  </p>
+                )}
+                {log.maintenance_parts && log.maintenance_parts.length > 0 && (
+                  <div className="space-y-1 border-t border-border/50 pt-2 mt-2">
+                    {log.maintenance_parts.map(p => (
+                      <div key={p.id} className="flex items-center justify-between text-xs text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <Wrench size={10} />
+                          <span>{p.spare_parts?.name_ar ?? '—'}</span>
+                        </div>
+                        <span>
+                          {p.quantity_used} × {Number(p.cost_at_time).toLocaleString('en-US')}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </details>
+  );
+}
 
 export function VehicleReportsTab() {
   const logsQ = useMaintenanceLogs();
@@ -316,6 +556,36 @@ export function VehicleReportsTab() {
     );
   }
 
+  const renderLogsList = () => {
+    if (logsQ.isLoading) {
+      return (
+        <div className="space-y-3">
+          {[1, 2, 3].map(i => <Skeleton key={i} className="h-16 w-full rounded-xl" />)}
+        </div>
+      );
+    }
+
+    if (filteredGroups.length === 0) {
+      return (
+        <div className="py-12 text-center bg-card border border-border/60 rounded-xl">
+          <div className="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-3">
+            <Car className="text-muted-foreground" size={24} />
+          </div>
+          <h3 className="text-sm font-semibold mb-1">لا توجد بيانات</h3>
+          <p className="text-xs text-muted-foreground">لم يتم العثور على مركبات مطابقة.</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-3">
+        {filteredGroups.map(group => (
+          <VehicleGroupCard key={group.vehicle_id} group={group} />
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-4">
       {/* Header */}
@@ -383,129 +653,18 @@ export function VehicleReportsTab() {
         </div>
       </div>
 
-      {/* Vehicle selection */}
+      {/* Vehicle selection — compact dropdown */}
       {!logsQ.isLoading && vehicleGroups.length > 0 && (
-        <div className="bg-card border border-border/60 rounded-xl p-3 space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold text-foreground">اختر المركبات المطلوبة في التقرير</span>
-            <div className="flex gap-2">
-              <Button variant="ghost" size="sm" onClick={selectAll} className="h-7 gap-1 text-xs">
-                <CheckSquare size={13} /> تحديد الكل
-              </Button>
-              <Button variant="ghost" size="sm" onClick={clearAll} className="h-7 gap-1 text-xs">
-                <Square size={13} /> إلغاء التحديد
-              </Button>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
-            {vehicleGroups.map(g => {
-              const checked = activeSelection.has(g.vehicle_id);
-              return (
-                <button
-                  key={g.vehicle_id}
-                  type="button"
-                  onClick={() => toggleVehicle(g.vehicle_id)}
-                  className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-full border transition-colors ${
-                    checked
-                      ? 'bg-primary/10 border-primary text-primary'
-                      : 'bg-muted/40 border-border text-muted-foreground'
-                  }`}
-                >
-                  {checked ? <CheckSquare size={12} /> : <Square size={12} />}
-                  {g.plate_number}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        <VehicleDropdown
+          vehicleGroups={vehicleGroups}
+          activeSelection={activeSelection}
+          toggleVehicle={toggleVehicle}
+          selectAll={selectAll}
+          clearAll={clearAll}
+        />
       )}
 
-      {logsQ.isLoading ? (
-        <div className="space-y-3">
-          {[1, 2, 3].map(i => <Skeleton key={i} className="h-16 w-full rounded-xl" />)}
-        </div>
-      ) : filteredGroups.length === 0 ? (
-        <div className="py-12 text-center bg-card border border-border/60 rounded-xl">
-          <div className="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-3">
-            <Car className="text-muted-foreground" size={24} />
-          </div>
-          <h3 className="text-sm font-semibold mb-1">لا توجد بيانات</h3>
-          <p className="text-xs text-muted-foreground">لم يتم العثور على مركبات مطابقة.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {filteredGroups.map(group => (
-            <details key={group.vehicle_id} className="group bg-card border border-border/60 rounded-xl overflow-hidden">
-              <summary className="px-4 py-4 hover:bg-muted/50 transition-colors cursor-pointer list-none [&::-webkit-details-marker]:hidden">
-                  <div className="flex items-center justify-between w-full pr-2">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 flex items-center justify-center shrink-0">
-                        <Car size={20} />
-                      </div>
-                      <div className="flex flex-col items-start text-right">
-                        <span className="font-bold text-base">{group.plate_number}</span>
-                        <span className="text-xs text-muted-foreground">{group.type} • {group.logs.length} عمليات صيانة</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-rose-600 dark:text-rose-400 shrink-0">
-                      <Banknote size={16} className="shrink-0" />
-                      <span className="font-bold">{formatCurrency(group.total_cost)}</span>
-                    </div>
-                  </div>
-                </summary>
-                <div className="px-4 pb-4 pt-1 bg-muted/10 border-t border-border/40 shadow-inner group-open:block hidden">
-                  <div className="space-y-3 mt-3">
-                    {group.logs.map(log => {
-                      const colorClass = TYPE_COLORS[log.type] ?? TYPE_COLORS['أخرى'];
-                      const dateFormatted = log.maintenance_date
-                        ? new Date(log.maintenance_date).toLocaleDateString('ar-SA', { year: 'numeric', month: 'short', day: 'numeric' })
-                        : '—';
-                      
-                      return (
-                        <div key={log.id} className="bg-background border border-border/60 rounded-lg p-3 shadow-sm">
-                          <div className="flex items-start justify-between gap-3 mb-2">
-                            <div className="flex items-center gap-2">
-                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${colorClass}`}>
-                                {log.type}
-                              </span>
-                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                <Calendar size={12} />
-                                {dateFormatted}
-                              </div>
-                            </div>
-                            <span className="text-sm font-bold text-foreground">
-                              {formatCurrency(Number(log.total_cost))}
-                            </span>
-                          </div>
-                          {log.notes && (
-                            <p className="text-xs text-muted-foreground mb-2 leading-relaxed">
-                              {log.notes}
-                            </p>
-                          )}
-                          {log.maintenance_parts && log.maintenance_parts.length > 0 && (
-                            <div className="space-y-1 border-t border-border/50 pt-2 mt-2">
-                              {log.maintenance_parts.map(p => (
-                                <div key={p.id} className="flex items-center justify-between text-xs text-muted-foreground">
-                                  <div className="flex items-center gap-1">
-                                    <Wrench size={10} />
-                                    <span>{p.spare_parts?.name_ar ?? '—'}</span>
-                                  </div>
-                                  <span>
-                                    {p.quantity_used} × {Number(p.cost_at_time).toLocaleString('en-US')}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </details>
-            ))}
-        </div>
-      )}
+      {renderLogsList()}
     </div>
   );
 }

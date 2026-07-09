@@ -48,7 +48,12 @@ const NUMERIC_KEYS = new Set<keyof SalaryImportMapped>([
 ]);
 
 function normalizeHeader(raw: unknown): string {
-  const rawStr = typeof raw === 'string' ? raw : typeof raw === 'number' || typeof raw === 'boolean' ? String(raw) : '';
+  let rawStr = '';
+  if (typeof raw === 'string') {
+    rawStr = raw;
+  } else if (typeof raw === 'number' || typeof raw === 'boolean') {
+    rawStr = String(raw);
+  }
   return rawStr
     .replaceAll('\uFEFF', '')
     .replaceAll(/\s+/g, ' ')
@@ -57,7 +62,13 @@ function normalizeHeader(raw: unknown): string {
 
 function parseApproved(val: unknown): boolean {
   if (typeof val === 'boolean') return val;
-  const s = (typeof val === 'string' ? val : typeof val === 'number' || typeof val === 'boolean' ? String(val) : '').trim().toLowerCase();
+  let rawStr = '';
+  if (typeof val === 'string') {
+    rawStr = val;
+  } else if (typeof val === 'number') {
+    rawStr = String(val);
+  }
+  const s = rawStr.trim().toLowerCase();
   if (s === '1' || s === 'true' || s === 'yes' || s === 'نعم' || s === 'معتمد') return true;
   return false;
 }

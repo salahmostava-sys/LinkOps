@@ -116,7 +116,7 @@ export function FuelImportDialog({
 
   return (
     <>
-      <Dialog open={open && !pendingUnmatched} onOpenChange={(v) => { if (!v) resetState(); onOpenChange(v); }}>
+      <Dialog open={open && !pendingUnmatched} onOpenChange={(v) => { if (!v) { resetState(); } onOpenChange(v); }}>
         <DialogContent className="sm:max-w-md" dir="rtl">
           <DialogHeader>
             <DialogTitle>رفع ملف {METRIC_LABEL[metric]} لكل المناديب</DialogTitle>

@@ -59,7 +59,7 @@ export function BaseTable<T>({
         </thead>
         <tbody className="divide-y divide-border">
           {data.map((row, rowIndex) => (
-            <tr key={rowKey ? rowKey(row, rowIndex) : String((row as Record<string, unknown>).id ?? rowIndex)} className="hover:bg-muted/30 transition-colors">
+            <tr key={rowKey ? rowKey(row, rowIndex) : String(((row as Record<string, unknown>).id as string | number | undefined) ?? rowIndex)} className="hover:bg-muted/30 transition-colors">
               {columns.map((col, colIndex) => (
                 <td key={String(col.key) + colIndex} className={`p-4 align-middle ${col.className || ''}`}>
                   {col.render ? col.render(row, rowIndex) : String((row as Record<keyof T, unknown>)[col.key as keyof T] ?? '')}

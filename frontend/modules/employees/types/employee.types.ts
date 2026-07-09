@@ -1,6 +1,4 @@
-import type { ComponentProps } from 'react';
 import { differenceInDays, parseISO } from 'date-fns';
-import EmployeeProfile from '@shared/components/employees/EmployeeProfile';
 import type { Employee } from '@modules/employees/model/employeeUtils';
 import { getEmployeeCities } from '@modules/employees/model/employeeUtils';
 import { cityLabel } from '@modules/employees/model/employeeCity';
@@ -12,7 +10,6 @@ export type { Employee } from '@modules/employees/model/employeeUtils';
 export type { SortDir } from '@modules/employees/model/employeeUtils';
 
 export type SortField = keyof Employee | 'days_residency' | 'residency_status';
-export type EmployeeProfileProps = ComponentProps<typeof EmployeeProfile>;
 export type EmployeeStatusFilter = 'all' | 'active' | 'inactive' | 'ended';
 
 export type UploadReport = {

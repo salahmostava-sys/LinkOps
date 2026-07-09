@@ -234,48 +234,21 @@ describe('usePermissions hook', () => {
     });
   });
 
-  it('المسؤول يملك صلاحيات كاملة', async () => {
+  it.each([
+    ['admin', 'employees', { can_view: true, can_edit: true, can_delete: true }],
+    ['finance', 'salaries', { can_view: true, can_edit: true, can_delete: false }],
+    ['finance', 'finance', { can_view: true, can_edit: true, can_delete: true }],
+  ])('role defaults fallback permissions for %s on %s', async (role, resource, expected) => {
     mockAuthState.user = { id: 'u1' };
-    mockAuthState.role = 'admin';
+    mockAuthState.role = role as any;
 
-    const { result } = renderHook(() => usePermissions('employees'), {
+    const { result } = renderHook(() => usePermissions(resource as any), {
       wrapper: createWrapper(),
     });
 
     await waitFor(() => expect(result.current.loading).toBe(false));
-    expect(result.current.permissions).toEqual({
-      can_view: true,
-      can_edit: true,
-      can_delete: true,
-    });
-  });
-
-  it('المالية: صلاحية الرواتب', async () => {
-    mockAuthState.user = { id: 'u1' };
-    mockAuthState.role = 'finance';
-
-    const { result } = renderHook(() => usePermissions('salaries'), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => expect(result.current.loading).toBe(false));
-    expect(result.current.permissions.can_view).toBe(true);
-    expect(result.current.permissions.can_edit).toBe(true);
-  });
-
-  it('finance role can access the finance module', async () => {
-    mockAuthState.user = { id: 'u1' };
-    mockAuthState.role = 'finance';
-
-    const { result } = renderHook(() => usePermissions('finance'), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => expect(result.current.loading).toBe(false));
-    expect(result.current.permissions).toEqual({
-      can_view: true,
-      can_edit: true,
-      can_delete: true,
-    });
+    expect(result.current.permissions.can_view).toBe(expected.can_view);
+    expect(result.current.permissions.can_edit).toBe(expected.can_edit);
+    expect(result.current.permissions.can_delete).toBe(expected.can_delete);
   });
 });

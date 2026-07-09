@@ -102,17 +102,19 @@ export const AppCard = ({
         <h3 className="truncate text-sm font-bold" style={{ color: app.text_color }}>
           {app.name}
         </h3>
-        <div
-          className="mt-1 flex justify-center"
-          onClick={(e) => e.stopPropagation()}
-          onKeyDown={(e) => { if (e.key === 'Enter') e.stopPropagation(); }}
-        >
+        <div className="mt-1 flex justify-center">
           {canEdit && onWorkTypeChange ? (
             <Select
               value={app.work_type || 'orders'}
               onValueChange={(v) => onWorkTypeChange(app, v as WorkType)}
             >
               <SelectTrigger
+                onClick={(e) => e.stopPropagation()}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.stopPropagation();
+                  }
+                }}
                 className="h-6 w-auto min-w-[80px] border-0 bg-white/20 text-[10px] font-semibold px-2 py-0 gap-1 rounded-full hover:bg-white/30 focus:ring-0 focus:ring-offset-0"
                 style={{ color: app.text_color }}
               >

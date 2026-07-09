@@ -298,7 +298,7 @@ const SORT_OPTIONS: { value: SortKey; label: string }[] = [
   { value: 'km', label: 'أعلى كيلومترات' },
   { value: 'plate', label: 'رقم اللوحة' },
 ];
-// eslint-disable-next-line sonarjs/cognitive-complexity
+ 
 const VehicleReportPage = () => {
   const { authLoading } = useAuthQueryGate();
   const { permissions, loading: permsLoading } = usePermissions('maintenance');
@@ -315,6 +315,53 @@ const VehicleReportPage = () => {
   const sorted = useSortedVehicles(query.data, search, sortKey);
 
   const [showFilters, setShowFilters] = useState(false);
+
+  let alertDocsValue = 'لا تنبيهات';
+  if (kpis.expiredDocs > 0) {
+    alertDocsValue = `${kpis.expiredDocs} منتهية`;
+  } else if (kpis.expiringDocs > 0) {
+    alertDocsValue = `${kpis.expiringDocs} قريباً`;
+  }
+
+  let alertDocsColor = 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400';
+  if (kpis.expiredDocs > 0) {
+    alertDocsColor = 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400';
+  } else if (kpis.expiringDocs > 0) {
+    alertDocsColor = 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400';
+  }
+
+  const renderList = () => {
+    if (query.isLoading) {
+      return (
+        <div className="space-y-3">
+          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-2xl" />)}
+        </div>
+      );
+    }
+    if (sorted.length === 0 && !query.isError) {
+      return (
+        <div className="py-16 text-center bg-card border border-border/60 rounded-2xl">
+          <div className="mx-auto w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mb-4">
+            <Activity className="text-muted-foreground" size={28} />
+          </div>
+          <h3 className="text-sm font-semibold mb-1">لا توجد مركبات</h3>
+          <p className="text-xs text-muted-foreground">جرّب تغيير الفلاتر أو مسح نص البحث.</p>
+        </div>
+      );
+    }
+    return (
+      <div className="space-y-3">
+        {sorted.map((v) => (
+          <VehicleCard
+            key={v.id}
+            v={v}
+            expanded={expandedId === v.id}
+            onToggle={() => toggleExpand(v.id)}
+          />
+        ))}
+      </div>
+    );
+  };
 
   const escapeHtml = (v?: string | null) =>
     (v ?? '')
@@ -590,13 +637,9 @@ const VehicleReportPage = () => {
             sub={kpis.totalVehicles > 0 ? `متوسط ${formatCurrency(kpis.avgCostPerVehicle)} / مركبة` : undefined}
             color="bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400" />
           <KpiCard icon={AlertTriangle} label="وثائق تنبيه"
-            value={kpis.expiredDocs > 0 ? `${kpis.expiredDocs} منتهية` : kpis.expiringDocs > 0 ? `${kpis.expiringDocs} قريباً` : 'لا تنبيهات'}
+            value={alertDocsValue}
             sub={kpis.expiringDocs > 0 ? `${kpis.expiringDocs} تنتهي خلال 30 يوم` : undefined}
-            color={kpis.expiredDocs > 0
-              ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400'
-              : kpis.expiringDocs > 0
-                ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-                : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'} />
+            color={alertDocsColor} />
         </div>
       )}
 
@@ -641,30 +684,7 @@ const VehicleReportPage = () => {
       )}
 
       {/* Vehicle list */}
-      {query.isLoading ? (
-        <div className="space-y-3">
-          {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-20 w-full rounded-2xl" />)}
-        </div>
-      ) : sorted.length === 0 && !query.isError ? (
-        <div className="py-16 text-center bg-card border border-border/60 rounded-2xl">
-          <div className="mx-auto w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mb-4">
-            <Activity className="text-muted-foreground" size={28} />
-          </div>
-          <h3 className="text-sm font-semibold mb-1">لا توجد مركبات</h3>
-          <p className="text-xs text-muted-foreground">جرّب تغيير الفلاتر أو مسح نص البحث.</p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {sorted.map((v) => (
-            <VehicleCard
-              key={v.id}
-              v={v}
-              expanded={expandedId === v.id}
-              onToggle={() => toggleExpand(v.id)}
-            />
-          ))}
-        </div>
-      )}
+      {renderList()}
     </div>
   );
 };

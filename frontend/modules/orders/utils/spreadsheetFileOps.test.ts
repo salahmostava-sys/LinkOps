@@ -278,7 +278,7 @@ describe('spreadsheetFileOps', () => {
       const result = await runSpreadsheetImport({
         file, dayArr: [], employees: [], apps: [], appEmployeeIds: {}, data: {}, onApplyData: vi.fn()
       });
-      expect(result).toBe(null);
+      expect(result).toBeNull();
       expect(toastErrorMock).toHaveBeenCalled();
     });
 
@@ -290,7 +290,7 @@ describe('spreadsheetFileOps', () => {
       const result = await runSpreadsheetImport({
         file, dayArr: [], employees: [], apps: [], appEmployeeIds: {}, data: {}, onApplyData: vi.fn()
       });
-      expect(result).toBe(null);
+      expect(result).toBeNull();
     });
 
     it('successfully imports valid spreadsheet', async () => {

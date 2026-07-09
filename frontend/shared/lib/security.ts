@@ -13,7 +13,18 @@ export function escapeHtml(value: unknown): string {
   if (value === null || value === undefined) {
     return '';
   }
-  const str = typeof value === 'string' ? value : typeof value === 'object' && value !== null ? JSON.stringify(value) : String(value);
+  let str = '';
+  if (typeof value === 'string') {
+    str = value;
+  } else if (typeof value === 'object') {
+    str = JSON.stringify(value);
+  } else if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint') {
+    str = String(value);
+  } else if (typeof value === 'symbol' || typeof value === 'function') {
+    str = value.toString();
+  } else {
+    str = '';
+  }
   return str
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')

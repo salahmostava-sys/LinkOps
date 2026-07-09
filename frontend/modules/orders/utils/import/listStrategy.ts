@@ -4,7 +4,7 @@ import {
   type SpreadsheetMergeResult,
   resolveImportTargetAppsForEmployee,
   validateCellValue,
-} from '../spreadsheetImportModel';
+} from './sharedTypes';
 
 export class ListImportStrategy implements SpreadsheetImportStrategy {
   private extractDay(cellValue: unknown): number | null {

@@ -1,5 +1,5 @@
 import type { App, DailyData } from '@modules/orders/types';
-import type { AppEmployeeIdsMap, SpreadsheetMergeResult } from '../spreadsheetImportModel';
+import type { AppEmployeeIdsMap, SpreadsheetMergeResult } from './sharedTypes';
 
 export interface SpreadsheetImportStrategy {
   parse(params: {

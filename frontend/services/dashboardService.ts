@@ -354,9 +354,7 @@ export const dashboardService = {
       );
     }
 
-    const supervisorIds = new Set<string>([
-      ...Array.from(actualBySupervisor.keys()),
-    ]);
+    const supervisorIds = new Set<string>(actualBySupervisor.keys());
 
     const rows: SupervisorPerformanceRow[] = Array.from(supervisorIds).map((id) => {
       const actual = actualBySupervisor.get(id) ?? 0;
