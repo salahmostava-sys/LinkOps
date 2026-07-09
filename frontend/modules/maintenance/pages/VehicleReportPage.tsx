@@ -298,7 +298,7 @@ const SORT_OPTIONS: { value: SortKey; label: string }[] = [
   { value: 'km', label: 'أعلى كيلومترات' },
   { value: 'plate', label: 'رقم اللوحة' },
 ];
-// eslint-disable-next-line sonarjs/cognitive-complexity
+ 
 const VehicleReportPage = () => {
   const { authLoading } = useAuthQueryGate();
   const { permissions, loading: permsLoading } = usePermissions('maintenance');
