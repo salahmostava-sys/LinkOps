@@ -103,7 +103,7 @@ export const OrdersCellPopover = ({ state, apps, data, appColorsList, canEdit, o
       role="dialog"
       ref={popRef}
       open
-      className="fixed z-50 bg-popover border border-border rounded-xl shadow-xl p-3 min-w-[200px] max-w-none m-0 text-inherit"
+      className="fixed z-50 bg-popover border border-border rounded-xl shadow-xl p-3 min-w-[140px] max-w-none m-0 text-inherit"
       style={{ top: pos.top, left: pos.left }}
       onMouseDown={e => e.stopPropagation()}
     >
@@ -121,22 +121,22 @@ export const OrdersCellPopover = ({ state, apps, data, appColorsList, canEdit, o
           handleApply();
         }}
       >
-        <div className="grid grid-cols-2 gap-3">
+        <div className="flex flex-col gap-2">
           {apps.map((app) => {
             const c = getAppColor(appColorsList, app.name);
             return (
-              <div key={app.id} className="flex flex-col gap-1.5">
+              <div key={app.id} className="flex items-center gap-2">
                 <ColorBadge
                   label={app.name}
                   bg={c.solid}
                   fg={c.solidText}
-                  className="w-full justify-center text-center py-1"
+                  className="flex-shrink-0 w-[4.5rem] justify-center text-center py-0.5 px-1 text-[10px] leading-tight"
                 />
                 <input
                   type="number" min={0} placeholder="0"
                   {...register(`vals.${app.id}` as const)}
                   disabled={!canEdit}
-                  className="w-full h-8 text-center text-sm rounded border border-border bg-background focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                  className="flex-1 w-16 h-7 text-center text-sm rounded border border-border bg-background focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                   onKeyDown={e => {
                     if (e.key === 'Enter') handleApply();
                     if (e.key === 'Escape') onClose();
@@ -147,7 +147,7 @@ export const OrdersCellPopover = ({ state, apps, data, appColorsList, canEdit, o
           })}
         </div>
         {canEdit && formState.isSubmitted && formState.isValid === false && (
-          <p className="text-[11px] text-destructive mt-2">تأكد أن القيم أرقام صحيحة (0 أو أكثر).</p>
+          <p className="text-[11px] text-destructive mt-2">تأكد أن القيم أرقام صحيحة.</p>
         )}
       </form>
       {canEdit && (
