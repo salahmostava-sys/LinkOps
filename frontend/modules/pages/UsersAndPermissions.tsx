@@ -336,7 +336,7 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
     const q = searchQuery.toLowerCase();
     return rows.filter((r) => 
       r.name.toLowerCase().includes(q) || 
-      (r.email && r.email.toLowerCase().includes(q))
+      r.email?.toLowerCase().includes(q)
     );
   }, [rows, searchQuery]);
 
@@ -625,7 +625,15 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
                         return (
                           <div
                             key={row.id}
+                            role="button"
+                            tabIndex={0}
                             onClick={() => setPermUserId(row.id)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                setPermUserId(row.id);
+                              }
+                            }}
                             className={cn(
                               "p-3 cursor-pointer transition-colors flex items-center justify-between gap-3 group hover:bg-muted/50",
                               isSelected ? "bg-primary/5 hover:bg-primary/10 border-r-4 border-primary" : "border-r-4 border-transparent"

@@ -696,7 +696,7 @@ const EmployeeTiers = () => {
                       <input type="checkbox" className="rounded border-border" 
                              checked={filtered.length > 0 && selectedIds.size === filtered.length}
                              onChange={e => setSelectedIds(e.target.checked ? new Set(filtered.map(t => t.id)) : new Set())} />
-                      إجراءات
+                      <span>إجراءات</span>
                     </div>
                   </th>
                 </tr>

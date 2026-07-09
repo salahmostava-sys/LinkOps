@@ -31,14 +31,14 @@ type VehicleGroup = {
 };
 
 interface VehicleDropdownProps {
-  vehicleGroups: VehicleGroup[];
-  activeSelection: Set<string>;
-  toggleVehicle: (id: string) => void;
-  selectAll: () => void;
-  clearAll: () => void;
+  readonly vehicleGroups: VehicleGroup[];
+  readonly activeSelection: Set<string>;
+  readonly toggleVehicle: (id: string) => void;
+  readonly selectAll: () => void;
+  readonly clearAll: () => void;
 }
 
-function VehicleDropdown({ vehicleGroups, activeSelection, toggleVehicle, selectAll, clearAll }: VehicleDropdownProps) {
+function VehicleDropdown({ vehicleGroups, activeSelection, toggleVehicle, selectAll, clearAll }: Readonly<VehicleDropdownProps>) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const ref = useRef<HTMLDivElement>(null);
@@ -50,6 +50,13 @@ function VehicleDropdown({ vehicleGroups, activeSelection, toggleVehicle, select
   const selectedCount = activeSelection.size;
   const total = vehicleGroups.length;
   const allSelected = selectedCount === total;
+
+  let selectionText = `${selectedCount} من ${total} مركبة`;
+  if (allSelected) {
+    selectionText = 'جميع المركبات';
+  } else if (selectedCount === 0) {
+    selectionText = 'اختر المركبات…';
+  }
 
   // Close on outside click
   useEffect(() => {
@@ -71,11 +78,7 @@ function VehicleDropdown({ vehicleGroups, activeSelection, toggleVehicle, select
         >
           <Car size={14} className="text-muted-foreground shrink-0" />
           <span className="text-muted-foreground">
-            {allSelected
-              ? 'جميع المركبات'
-              : selectedCount === 0
-              ? 'اختر المركبات…'
-              : `${selectedCount} من ${total} مركبة`}
+            {selectionText}
           </span>
           <ChevronDown size={14} className={`text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`} />
         </button>
@@ -162,10 +165,10 @@ function VehicleDropdown({ vehicleGroups, activeSelection, toggleVehicle, select
 
 
 interface VehicleGroupCardProps {
-  group: VehicleGroup;
+  readonly group: VehicleGroup;
 }
 
-function VehicleGroupCard({ group }: VehicleGroupCardProps) {
+function VehicleGroupCard({ group }: Readonly<VehicleGroupCardProps>) {
   const uniqueTypes = useMemo(() => Array.from(new Set(group.logs.map(l => l.type))), [group.logs]);
   
   const uniqueParts = useMemo(() => {
