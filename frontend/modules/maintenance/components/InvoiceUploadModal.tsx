@@ -20,7 +20,7 @@ import { getErrorMessage } from '@services/serviceError';
 type DraftRow = { id: string; name: string; quantity: string; unitPrice: string };
 
 const emptyRow = (): DraftRow => ({
-  id: Math.random().toString(36).substring(2, 9),
+  id: crypto.randomUUID(),
   name: '',
   quantity: '1',
   unitPrice: '',
@@ -85,7 +85,7 @@ export function InvoiceUploadModal({
         setRows([emptyRow()]);
       } else {
         setRows(parsed.map(p => ({
-          id: Math.random().toString(36).substring(2, 9),
+          id: crypto.randomUUID(),
           name: p.name,
           quantity: String(p.quantity),
           unitPrice: String(p.unitPrice)

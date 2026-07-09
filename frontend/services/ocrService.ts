@@ -292,8 +292,17 @@ function toNumber(token: string): number {
   return Number.isFinite(n) ? n : 0;
 }
 
-/** كلمات لا تُعتبر أبداً اسم صنف (رؤوس أعمدة، إجماليات...) */
-const IGNORED_LINE_RE = /^(الإجمالي|الاجمالي|المجموع|الضريبة|ضريبة|القيمة المضافة|VAT|Total|Subtotal|Tax|السعر|الكمية|الصنف|الوصف|Item|Description|Qty|Price|فاتورة|Invoice|التاريخ|Date|رقم|Bill|Net|الصافي)/i;
+const IGNORED_WORDS = [
+  'الإجمالي', 'الاجمالي', 'المجموع', 'الضريبة', 'ضريبة', 'القيمة المضافة',
+  'vat', 'total', 'subtotal', 'tax', 'السعر', 'الكمية', 'الصنف', 'الوصف',
+  'item', 'description', 'qty', 'price', 'فاتورة', 'invoice', 'التاريخ',
+  'date', 'رقم', 'bill', 'net', 'الصافي'
+];
+
+function isIgnoredLine(line: string): boolean {
+  const normalized = line.trim().toLowerCase();
+  return IGNORED_WORDS.some(word => normalized.startsWith(word.toLowerCase()));
+}
 
 /**
  * يحاول استخراج بنود الفاتورة (اسم الصنف / الكمية / سعر الوحدة) من نص OCR خام.
@@ -309,7 +318,7 @@ export function parseInvoiceLineItems(rawText: string): InvoiceLineItem[] {
   const items: InvoiceLineItem[] = [];
 
   for (const line of lines) {
-    if (IGNORED_LINE_RE.test(line)) continue;
+    if (isIgnoredLine(line)) continue;
 
     const numbers = [...line.matchAll(NUMBER_TOKEN_RE)].map(m => m[0]);
     if (numbers.length < 2) continue;

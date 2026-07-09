@@ -316,17 +316,19 @@ const VehicleReportPage = () => {
 
   const [showFilters, setShowFilters] = useState(false);
 
-  const alertDocsValue = kpis.expiredDocs > 0
-    ? `${kpis.expiredDocs} منتهية`
-    : kpis.expiringDocs > 0
-      ? `${kpis.expiringDocs} قريباً`
-      : 'لا تنبيهات';
+  let alertDocsValue = 'لا تنبيهات';
+  if (kpis.expiredDocs > 0) {
+    alertDocsValue = `${kpis.expiredDocs} منتهية`;
+  } else if (kpis.expiringDocs > 0) {
+    alertDocsValue = `${kpis.expiringDocs} قريباً`;
+  }
 
-  const alertDocsColor = kpis.expiredDocs > 0
-    ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400'
-    : kpis.expiringDocs > 0
-      ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-      : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400';
+  let alertDocsColor = 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400';
+  if (kpis.expiredDocs > 0) {
+    alertDocsColor = 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400';
+  } else if (kpis.expiringDocs > 0) {
+    alertDocsColor = 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400';
+  }
 
   const renderList = () => {
     if (query.isLoading) {

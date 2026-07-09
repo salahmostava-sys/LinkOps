@@ -27,7 +27,7 @@ function extractErrorMessage(error: Error): string {
         // fallback
       }
     }
-    return String(cause);
+    return String(cause as string | number | boolean | symbol);
   }
   return String(error);
 }
