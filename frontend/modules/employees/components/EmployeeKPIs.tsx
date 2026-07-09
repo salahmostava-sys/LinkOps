@@ -343,6 +343,14 @@ export function EmployeeKPIs({ allEmployees, onSelectEmployee }: Readonly<Props>
                       setDetailModal(prev => ({ ...prev, isOpen: false }));
                       onSelectEmployee?.(emp.id);
                     }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        setDetailModal(prev => ({ ...prev, isOpen: false }));
+                        onSelectEmployee?.(emp.id);
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
                     className="flex items-center justify-between p-3 rounded-xl hover:bg-muted/50 cursor-pointer transition-colors border border-transparent hover:border-border/40"
                   >
                     <div className="flex flex-col text-right">
@@ -406,6 +414,14 @@ function KpiCard({
   return (
     <div 
       onClick={onClick}
+      onKeyDown={(e) => {
+        if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
       className={`rounded-lg p-3 flex flex-col gap-1.5 ${c.bg} ${onClick ? 'cursor-pointer hover:opacity-85 transition-opacity' : ''}`}
     >
       <div className={`${c.icon}`}>{icon}</div>
@@ -427,6 +443,14 @@ function AlertCard({ label, value, severity, onClick }: Readonly<{ label: string
   return (
     <div 
       onClick={!isEmpty ? onClick : undefined}
+      onKeyDown={(e) => {
+        if (!isEmpty && onClick && (e.key === 'Enter' || e.key === ' ')) {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+      role={!isEmpty && onClick ? 'button' : undefined}
+      tabIndex={!isEmpty && onClick ? 0 : undefined}
       className={`rounded-lg border p-3 flex flex-col gap-1 ${isEmpty ? 'bg-muted/20 border-border opacity-60' : s.bg + ' ' + s.border} ${onClick && !isEmpty ? 'cursor-pointer hover:opacity-85 transition-opacity' : ''}`}
     >
       <div className={`text-2xl font-bold tabular-nums ${isEmpty ? 'text-muted-foreground' : s.val}`}>{value}</div>
@@ -441,6 +465,14 @@ function BarRow({ label, value, max, total, color, onClick }: Readonly<{ label: 
   return (
     <div 
       onClick={onClick}
+      onKeyDown={(e) => {
+        if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
       className={`flex items-center gap-3 p-1 rounded-lg ${onClick ? 'cursor-pointer hover:bg-muted/40 transition-colors' : ''}`}
     >
       <div className="w-28 text-xs text-muted-foreground truncate text-start shrink-0">{label}</div>

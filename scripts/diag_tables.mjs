@@ -4,7 +4,7 @@ const client = new Client({
   host: 'aws-1-ap-south-1.pooler.supabase.com',
   port: 5432,
   user: 'cli_login_postgres.plxpehtkabmfkdlgjyin',
-  password: 'neSIvtFYOSVkqpdNaEWPxMkAyKqNWiLg',
+  password: process.env.DB_PASSWORD || '',
   database: 'postgres',
   ssl: { rejectUnauthorized: false }
 });

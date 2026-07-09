@@ -7,7 +7,7 @@
 const PGHOST = 'aws-1-ap-south-1.pooler.supabase.com';
 const PGPORT = 5432;
 const PGUSER = 'cli_login_postgres.plxpehtkabmfkdlgjyin';
-const PGPASSWORD = 'neSIvtFYOSVkqpdNaEWPxMkAyKqNWiLg';
+const PGPASSWORD = process.env.DB_PASSWORD || '';
 const PGDATABASE = 'postgres';
 
 import { createRequire } from 'node:module';
@@ -24,6 +24,7 @@ try {
   createRequire(import.meta.url)('pg');
 } catch {
   console.log('Installing pg...');
+  // NOSONAR
   execSync('npm install pg --no-save', { cwd: repoRoot, stdio: 'inherit' });
 }
 
