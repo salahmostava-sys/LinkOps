@@ -272,8 +272,21 @@ export async function adminUpdateUserHandler(req, res) {
     if (roleError) throw new Error(roleError.message);
 
     const callerRoles = new Set((roleRows ?? []).map(r => r.role));
-    if (!callerRoles.has('admin')) {
-      return res.status(403).json({ error: 'Only admins can update users' });
+    let hasUserManagementAccess = callerRoles.has('admin');
+    if (!hasUserManagementAccess) {
+      // Delegated access: a non-admin can be granted "settings" edit permission via the
+      // permissions matrix (user_permissions), which unlocks user/permission management too.
+      const { data: settingsPerm, error: settingsPermError } = await callerClient
+        .from('user_permissions')
+        .select('can_edit')
+        .eq('user_id', callerUser.id)
+        .eq('permission_key', 'settings')
+        .maybeSingle();
+      if (settingsPermError) throw new Error(settingsPermError.message);
+      hasUserManagementAccess = Boolean(settingsPerm?.can_edit);
+    }
+    if (!hasUserManagementAccess) {
+      return res.status(403).json({ error: 'Only admins or users with settings management access can update users' });
     }
 
     const supabaseAdmin = getAdminClient();

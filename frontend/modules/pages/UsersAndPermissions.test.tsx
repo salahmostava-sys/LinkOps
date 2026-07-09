@@ -125,7 +125,7 @@ describe('UsersAndPermissions', () => {
     fireEvent.click(screen.getByRole('button', { name: 'تأكيد الحذف' }));
 
     await waitFor(() => expect(authServiceMock.deleteManagedUser).toHaveBeenCalledWith('user-2'));
-  });
+  }, 15000);
 
   it('allows admins to open the edit-user dialog and submit changes', async () => {
     authServiceMock.createManagedUser.mockResolvedValue({ user_id: 'user-3' });

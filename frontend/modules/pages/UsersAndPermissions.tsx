@@ -311,8 +311,12 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
   const [editingUser, setEditingUser] = useState(false);
 
   const isAdmin = authRole === 'admin';
-  const canEdit = settingsPerm.can_edit && isAdmin;
-  const canDelete = settingsPerm.can_delete && isAdmin;
+  // Access to this page (viewing and managing other users' roles/permissions) is driven by the
+  // "settings" permission itself, not hardcoded to the admin role — an admin can delegate it to
+  // anyone via the permissions matrix below (see supabase/migrations/*_allow_settings_delegate_*).
+  const canView = settingsPerm.can_view || isAdmin;
+  const canEdit = settingsPerm.can_edit || isAdmin;
+  const canDelete = settingsPerm.can_delete || isAdmin;
   const currentUserId = user?.id ?? null;
 
   useEffect(() => {
@@ -341,7 +345,7 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
   }, [rows, searchQuery]);
 
   const loadMatrix = useCallback(async (userId: string, role: AppRole) => {
-    if (!isAdmin) return;
+    if (!canView) return;
     setMatrixLoading(true);
     try {
       const data = await userPermissionService.getUserPermissions(userId);
@@ -352,7 +356,7 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
     } finally {
       setMatrixLoading(false);
     }
-  }, [isAdmin, toast]);
+  }, [canView, toast]);
 
   useEffect(() => {
     if (rows.length && !permUserId) {
@@ -361,11 +365,11 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
   }, [rows, permUserId]);
 
   useEffect(() => {
-    if (!permUserId || !isAdmin) return;
+    if (!permUserId || !canView) return;
     const u = rows.find((r) => r.id === permUserId);
     if (!u) return;
     loadMatrix(u.id, u.role).catch(() => {});
-  }, [permUserId, rows, isAdmin, loadMatrix]);
+  }, [permUserId, rows, canView, loadMatrix]);
 
   const updateRole = async (userId: string, role: AppRole) => {
     if (!canEdit) return;
@@ -398,7 +402,7 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
   };
 
   const saveMatrix = async () => {
-    if (!canEdit || !selectedUser || !isAdmin) return;
+    if (!canEdit || !selectedUser) return;
     setSavingMatrix(true);
     try {
       const roleDefaults = DEFAULT_PERMISSIONS[selectedUser.role] || DEFAULT_PERMISSIONS.viewer;
@@ -546,13 +550,13 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
     );
   }
 
-  if (!isAdmin) {
+  if (!canView) {
     return (
       <Alert variant="destructive" className="rounded-xl">
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>غير متاح</AlertTitle>
         <AlertDescription>
-          إدارة المستخدمين والأدوار والصلاحيات المخصصة متاحة لـ <strong>مدير النظام</strong> فقط (مطابقة لسياسات قاعدة البيانات).
+          ليس لديك صلاحية الوصول لإدارة المستخدمين والأدوار والصلاحيات. تواصل مع مدير النظام لمنحك هذه الصلاحية.
         </AlertDescription>
       </Alert>
     );
@@ -595,7 +599,7 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
       <Tabs defaultValue="users" className="space-y-4">
         <TabsList className="grid w-full max-w-sm grid-cols-2">
           <TabsTrigger value="users">المستخدمين والصلاحيات</TabsTrigger>
-          {isAdmin && <TabsTrigger value="active_users">المستخدمين النشطين</TabsTrigger>}
+          {canView && <TabsTrigger value="active_users">المستخدمين النشطين</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="users" className="space-y-4">
@@ -790,7 +794,7 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
           </div>
         </TabsContent>
 
-        {isAdmin && (
+        {canView && (
           <TabsContent value="active_users">
             <ActiveUsersTab />
           </TabsContent>
