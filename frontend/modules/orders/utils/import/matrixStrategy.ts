@@ -5,7 +5,7 @@ import {
   clearEmployeeAppMonthData,
   resolveImportTargetAppsForEmployee,
   validateCellValue,
-} from '../spreadsheetImportModel';
+} from './sharedTypes';
 import type { SpreadsheetImportStrategy } from './strategy';
 
 export class MatrixImportStrategy implements SpreadsheetImportStrategy {
