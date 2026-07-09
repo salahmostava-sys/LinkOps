@@ -320,12 +320,11 @@ const EmployeeTiers = () => {
       return;
     }
     const merged = { ...tier, ...editRows[tier.id] };
-    if (!merged.employee_id) { toast({ title: 'خطأ', description: 'اختر مندوباً', variant: 'destructive' }); return; }
     setSavingId(tier.id);
     try {
       await employeeTierService.updateTier(tier.id, {
         sim_number: merged.sim_number || null,
-        employee_id: merged.employee_id,
+        employee_id: merged.employee_id || null,
         package_type: merged.package_type,
         renewal_date: merged.renewal_date,
         delivery_status: merged.delivery_status,
@@ -350,12 +349,11 @@ const EmployeeTiers = () => {
       toast({ title: 'صلاحية غير كافية', description: 'ليس لديك صلاحية الإضافة', variant: 'destructive' });
       return;
     }
-    if (!newRow.employee_id) { toast({ title: 'خطأ', description: 'اختر مندوباً', variant: 'destructive' }); return; }
     setSavingNew(true);
     try {
       await employeeTierService.createTier({
         sim_number: newRow.sim_number || null,
-        employee_id: newRow.employee_id,
+        employee_id: newRow.employee_id || null,
         package_type: newRow.package_type ?? '',
         renewal_date: newRow.renewal_date || new Date().toISOString().slice(0, 10),
         delivery_status: newRow.delivery_status || STATUS_DELIVERED,
