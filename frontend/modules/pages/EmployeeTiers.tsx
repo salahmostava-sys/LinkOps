@@ -233,6 +233,8 @@ const EmployeeTiers = () => {
 
   // Delete
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleting, setBulkDeleting] = useState(false);
 
   // Absconded alert
   const [abscondedAlert, setAbscondedAlert] = useState<{
@@ -410,12 +412,29 @@ const EmployeeTiers = () => {
       setDeleteId(null);
       refetchTiersData().catch(() => {});
     } catch (err: unknown) {
-      const message = getErrorMessage(err, 'تعذر حذف الشريحة');
-      toast({ title: 'خطأ في الحذف', description: message, variant: 'destructive' });
+      logError('EmployeeTiers: Delete error', err);
+      toast({ title: 'خطأ', description: getErrorMessage(err), variant: 'destructive' });
     }
   };
 
-  /* ── Sort ── */
+  const bulkDelete = async () => {
+    if (!perms.can_delete || selectedIds.size === 0) return;
+    if (!confirm(`هل أنت متأكد من مسح ${selectedIds.size} شريحة؟`)) return;
+    setBulkDeleting(true);
+    try {
+      await employeeTierService.deleteTiers(Array.from(selectedIds));
+      toast({ title: '✅ تم مسح الشرائح المحددة' });
+      setSelectedIds(new Set());
+      refetchTiersData().catch(() => {});
+    } catch (err: unknown) {
+      logError('EmployeeTiers: Bulk delete error', err);
+      toast({ title: 'خطأ', description: getErrorMessage(err), variant: 'destructive' });
+    } finally {
+      setBulkDeleting(false);
+    }
+  };
+
+  /* ── Print / Export ── */
   const handleSort = (field: string) => {
     if (sortField === field) {
       if (sortDir === 'asc') setSortDir('desc');
@@ -641,6 +660,12 @@ const EmployeeTiers = () => {
           <Input placeholder="بحث بالاسم أو رقم الشريحة..." className="pr-9 h-9 w-full" value={search} onChange={e => setSearch(e.target.value)} />
         </div>
         <div className="flex gap-1">
+          {selectedIds.size > 0 && (
+            <Button variant="destructive" size="sm" onClick={bulkDelete} disabled={bulkDeleting || !perms.can_delete} className="h-9 px-3 gap-1">
+              {bulkDeleting ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+              مسح ({selectedIds.size})
+            </Button>
+          )}
           {[{ v: 'all', l: 'الكل' }, { v: STATUS_DELIVERED, l: 'مسلّمة' }, { v: STATUS_NOT_DELIVERED, l: 'غير مسلّمة' }].map(s => (
             <button key={s.v} onClick={() => setStatusFilter(s.v)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${statusFilter === s.v ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-accent'}`}>
@@ -671,15 +696,21 @@ const EmployeeTiers = () => {
           <div className="flex-1 min-h-0 overflow-x-auto w-full">
             <table className="w-full min-w-[920px] text-sm border-collapse table-fixed">
               <colgroup>
-                <col className="w-[13%]" />
-                <col className="w-[22%]" />
+                <col className="w-[4%]" />
+                <col className="w-[12%]" />
+                <col className="w-[21%]" />
                 <col className="w-[14%]" />
                 <col className="w-[12%]" />
-                <col className="w-[29%]" />
-                <col className="w-[10%]" />
+                <col className="w-[28%]" />
+                <col className="w-[9%]" />
               </colgroup>
               <thead className="bg-muted/50">
                 <tr>
+                  <th className="ta-th border-b border-border/50 text-center w-8 px-0">
+                    <input type="checkbox" className="rounded border-border" 
+                           checked={filtered.length > 0 && selectedIds.size === filtered.length}
+                           onChange={e => setSelectedIds(e.target.checked ? new Set(filtered.map(t => t.id)) : new Set())} />
+                  </th>
                   <ThSort field="sim_number" label="رقم الشريحة" sortField={sortField} sortDir={sortDir} onSort={handleSort} />
                   <ThSort field="employee_name" label="المندوب" sortField={sortField} sortDir={sortDir} onSort={handleSort} />
                   <ThSort field="package_type" label="نوع الباقة" sortField={sortField} sortDir={sortDir} onSort={handleSort} />
@@ -692,6 +723,7 @@ const EmployeeTiers = () => {
                 {/* ── Add new row ── */}
                 {addingRow && (
                   <tr className="border-b border-border/30 bg-primary/5">
+                    <td className="ta-td align-middle text-center"></td>
                     {/* sim_number */}
                     <td className="ta-td min-w-0 align-top">
                       <Input
@@ -750,7 +782,7 @@ const EmployeeTiers = () => {
                 {/* ── Data rows ── */}
                 {filtered.length === 0 && !addingRow ? (
                   <tr>
-                    <td colSpan={6} className="p-0 align-middle">
+                    <td colSpan={7} className="p-0 align-middle">
                       <div className="min-h-[min(48vh,26rem)] flex flex-col items-center justify-center gap-2 py-16 text-center text-muted-foreground">
                         <Layers size={32} className="opacity-20" />
                         <p className="text-sm">لا توجد شرائح — أضف شريحة جديدة</p>
@@ -764,6 +796,17 @@ const EmployeeTiers = () => {
 
                     return (
                       <tr key={tier.id} className={`border-b border-border/30 hover:bg-muted/10 transition-colors ${dirty ? 'bg-primary/5' : ''}`}>
+                        {/* checkbox */}
+                        <td className="ta-td text-center align-middle">
+                           <input type="checkbox" className="rounded border-border" 
+                                  checked={selectedIds.has(tier.id)}
+                                  onChange={e => {
+                                    const next = new Set(selectedIds);
+                                    if (e.target.checked) next.add(tier.id); else next.delete(tier.id);
+                                    setSelectedIds(next);
+                                  }} />
+                        </td>
+
                         {/* sim_number */}
                         <td className="ta-td min-w-0 align-top">
                           <Input
