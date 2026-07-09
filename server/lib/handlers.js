@@ -195,43 +195,48 @@ async function handleUpdatePassword(supabaseAdmin, user_id, password) {
   return { success: true };
 }
 
-async function handleUpdateUser(supabaseAdmin, user_id, { email, password, name, role, is_active }) {
-  // Update Auth layer
+async function updateAuthLayer(supabaseAdmin, user_id, { email, password }) {
   const authUpdates = {};
   if (email !== undefined) authUpdates.email = email.toLowerCase().trim();
   if (password !== undefined && password.trim() !== '') authUpdates.password = password;
   
-  if (Object.keys(authUpdates).length > 0) {
-    if (authUpdates.email) authUpdates.email_confirm = true;
-    const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(user_id, authUpdates);
-    if (authError) throw authError;
-  }
+  if (Object.keys(authUpdates).length === 0) return;
 
-  // Update Profiles layer
+  if (authUpdates.email) authUpdates.email_confirm = true;
+  const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(user_id, authUpdates);
+  if (authError) throw authError;
+}
+
+async function updateProfileLayer(supabaseAdmin, user_id, { email, name, is_active }) {
   const profileUpdates = {};
   if (name !== undefined) profileUpdates.name = name.trim();
   if (email !== undefined) profileUpdates.email = email.toLowerCase().trim();
   if (is_active !== undefined) profileUpdates.is_active = is_active;
 
-  if (Object.keys(profileUpdates).length > 0) {
-    const { error: profileError } = await supabaseAdmin.from('profiles')
-      .update(profileUpdates)
-      .eq('id', user_id);
-    if (profileError) throw profileError;
-  }
+  if (Object.keys(profileUpdates).length === 0) return;
 
-  // Update Role layer
-  if (role !== undefined) {
-    const normalizedRole = role.toLowerCase().trim();
-    if (!['admin', 'operations', 'supervisor', 'accountant'].includes(normalizedRole)) {
-      throw new Error('Invalid role specified');
-    }
-    const { error: roleError } = await supabaseAdmin.from('user_roles')
-      .update({ role: normalizedRole })
-      .eq('user_id', user_id);
-    if (roleError) throw roleError;
-  }
+  const { error: profileError } = await supabaseAdmin.from('profiles')
+    .update(profileUpdates)
+    .eq('id', user_id);
+  if (profileError) throw profileError;
+}
 
+async function updateRoleLayer(supabaseAdmin, user_id, role) {
+  if (role === undefined) return;
+  const normalizedRole = role.toLowerCase().trim();
+  if (!['admin', 'operations', 'supervisor', 'accountant'].includes(normalizedRole)) {
+    throw new Error('Invalid role specified');
+  }
+  const { error: roleError } = await supabaseAdmin.from('user_roles')
+    .update({ role: normalizedRole })
+    .eq('user_id', user_id);
+  if (roleError) throw roleError;
+}
+
+async function handleUpdateUser(supabaseAdmin, user_id, { email, password, name, role, is_active }) {
+  await updateAuthLayer(supabaseAdmin, user_id, { email, password });
+  await updateProfileLayer(supabaseAdmin, user_id, { email, name, is_active });
+  await updateRoleLayer(supabaseAdmin, user_id, role);
   return { success: true };
 }
 

@@ -100,12 +100,10 @@ export const OrdersCellPopover = ({ state, apps, data, appColorsList, canEdit, o
 
   return createPortal(
     <dialog
-      role="dialog"
       ref={popRef}
       open
       className="fixed z-50 bg-popover border border-border rounded-xl shadow-xl p-3 min-w-[200px] max-w-none m-0 text-inherit"
       style={{ top: pos.top, left: pos.left }}
-      onMouseDown={e => e.stopPropagation()}
     >
       <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-popover border-t border-l border-border rotate-45" />
       <div className="flex items-center justify-between mb-2.5 relative z-10">

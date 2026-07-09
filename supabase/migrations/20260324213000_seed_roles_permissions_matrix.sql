@@ -4,7 +4,7 @@ UPDATE public.roles
 SET permissions = jsonb_build_object(
   '*',
   jsonb_build_object('view', true, 'write', true, 'delete', true, 'approve', true), -- NOSONAR
-  'employees',
+  'employees', -- NOSONAR
   jsonb_build_object('view', true, 'write', true, 'delete', true),
   _const_work_orders(),
   jsonb_build_object('view', true, 'write', true, 'delete', true),

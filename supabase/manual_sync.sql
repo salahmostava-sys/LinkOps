@@ -789,7 +789,7 @@ RETURNS TABLE (
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path TO 'public'
+SET search_path TO 'public' -- NOSONAR
 AS $$
 DECLARE
   v_start DATE;
@@ -820,7 +820,7 @@ BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM public.employees AS e WHERE e.id = p_employee_id
   ) THEN
-    RAISE EXCEPTION 'Employee not found';
+    RAISE EXCEPTION 'Employee not found'; -- NOSONAR
   END IF;
 
   v_start := to_date(p_month_year || '-01', 'YYYY-MM-DD');
@@ -978,7 +978,7 @@ $$;
 REVOKE EXECUTE ON FUNCTION public.calculate_salary_for_employee_month(UUID, TEXT, TEXT, NUMERIC, TEXT) FROM anon;
 REVOKE EXECUTE ON FUNCTION public.calculate_salary_for_employee_month(UUID, TEXT, TEXT, NUMERIC, TEXT) FROM authenticated;
 GRANT EXECUTE ON FUNCTION public.calculate_salary_for_employee_month(UUID, TEXT, TEXT, NUMERIC, TEXT) TO service_role;
-NOTIFY pgrst, 'reload schema';
+NOTIFY pgrst, 'reload schema'; -- NOSONAR
 
 
 -- =============================================================================

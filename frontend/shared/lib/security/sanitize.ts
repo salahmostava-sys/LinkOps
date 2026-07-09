@@ -41,7 +41,14 @@ function stripControlCharacters(input: string): string {
 export function sanitizeForLog(input: unknown): string {
   if (input === null || input === undefined) return '';
 
-  const str = typeof input === 'string' ? input : typeof input === 'object' && input !== null ? JSON.stringify(input) : String(input);
+  let str = '';
+  if (typeof input === 'string') {
+    str = input;
+  } else if (typeof input === 'object') {
+    str = JSON.stringify(input);
+  } else {
+    str = String(input);
+  }
   const stripped = stripControlCharacters(str.replaceAll(/[\r\n\t]/g, ' '));
   return maskSensitiveData(stripped).trim().slice(0, 1000);
 }
