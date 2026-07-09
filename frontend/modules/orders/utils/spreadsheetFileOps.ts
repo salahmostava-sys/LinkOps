@@ -213,64 +213,68 @@ export async function printDailyAppReportTable(params: {
     return;
   }
 
-  let html = `
-    <html dir="rtl">
-    <head>
-      <title>${titleText}</title>
-      <style>
-        body { font-family: system-ui, -apple-system, sans-serif; padding: 20px; }
-        h1 { text-align: center; margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: right; }
-        th { background-color: #f1f5f9; }
-        @media print {
-          button { display: none; }
-        }
-      </style>
-    </head>
-    <body>
-      <h1>${titleText}</h1>
-      <table>
-        <thead>
-          <tr>
-            <th>اسم المندوب</th>
-            <th>إجمالي الطلبات</th>
-            <th>تارجت المندوب</th>
-            <th>المتبقي</th>
-            <th>التوصيات</th>
-          </tr>
-        </thead>
-        <tbody>
-  `;
+  const doc = newWin.document;
+  const htmlEl = doc.documentElement;
+  const head = doc.head;
+  const body = doc.body;
+  if (!htmlEl || !head || !body) return;
 
+  htmlEl.setAttribute('dir', 'rtl');
+
+  const titleEl = doc.createElement('title');
+  titleEl.textContent = titleText;
+  head.appendChild(titleEl);
+
+  const styleEl = doc.createElement('style');
+  styleEl.textContent = `
+    body { font-family: system-ui, -apple-system, sans-serif; padding: 20px; }
+    h1 { text-align: center; margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: right; }
+    th { background-color: #f1f5f9; }
+    @media print {
+      button { display: none; }
+    }
+  `;
+  head.appendChild(styleEl);
+
+  const h1 = doc.createElement('h1');
+  h1.textContent = titleText;
+  body.appendChild(h1);
+
+  const table = doc.createElement('table');
+  const thead = doc.createElement('thead');
+  thead.innerHTML = `
+    <tr>
+      <th>اسم المندوب</th>
+      <th>إجمالي الطلبات</th>
+      <th>تارجت المندوب</th>
+      <th>المتبقي</th>
+      <th>التوصيات</th>
+    </tr>
+  `;
+  table.appendChild(thead);
+
+  const tbody = doc.createElement('tbody');
   results.forEach(r => {
     const remaining = r.empTarget != null ? r.empTarget - r.total : '—';
     const displayEmpTarget = r.empTarget ?? 'بدون هدف';
-    html += `
-      <tr>
-        <td>${r.name}</td>
-        <td>${r.total}</td>
-        <td>${displayEmpTarget}</td>
-        <td dir="ltr" style="text-align: right;">${remaining}</td>
-        <td></td>
-      </tr>
+    const tr = doc.createElement('tr');
+    tr.innerHTML = `
+      <td>${r.name}</td>
+      <td>${r.total}</td>
+      <td>${displayEmpTarget}</td>
+      <td dir="ltr" style="text-align: right;">${remaining}</td>
+      <td></td>
     `;
+    tbody.appendChild(tr);
   });
+  table.appendChild(tbody);
+  body.appendChild(table);
 
-  html += `
-        </tbody>
-      </table>
-      <script>
-        setTimeout(() => {
-          window.print();
-        }, 500);
-      </script>
-    </body>
-    </html>
-  `;
-
-  newWin.document.write(html);
-  newWin.document.close();
+  setTimeout(() => {
+    newWin.print();
+  }, 500);
 }
 
 export async function runSpreadsheetImport(params: {

@@ -170,19 +170,16 @@ describe('spreadsheetFileOps', () => {
 
     it('prints the daily app report with totals from data keys', async () => {
       vi.mocked(orderService.getMonthTargets).mockResolvedValue([{ app_id: 'app1', target_orders: 10 }]);
+      vi.useFakeTimers();
+      const appendChildMock = vi.fn();
       const mockWindow = {
         document: {
           documentElement: { setAttribute: vi.fn() },
           head: { appendChild: vi.fn() },
-          body: { replaceChildren: vi.fn(), appendChild: vi.fn() },
-          createElement: vi.fn().mockReturnValue({ setAttribute: vi.fn() }),
-          write: vi.fn(),
-          close: vi.fn(),
+          body: { replaceChildren: vi.fn(), appendChild: appendChildMock },
+          createElement: (tag: string) => document.createElement(tag),
         },
-        onload: null as any,
         print: vi.fn(),
-        onafterprint: null as any,
-        close: vi.fn(),
       };
       vi.spyOn(globalThis, 'open').mockReturnValue(mockWindow as any);
       const { printDailyAppReportTable } = await import('./spreadsheetFileOps');
@@ -206,13 +203,17 @@ describe('spreadsheetFileOps', () => {
       });
 
       expect(globalThis.open).toHaveBeenCalled();
-      expect(mockWindow.document.write).toHaveBeenCalled();
-      const html = mockWindow.document.write.mock.calls[0][0] as string;
-      expect(html).toContain('John');
-      expect(html).toContain('Jane');
-      expect(html).toContain('5');
-      expect(mockWindow.document.write).toHaveBeenCalled();
-      expect(mockWindow.document.close).toHaveBeenCalled();
+      
+      const tableEl = appendChildMock.mock.calls.find(call => call[0]?.tagName === 'TABLE')?.[0] as HTMLTableElement;
+      expect(tableEl).toBeDefined();
+      expect(tableEl.innerHTML).toContain('John');
+      expect(tableEl.innerHTML).toContain('Jane');
+      expect(tableEl.innerHTML).toContain('5');
+
+      vi.runAllTimers();
+      expect(mockWindow.print).toHaveBeenCalled();
+      
+      vi.useRealTimers();
     });
   });
 

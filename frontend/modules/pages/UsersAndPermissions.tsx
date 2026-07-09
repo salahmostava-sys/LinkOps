@@ -109,17 +109,18 @@ function validateUserForm(name: string, email: string, password?: string): strin
   return null;
 }
 
-async function handleUserDeletion(
-  target: UserRow | null,
-  currentUserId: string | null,
-  authService: typeof import('@services/authService').authService,
-  setDeletingUserId: (id: string | null) => void,
-  setPermUserId: (id: string | null) => void,
-  setDeleteTarget: (target: null) => void,
-  refetchUsersData: () => Promise<unknown>,
-  toast: (props: { title: string; description?: string; variant?: 'default' | 'destructive' }) => void,
-  permUserId: string | null
-) {
+async function handleUserDeletion(params: {
+  target: UserRow | null;
+  currentUserId: string | null;
+  authService: typeof import('@services/authService').authService;
+  setDeletingUserId: (id: string | null) => void;
+  setPermUserId: (id: string | null) => void;
+  setDeleteTarget: (target: null) => void;
+  refetchUsersData: () => Promise<unknown>;
+  toast: (props: { title: string; description?: string; variant?: 'default' | 'destructive' }) => void;
+  permUserId: string | null;
+}) {
+  const { target, currentUserId, authService, setDeletingUserId, setPermUserId, setDeleteTarget, refetchUsersData, toast, permUserId } = params;
   if (!target) return;
   if (target.id === currentUserId) {
     toast({
@@ -167,7 +168,7 @@ interface UsersTableProps {
   openEditModal: (target: UserRow) => void;
 }
 
-function UsersTable({ rows, canEdit, canDelete, currentUserId, savingId, deletingUserId, updateRole, setDeleteTarget, openEditModal }: UsersTableProps) {
+function UsersTable({ rows, canEdit, canDelete, currentUserId, savingId, deletingUserId, updateRole, setDeleteTarget, openEditModal }: Readonly<UsersTableProps>) {
   return (
     <table className="w-full text-sm">
       <thead className="bg-muted/40">
@@ -260,7 +261,7 @@ function CreateUserDialog({
   updateNewUserField,
   resetNewUserForm,
   createUser
-}: {
+}: Readonly<{
   open: boolean;
   setOpen: (o: boolean) => void;
   creatingUser: boolean;
@@ -268,7 +269,7 @@ function CreateUserDialog({
   updateNewUserField: <K extends keyof typeof EMPTY_NEW_USER_FORM>(key: K, value: (typeof EMPTY_NEW_USER_FORM)[K]) => void;
   resetNewUserForm: () => void;
   createUser: () => void;
-}) {
+}>) {
   return (
     <Dialog
       open={open}
@@ -610,8 +611,8 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
 
   const deleteUser = async () => {
     if (!canDelete || !deleteTarget) return;
-    await handleUserDeletion(
-      deleteTarget,
+    await handleUserDeletion({
+      target: deleteTarget,
       currentUserId,
       authService,
       setDeletingUserId,
@@ -620,7 +621,7 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
       refetchUsersData,
       toast,
       permUserId
-    );
+    });
   };
 
   if (authLoading) {
@@ -837,7 +838,7 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
                 disabled={editingUser} />
 
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-foreground">الدور</label>
+              <span className="text-xs font-semibold text-foreground">الدور</span>
               <Select
                 value={editUserForm.role}
                 onValueChange={(value) => setEditUserForm(p => ({ ...p, role: value as AppRole }))}
