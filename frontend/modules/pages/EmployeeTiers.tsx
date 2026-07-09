@@ -232,7 +232,6 @@ const EmployeeTiers = () => {
   const [savingNew, setSavingNew] = useState(false);
 
   // Delete
-  const [deleteId, setDeleteId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
 
@@ -396,24 +395,6 @@ const EmployeeTiers = () => {
     } finally {
       setUpdatingAbsconded(false);
       setAbscondedAlert(null);
-    }
-  };
-
-  /* ── Delete ── */
-  const handleDelete = async () => {
-    if (!perms.can_delete) {
-      toast({ title: 'صلاحية غير كافية', description: 'ليس لديك صلاحية الحذف', variant: 'destructive' });
-      return;
-    }
-    if (!deleteId) return;
-    try {
-      await employeeTierService.deleteTier(deleteId);
-      toast({ title: 'تم الحذف' });
-      setDeleteId(null);
-      refetchTiersData().catch(() => {});
-    } catch (err: unknown) {
-      logError('EmployeeTiers: Delete error', err);
-      toast({ title: 'خطأ', description: getErrorMessage(err), variant: 'destructive' });
     }
   };
 
@@ -914,20 +895,6 @@ const EmployeeTiers = () => {
               {updatingAbsconded ? <Loader2 size={14} className="animate-spin ml-1" /> : null}
               تأكيد التغيير
             </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* ── Delete confirm ── */}
-      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-        <AlertDialogContent dir="rtl">
-          <AlertDialogHeader>
-            <AlertDialogTitle>حذف الشريحة</AlertDialogTitle>
-            <AlertDialogDescription>هل أنت متأكد من حذف هذا السجل؟</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>إلغاء</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} disabled={!perms.can_delete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50 disabled:cursor-not-allowed">حذف</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
