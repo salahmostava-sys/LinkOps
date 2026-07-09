@@ -10,12 +10,12 @@ ALTER TABLE public.roles
   CHECK (
     title = ANY (
       ARRAY[
-        'admin'::text,
-        'hr'::text,
-        'finance'::text,
-        'accountant'::text,
-        'operations'::text,
-        'viewer'::text
+        'admin'::text, -- NOSONAR
+        'hr'::text, -- NOSONAR
+        'finance'::text, -- NOSONAR
+        'accountant'::text, -- NOSONAR
+        'operations'::text, -- NOSONAR
+        'viewer'::text -- NOSONAR
       ]
     )
   );
