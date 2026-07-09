@@ -27,6 +27,8 @@ import time
 import hashlib
 import threading
 
+from typing import Annotated
+
 from fastapi import FastAPI, Depends, Request, Header, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
@@ -490,8 +492,12 @@ def api_detect_anomalies(req: AnomalyDetectionRequest):
     return detect_anomalies(req.model_dump())
 
 
-@app.post("/api/ocr/extract-waybill", dependencies=[Depends(_security)])
-async def extract_text_from_image(file: UploadFile = File(...)):
+@app.post(
+    "/api/ocr/extract-waybill",
+    dependencies=[Depends(_security)],
+    responses={500: {"description": "Internal Server Error"}},
+)
+async def extract_text_from_image(file: Annotated[UploadFile, File(...)]):
     """Extract text from a waybill or document image using Google Cloud Vision."""
     try:
         content = await file.read()
