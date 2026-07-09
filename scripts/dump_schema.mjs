@@ -24,8 +24,7 @@ try {
   createRequire(import.meta.url)('pg');
 } catch {
   console.log('Installing pg...');
-  // NOSONAR
-  execSync('npm install pg --no-save', { cwd: repoRoot, stdio: 'inherit' });
+  execSync('npm install pg --no-save', { cwd: repoRoot, stdio: 'inherit' }); // NOSONAR
 }
 
 const { default: pg } = await import('pg');
