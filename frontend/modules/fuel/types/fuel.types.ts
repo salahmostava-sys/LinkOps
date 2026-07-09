@@ -121,7 +121,7 @@ export const buildMonthlyRows = (
   const isHiddenExcludedEmployeeId = (id: string): boolean => {
     const emp = employeeById[id];
     if (!emp || !isEmployeeExcluded(emp)) return false;
-    return !((ordersMap[id] || 0) > 0);
+    return (ordersMap[id] || 0) <= 0;
   };
   const allEmployeeIds = new Set<string>([
     ...baseEmployees

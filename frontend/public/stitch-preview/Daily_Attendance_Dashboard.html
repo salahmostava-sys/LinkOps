@@ -125,7 +125,7 @@
 </head>
 <body class="bg-background text-on-background font-body-lg min-h-screen flex antialiased">
 <!-- Side Navigation Shell (from JSON) -->
-<nav class="bg-surface-container-low border-r border-outline-variant hidden lg:flex flex-col h-screen p-stack-md sticky top-0 w-64 z-20">
+<nav aria-label="Sidebar Navigation" class="bg-surface-container-low border-r border-outline-variant hidden lg:flex flex-col h-screen p-stack-md sticky top-0 w-64 z-20">
 <div class="mb-stack-lg flex items-center gap-3">
 <div class="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center text-on-primary-container font-headline-lg font-bold">
                 C
@@ -216,12 +216,12 @@
 <div class="flex flex-col sm:flex-row items-start sm:items-center gap-stack-md w-full md:w-auto">
 <!-- Date Picker -->
 <div class="relative w-full sm:w-auto">
-<label class="sr-only">Select Date</label>
-<div class="flex items-center bg-surface-container-low border border-outline-variant rounded-lg px-4 py-2 hover:border-primary transition-colors cursor-pointer group">
+<label class="sr-only" for="date-picker-button">Select Date</label>
+<button id="date-picker-button" class="flex items-center bg-surface-container-low border border-outline-variant rounded-lg px-4 py-2 hover:border-primary transition-colors cursor-pointer group text-left" type="button">
 <span class="material-symbols-outlined text-on-surface-variant mr-2 group-hover:text-primary">calendar_today</span>
 <span class="font-body-lg text-body-lg font-semibold text-on-surface">Oct 24, 2023</span>
 <span class="material-symbols-outlined text-on-surface-variant ml-2 group-hover:text-primary">arrow_drop_down</span>
-</div>
+</button>
 </div>
 <!-- Platform Filter -->
 <div class="relative w-full sm:w-auto">
@@ -274,7 +274,7 @@
 <span class="material-symbols-outlined text-[20px]">more_vert</span>
 </button>
 <!-- Dropdown structure (hidden by default, structural only) -->
-<!-- <div class="absolute right-0 mt-2 w-48 bg-surface-container-lowest rounded-md shadow-[0_12px_24px_-8px_rgba(0,0,0,0.12)] border border-outline-variant py-1 z-20"> ... </div> -->
+
 </div>
 </section>
 <!-- 3. Attendance Grid -->

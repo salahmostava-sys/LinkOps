@@ -288,7 +288,7 @@ export interface InvoiceLineItem {
 const NUMBER_TOKEN_RE = /-?\d[\d,]*(?:\.\d+)?/g;
 
 function toNumber(token: string): number {
-  const n = Number.parseFloat(normalizeArabicNumerals(token).replace(/,/g, ''));
+  const n = Number.parseFloat(normalizeArabicNumerals(token).replaceAll(',', ''));
   return Number.isFinite(n) ? n : 0;
 }
 

@@ -139,6 +139,54 @@ export function VehicleDetailsModal({ vehicle, canEdit, canDelete, onClose }: Re
     }
   };
 
+  const renderDocsContent = () => {
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center gap-2 py-6 text-sm text-muted-foreground">
+          <Loader2 size={16} className="animate-spin" /> جاري التحميل...
+        </div>
+      );
+    }
+    if (documents.length === 0) {
+      return (
+        <p className="py-6 text-center text-sm text-muted-foreground">لا توجد مستندات مرفوعة لهذه المركبة</p>
+      );
+    }
+    return (
+      <ul className="divide-y divide-border/40">
+        {documents.map((doc) => (
+          <li key={doc.id} className="flex items-center justify-between gap-2 px-3 py-2.5">
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium">{doc.file_name}</p>
+              <p className="text-xs text-muted-foreground">
+                {DOC_TYPE_LABELS[doc.doc_type] ?? doc.doc_type} • {format(parseISO(doc.created_at), 'yyyy/MM/dd')}
+              </p>
+            </div>
+            <div className="flex shrink-0 items-center gap-1">
+              <Button variant="ghost" size="icon" className="h-8 w-8" title="عرض" disabled={busyDocId === doc.id} onClick={() => handleView(doc)}>
+                <Eye size={15} />
+              </Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8" title="تنزيل" disabled={busyDocId === doc.id} onClick={() => handleDownload(doc)}>
+                <Download size={15} />
+              </Button>
+              {canDelete && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                  title="حذف"
+                  onClick={() => setDeleteTarget(doc)}
+                >
+                  <Trash2 size={15} className="text-destructive" />
+                </Button>
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
+    );
+  };
+
   return (
     <>
       <Dialog open onOpenChange={(next) => !next && onClose()}>
@@ -197,45 +245,7 @@ export function VehicleDetailsModal({ vehicle, canEdit, canDelete, onClose }: Re
           {/* Documents list */}
           <div className="rounded-xl border border-border/50">
             <div className="border-b border-border/50 px-3 py-2 text-sm font-semibold">المستندات ({documents.length})</div>
-            {loading ? (
-              <div className="flex items-center justify-center gap-2 py-6 text-sm text-muted-foreground">
-                <Loader2 size={16} className="animate-spin" /> جاري التحميل...
-              </div>
-            ) : documents.length === 0 ? (
-              <p className="py-6 text-center text-sm text-muted-foreground">لا توجد مستندات مرفوعة لهذه المركبة</p>
-            ) : (
-              <ul className="divide-y divide-border/40">
-                {documents.map((doc) => (
-                  <li key={doc.id} className="flex items-center justify-between gap-2 px-3 py-2.5">
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium">{doc.file_name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {DOC_TYPE_LABELS[doc.doc_type] ?? doc.doc_type} • {format(parseISO(doc.created_at), 'yyyy/MM/dd')}
-                      </p>
-                    </div>
-                    <div className="flex shrink-0 items-center gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8" title="عرض" disabled={busyDocId === doc.id} onClick={() => handleView(doc)}>
-                        <Eye size={15} />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" title="تنزيل" disabled={busyDocId === doc.id} onClick={() => handleDownload(doc)}>
-                        <Download size={15} />
-                      </Button>
-                      {canDelete && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                          title="حذف"
-                          onClick={() => setDeleteTarget(doc)}
-                        >
-                          <Trash2 size={15} className="text-destructive" />
-                        </Button>
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
+            {renderDocsContent()}
           </div>
 
           <DialogFooter className="mt-2">

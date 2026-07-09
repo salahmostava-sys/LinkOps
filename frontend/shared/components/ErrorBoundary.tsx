@@ -11,6 +11,27 @@ type State = {
   error: Error | null;
 };
 
+function extractErrorMessage(error: Error): string {
+  if (error.message) {
+    return error.message;
+  }
+  if ('cause' in error && error.cause) {
+    const cause = error.cause;
+    if (cause instanceof Error) {
+      return cause.message;
+    }
+    if (typeof cause === 'object' && cause !== null) {
+      try {
+        return JSON.stringify(cause);
+      } catch {
+        // fallback
+      }
+    }
+    return String(cause);
+  }
+  return String(error);
+}
+
 export class ErrorBoundary extends Component<Props, State> {
   state: State = { error: null };
 
@@ -28,16 +49,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
   render() {
     if (!this.state.error) return this.props.children;
-    const message =
-      this.state.error.message ||
-      ('cause' in this.state.error && this.state.error.cause
-        ? (this.state.error.cause instanceof Error
-            ? this.state.error.cause.message
-            : typeof this.state.error.cause === 'object' && this.state.error.cause !== null
-            ? JSON.stringify(this.state.error.cause)
-            : String(this.state.error.cause))
-        : '') ||
-      String(this.state.error);
+    const message = extractErrorMessage(this.state.error);
     return (
       <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-6">
         <div className="max-w-2xl w-full bg-card border border-border -2xl shadow-card p-6 space-y-3 rounded-2xl">

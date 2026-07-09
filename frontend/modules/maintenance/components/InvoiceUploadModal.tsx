@@ -17,9 +17,14 @@ import { storageService } from '@services/storageService';
 import * as maintenanceService from '@services/maintenanceService';
 import { getErrorMessage } from '@services/serviceError';
 
-type DraftRow = { name: string; quantity: string; unitPrice: string };
+type DraftRow = { id: string; name: string; quantity: string; unitPrice: string };
 
-const emptyRow = (): DraftRow => ({ name: '', quantity: '1', unitPrice: '' });
+const emptyRow = (): DraftRow => ({
+  id: Math.random().toString(36).substring(2, 9),
+  name: '',
+  quantity: '1',
+  unitPrice: '',
+});
 
 export function InvoiceUploadModal({
   open,
@@ -79,7 +84,12 @@ export function InvoiceUploadModal({
         toast({ title: 'لم يتم التعرف على بنود بشكل مؤكد', description: 'أضف بنود الفاتورة يدوياً بالأسفل.' });
         setRows([emptyRow()]);
       } else {
-        setRows(parsed.map(p => ({ name: p.name, quantity: String(p.quantity), unitPrice: String(p.unitPrice) })));
+        setRows(parsed.map(p => ({
+          id: Math.random().toString(36).substring(2, 9),
+          name: p.name,
+          quantity: String(p.quantity),
+          unitPrice: String(p.unitPrice)
+        })));
         toast({ title: `✅ تم التعرف على ${parsed.length} صنف`, description: 'راجع البيانات وعدّلها قبل الحفظ.' });
       }
     } catch (err) {
@@ -210,7 +220,7 @@ export function InvoiceUploadModal({
                   </thead>
                   <tbody className="divide-y divide-border/50">
                     {rows.map((row, idx) => (
-                      <tr key={`invoice-row-${idx}`}>
+                      <tr key={row.id}>
                         <td className="p-1.5">
                           <Input value={row.name} onChange={e => setRow(idx, 'name', e.target.value)} placeholder="اسم القطعة" />
                         </td>
