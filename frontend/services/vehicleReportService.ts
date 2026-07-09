@@ -48,7 +48,7 @@ export interface VehicleReportFilters {
   fromDate?: string;
   toDate?: string;
   vehicleType?: 'motorcycle' | 'car' | 'all';
-  status?: string | 'all';
+  status?: string;
 }
 
 // eslint-disable-next-line sonarjs/cognitive-complexity

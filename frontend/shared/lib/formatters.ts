@@ -57,7 +57,7 @@ export function formatStandardDateTime(dateInput: string | Date | null | undefin
     const ampm = hours >= 12 ? 'PM' : 'AM';
     
     hours = hours % 12;
-    hours = hours ? hours : 12; // the hour '0' should be '12'
+    hours = hours || 12; // the hour '0' should be '12'
     const strHours = String(hours).padStart(2, '0');
 
     return `${day}/${month}/${year} ${strHours}:${minutes} ${ampm}`;

@@ -100,6 +100,7 @@ export const OrdersCellPopover = ({ state, apps, data, appColorsList, canEdit, o
 
   return createPortal(
     <dialog
+      role="dialog"
       ref={popRef}
       open
       className="fixed z-50 bg-popover border border-border rounded-xl shadow-xl p-3 min-w-[200px] max-w-none m-0 text-inherit"

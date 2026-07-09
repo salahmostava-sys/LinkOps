@@ -13,7 +13,7 @@ export function escapeHtml(value: unknown): string {
   if (value === null || value === undefined) {
     return '';
   }
-  const str = typeof value === 'object' ? JSON.stringify(value) : String(value);
+  const str = typeof value === 'string' ? value : typeof value === 'object' && value !== null ? JSON.stringify(value) : String(value);
   return str
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')

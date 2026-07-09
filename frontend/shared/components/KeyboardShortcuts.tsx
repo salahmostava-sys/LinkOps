@@ -26,7 +26,7 @@ type Shortcut = {
 };
 
 /** يعرض صفاً واحداً لاختصار لوحة مفاتيح (الأيقونة، الوصف، ومفاتيحه). */
-function ShortcutRow({ shortcut }: { shortcut: Shortcut }) {
+function ShortcutRow({ shortcut }: Readonly<{ shortcut: Shortcut }>) {
   return (
     <div className="flex items-center justify-between rounded-lg px-3 py-2 text-sm hover:bg-muted/60 transition-colors">
       <div className="flex items-center gap-2.5 text-foreground">

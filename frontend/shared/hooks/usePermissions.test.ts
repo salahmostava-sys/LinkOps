@@ -215,42 +215,23 @@ describe('usePermissions hook', () => {
     });
   });
 
-  it('viewer gets deny-all on employees', async () => {
-    mockAuthState.user = { id: 'u1' };
-    mockAuthState.role = 'viewer';
+  describe('viewer restrictions', () => {
+    it.each([
+      ['employees', false, false, false],
+      ['maintenance', true, false, false],
+    ])('viewer permissions for %s (view: %s, edit: %s, delete: %s)', async (resource, view, edit, del) => {
+      mockAuthState.user = { id: 'u1' };
+      mockAuthState.role = 'viewer';
 
-    const { result } = renderHook(() => usePermissions('employees'), {
-      wrapper: createWrapper(),
+      const { result } = renderHook(() => usePermissions(resource as any), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => expect(result.current.loading).toBe(false));
+      expect(result.current.permissions.can_view).toBe(view);
+      expect(result.current.permissions.can_edit).toBe(edit);
+      expect(result.current.permissions.can_delete).toBe(del);
     });
-
-    await waitFor(() => expect(result.current.loading).toBe(false));
-    expect(result.current.permissions.can_view).toBe(false);
-    expect(result.current.permissions.can_edit).toBe(false);
-    expect(result.current.permissions.can_delete).toBe(false);
-  });
-
-  it('المشاهد لا يستطيع التعديل', async () => {
-    mockAuthState.user = { id: 'u1' };
-    mockAuthState.role = 'viewer';
-
-    const { result } = renderHook(() => usePermissions('maintenance'), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => expect(result.current.loading).toBe(false));
-    expect(result.current.permissions.can_edit).toBe(false);
-  });
-
-  it('المشاهد لا يستطيع الحذف', async () => {
-    mockAuthState.user = { id: 'u1' };
-    mockAuthState.role = 'viewer';
-
-    const { result } = renderHook(() => usePermissions('maintenance'), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => expect(result.current.loading).toBe(false));
-    expect(result.current.permissions.can_delete).toBe(false);
   });
 
   it('المسؤول يملك صلاحيات كاملة', async () => {

@@ -13,7 +13,7 @@ const PGDATABASE = 'postgres';
 import { createRequire } from 'node:module';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { writeFileSync, existsSync } from 'node:fs';
+import { writeFileSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -185,7 +185,7 @@ for (const p of policies.rows) {
 out('-- ================================================================');
 out('-- FUNCTIONS');
 out('-- ================================================================');
-const funcs = await client.query(`
+const funcs = await client.query(String.raw`
   SELECT 
     p.proname AS func_name,
     pg_get_function_identity_arguments(p.oid) AS args,

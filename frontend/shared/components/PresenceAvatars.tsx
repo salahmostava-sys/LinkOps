@@ -21,7 +21,12 @@ export function PresenceAvatars({ users, maxVisible = 5, isAdmin = false }: Read
     <div className="flex items-center -space-x-2 rtl:space-x-reverse" dir="ltr">
       {visible.map((u) => {
         const route = u.currentPath ? getRouteByPathname(u.currentPath) : null;
-        const pageTitle = route ? route.titleAr : (u.currentPath && u.currentPath !== '/') ? 'صفحة أخرى' : '';
+        let pageTitle = '';
+        if (route) {
+          pageTitle = route.titleAr;
+        } else if (u.currentPath && u.currentPath !== '/') {
+          pageTitle = 'صفحة أخرى';
+        }
         const title = isAdmin && pageTitle ? `${u.name} (في صفحة: ${pageTitle})` : u.name;
 
         return (

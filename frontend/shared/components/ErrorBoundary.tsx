@@ -31,7 +31,11 @@ export class ErrorBoundary extends Component<Props, State> {
     const message =
       this.state.error.message ||
       ('cause' in this.state.error && this.state.error.cause
-        ? String(this.state.error.cause)
+        ? (this.state.error.cause instanceof Error
+            ? this.state.error.cause.message
+            : typeof this.state.error.cause === 'object' && this.state.error.cause !== null
+            ? JSON.stringify(this.state.error.cause)
+            : String(this.state.error.cause))
         : '') ||
       String(this.state.error);
     return (

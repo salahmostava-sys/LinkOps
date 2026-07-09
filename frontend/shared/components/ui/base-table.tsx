@@ -14,6 +14,7 @@ export interface BaseTableProps<T> {
   emptyMessage?: string;
   className?: string;
   isLoading?: boolean;
+  rowKey?: (item: T, index: number) => string;
 }
 
 export function BaseTable<T>({ 
@@ -21,7 +22,8 @@ export function BaseTable<T>({
   columns, 
   emptyMessage = 'لا توجد سجلات لعرضها', 
   className = '', 
-  isLoading = false 
+  isLoading = false,
+  rowKey
 }: Readonly<BaseTableProps<T>>) {
   if (isLoading) {
     return (
@@ -57,7 +59,7 @@ export function BaseTable<T>({
         </thead>
         <tbody className="divide-y divide-border">
           {data.map((row, rowIndex) => (
-            <tr key={rowIndex} className="hover:bg-muted/30 transition-colors">
+            <tr key={rowKey ? rowKey(row, rowIndex) : String((row as Record<string, unknown>).id ?? rowIndex)} className="hover:bg-muted/30 transition-colors">
               {columns.map((col, colIndex) => (
                 <td key={String(col.key) + colIndex} className={`p-4 align-middle ${col.className || ''}`}>
                   {col.render ? col.render(row, rowIndex) : String((row as Record<keyof T, unknown>)[col.key as keyof T] ?? '')}
