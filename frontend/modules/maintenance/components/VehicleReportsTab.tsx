@@ -143,10 +143,10 @@ export function VehicleReportsTab() {
   const escapeHtml = (value?: string | null) => {
     if (!value) return '';
     return String(value)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;');
   };
 
   const partsSummary = (log: MaintenanceLogWithDetails) =>
@@ -249,33 +249,25 @@ export function VehicleReportsTab() {
       `;
     }
 
-    const html = `
-      <!DOCTYPE html>
-      <html dir="rtl" lang="ar">
-        <head>
-          <title>تقرير صيانة المركبات</title>
-          <style>
-            @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
-            body { font-family: 'Tajawal', system-ui, sans-serif; padding: 20px; margin: 0; color: #111; background: #fff; }
-            .company-name { text-align: center; font-size: 22px; font-weight: bold; margin-bottom: 5px; color: #1e293b; }
-            h1 { text-align: center; margin-bottom: 5px; color: #0f172a; font-size: 18px; }
-            .header-info { text-align: center; margin-bottom: 20px; font-size: 13px; color: #64748b; }
-            table { width: 100%; border-collapse: collapse; margin-top: 10px; text-align: right; font-size: 12px; }
-            th, td { border: 1px solid #cbd5e1; padding: 8px; }
-            th { background-color: #f8fafc; font-weight: bold; color: #334155; }
-            tr:nth-child(even) { background-color: #f8fafc; }
-            .totals { text-align: left; margin-top: 12px; font-size: 13px; font-weight: bold; color: #0f172a; }
-            @media print {
-              body { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 0; margin: 0; }
-              .page-break { page-break-after: always; padding-bottom: 20px; }
-              .page-break:last-child { page-break-after: auto; }
-            }
-          </style>
-        </head>
-        <body>
-          ${bodyHtml}
-        </body>
-      </html>
+    const headHtml = `
+      <title>تقرير صيانة المركبات</title>
+      <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
+        body { font-family: 'Tajawal', system-ui, sans-serif; padding: 20px; margin: 0; color: #111; background: #fff; }
+        .company-name { text-align: center; font-size: 22px; font-weight: bold; margin-bottom: 5px; color: #1e293b; }
+        h1 { text-align: center; margin-bottom: 5px; color: #0f172a; font-size: 18px; }
+        .header-info { text-align: center; margin-bottom: 20px; font-size: 13px; color: #64748b; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; text-align: right; font-size: 12px; }
+        th, td { border: 1px solid #cbd5e1; padding: 8px; }
+        th { background-color: #f8fafc; font-weight: bold; color: #334155; }
+        tr:nth-child(even) { background-color: #f8fafc; }
+        .totals { text-align: left; margin-top: 12px; font-size: 13px; font-weight: bold; color: #0f172a; }
+        @media print {
+          body { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 0; margin: 0; }
+          .page-break { page-break-after: always; padding-bottom: 20px; }
+          .page-break:last-child { page-break-after: auto; }
+        }
+      </style>
     `;
 
     const iframe = document.createElement('iframe');
@@ -293,9 +285,10 @@ export function VehicleReportsTab() {
       return;
     }
 
-    doc.open();
-    doc.write(html);
-    doc.close();
+    doc.documentElement.dir = 'rtl';
+    doc.documentElement.lang = 'ar';
+    doc.head.innerHTML = headHtml;
+    doc.body.innerHTML = bodyHtml;
 
     const contentWindow = iframe.contentWindow;
     if (contentWindow) {

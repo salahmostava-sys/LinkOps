@@ -54,13 +54,16 @@ function docExpiryStatus(expiry: string | null): 'ok' | 'soon' | 'expired' {
   return 'ok';
 }
 
-function ExpiryBadge({ date, label }: { date: string | null; label: string }) {
+function getExpiryBadgeStyle(s: 'ok' | 'soon' | 'expired') {
+  if (s === 'expired') return 'bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300';
+  if (s === 'soon') return 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300';
+  return 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300';
+}
+
+function ExpiryBadge({ date, label }: Readonly<{ date: string | null; label: string }>) {
   if (!date) return null;
   const s = docExpiryStatus(date);
-  const cls =
-    s === 'expired' ? 'bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300' :
-    s === 'soon'    ? 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300' :
-                      'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300';
+  const cls = getExpiryBadgeStyle(s);
   return (
     <span className={`text-[10px] border px-1.5 py-0.5 rounded-full font-medium ${cls}`}>
       {label}: {new Date(date).toLocaleDateString('ar-SA', { year: 'numeric', month: 'short', day: 'numeric' })}
@@ -71,13 +74,13 @@ function ExpiryBadge({ date, label }: { date: string | null; label: string }) {
 }
 
 /* ─────────────── KPI Card ─────────────── */
-function KpiCard({ icon: Icon, label, value, sub, color }: {
+function KpiCard({ icon: Icon, label, value, sub, color }: Readonly<{
   icon: React.ComponentType<{ size?: number; className?: string }>;
   label: string;
   value: string | number;
   sub?: string;
   color: string;
-}) {
+}>) {
   return (
     <div className="bg-card border border-border/60 rounded-2xl p-4 flex items-center gap-4 shadow-sm">
       <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${color}`}>
@@ -93,11 +96,11 @@ function KpiCard({ icon: Icon, label, value, sub, color }: {
 }
 
 /* ─────────────── Vehicle Card ─────────────── */
-function VehicleCard({ v, expanded, onToggle }: {
+function VehicleCard({ v, expanded, onToggle }: Readonly<{
   v: VehicleReportRow;
   expanded: boolean;
   onToggle: () => void;
-}) {
+}>) {
   const status = STATUS_LABELS[v.status] ?? { label: v.status, color: 'bg-muted text-muted-foreground' };
   const insStatus = docExpiryStatus(v.insurance_expiry);
   const regStatus = docExpiryStatus(v.registration_expiry);
@@ -243,8 +246,8 @@ function VehicleCard({ v, expanded, onToggle }: {
                       {log.notes && <p className="text-muted-foreground leading-relaxed mb-1">{log.notes}</p>}
                       {log.parts.length > 0 && (
                         <div className="flex flex-wrap gap-1.5 pt-1 border-t border-border/40 mt-1">
-                          {log.parts.map((p, i) => (
-                            <span key={i} className="bg-muted/60 px-2 py-0.5 rounded text-[10px] text-muted-foreground">
+                          {log.parts.map((p) => (
+                            <span key={p.name_ar} className="bg-muted/60 px-2 py-0.5 rounded text-[10px] text-muted-foreground">
                               {p.name_ar} ×{p.quantity_used}
                             </span>
                           ))}
@@ -315,7 +318,7 @@ const VehicleReportPage = () => {
 
   const escapeHtml = (v?: string | null) =>
     (v ?? '')
-      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
 
   // eslint-disable-next-line sonarjs/cognitive-complexity
   const exportToExcel = async () => {
@@ -355,53 +358,58 @@ const VehicleReportPage = () => {
     } catch (e) { console.error(e); }
   };
 
-  const printReport = () => {
-    const rowsHtml = sorted.map((v) => {
-      const statusLabel = STATUS_LABELS[v.status]?.label ?? v.status;
-      const logsHtml = v.maintenance_logs.length === 0
-        ? `<tr><td colspan="4" style="text-align:center;color:#94a3b8;">لا توجد صيانات</td></tr>`
-        : v.maintenance_logs.map((l) => `
-          <tr>
-            <td>${l.maintenance_date ? new Date(l.maintenance_date).toLocaleDateString('ar-SA') : ''}</td>
-            <td>${escapeHtml(l.type)}</td>
-            <td>${l.parts.map((p) => `${escapeHtml(p.name_ar)} ×${p.quantity_used}`).join('، ') || '—'}</td>
-            <td>${formatCurrency(l.total_cost)}</td>
-          </tr>`).join('');
+  const generateDocsRow = (v: VehicleReportRow) => {
+    if (!v.insurance_expiry && !v.registration_expiry && !v.authorization_expiry) return '';
+    let html = '<div class="docs-row">';
+    if (v.insurance_expiry) html += `<span>تأمين: ${v.insurance_expiry}</span>`;
+    if (v.registration_expiry) html += `<span>تسجيل: ${v.registration_expiry}</span>`;
+    if (v.authorization_expiry) html += `<span>تفويض: ${v.authorization_expiry}</span>`;
+    html += '</div>';
+    return html;
+  };
 
-      return `
-        <div class="vehicle-block">
-          <div class="vehicle-header">
-            <div>
-              <strong style="font-size:15px;" dir="ltr">${escapeHtml(v.plate_number)}</strong>
-              ${v.brand ? ` — ${escapeHtml(v.brand)} ${escapeHtml(v.model ?? '')}` : ''}
-              <span style="margin-right:8px;font-size:11px;color:#64748b;">(${statusLabel})</span>
-            </div>
-            ${v.current_rider ? `<div style="font-size:12px;color:#475569;">السائق: ${escapeHtml(v.current_rider)}</div>` : ''}
+  const generateRowHtml = (v: VehicleReportRow) => {
+    const statusLabel = STATUS_LABELS[v.status]?.label ?? v.status;
+    const logsHtml = v.maintenance_logs.length === 0
+      ? `<tr><td colspan="4" style="text-align:center;color:#94a3b8;">لا توجد صيانات</td></tr>`
+      : v.maintenance_logs.map((l) => `
+        <tr>
+          <td>${l.maintenance_date ? new Date(l.maintenance_date).toLocaleDateString('ar-SA') : ''}</td>
+          <td>${escapeHtml(l.type)}</td>
+          <td>${l.parts.map((p) => `${escapeHtml(p.name_ar)} ×${p.quantity_used}`).join('، ') || '—'}</td>
+          <td>${formatCurrency(l.total_cost)}</td>
+        </tr>`).join('');
+
+    return `
+      <div class="vehicle-block">
+        <div class="vehicle-header">
+          <div>
+            <strong style="font-size:15px;" dir="ltr">${escapeHtml(v.plate_number)}</strong>
+            ${v.brand ? ` — ${escapeHtml(v.brand)} ${escapeHtml(v.model ?? '')}` : ''}
+            <span style="margin-right:8px;font-size:11px;color:#64748b;">(${statusLabel})</span>
           </div>
-          <div class="stats-row">
-            <span>صيانة: <strong>${formatCurrency(v.total_maintenance_cost)}</strong></span>
-            ${v.total_km > 0 ? `<span>كيلومترات: <strong>${v.total_km.toLocaleString('en-US')} كم</strong></span>` : ''}
-            ${v.total_fuel_cost > 0 ? `<span>وقود: <strong>${formatCurrency(v.total_fuel_cost)}</strong></span>` : ''}
-            <span>إجمالي التشغيل: <strong>${formatCurrency(v.total_maintenance_cost + v.total_fuel_cost)}</strong></span>
-          </div>
-          ${v.insurance_expiry || v.registration_expiry || v.authorization_expiry ? `
-          <div class="docs-row">
-            ${v.insurance_expiry ? `<span>تأمين: ${v.insurance_expiry}</span>` : ''}
-            ${v.registration_expiry ? `<span>تسجيل: ${v.registration_expiry}</span>` : ''}
-            ${v.authorization_expiry ? `<span>تفويض: ${v.authorization_expiry}</span>` : ''}
-          </div>` : ''}
-          <table>
-            <thead><tr><th>التاريخ</th><th>نوع الصيانة</th><th>القطع</th><th>التكلفة</th></tr></thead>
-            <tbody>${logsHtml}</tbody>
-          </table>
-        </div>`;
-    }).join('');
+          ${v.current_rider ? `<div style="font-size:12px;color:#475569;">السائق: ${escapeHtml(v.current_rider)}</div>` : ''}
+        </div>
+        <div class="stats-row">
+          <span>صيانة: <strong>${formatCurrency(v.total_maintenance_cost)}</strong></span>
+          ${v.total_km > 0 ? `<span>كيلومترات: <strong>${v.total_km.toLocaleString('en-US')} كم</strong></span>` : ''}
+          ${v.total_fuel_cost > 0 ? `<span>وقود: <strong>${formatCurrency(v.total_fuel_cost)}</strong></span>` : ''}
+          <span>إجمالي التشغيل: <strong>${formatCurrency(v.total_maintenance_cost + v.total_fuel_cost)}</strong></span>
+        </div>
+        ${generateDocsRow(v)}
+        <table>
+          <thead><tr><th>التاريخ</th><th>نوع الصيانة</th><th>القطع</th><th>التكلفة</th></tr></thead>
+          <tbody>${logsHtml}</tbody>
+        </table>
+      </div>`;
+  };
+
+  const printReport = () => {
+    const rowsHtml = sorted.map(generateRowHtml).join('');
 
     const totalCost = sorted.reduce((s, v) => s + v.total_maintenance_cost + v.total_fuel_cost, 0);
 
-    const html = `<!DOCTYPE html>
-<html dir="rtl" lang="ar">
-<head>
+    const headHtml = `
   <title>تقرير المركبات الشامل</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
@@ -421,8 +429,9 @@ const VehicleReportPage = () => {
     .total { text-align:left; font-size:14px; font-weight:bold; margin-top:16px; }
     @media print { body{padding:0;} .vehicle-block{page-break-inside:avoid;} }
   </style>
-</head>
-<body>
+`;
+
+    const bodyHtml = `
   <div class="company">شركة مهمة التوصيل للخدمات اللوجستية</div>
   <h1>تقرير المركبات الشامل</h1>
   <div class="meta">
@@ -438,15 +447,18 @@ const VehicleReportPage = () => {
   </div>
   ${rowsHtml}
   <div class="total">إجمالي التكاليف التشغيلية لجميع المركبات: ${formatCurrency(totalCost)}</div>
-</body>
-</html>`;
+`;
 
     const iframe = document.createElement('iframe');
     iframe.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:none;';
     document.body.appendChild(iframe);
     const doc = iframe.contentWindow?.document;
     if (!doc) { iframe.remove(); return; }
-    doc.open(); doc.write(html); doc.close();
+    
+    doc.documentElement.dir = 'rtl';
+    doc.documentElement.lang = 'ar';
+    doc.head.innerHTML = headHtml;
+    doc.body.innerHTML = bodyHtml;
     const cw = iframe.contentWindow;
     if (cw) {
       cw.focus();
@@ -512,17 +524,17 @@ const VehicleReportPage = () => {
         <div className="bg-card border border-border/60 rounded-2xl p-4 shadow-sm">
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             <div>
-              <label className="text-xs text-muted-foreground mb-1 block">من تاريخ</label>
-              <Input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} className="h-9 text-xs rounded-xl" />
+              <label htmlFor="filter-from" className="text-xs text-muted-foreground mb-1 block">من تاريخ</label>
+              <Input id="filter-from" type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} className="h-9 text-xs rounded-xl" />
             </div>
             <div>
-              <label className="text-xs text-muted-foreground mb-1 block">إلى تاريخ</label>
-              <Input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} className="h-9 text-xs rounded-xl" />
+              <label htmlFor="filter-to" className="text-xs text-muted-foreground mb-1 block">إلى تاريخ</label>
+              <Input id="filter-to" type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} className="h-9 text-xs rounded-xl" />
             </div>
             <div>
-              <label className="text-xs text-muted-foreground mb-1 block">نوع المركبة</label>
+              <label htmlFor="filter-type" className="text-xs text-muted-foreground mb-1 block">نوع المركبة</label>
               <Select value={vehicleType} onValueChange={(v) => setVehicleType(v as 'all' | 'motorcycle' | 'car')}>
-                <SelectTrigger className="h-9 text-xs rounded-xl"><SelectValue /></SelectTrigger>
+                <SelectTrigger id="filter-type" className="h-9 text-xs rounded-xl"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">الكل</SelectItem>
                   <SelectItem value="motorcycle">دباب</SelectItem>
@@ -531,9 +543,9 @@ const VehicleReportPage = () => {
               </Select>
             </div>
             <div>
-              <label className="text-xs text-muted-foreground mb-1 block">الحالة</label>
+              <label htmlFor="filter-status" className="text-xs text-muted-foreground mb-1 block">الحالة</label>
               <Select value={status} onValueChange={setStatus}>
-                <SelectTrigger className="h-9 text-xs rounded-xl"><SelectValue /></SelectTrigger>
+                <SelectTrigger id="filter-status" className="h-9 text-xs rounded-xl"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">الكل</SelectItem>
                   {Object.entries(STATUS_LABELS).map(([k, v]) => (
@@ -543,9 +555,9 @@ const VehicleReportPage = () => {
               </Select>
             </div>
             <div>
-              <label className="text-xs text-muted-foreground mb-1 block">ترتيب حسب</label>
+              <label htmlFor="filter-sort" className="text-xs text-muted-foreground mb-1 block">ترتيب حسب</label>
               <Select value={sortKey} onValueChange={(v) => setSortKey(v as SortKey)}>
-                <SelectTrigger className="h-9 text-xs rounded-xl"><SelectValue /></SelectTrigger>
+                <SelectTrigger id="filter-sort" className="h-9 text-xs rounded-xl"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {SORT_OPTIONS.map((o) => (
                     <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
@@ -560,7 +572,7 @@ const VehicleReportPage = () => {
       {/* KPI Cards */}
       {query.isLoading ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-          {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-20 rounded-2xl" />)}
+          {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-20 rounded-2xl" />)}
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
