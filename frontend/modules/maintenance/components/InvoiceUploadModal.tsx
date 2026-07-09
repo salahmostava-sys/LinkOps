@@ -1,6 +1,6 @@
 import { BaseInput } from '@shared/components/ui/base-input';
 import { useRef, useState } from 'react';
-import { FileText, Loader2, Plus, Trash2, UploadCloud } from 'lucide-react';
+import { FileText, Plus, Trash2, UploadCloud } from 'lucide-react';
 import { Button } from '@shared/components/ui/button';
 import { Input } from '@shared/components/ui/input';
 import { Label } from '@shared/components/ui/label';
