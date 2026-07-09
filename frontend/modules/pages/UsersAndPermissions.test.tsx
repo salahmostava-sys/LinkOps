@@ -105,14 +105,23 @@ describe('UsersAndPermissions', () => {
     );
   }, 10000);
 
-  it('allows admins to delete another user but keeps current-account delete disabled', async () => {
+  it('does not render delete button for the current user and allows deleting another user', async () => {
     render(<UsersAndPermissions />);
 
-    const deleteButtons = screen.getAllByRole('button', { name: 'حذف' });
-    expect(deleteButtons[0]).toBeDisabled();
-    expect(deleteButtons[1]).not.toBeDisabled();
+    // Wait for the rows to render and the first user (current user) to be selected automatically
+    await screen.findAllByText(/Admin User/i);
+    
+    // Delete button should not be rendered for the current user
+    expect(screen.queryByRole('button', { name: /حذف/i })).toBeNull();
 
-    fireEvent.click(deleteButtons[1]);
+    // Click on the second user to select them
+    fireEvent.click(await screen.findByText('Second User'));
+
+    // Now the delete button should be available
+    const deleteButton = await screen.findByRole('button', { name: /حذف/i });
+    expect(deleteButton).not.toBeDisabled();
+
+    fireEvent.click(deleteButton);
     fireEvent.click(screen.getByRole('button', { name: 'تأكيد الحذف' }));
 
     await waitFor(() => expect(authServiceMock.deleteManagedUser).toHaveBeenCalledWith('user-2'));
@@ -125,8 +134,10 @@ describe('UsersAndPermissions', () => {
 
     render(<UsersAndPermissions />);
 
-    const editButtons = screen.getAllByRole('button', { name: 'تعديل' });
-    fireEvent.click(editButtons[0]);
+    // Admin User is selected by default
+    await screen.findAllByText(/Admin User/i);
+    const editButton = await screen.findByRole('button', { name: /تعديل/i });
+    fireEvent.click(editButton);
 
     const nameInput = await screen.findByLabelText('الاسم');
     expect(nameInput).toHaveValue('Admin User');
