@@ -1,8 +1,8 @@
-import { formatStandardDateTime } from '@shared/lib/formatters';
+import { formatStandardDateTime, formatCurrency } from '@shared/lib/formatters';
 
 import type React from 'react';
 import { Suspense, lazy, useEffect, useRef, useState, useCallback, type Dispatch, type SetStateAction } from 'react';
-import { Search, Plus, FolderOpen, Edit, Trash2, Bike, FileText } from 'lucide-react';
+import { Search, Plus, FolderOpen, Edit, Trash2, Bike, FileText, ChevronDown, ChevronUp, Car } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Input } from '@shared/components/ui/input';
 import { Button } from '@shared/components/ui/button';
@@ -375,6 +375,16 @@ const Motorcycles = () => {
   const [deleteVehicle, setDeleteVehicle] = useState<Vehicle | null>(null);
   const [deletingVehicle, setDeletingVehicle] = useState(false);
   const [detailsVehicle, setDetailsVehicle] = useState<Vehicle | null>(null);
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  const toggleRow = (id: string) => {
+    setExpandedRows((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
 
   const importRef = useRef<HTMLInputElement>(null);
   const tableRef = useRef<HTMLTableElement>(null);
