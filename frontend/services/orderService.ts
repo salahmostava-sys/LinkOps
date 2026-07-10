@@ -323,12 +323,17 @@ export const orderService = {
     for (let i = 0; i < keys.length; i += CHUNK_SIZE) {
       const chunk = keys.slice(i, i + CHUNK_SIZE);
       await Promise.all(
-        chunk.map((k) =>
-          supabase
+        chunk.map(async (k) => {
+          const { error } = await supabase
             .from('daily_orders')
             .delete()
-            .match({ employee_id: k.employeeId, app_id: k.appId, date: k.date })
-        )
+            .eq('employee_id', k.employeeId)
+            .eq('app_id', k.appId)
+            .eq('date', k.date);
+          if (error) {
+            throw toServiceError(error, 'orderService.deleteDailyOrders');
+          }
+        })
       );
     }
   },
