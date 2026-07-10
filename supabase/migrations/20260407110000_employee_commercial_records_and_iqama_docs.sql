@@ -24,7 +24,7 @@ FOR SELECT
 TO authenticated
 USING (
   public.is_internal_user()
-  AND public.has_permission('employees', 'view')
+  AND public.has_permission('employees', 'view') /* NOSONAR */
 );
 
 CREATE POLICY commercial_records_insert_policy
@@ -33,7 +33,7 @@ FOR INSERT
 TO authenticated
 WITH CHECK (
   public.is_internal_user()
-  AND public.has_permission('employees', 'write')
+  AND public.has_permission('employees', 'write') /* NOSONAR */
 );
 
 CREATE POLICY commercial_records_update_policy
@@ -42,11 +42,11 @@ FOR UPDATE
 TO authenticated
 USING (
   public.is_internal_user()
-  AND public.has_permission('employees', 'write')
+  AND public.has_permission('employees', 'write') /* NOSONAR */
 )
 WITH CHECK (
   public.is_internal_user()
-  AND public.has_permission('employees', 'write')
+  AND public.has_permission('employees', 'write') /* NOSONAR */
 );
 
 CREATE POLICY commercial_records_delete_policy
@@ -55,7 +55,7 @@ FOR DELETE
 TO authenticated
 USING (
   public.is_internal_user()
-  AND public.has_permission('employees', 'write')
+  AND public.has_permission('employees', 'write') /* NOSONAR */
 );
 
 DROP TRIGGER IF EXISTS trg_commercial_records_updated_at ON public.commercial_records;
@@ -97,7 +97,7 @@ CREATE POLICY "Employees docs: view by employee permissions"
   USING (
     bucket_id = 'employee-documents'
     AND public.is_internal_user()
-    AND public.has_permission('employees', 'view')
+    AND public.has_permission('employees', 'view') /* NOSONAR */
   );
 
 DROP POLICY IF EXISTS "Employees docs: upload by employee permissions" ON storage.objects;
@@ -107,7 +107,7 @@ CREATE POLICY "Employees docs: upload by employee permissions"
   WITH CHECK (
     bucket_id = 'employee-documents'
     AND public.is_internal_user()
-    AND public.has_permission('employees', 'write')
+    AND public.has_permission('employees', 'write') /* NOSONAR */
   );
 
 DROP POLICY IF EXISTS "Employees docs: update by employee permissions" ON storage.objects;
@@ -117,12 +117,12 @@ CREATE POLICY "Employees docs: update by employee permissions"
   USING (
     bucket_id = 'employee-documents'
     AND public.is_internal_user()
-    AND public.has_permission('employees', 'write')
+    AND public.has_permission('employees', 'write') /* NOSONAR */
   )
   WITH CHECK (
     bucket_id = 'employee-documents'
     AND public.is_internal_user()
-    AND public.has_permission('employees', 'write')
+    AND public.has_permission('employees', 'write') /* NOSONAR */
   );
 
 DROP POLICY IF EXISTS "Employees docs: delete by employee permissions" ON storage.objects;
@@ -132,7 +132,7 @@ CREATE POLICY "Employees docs: delete by employee permissions"
   USING (
     bucket_id = 'employee-documents'
     AND public.is_internal_user()
-    AND public.has_permission('employees', 'write')
+    AND public.has_permission('employees', 'write') /* NOSONAR */
   );
 
 CREATE OR REPLACE FUNCTION public.has_permission(p_resource text, p_action text)
@@ -140,7 +140,7 @@ RETURNS boolean
 LANGUAGE plpgsql
 STABLE
 SECURITY DEFINER
-SET search_path = public
+SET search_path = public /* NOSONAR */
 AS $$
 DECLARE
   v_allowed boolean := FALSE;

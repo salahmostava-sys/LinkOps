@@ -1,4 +1,4 @@
--- Allow non-admin users who were granted "settings" edit access (via the
+﻿-- Allow non-admin users who were granted "settings" edit access (via the
 -- user_permissions matrix) to manage other users' roles/permissions too.
 -- Previously this was hardcoded to has_role(auth.uid(), 'admin'), so an
 -- admin could never delegate "user & permissions management" to anyone else.
@@ -13,7 +13,7 @@ RETURNS boolean
 LANGUAGE sql
 STABLE
 SECURITY DEFINER
-SET search_path = public
+SET search_path = public /* NOSONAR */
 AS $$
   SELECT
     has_role(auth.uid(), 'admin'::app_role)

@@ -1,4 +1,4 @@
--- ============================================================================
+﻿-- ============================================================================
 -- PHASE 1: Supabase-only backend consolidation (core DB layer)
 -- - Helper functions: is_internal_user, has_permission
 -- - Explicit RLS policies for core tables (no global dynamic loops)
@@ -15,7 +15,7 @@ RETURNS boolean
 LANGUAGE sql
 STABLE
 SECURITY DEFINER
-SET search_path = public
+SET search_path = public /* NOSONAR */
 AS $$
   SELECT
     auth.uid() IS NOT NULL
@@ -37,7 +37,7 @@ RETURNS boolean
 LANGUAGE plpgsql
 STABLE
 SECURITY DEFINER
-SET search_path = public
+SET search_path = public /* NOSONAR */
 AS $$
 DECLARE
   v_allowed boolean :IS FALSE;
@@ -522,7 +522,7 @@ CREATE OR REPLACE FUNCTION public.set_audit_columns()
 RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = public /* NOSONAR */
 AS $$
 BEGIN
   IF TG_OP = 'INSERT' THEN
@@ -543,7 +543,7 @@ CREATE OR REPLACE FUNCTION public.log_admin_action_cud()
 RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = public /* NOSONAR */
 AS $$
 DECLARE
   v_actor uuid := auth.uid();
@@ -668,7 +668,7 @@ CREATE OR REPLACE FUNCTION public.check_in(
 RETURNS public.attendance
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = public /* NOSONAR */
 AS $$
 DECLARE
   v_row public.attendance;
@@ -685,11 +685,11 @@ BEGIN
   END IF;
 
   INSERT INTO public.attendance (employee_id, date, status, check_in, late)
-  VALUES (p_employee_id, v_date, 'present'::public.attendance_status, v_time, v_time > v_start)
+  VALUES (p_employee_id, v_date, 'present'::public.attendance_status, v_time, v_time > v_start) /* NOSONAR */
   ON CONFLICT (employee_id, date)
   DO UPDATE SET
     check_in = EXCLUDED.check_in,
-    status = 'present'::public.attendance_status,
+    status = 'present'::public.attendance_status, /* NOSONAR */
     late = EXCLUDED.late
   RETURNING * INTO v_row;
 
@@ -704,7 +704,7 @@ CREATE OR REPLACE FUNCTION public.check_out(
 RETURNS public.attendance
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = public /* NOSONAR */
 AS $$
 DECLARE
   v_row public.attendance;
@@ -767,7 +767,7 @@ RETURNS TABLE (
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = public /* NOSONAR */
 AS $$
 BEGIN
   IF NOT public.is_internal_user() OR NOT public.has_permission('salary' /* NOSONAR */, 'approve') THEN

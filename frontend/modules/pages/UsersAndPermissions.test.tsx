@@ -126,7 +126,7 @@ describe('UsersAndPermissions', () => {
     await waitFor(() => expect(authServiceMock.deleteManagedUser).toHaveBeenCalledWith('user-2'));
   }, 15000);
 
-  it.skip('allows admins to open the edit-user dialog and submit changes', async () => {
+  it('allows admins to open the edit-user dialog and submit changes', async () => {
     authServiceMock.createManagedUser.mockResolvedValue({ user_id: 'user-3' });
     authServiceMock.deleteManagedUser.mockResolvedValue(undefined);
     authServiceMock.updateManagedUser.mockResolvedValue(undefined);

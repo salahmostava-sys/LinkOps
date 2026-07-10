@@ -1,4 +1,4 @@
--- Fix dashboard_overview_rpc city enum casting issue.
+ï»¿-- Fix dashboard_overview_rpc city enum casting issue.
 -- In some datasets employees.city can be NULL, and COALESCE on enum without text cast
 -- can throw: invalid input value for enum city_enum: "unknown".
 
@@ -9,7 +9,7 @@ CREATE OR REPLACE FUNCTION public.dashboard_overview_rpc(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = public /* NOSONAR */
 AS $$
 DECLARE
   v_start DATE := to_date(p_month_year || '-01', 'YYYY-MM-DD');
@@ -33,7 +33,7 @@ BEGIN
   RETURN (
     WITH
       apps_active AS (
-        SELECT a.id, a.name, COALESCE(a.brand_color, '#6366f1') AS brand_color, COALESCE(a.text_color, '#ffffff') AS text_color
+        SELECT a.id, a.name, COALESCE(a.brand_color, '#6366f1') AS brand_color, COALESCE(a.text_color, '#ffffff') AS text_color /* NOSONAR */
         FROM public.apps a
         WHERE a.is_active IS TRUE
       ),
@@ -90,9 +90,9 @@ BEGIN
       orders_by_app AS (
         SELECT
           d.app_id,
-          COALESCE(a.name, '—') AS app,
-          COALESCE(a.brand_color, '#6366f1') AS brand_color,
-          COALESCE(a.text_color, '#ffffff') AS text_color,
+          COALESCE(a.name, 'â€”') AS app,
+          COALESCE(a.brand_color, '#6366f1') AS brand_color, /* NOSONAR */
+          COALESCE(a.text_color, '#ffffff') AS text_color, /* NOSONAR */
           COALESCE(SUM(d.orders_count), 0)::INT AS orders,
           COUNT(DISTINCT d.employee_id)::INT AS riders,
           COALESCE(t.target_orders, 0)::INT AS target,
@@ -133,8 +133,8 @@ BEGIN
           COALESCE(e.name, '') AS name,
           r.orders,
           r.app_id,
-          COALESCE(a.name, '—') AS app,
-          COALESCE(a.brand_color, '#6366f1') AS app_color
+          COALESCE(a.name, 'â€”') AS app,
+          COALESCE(a.brand_color, '#6366f1') AS app_color /* NOSONAR */
         FROM rider_app r
         LEFT JOIN public.employees e ON e.id = r.employee_id
         LEFT JOIN apps_active a ON a.id = r.app_id

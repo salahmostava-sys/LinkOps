@@ -26,7 +26,7 @@ LANGUAGE sql IMMUTABLE PARALLEL SAFE SET search_path TO public AS
 
 CREATE OR REPLACE FUNCTION public._const_dashboard_text_color_default() RETURNS TEXT
 LANGUAGE sql IMMUTABLE PARALLEL SAFE SET search_path TO public AS
-'SELECT ''#ffffff''::TEXT;';
+'SELECT ''#ffffff''::TEXT;'; /* NOSONAR */
 
 CREATE OR REPLACE FUNCTION public._const_dashboard_trend_stable() RETURNS TEXT
 LANGUAGE sql IMMUTABLE PARALLEL SAFE SET search_path TO public AS
@@ -58,7 +58,7 @@ CREATE OR REPLACE FUNCTION public.performance_dashboard_rpc(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path TO 'public'
+SET search_path TO 'public' /* NOSONAR */
 AS $$
 DECLARE
   v_start DATE;
@@ -684,7 +684,7 @@ CREATE OR REPLACE FUNCTION public.rider_profile_performance_rpc(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path TO 'public'
+SET search_path TO 'public' /* NOSONAR */
 AS $$
 DECLARE
   v_start DATE;

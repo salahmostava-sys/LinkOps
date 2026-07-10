@@ -1,4 +1,4 @@
--- Add SECURITY DEFINER to the employee sponsorship alerts trigger
+﻿-- Add SECURITY DEFINER to the employee sponsorship alerts trigger
 -- so that any role (e.g. 'operations') that can update an employee
 -- can indirectly insert an alert without needing direct INSERT permissions on alerts table.
 
@@ -78,12 +78,12 @@ BEGIN
 
     msg :=
       format(
-        'الموظف: %s (الهوية: %s) | منصات: %s | مركبات: %s | سجل تجاري: %s',
-        COALESCE(NEW.name, '—'),
-        COALESCE(NEW.national_id, '—'),
-        COALESCE(account_list, '—'),
-        COALESCE(vehicle_plate_list, CASE WHEN vehicle_count IS NULL THEN '—' ELSE vehicle_count::TEXT || ' مركبة' END),
-        COALESCE(trade_name, '—')
+        'Ø§Ù„Ù…ÙˆØ¸Ù: %s (Ø§Ù„Ù‡ÙˆÙŠØ©: %s) | Ù…Ù†ØµØ§Øª: %s | Ù…Ø±ÙƒØ¨Ø§Øª: %s | Ø³Ø¬Ù„ ØªØ¬Ø§Ø±ÙŠ: %s',
+        COALESCE(NEW.name, 'â€”'),
+        COALESCE(NEW.national_id, 'â€”'),
+        COALESCE(account_list, 'â€”'),
+        COALESCE(vehicle_plate_list, CASE WHEN vehicle_count IS NULL THEN 'â€”' ELSE vehicle_count::TEXT || ' Ù…Ø±ÙƒØ¨Ø©' END),
+        COALESCE(trade_name, 'â€”')
       );
 
     INSERT INTO public.alerts (

@@ -1,11 +1,11 @@
--- ══════════════════════════════════════════════════════════════════════════════
+﻿-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 -- Fix: employee_tiers INSERT/UPDATE/DELETE policies now respect user_permissions
 --
 -- Problem: Custom user permissions (can_edit, can_delete) were not respected 
 --          by the backend RLS policies for employee_tiers.
 --
 -- Solution: Add EXISTS checks against public.user_permissions for CUD operations.
--- ══════════════════════════════════════════════════════════════════════════════
+-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 DROP POLICY IF EXISTS "unified_insert_policy" ON public."employee_tiers";
 CREATE POLICY "unified_insert_policy" ON public."employee_tiers"

@@ -1,4 +1,4 @@
--- ══════════════════════════════════════════════════════════════════════════════
+﻿-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 -- Fix: employee_tiers SELECT policy now respects user_permissions overrides
 --
 -- Problem: The unified_select_policy only allows admin/hr roles to read rows.
@@ -8,7 +8,7 @@
 -- Solution: Extend SELECT USING clause to also allow users who have an explicit
 --           can_view=true record in public.user_permissions for 'employee_tiers'.
 --           INSERT / UPDATE / DELETE remain restricted to admin/hr only.
--- ══════════════════════════════════════════════════════════════════════════════
+-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 DROP POLICY IF EXISTS "unified_select_policy" ON public."employee_tiers";
 

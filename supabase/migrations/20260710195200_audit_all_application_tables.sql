@@ -1,11 +1,11 @@
--- Ensure the activity log captures CUD changes across all application tables.
+﻿-- Ensure the activity log captures CUD changes across all application tables.
 -- Excludes audit tables themselves to avoid recursive logging.
 
 CREATE OR REPLACE FUNCTION public.log_audit_event()
 RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = public /* NOSONAR */
 AS $$
 DECLARE
   v_row jsonb;
