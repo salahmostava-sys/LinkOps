@@ -92,26 +92,14 @@ export const settingsHubService = {
   },
 
   /**
-   * Fetch distinct users who have at least one entry in audit_log.
-   * Used to populate the "filter by user" dropdown.
+   * Fetch all user profiles for the activity-log user filter.
    */
   getAuditUsers: async () => {
-    // Get distinct non-null user_ids from audit_log
-    const { data: logRows, error: logError } = await supabase
-      .from('audit_log')
-      .select('user_id')
-      .not('user_id', 'is', null)
-      .limit(500);
-    if (logError) throw toServiceError(logError, 'settingsHubService.getAuditUsers');
-
-    const uniqueIds = [...new Set((logRows ?? []).map(r => r.user_id).filter(Boolean))] as string[];
-    if (uniqueIds.length === 0) return [];
-
-    const { data: profiles, error: profError } = await supabase
+    const { data: profiles, error } = await supabase
       .from('profiles')
       .select('id, name, email')
-      .in('id', uniqueIds);
-    if (profError) throw toServiceError(profError, 'settingsHubService.getAuditUsers.profiles');
+      .order('name', { ascending: true });
+    if (error) throw toServiceError(error, 'settingsHubService.getAuditUsers');
 
     return (profiles ?? []).sort((a, b) => (a.name ?? '').localeCompare(b.name ?? '', 'ar'));
   },

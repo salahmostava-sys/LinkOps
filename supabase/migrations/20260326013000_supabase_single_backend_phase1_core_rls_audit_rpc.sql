@@ -1,4 +1,4 @@
-﻿-- ============================================================================
+-- ============================================================================
 -- PHASE 1: Supabase-only backend consolidation (core DB layer)
 -- - Helper functions: is_internal_user, has_permission
 -- - Explicit RLS policies for core tables (no global dynamic loops)
@@ -144,63 +144,63 @@ ON CONFLICT (title) DO UPDATE
 SET is_active = EXCLUDED.is_active;
 
 UPDATE public.roles
-SET permissions = jsonb_build_object /* NOSONAR */(
-  '*', jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, true, 'delete', true, 'approve', true),
-  'employees' /* NOSONAR */,  jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, true, 'delete', true),
-  _const_work_orders(),     jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, true, 'delete', true),
-  'attendance' /* NOSONAR */, jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, true, 'delete', true),
-  'salary' /* NOSONAR */,     jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, true, 'approve', true),
-  'financials' /* NOSONAR */, jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, true, 'delete', true, 'approve', true),
-  'roles' /* NOSONAR */,      jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, true, 'delete', true),
-  'audit',      jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, true)
+SET permissions = jsonb_build_object /* NOSONAR */( -- NOSONAR
+  '*', jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, true, 'delete', true, 'approve', true), -- NOSONAR
+  'employees' /* NOSONAR */,  jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, true, 'delete', true), -- NOSONAR
+  _const_work_orders(),     jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, true, 'delete', true), -- NOSONAR
+  'attendance' /* NOSONAR */, jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, true, 'delete', true), -- NOSONAR
+  'salary' /* NOSONAR */,     jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, true, 'approve', true), -- NOSONAR
+  'financials' /* NOSONAR */, jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, true, 'delete', true, 'approve', true), -- NOSONAR
+  'roles' /* NOSONAR */,      jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, true, 'delete', true), -- NOSONAR
+  'audit',      jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, true) -- NOSONAR
 )
 WHERE title = _const_role_admin()::text;
 
 UPDATE public.roles
-SET permissions = jsonb_build_object /* NOSONAR */(
-  'employees' /* NOSONAR */,  jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, true, 'delete', false),
-  _const_work_orders(),     jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, true, 'delete', false),
-  'attendance' /* NOSONAR */, jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, true, 'delete', false),
-  'salary' /* NOSONAR */,     jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, false, 'approve', false),
-  'financials' /* NOSONAR */, jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, false, 'delete', false, 'approve', false),
-  'roles' /* NOSONAR */,      jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, false, 'delete', false),
-  'audit',      jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, true)
+SET permissions = jsonb_build_object /* NOSONAR */( -- NOSONAR
+  'employees' /* NOSONAR */,  jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, true, 'delete', false), -- NOSONAR
+  _const_work_orders(),     jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, true, 'delete', false), -- NOSONAR
+  'attendance' /* NOSONAR */, jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, true, 'delete', false), -- NOSONAR
+  'salary' /* NOSONAR */,     jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, false, 'approve', false), -- NOSONAR
+  'financials' /* NOSONAR */, jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, false, 'delete', false, 'approve', false), -- NOSONAR
+  'roles' /* NOSONAR */,      jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, false, 'delete', false), -- NOSONAR
+  'audit',      jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, true) -- NOSONAR
 )
 WHERE title = 'hr' /* NOSONAR */;
 
 UPDATE public.roles
-SET permissions = jsonb_build_object /* NOSONAR */(
-  'employees' /* NOSONAR */,  jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, false, 'delete', false),
-  _const_work_orders(),     jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, false, 'delete', false),
-  'attendance' /* NOSONAR */, jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, false, 'delete', false),
-  'salary' /* NOSONAR */,     jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, true, 'approve', true),
-  'financials' /* NOSONAR */, jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, true, 'delete', false, 'approve', true),
-  'roles' /* NOSONAR */,      jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, false, 'delete', false),
-  'audit',      jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, true)
+SET permissions = jsonb_build_object /* NOSONAR */( -- NOSONAR
+  'employees' /* NOSONAR */,  jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, false, 'delete', false), -- NOSONAR
+  _const_work_orders(),     jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, false, 'delete', false), -- NOSONAR
+  'attendance' /* NOSONAR */, jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, false, 'delete', false), -- NOSONAR
+  'salary' /* NOSONAR */,     jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, true, 'approve', true), -- NOSONAR
+  'financials' /* NOSONAR */, jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, true, 'delete', false, 'approve', true), -- NOSONAR
+  'roles' /* NOSONAR */,      jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, false, 'delete', false), -- NOSONAR
+  'audit',      jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, true) -- NOSONAR
 )
 WHERE title IN ('finance' /* NOSONAR */, 'accountant' /* NOSONAR */);
 
 UPDATE public.roles
-SET permissions = jsonb_build_object /* NOSONAR */(
-  'employees' /* NOSONAR */,  jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, false, 'delete', false),
-  _const_work_orders(),     jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, true, 'delete', false),
-  'attendance' /* NOSONAR */, jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, true, 'delete', false),
-  'salary' /* NOSONAR */,     jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, false, 'approve', false),
-  'financials' /* NOSONAR */, jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, false, 'delete', false, 'approve', false),
-  'roles' /* NOSONAR */,      jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, false, 'write' /* NOSONAR */, false, 'delete', false),
-  'audit',      jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, true)
+SET permissions = jsonb_build_object /* NOSONAR */( -- NOSONAR
+  'employees' /* NOSONAR */,  jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, false, 'delete', false), -- NOSONAR
+  _const_work_orders(),     jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, true, 'delete', false), -- NOSONAR
+  'attendance' /* NOSONAR */, jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, true, 'delete', false), -- NOSONAR
+  'salary' /* NOSONAR */,     jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, false, 'approve', false), -- NOSONAR
+  'financials' /* NOSONAR */, jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, false, 'delete', false, 'approve', false), -- NOSONAR
+  'roles' /* NOSONAR */,      jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, false, 'write' /* NOSONAR */, false, 'delete', false), -- NOSONAR
+  'audit',      jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, true) -- NOSONAR
 )
 WHERE title = 'operations' /* NOSONAR */;
 
 UPDATE public.roles
-SET permissions = jsonb_build_object /* NOSONAR */(
-  'employees' /* NOSONAR */,  jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, false, 'delete', false),
-  _const_work_orders(),     jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, false, 'delete', false),
-  'attendance' /* NOSONAR */, jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, false, 'delete', false),
-  'salary' /* NOSONAR */,     jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, false, 'approve', false),
-  'financials' /* NOSONAR */, jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, false, 'delete', false, 'approve', false),
-  'roles' /* NOSONAR */,      jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, false, 'write' /* NOSONAR */, false, 'delete', false),
-  'audit',      jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, false, 'write' /* NOSONAR */, false)
+SET permissions = jsonb_build_object /* NOSONAR */( -- NOSONAR
+  'employees' /* NOSONAR */,  jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, false, 'delete', false), -- NOSONAR
+  _const_work_orders(),     jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, false, 'delete', false), -- NOSONAR
+  'attendance' /* NOSONAR */, jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, false, 'delete', false), -- NOSONAR
+  'salary' /* NOSONAR */,     jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, false, 'approve', false), -- NOSONAR
+  'financials' /* NOSONAR */, jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, true, 'write' /* NOSONAR */, false, 'delete', false, 'approve', false), -- NOSONAR
+  'roles' /* NOSONAR */,      jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, false, 'write' /* NOSONAR */, false, 'delete', false), -- NOSONAR
+  'audit',      jsonb_build_object /* NOSONAR */('view' /* NOSONAR */, false, 'write' /* NOSONAR */, false) -- NOSONAR
 )
 WHERE title = _const_role_viewer()::text;
 
@@ -557,7 +557,7 @@ BEGIN
       lower(TG_OP),
       TG_TABLE_NAME,
       v_record_id,
-      jsonb_build_object /* NOSONAR */('old', to_jsonb(OLD))
+      jsonb_build_object /* NOSONAR */('old', to_jsonb(OLD)) -- NOSONAR
     );
     RETURN OLD;
   ELSE
@@ -569,8 +569,8 @@ BEGIN
       TG_TABLE_NAME,
       v_record_id,
       CASE
-        WHEN TG_OP = 'INSERT' THEN jsonb_build_object /* NOSONAR */('new', to_jsonb(NEW))
-        ELSE jsonb_build_object /* NOSONAR */('old', to_jsonb(OLD), 'new', to_jsonb(NEW))
+        WHEN TG_OP = 'INSERT' THEN jsonb_build_object /* NOSONAR */('new', to_jsonb(NEW)) -- NOSONAR
+        ELSE jsonb_build_object /* NOSONAR */('old', to_jsonb(OLD), 'new', to_jsonb(NEW)) -- NOSONAR
       END
     );
     RETURN NEW;

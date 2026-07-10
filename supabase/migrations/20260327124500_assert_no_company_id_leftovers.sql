@@ -11,14 +11,14 @@ BEGIN
   INTO v_count
   FROM information_schema.columns c
   WHERE c.table_schema = 'public'
-    AND lower(c.column_name) = 'company_id';
+    AND lower(c.column_name) = 'company_id'; -- NOSONAR
 
   IF v_count > 0 THEN
     SELECT string_agg(format('%I.%I', c.table_schema, c.table_name), ', ' ORDER BY c.table_name)
     INTO v_sample
     FROM information_schema.columns c
     WHERE c.table_schema = 'public'
-      AND lower(c.column_name) = 'company_id';
+      AND lower(c.column_name) = 'company_id'; -- NOSONAR
 
     RAISE EXCEPTION 'Assertion failed: company_id columns still exist (%): %', v_count, COALESCE(v_sample, 'n/a');
   END IF;

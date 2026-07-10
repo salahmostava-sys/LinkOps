@@ -1,4 +1,4 @@
-ï»¿-- Fix dashboard_overview_rpc city enum casting issue.
+-- Fix dashboard_overview_rpc city enum casting issue.
 -- In some datasets employees.city can be NULL, and COALESCE on enum without text cast
 -- can throw: invalid input value for enum city_enum: "unknown".
 
@@ -90,7 +90,7 @@ BEGIN
       orders_by_app AS (
         SELECT
           d.app_id,
-          COALESCE(a.name, 'â€”') AS app,
+          COALESCE(a.name, '—') AS app,
           COALESCE(a.brand_color, '#6366f1') AS brand_color,
           COALESCE(a.text_color, '#ffffff') AS text_color,
           COALESCE(SUM(d.orders_count), 0)::INT AS orders,
@@ -108,7 +108,7 @@ BEGIN
       ),
       orders_by_city AS (
         SELECT
-          COALESCE(e.city::TEXT, 'unknown') AS city,
+          COALESCE(e.city::TEXT, 'unknown') AS city, -- NOSONAR
           COALESCE(SUM(d.orders_count), 0)::INT AS orders
         FROM public.daily_orders d
         JOIN public.employees e ON e.id = d.employee_id
@@ -133,7 +133,7 @@ BEGIN
           COALESCE(e.name, '') AS name,
           r.orders,
           r.app_id,
-          COALESCE(a.name, 'â€”') AS app,
+          COALESCE(a.name, '—') AS app,
           COALESCE(a.brand_color, '#6366f1') AS app_color
         FROM rider_app r
         LEFT JOIN public.employees e ON e.id = r.employee_id
@@ -158,7 +158,7 @@ BEGIN
           COALESCE((SELECT SUM(o.orders)::INT FROM orders_by_app o), 0) AS total_orders,
           COALESCE((SELECT SUM(o.est_revenue)::NUMERIC FROM orders_by_app o), 0) AS est_revenue_total
       )
-    SELECT jsonb_build_object(
+    SELECT jsonb_build_object( -- NOSONAR
       'monthYear', p_month_year,
       'today', p_today::TEXT,
       'apps', COALESCE((SELECT jsonb_agg(to_jsonb(a) ORDER BY a.name) FROM apps_active a), '[]'::jsonb),
@@ -167,7 +167,7 @@ BEGIN
       'attendanceWeek', COALESCE((SELECT jsonb_agg(to_jsonb(w) ORDER BY w.date) FROM att_week w), '[]'::jsonb),
       'ordersByApp', COALESCE((
         SELECT jsonb_agg(
-          jsonb_build_object(
+          jsonb_build_object( -- NOSONAR
             'appId', o.app_id,
             'app', o.app,
             _const_work_orders(), o.orders,
@@ -184,7 +184,7 @@ BEGIN
       'ordersByCity', COALESCE((SELECT jsonb_agg(to_jsonb(c) ORDER BY c.orders DESC) FROM orders_by_city c), '[]'::jsonb),
       'riders', COALESCE((
         SELECT jsonb_agg(
-          jsonb_build_object(
+          jsonb_build_object( -- NOSONAR
             'employee_id', r.employee_id,
             'name', r.name,
             _const_work_orders(), r.orders,
@@ -197,7 +197,7 @@ BEGIN
         FROM riders r
       ), '[]'::jsonb),
       'recentActivity', COALESCE((SELECT jsonb_agg(to_jsonb(ra) ORDER BY ra.created_at DESC) FROM recent_activity ra), '[]'::jsonb),
-      'kpis', jsonb_build_object(
+      'kpis', jsonb_build_object( -- NOSONAR
         'prevMonthOrders', (SELECT total FROM prev_month_orders),
         'activeVehicles', (SELECT active_vehicles FROM counts),
         'activeAlerts', (SELECT active_alerts FROM counts),

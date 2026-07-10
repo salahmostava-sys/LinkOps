@@ -258,6 +258,28 @@ function classifyAdminError(message) {
   return { status: 500, safeMessage: 'Internal server error' };
 }
 
+async function checkUserManagementAccess(callerClient, callerUserId) {
+  const { data: roleRows, error: roleError } = await callerClient
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', callerUserId);
+  if (roleError) throw new Error(roleError.message);
+
+  const callerRoles = new Set((roleRows ?? []).map(r => r.role));
+  if (callerRoles.has('admin')) return true;
+
+  // Delegated access: a non-admin can be granted "settings" edit permission via the
+  // permissions matrix (user_permissions), which unlocks user/permission management too.
+  const { data: settingsPerm, error: settingsPermError } = await callerClient
+    .from('user_permissions')
+    .select('can_edit')
+    .eq('user_id', callerUserId)
+    .eq('permission_key', 'settings')
+    .maybeSingle();
+  if (settingsPermError) throw new Error(settingsPermError.message);
+  return Boolean(settingsPerm?.can_edit);
+}
+
 export async function adminUpdateUserHandler(req, res) {
   const requestId = crypto.randomUUID();
   try {
@@ -265,26 +287,7 @@ export async function adminUpdateUserHandler(req, res) {
     if (!auth) return;
     const { user: callerUser, callerClient } = auth;
 
-    const { data: roleRows, error: roleError } = await callerClient
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', callerUser.id);
-    if (roleError) throw new Error(roleError.message);
-
-    const callerRoles = new Set((roleRows ?? []).map(r => r.role));
-    let hasUserManagementAccess = callerRoles.has('admin');
-    if (!hasUserManagementAccess) {
-      // Delegated access: a non-admin can be granted "settings" edit permission via the
-      // permissions matrix (user_permissions), which unlocks user/permission management too.
-      const { data: settingsPerm, error: settingsPermError } = await callerClient
-        .from('user_permissions')
-        .select('can_edit')
-        .eq('user_id', callerUser.id)
-        .eq('permission_key', 'settings')
-        .maybeSingle();
-      if (settingsPermError) throw new Error(settingsPermError.message);
-      hasUserManagementAccess = Boolean(settingsPerm?.can_edit);
-    }
+    const hasUserManagementAccess = await checkUserManagementAccess(callerClient, callerUser.id);
     if (!hasUserManagementAccess) {
       return res.status(403).json({ error: 'Only admins or users with settings management access can update users' });
     }
@@ -297,8 +300,7 @@ export async function adminUpdateUserHandler(req, res) {
     }
 
     const { user_id, password, email, name, role, is_active, action } = req.body;
-    let normalizedAction = action;
-    if (!normalizedAction && password) normalizedAction = 'update_password';
+    const normalizedAction = action || (password ? 'update_password' : undefined);
     if (!normalizedAction) throw new Error('action is required');
 
     if (normalizedAction !== 'create_user') {

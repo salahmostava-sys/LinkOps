@@ -108,7 +108,6 @@ describe('settingsHubService', () => {
         return {
           select: vi.fn().mockReturnThis(),
           order: vi.fn().mockResolvedValue({ data: [{ id: 'user-1', name: 'Z' }, { id: 'user-2', name: 'A' }], error: null }),
-          in: vi.fn().mockResolvedValue({ data: [{ id: 'user-1', name: 'Z' }, { id: 'user-2', name: 'A' }], error: null })
         };
       });
       const res = await settingsHubService.getAuditUsers();
