@@ -26,16 +26,16 @@ import { UndoProvider } from "@shared/context/UndoContext";
 
 const Login = lazy(() => import("@modules/pages/Login"));
 
-const Dashboard = lazy(() => import("@modules/pages/Dashboard"));
+const Dashboard = lazy(() => import("@modules/dashboard/pages/DashboardPage"));
 const Employees = lazy(() => import("@modules/employees/pages/EmployeesPage"));
-const Attendance = lazy(() => import("@modules/pages/Attendance"));
+const Attendance = lazy(() => import("@modules/attendance/pages/AttendancePage"));
 const Orders = lazy(() => import("@modules/orders/pages/OrdersPage"));
 const Salaries = lazy(() => import("@modules/salaries/pages/SalariesPage"));
 const Advances = lazy(() => import("@modules/advances/pages/AdvancesPage"));
 const FuelPage = lazy(() => import("@modules/fuel/pages/FuelPage"));
 const MaintenancePage = lazy(() => import("@modules/maintenance/pages/MaintenancePage"));
 const VehicleReportPage = lazy(() => import("@modules/maintenance/pages/VehicleReportPage"));
-const Apps = lazy(() => import("@modules/pages/Apps"));
+const Apps = lazy(() => import("@modules/apps/pages/AppsPage"));
 const AppSettingsPage = lazy(() => import("@modules/apps/pages/AppSettingsPage").then(m => ({ default: m.AppSettingsPage })));
 const Alerts = lazy(() => import("@modules/pages/Alerts"));
 const SettingsHub = lazy(() => import("@modules/pages/SettingsHub"));
