@@ -103,15 +103,15 @@ const config = {
         "outline-variant": "#dce2eb",
         /* ── Brand palette ────────────────────────────────────────── */
         brand: {
-          25:  '#f5f8fc',
-          50:  '#eef3fa',
-          100: '#dbe6f4',
-          200: '#b8cce6',
-          300: '#8aaad1',
-          400: '#5684ba',
-          500: '#2f609d',
+          25:  '#f4f8fe',
+          50:  '#edf4fd',
+          100: '#d8e7fa',
+          200: '#b4cff3',
+          300: '#83ade8',
+          400: '#4d83d4',
+          500: '#1f54ad',
           600: '#174ea6',
-          700: '#0f3b85',
+          700: '#123f88',
           800: '#0b276b',
           900: '#061735',
         },
@@ -127,9 +127,9 @@ const config = {
       boxShadow: {
         'card':       '0px 8px 28px rgba(20, 31, 52, 0.045)',
         'card-hover': '0px 14px 42px rgba(20, 31, 52, 0.075)',
-        'brand':      '0 4px 16px 0 rgba(11, 39, 107, 0.18)',
-        'brand-sm':   '0 2px 8px 0 rgba(11, 39, 107, 0.14)',
-        'sidebar':    '4px 0 24px 0 rgba(11, 39, 107, 0.08)',
+        'brand':      '0 4px 16px 0 rgba(31, 84, 173, 0.18)',
+        'brand-sm':   '0 2px 8px 0 rgba(31, 84, 173, 0.14)',
+        'sidebar':    '4px 0 24px 0 rgba(31, 84, 173, 0.08)',
       },
       keyframes: {
         "accordion-down": {

@@ -183,7 +183,7 @@ export default function SettingsHub() {
                   style={
                     isActive
                       ? {
-                          background: '#0b276b',
+                          background: '#1f54ad',
                           color: '#ffffff',
                           fontWeight: 600,
                           boxShadow: '0 4px 12px rgba(38,66,230,0.20)',

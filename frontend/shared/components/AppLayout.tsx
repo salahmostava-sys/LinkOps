@@ -224,7 +224,7 @@ const AppLayoutInner = ({ children }: Readonly<AppLayoutProps>) => { // NOSONAR:
                   ) : (
                     <div
                       className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 ring-2 ring-background"
-                      style={{ background: '#0b276b' }}
+                      style={{ background: 'var(--ds-primary)' }}
                       title={displayName}
                     >
                       {initials || 'A'}
@@ -256,7 +256,7 @@ const AppLayoutInner = ({ children }: Readonly<AppLayoutProps>) => { // NOSONAR:
                     ) : (
                       <div
                         className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
-                        style={{ background: '#0b276b' }}
+                        style={{ background: 'var(--ds-primary)' }}
                       >
                         {initials || 'A'}
                       </div>

@@ -104,8 +104,8 @@ export function buildPlatformAppsFilter(ctx: FilterContext): React.ReactNode {
           <span
             className="inline-flex items-center rounded px-2 py-0.5 text-[10px] font-medium"
             style={{
-              backgroundColor: app.brand_color || "#0b276b",
-              color: getContrastTextColor(app.brand_color || "#0b276b"),
+              backgroundColor: app.brand_color || "#1f54ad",
+              color: getContrastTextColor(app.brand_color || "#1f54ad"),
             }}
           >
             {app.name}

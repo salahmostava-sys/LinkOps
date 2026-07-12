@@ -288,7 +288,7 @@ function mapRpcToDashboardResponse(raw: any): PerformanceDashboardResponse {
   const ordersByApp = (Array.isArray(raw.appComparison) ? raw.appComparison : []).map((ac: any) => ({
     appId: ac.appId ?? ac.app_id ?? '',
     appName: ac.appName ?? ac.app_name ?? '',
-    brandColor: ac.brandColor ?? ac.brand_color ?? '#0b276b',
+    brandColor: ac.brandColor ?? ac.brand_color ?? '#1f54ad',
     textColor: ac.textColor ?? ac.text_color ?? '#ffffff',
     orders: Number(ac.totalOrders ?? ac.total_orders ?? 0),
     riders: Number(ac.riderCount ?? ac.rider_count ?? 0),

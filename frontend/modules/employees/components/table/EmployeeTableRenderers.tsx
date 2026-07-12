@@ -120,7 +120,7 @@ function renderPlatformAppsCell(ctx: CellContext): React.ReactNode {
           {emp.platform_apps?.length
             ? emp.platform_apps.map((app) => (
                 <span key={app.id} className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium"
-                  style={{ backgroundColor: app.brand_color || "#0b276b", color: getContrastTextColor(app.brand_color || "#0b276b") }}
+                  style={{ backgroundColor: app.brand_color || "#1f54ad", color: getContrastTextColor(app.brand_color || "#1f54ad") }}
                 >
                   {app.name}
                 </span>

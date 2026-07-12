@@ -92,7 +92,7 @@ const STATUS_CLASSES: Record<string, string> = {
 const COLOR_MAP: Record<string, string> = {
   green: '#16a34a',
   red: '#dc2626',
-  blue: '#0b276b',
+  blue: '#1f54ad',
   orange: '#ea580c',
 };
 
@@ -201,12 +201,12 @@ const buildPlatformsTable = (platforms: SlipPlatformRow[]): string => {
         <tr>
           <td class="label-cell">${escapeHtml(p.name)}</td>
           <td class="value-cell">${fmt(p.orders)}</td>
-          <td class="value-cell" style="color:#0b276b">${fmt(p.salary)} ر.س</td>
+          <td class="value-cell" style="color:#1f54ad">${fmt(p.salary)} ر.س</td>
         </tr>`).join('')}
       <tr class="total-row">
         <td class="label-cell">إجمالي المنصات</td>
         <td class="value-cell">${fmt(totalOrders)}</td>
-        <td class="value-cell" style="color:#0b276b">${fmt(totalPlatformSalary)} ر.س</td>
+        <td class="value-cell" style="color:#1f54ad">${fmt(totalPlatformSalary)} ر.س</td>
       </tr>
     </table>`;
 };

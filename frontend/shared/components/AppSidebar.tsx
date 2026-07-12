@@ -122,8 +122,8 @@ function setHoverStylesIf(
   enter: boolean
 ) {
   if (!shouldApply) return;
-  el.style.background = enter ? 'rgba(11, 39, 107, 0.08)' : 'transparent';
-  el.style.color = '#0b276b';
+  el.style.background = enter ? 'rgba(31, 84, 173, 0.08)' : 'transparent';
+  el.style.color = 'var(--ds-primary)';
 }
 
 type SidebarNavItemData = {
@@ -157,7 +157,7 @@ const SidebarNavLink = memo(function SidebarNavLink({
       style={
         active
           ? {
-              background: '#0b276b',
+              background: 'var(--ds-primary)',
               color: '#ffffff',
               fontWeight: 700,
             }
@@ -311,9 +311,9 @@ const AppSidebar = () => {
         )}
         style={{
           background: '#ffffff',
-          boxShadow: '4px 0 24px rgba(11, 39, 107, 0.08)',
-          borderInlineStart: isRTL ? '1px solid #e5eaf2' : undefined,
-          borderInlineEnd: isRTL ? undefined : '1px solid #e5eaf2',
+          boxShadow: 'none',
+          borderInlineStart: isRTL ? '6px solid #d9e0ea' : undefined,
+          borderInlineEnd: isRTL ? undefined : '6px solid #d9e0ea',
         }}
       >
 
@@ -349,8 +349,8 @@ const AppSidebar = () => {
             <button
               onClick={close}
               className="lg:hidden w-7 h-7 rounded-lg flex items-center justify-center transition-colors flex-shrink-0"
-              style={{ color: '#0b276b' }}
-              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(11,39,107,0.08)')}
+              style={{ color: 'var(--ds-primary)' }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(31,84,173,0.08)')}
               onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
             >
               <X size={15} />
@@ -417,20 +417,20 @@ const AppSidebar = () => {
                   type="button"
                   className={cn(
                     'flex h-10 w-full items-center gap-2.5 rounded-xl px-3 text-start transition-all duration-150',
-                    'hover:bg-[#0b276b]/[0.08]',
+                    'hover:bg-[rgba(31,84,173,0.08)]',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                     'text-[#061735]'
                   )}
                   style={{ fontWeight: 600 }}
                 >
-                  {group.groupIcon && <group.groupIcon size={16} className="flex-shrink-0 text-[#0b276b]" />}
+                  {group.groupIcon && <group.groupIcon size={16} className="flex-shrink-0 text-[var(--ds-primary)]" />}
                   <span className="min-w-0 flex-1 truncate text-sm">
                     {group.sectionLabel}
                   </span>
                   <ChevronDown
                     size={16}
                     className={cn(
-                      'flex-shrink-0 text-[#0b276b] transition-transform duration-200',
+                      'flex-shrink-0 text-[var(--ds-primary)] transition-transform duration-200',
                       isOpen && '-rotate-180',
                     )}
                     aria-hidden
@@ -467,8 +467,8 @@ const AppSidebar = () => {
             onClick={toggleCollapse}
             title={collapsed ? 'توسيع القائمة' : 'تصغير القائمة'}
             className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
-            style={{ color: '#0b276b' }}
-            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(11,39,107,0.08)')}
+            style={{ color: 'var(--ds-primary)' }}
+            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(31,84,173,0.08)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
           >
             <CollapseChevronIcon size={16} />
@@ -495,7 +495,7 @@ function SidebarLogo({ logoSrc }: Readonly<{ logoSrc?: string }>) {
   return (
     <div
       className="w-8 h-8 rounded-xl flex items-center justify-center text-white flex-shrink-0"
-      style={{ background: '#0b276b' }}
+      style={{ background: 'var(--ds-primary)' }}
     >
       <Sparkles size={18} aria-hidden />
     </div>

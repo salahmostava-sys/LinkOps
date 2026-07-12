@@ -26,7 +26,7 @@ export const MERGED_PDF_STYLES = `
   table{width:100%;border-collapse:collapse;margin-bottom:10px}
   td{padding:7px 10px;border:1px solid #e5e7eb;font-size:12px}
   .label{background:#f3f4f6;font-weight:600;width:55%}
-  .val-blue{color:#0b276b;font-weight:700}
+  .val-blue{color:#1f54ad;font-weight:700}
   .val-green{color:#16a34a;font-weight:700}
   .val-red{color:#dc2626;font-weight:700}
   .val-orange{color:#ea580c;font-weight:600}

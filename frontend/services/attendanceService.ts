@@ -235,7 +235,7 @@ const attendanceService = {
   },
 
   /** Add a new custom attendance status. */
-  addStatusConfig: async (name: string, color = '#0b276b') => {
+  addStatusConfig: async (name: string, color = '#1f54ad') => {
     const { error } = await supabase
       .from('attendance_status_configs')
       .insert({ name, color });

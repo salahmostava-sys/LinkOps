@@ -28,7 +28,7 @@ export const useAppsData = () => {
             id: app.id,
             name: app.name,
             name_en: app.name_en,
-            brand_color: app.brand_color || '#0b276b',
+            brand_color: app.brand_color || '#1f54ad',
             text_color: app.text_color || '#ffffff',
             is_active: app.is_active,
             employeeCount: count,

@@ -69,7 +69,7 @@ describe('useAppColors', () => {
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.apps).toHaveLength(2);
     expect(result.current.activeApps).toHaveLength(1);
-    expect(result.current.apps[0].brand_color).toBe('#0b276b');
+    expect(result.current.apps[0].brand_color).toBe('#1f54ad');
     expect(result.current.apps[0].text_color).toBe('#ffffff');
     expect(result.current.apps[0].custom_columns).toEqual([{ key: 'rating', label: 'Rating' }]);
     expect(result.current.apps[1].custom_columns).toEqual([]);

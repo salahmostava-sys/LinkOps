@@ -20,7 +20,7 @@ export function useDailyAppReportTab() {
 
   const getAppColor = (appId: string) => {
     const app = sq.apps.find((a) => a.id === appId);
-    if (!app) return '#0b276b';
+    if (!app) return '#1f54ad';
     return getAppColorFunction(colorApps, app.name).solid;
   };
 

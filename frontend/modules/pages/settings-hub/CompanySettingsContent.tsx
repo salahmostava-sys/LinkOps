@@ -16,7 +16,7 @@ import { usePermissions } from '@shared/hooks/usePermissions';
 const SectionHeader = ({ icon, title, subtitle }: { icon: React.ReactNode; title: string; subtitle?: string }) => (
   <div className="flex items-center gap-3 pb-4 mb-5" style={{ borderBottom: '1px solid var(--ds-surface-container)' }}>
     <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-      style={{ background: 'rgba(11,39,107,0.08)', color: '#0b276b' }}>
+      style={{ background: 'rgba(31,84,173,0.08)', color: '#1f54ad' }}>
       {icon}
     </div>
     <div>

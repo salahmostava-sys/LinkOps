@@ -188,7 +188,7 @@ function LoginBrandingPanel({
     <section
       className="hidden lg:flex lg:w-[52%] relative flex-col justify-between overflow-hidden px-12 py-10 xl:px-16 xl:py-12"
       style={{
-        background: '#0b276b',
+        background: 'var(--ds-primary)',
       }}
     >
       <div
@@ -376,7 +376,7 @@ function LoginFormSection(props: LoginFormSectionProps) {
             />
           </span>
         ) : (
-          <div className="w-20 h-20 rounded-xl mb-3 flex items-center justify-center" style={{ background: '#0b276b' }}>
+          <div className="w-20 h-20 rounded-xl mb-3 flex items-center justify-center" style={{ background: 'var(--ds-primary)' }}>
             <span className="material-symbols-outlined text-5xl text-white" style={{ fontVariationSettings: "'FILL' 1" }}>local_shipping</span>
           </div>
         )}
@@ -463,7 +463,7 @@ function LoginFormSection(props: LoginFormSectionProps) {
               type="submit"
               disabled={loading}
               className="relative h-12 w-full px-5 text-white font-bold rounded-xl overflow-hidden active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed group"
-              style={{ background: '#0b276b' }}
+              style={{ background: 'var(--ds-primary)' }}
             >
               <span
                 className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
