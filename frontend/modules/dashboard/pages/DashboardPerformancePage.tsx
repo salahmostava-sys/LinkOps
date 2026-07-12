@@ -1,19 +1,18 @@
 import { Suspense, lazy, startTransition, useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Suspense, lazy, startTransition, useMemo, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { useAuth } from '@app/providers/AuthContext';
 import { useTemporalContext } from '@app/providers/TemporalContext';
 import { QueryErrorRetry } from '@shared/components/QueryErrorRetry';
 import { authQueryUserId, useAuthQueryGate } from '@shared/hooks/useAuthQueryGate';
 import { REALTIME_TABLES_DASHBOARD, useRealtimePostgresChanges } from '@shared/hooks/useRealtimePostgresChanges';
-import { operationsMonitorService } from '@services/operationsMonitorService';
-import { performanceService } from '@services/performanceService';
 import {
   DashboardPerformanceHeader,
   type DashboardPerformanceTabKey,
 } from '@modules/dashboard/components/DashboardPerformanceHeader';
 import { DashboardPerformanceOverviewTab } from '@modules/dashboard/components/DashboardPerformanceOverviewTab';
-import { DashboardDailyOperationsTab } from '@modules/dashboard/components/DashboardDailyOperationsTab';
 import { DashboardRiderProfileModal } from '@modules/dashboard/components/DashboardRiderProfileModal';
 import { Skeleton } from '@shared/components/ui/skeleton';
 
@@ -32,15 +31,9 @@ const loadPlatformsTab = () =>
     default: module.DashboardPlatformsTab,
   }));
 
-const loadAITab = () =>
-  import('@modules/pages/AiAnalyticsPage').then((module) => ({
-    default: module.default,
-  }));
-
 const LazyDashboardPerformanceAnalyticsTab = lazy(loadAnalyticsTab);
 const LazyDashboardRankingTab = lazy(loadRankingTab);
 const LazyDashboardPlatformsTab = lazy(loadPlatformsTab);
-const LazyAiAnalyticsTab = lazy(loadAITab);
 
 const REALTIME_TABLES_PERFORMANCE_PAGE = [
   ...REALTIME_TABLES_DASHBOARD,
@@ -64,7 +57,6 @@ export default function DashboardPerformancePage() {
   useRealtimePostgresChanges('performance-dashboard-realtime', REALTIME_TABLES_PERFORMANCE_PAGE, () => {
     if (!user?.id) return;
     queryClient.invalidateQueries({ queryKey: ['performance-dashboard', uid, currentMonth] });
-    queryClient.invalidateQueries({ queryKey: ['daily-operations', uid] });
   });
 
   const dashboardQuery = useQuery({
@@ -72,13 +64,6 @@ export default function DashboardPerformancePage() {
     enabled,
     staleTime: 60_000,
     queryFn: () => performanceService.getDashboard(currentMonth),
-  });
-
-  const operationsQuery = useQuery({
-    queryKey: ['daily-operations', uid] as const,
-    enabled: enabled && activeTab === 'daily_operations',
-    staleTime: 60_000,
-    queryFn: () => operationsMonitorService.getDailySnapshot(),
   });
 
   const _chatEnabled = useMemo(() => {
@@ -90,9 +75,6 @@ export default function DashboardPerformancePage() {
       loadAnalyticsTab();
       loadRankingTab();
       loadPlatformsTab();
-    }
-    if (tab === 'ai') {
-      loadAITab();
     }
     startTransition(() => {
       setActiveTab(tab);
@@ -108,11 +90,10 @@ export default function DashboardPerformancePage() {
           loadAnalyticsTab();
           loadRankingTab();
           loadPlatformsTab();
-          loadAITab();
         }}
       />
 
-      {dashboardQuery.isError && activeTab !== 'daily_operations' ? (
+      {dashboardQuery.isError ? (
         <QueryErrorRetry
           error={dashboardQuery.error}
           onRetry={() => { dashboardQuery.refetch(); }}
@@ -147,33 +128,6 @@ export default function DashboardPerformancePage() {
           </div>
         </div>
       ) : null}
-
-      {!dashboardQuery.isError && activeTab === 'ai' ? (
-        <div className="space-y-6">
-          <Suspense fallback={<TabFallback />}>
-            <LazyAiAnalyticsTab />
-          </Suspense>
-        </div>
-      ) : null}
-
-      {activeTab === 'daily_operations' ? (
-        operationsQuery.isError ? (
-          <QueryErrorRetry
-            error={operationsQuery.error}
-            onRetry={() => { operationsQuery.refetch(); }}
-            isFetching={operationsQuery.isFetching}
-            title="تعذر تحميل حالة التشغيل اليومية"
-            hint="راجع الاتصال أو صلاحيات قراءة بيانات التشغيل ثم أعد المحاولة."
-          />
-        ) : (
-          <DashboardDailyOperationsTab
-            loading={operationsQuery.isLoading || operationsQuery.isFetching}
-            snapshot={operationsQuery.data ?? null}
-          />
-        )
-      ) : null}
-
-      {/* المساعد الذكي */}
 
       <DashboardRiderProfileModal riderId={selectedRiderId} onClose={() => setSelectedRiderId(null)} />
     </div>

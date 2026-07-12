@@ -1,4 +1,4 @@
-import { Activity, Brain, LayoutDashboard, Medal } from 'lucide-react';
+import { LayoutDashboard, Medal } from 'lucide-react';
 
 import { useTemporalContext } from '@app/providers/TemporalContext';
 import {
@@ -7,7 +7,7 @@ import {
   dashboardTabButtonClass,
 } from '@modules/dashboard/components/DashboardHeaderShared';
 
-export type DashboardPerformanceTabKey = 'overview' | 'analytics_ranking' | 'ai' | 'daily_operations';
+export type DashboardPerformanceTabKey = 'overview' | 'analytics_ranking';
 
 type DashboardPerformanceHeaderProps = {
   activeTab: DashboardPerformanceTabKey;
@@ -18,15 +18,11 @@ type DashboardPerformanceHeaderProps = {
 const TAB_LABELS: Record<DashboardPerformanceTabKey, string> = {
   overview: 'النظرة العامة',
   analytics_ranking: 'التحليلات والمراكز',
-  ai: 'التحليلات الذكية',
-  daily_operations: 'التشغيل اليومي',
 };
 
 const DASHBOARD_TABS: readonly DashboardPerformanceTabKey[] = [
   'overview',
   'analytics_ranking',
-  'ai',
-  'daily_operations',
 ];
 
 export function DashboardPerformanceHeader({
@@ -54,8 +50,6 @@ export function DashboardPerformanceHeader({
             >
               {tab === 'overview' ? <LayoutDashboard size={13} /> : null}
               {tab === 'analytics_ranking' ? <Medal size={13} /> : null}
-              {tab === 'ai' ? <Brain size={13} /> : null}
-              {tab === 'daily_operations' ? <Activity size={13} /> : null}
               {TAB_LABELS[tab]}
             </button>
           ))}

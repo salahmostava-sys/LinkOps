@@ -45,7 +45,6 @@ const WalletPage = lazy(() => import("@modules/wallet/pages/WalletPage"));
 const Motorcycles = lazy(() => import("@modules/pages/Motorcycles"));
 const VehicleAssignment = lazy(() => import("@modules/pages/VehicleAssignment"));
 const EmployeeTiers = lazy(() => import("@modules/pages/EmployeeTiers"));
-const AiAnalytics = lazy(() => import("@modules/pages/AiAnalyticsPage"));
 const ProfilePage = lazy(() => import("@modules/pages/ProfilePage"));
 const NotFound = lazy(() => import("@modules/pages/NotFound"));
 
@@ -151,7 +150,6 @@ const router = createBrowserRouter([
           { path: "apps/settings", element: <PageGuard pageKey="apps"><AppSettingsPage /></PageGuard> },
           { path: "alerts", element: <PageGuard pageKey="alerts"><Alerts /></PageGuard> },
           { path: "employee-tiers", element: <PageGuard pageKey="employee_tiers"><EmployeeTiers /></PageGuard> },
-          { path: "ai-analytics", element: <PageGuard pageKey="ai_analytics"><AiAnalytics /></PageGuard> },
           { path: "profile", element: <ProfilePage /> },
           { path: "profile-page", element: <Navigate to="/profile" replace /> },
           { path: "settings", element: <PageGuard pageKey="settings"><SettingsHub /></PageGuard> },
