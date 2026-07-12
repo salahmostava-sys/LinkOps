@@ -167,7 +167,7 @@ function EmployeeDetailedTableInner() {
                 return (
                   <th
                     key={col.key}
-                    className={`ta-th select-none whitespace-nowrap text-center text-black ${col.key === "seq" ? "w-10 px-2" : ""}`}
+                    className={`ta-th !px-1 select-none whitespace-nowrap text-center text-black ${col.key === "seq" ? "w-10 !px-1" : ""}`}
                   >
                     <div className="flex items-center justify-center gap-1">
                       {col.sortable ? (
@@ -213,7 +213,7 @@ function EmployeeDetailedTableInner() {
               ))}
             {!loading && hasNoPaginatedRows && (
               <tr>
-                <td colSpan={activeCols.length} className="ta-td">
+                <td colSpan={activeCols.length} className="ta-td !px-1">
                   <div className="flex flex-col items-center gap-2 text-muted-foreground">
                     <Users size={40} className="opacity-60" aria-hidden />
                     <p className="font-medium">لا توجد نتائج</p>

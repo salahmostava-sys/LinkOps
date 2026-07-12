@@ -83,7 +83,7 @@ export type CellContext = {
 function renderSeqCell(ctx: CellContext): React.ReactNode {
   const { colIdx, globalIdx, presenceUser } = ctx;
   return (
-    <td key="seq" className="ta-td relative font-semibold text-muted-foreground tabular-nums">
+    <td key="seq" className="ta-td !px-1 relative font-semibold text-muted-foreground tabular-nums">
       {globalIdx}
       {colIdx === 0 && presenceUser && (
         <span className="absolute -top-2.5 start-1 z-10 rounded px-1.5 py-0 text-[8px] font-medium text-white whitespace-nowrap shadow-sm" style={{ backgroundColor: presenceUser.color }}>
@@ -97,7 +97,7 @@ function renderSeqCell(ctx: CellContext): React.ReactNode {
 function renderNameCell(ctx: CellContext): React.ReactNode {
   const { emp, setSelectedEmployee } = ctx;
   return (
-    <td key="name" className="ta-td align-middle">
+    <td key="name" className="ta-td !px-1 align-middle">
       <button
         onClick={() => setSelectedEmployee(emp.id)}
         className="flex items-center justify-center gap-2.5 text-sm font-semibold text-foreground transition-colors hover:text-primary text-center"
@@ -112,7 +112,7 @@ function renderNameCell(ctx: CellContext): React.ReactNode {
 function renderPlatformAppsCell(ctx: CellContext): React.ReactNode {
   const { emp, permissions, availableApps, refetchEmployees, emptyCell } = ctx;
   return (
-    <td key="platform_apps" className="ta-td">
+    <td key="platform_apps" className="ta-td !px-1">
       {permissions.can_edit ? (
         <PlatformAppsEditor employeeId={emp.id} employeeName={emp.name} currentApps={emp.platform_apps || []} availableApps={availableApps} onSuccess={refetchEmployees} />
       ) : (
@@ -135,7 +135,7 @@ function renderPlatformAppsCell(ctx: CellContext): React.ReactNode {
 function renderResidencyCell(ctx: CellContext): React.ReactNode {
   const { emp, res, daysColor, renderEditableDate, formatDateCell, emptyCell } = ctx;
   return (
-    <td key="residency_combined" className="ta-td">
+    <td key="residency_combined" className="ta-td !px-1">
       {renderEditableDate(emp.id, "residency_expiry", emp.residency_expiry,
         emp.residency_expiry ? (
           <div className="flex flex-col items-center gap-0.5">
@@ -155,7 +155,7 @@ function renderResidencyCell(ctx: CellContext): React.ReactNode {
 function renderSponsorshipCell(ctx: CellContext): React.ReactNode {
   const { emp, permissions, saveField, setStatusDate, setStatusDateDialog } = ctx;
   return (
-    <td key="sponsorship_status" className="ta-td">
+    <td key="sponsorship_status" className="ta-td !px-1">
       {permissions.can_edit ? (
         <InlineSelectEditor
           value={emp.sponsorship_status || "not_sponsored"}
@@ -181,7 +181,7 @@ function renderProbationCell(ctx: CellContext): React.ReactNode {
   const { emp, renderEditableDate, formatDateCell, emptyCell } = ctx;
   const probDays = emp.probation_end_date ? differenceInDays(parseISO(emp.probation_end_date), new Date()) : null;
   return (
-    <td key="probation_end_date" className="ta-td">
+    <td key="probation_end_date" className="ta-td !px-1">
       {renderEditableDate(emp.id, "probation_end_date", emp.probation_end_date,
         emp.probation_end_date ? (
           <div className="flex flex-col items-center gap-0.5">
@@ -207,7 +207,7 @@ function renderExpiryDateCell(key: string, field: string, ctx: CellContext): Rea
     ? { remaining: "متبقي", expired: "منتهي منذ" }
     : { remaining: "متبقي", expired: "منتهية منذ" };
   return (
-    <td key={key} className="ta-td">
+    <td key={key} className="ta-td !px-1">
       {renderEditableDate(emp.id, field, expiry,
         expiry ? (
           <div className="flex flex-col items-center gap-0.5">
@@ -227,7 +227,7 @@ function renderExpiryDateCell(key: string, field: string, ctx: CellContext): Rea
 function renderActionsCell(ctx: CellContext): React.ReactNode {
   const { emp, permissions, setSelectedEmployee, setEditEmployee, setShowAddModal, setDeleteEmployee } = ctx;
   return (
-    <td key="actions" className="ta-td">
+    <td key="actions" className="ta-td !px-1">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="sm" className="h-7 px-2 text-muted-foreground">⋮</Button>
@@ -259,7 +259,7 @@ function renderJobTitleCell(ctx: CellContext): React.ReactNode {
   const { emp, permissions, uniqueVals, buildTextOptions, renderTextValue, saveField } = ctx;
   const options = [{ value: "", label: "بدون تحديد" }, ...buildTextOptions(uniqueVals.job_title, emp.job_title)];
   return (
-    <td key="job_title" className="ta-td">
+    <td key="job_title" className="ta-td !px-1">
       {permissions.can_edit ? (
         <InlineSelectEditor value={emp.job_title || ""} options={options} onSave={(nextValue) => saveField(emp.id, "job_title", nextValue)} renderDisplay={() => renderTextValue(emp.job_title)} />
       ) : renderTextValue(emp.job_title)}
@@ -274,7 +274,7 @@ function renderCityCell(ctx: CellContext): React.ReactNode {
     return saveField(emp.id, "city", ordered[0] ?? "", { cities: ordered });
   };
   return (
-    <td key="city" className="ta-td">
+    <td key="city" className="ta-td !px-1">
       {permissions.can_edit ? (
         <InlineMultiSelectEditor values={getEmployeeCities(emp)} options={cityOptions} onSave={onSaveCities} renderDisplay={() => <CityBadges cities={emp.cities} city={emp.city} />} />
       ) : <CityBadges cities={emp.cities} city={emp.city} />}
@@ -286,7 +286,7 @@ function renderNationalityCell(ctx: CellContext): React.ReactNode {
   const { emp, permissions, uniqueVals, buildTextOptions, renderTextValue, saveField } = ctx;
   const options = [{ value: "", label: "بدون تحديد" }, ...buildTextOptions(uniqueVals.nationality, emp.nationality)];
   return (
-    <td key="nationality" className="ta-td">
+    <td key="nationality" className="ta-td !px-1">
       {permissions.can_edit ? (
         <InlineSelectEditor value={emp.nationality || ""} options={options} onSave={(nextValue) => saveField(emp.id, "nationality", nextValue)} renderDisplay={() => renderTextValue(emp.nationality)} />
       ) : renderTextValue(emp.nationality)}
@@ -298,7 +298,7 @@ function renderCommercialRecordCell(ctx: CellContext): React.ReactNode {
   const { emp, permissions, commercialRecordNames, buildTextOptions, renderTextValue, saveField } = ctx;
   const options = [{ value: "", label: "بدون تحديد" }, ...buildTextOptions(commercialRecordNames, emp.commercial_record)];
   return (
-    <td key="commercial_record" className="ta-td">
+    <td key="commercial_record" className="ta-td !px-1">
       {permissions.can_edit ? (
         <InlineSelectEditor value={emp.commercial_record || ""} options={options} onSave={(nextValue) => saveField(emp.id, "commercial_record", nextValue)} renderDisplay={() => renderTextValue(emp.commercial_record)} />
       ) : renderTextValue(emp.commercial_record)}
@@ -323,14 +323,14 @@ function renderEmployeeStatusCell(ctx: CellContext): React.ReactNode {
     case "residency_combined": return renderResidencyCell(ctx);
     case "sponsorship_status": return renderSponsorshipCell(ctx);
     case "status": return (
-      <td key="status" className="ta-td">
+      <td key="status" className="ta-td !px-1">
         {permissions.can_edit ? (
           <InlineSelectEditor value={emp.status || "active"} options={STATUS_OPTIONS.map((option) => ({ value: option.value, label: option.label }))} onSave={(nextValue) => saveField(emp.id, "status", nextValue)} renderDisplay={() => <StatusBadge status={emp.status} />} />
         ) : <StatusBadge status={emp.status} />}
       </td>
     );
     case "license_status": return (
-      <td key="license_status" className="ta-td">
+      <td key="license_status" className="ta-td !px-1">
         {permissions.can_edit ? (
           <InlineSelectEditor value={emp.license_status || "no_license"} options={LICENSE_OPTIONS.map((option) => ({ value: option.value, label: option.label }))} onSave={(nextValue) => saveField(emp.id, "license_status", nextValue)} renderDisplay={() => <LicenseBadge status={emp.license_status} />} />
         ) : <LicenseBadge status={emp.license_status} />}
@@ -343,8 +343,8 @@ function renderEmployeeStatusCell(ctx: CellContext): React.ReactNode {
 function renderEmployeeDatesCell(ctx: CellContext): React.ReactNode {
   const { col, emp, renderEditableDate, formatDateCell, emptyCell, renderTextValue } = ctx;
   switch (col.key) {
-    case "join_date": return <td key="join_date" className="ta-td">{renderEditableDate(emp.id, "join_date", emp.join_date, emp.join_date ? renderTextValue(formatDateCell(emp.join_date), { dir: "ltr" }) : emptyCell)}</td>;
-    case "birth_date": return <td key="birth_date" className="ta-td">{renderEditableDate(emp.id, "birth_date", emp.birth_date, emp.birth_date ? renderTextValue(formatDateCell(emp.birth_date), { dir: "ltr" }) : emptyCell)}</td>;
+    case "join_date": return <td key="join_date" className="ta-td !px-1">{renderEditableDate(emp.id, "join_date", emp.join_date, emp.join_date ? renderTextValue(formatDateCell(emp.join_date), { dir: "ltr" }) : emptyCell)}</td>;
+    case "birth_date": return <td key="birth_date" className="ta-td !px-1">{renderEditableDate(emp.id, "birth_date", emp.birth_date, emp.birth_date ? renderTextValue(formatDateCell(emp.birth_date), { dir: "ltr" }) : emptyCell)}</td>;
     case "probation_end_date": return renderProbationCell(ctx);
     case "health_insurance_expiry": return renderExpiryDateCell("health_insurance_expiry", "health_insurance_expiry", ctx);
     case "license_expiry": return renderExpiryDateCell("license_expiry", "license_expiry", ctx);
@@ -357,11 +357,11 @@ export function renderEmployeeCell(ctx: CellContext): React.ReactNode {
   switch (col.key) {
     case "seq": return renderSeqCell(ctx);
     case "name": return renderNameCell(ctx);
-    case "name_en": return <td key="name_en" className="ta-td" dir="ltr">{renderEditableTextCell(emp.id, "name_en", emp.name_en, { dir: "ltr", placeholder: "الاسم بالإنجليزية" })}</td>;
-    case "national_id": return <td key="national_id" className="ta-td" dir="ltr">{renderTextValue(emp.national_id, { dir: "ltr", className: "tabular-nums" })}</td>;
-    case "phone": return <td key="phone" className="ta-td" dir="ltr">{renderEditableTextCell(emp.id, "phone", emp.phone, { dir: "ltr", placeholder: "رقم الهاتف" })}</td>;
+    case "name_en": return <td key="name_en" className="ta-td !px-1" dir="ltr">{renderEditableTextCell(emp.id, "name_en", emp.name_en, { dir: "ltr", placeholder: "الاسم بالإنجليزية" })}</td>;
+    case "national_id": return <td key="national_id" className="ta-td !px-1" dir="ltr">{renderTextValue(emp.national_id, { dir: "ltr", className: "tabular-nums" })}</td>;
+    case "phone": return <td key="phone" className="ta-td !px-1" dir="ltr">{renderEditableTextCell(emp.id, "phone", emp.phone, { dir: "ltr", placeholder: "رقم الهاتف" })}</td>;
     case "email": return (
-      <td key="email" className="ta-td" dir="ltr">
+      <td key="email" className="ta-td !px-1" dir="ltr">
         {emp.email ? <a href={`mailto:${emp.email}`} className="text-primary hover:underline text-sm">{emp.email}</a> : emptyCell}
       </td>
     );
@@ -382,8 +382,8 @@ export function renderEmployeeCell(ctx: CellContext): React.ReactNode {
     case "health_insurance_expiry":
     case "license_expiry":
       return renderEmployeeDatesCell(ctx);
-    case "bank_account_number": return <td key="bank_account_number" className="ta-td" dir="ltr">{renderTextValue(emp.bank_account_number, { dir: "ltr", className: "tabular-nums" })}</td>;
+    case "bank_account_number": return <td key="bank_account_number" className="ta-td !px-1" dir="ltr">{renderTextValue(emp.bank_account_number, { dir: "ltr", className: "tabular-nums" })}</td>;
     case "actions": return renderActionsCell(ctx);
-    default: return <td key={(col as { key: string }).key} className="ta-td">{EMPTY_DATA_PLACEHOLDER}</td>;
+    default: return <td key={(col as { key: string }).key} className="ta-td !px-1">{EMPTY_DATA_PLACEHOLDER}</td>;
   }
 }
