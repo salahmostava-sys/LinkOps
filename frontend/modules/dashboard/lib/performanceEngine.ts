@@ -80,14 +80,6 @@ export interface FleetPerformanceSummary {
   distribution: { excellent: number; good: number; average: number; weak: number };
 }
 
-export interface MonthTrendPoint {
-  monthYear: string;
-  totalOrders: number;
-  activeRiders: number;
-  avgOrdersPerRider: number;
-  growthPct: number;
-}
-
 // ─── Weights for Performance Score ───────────────────────────────────────────
 
 const SCORE_WEIGHTS = {
@@ -247,42 +239,6 @@ export function compareValues(current: number, previous: number): ComparisonResu
     direction: growth.direction,
     formattedDelta,
   };
-}
-
-/**
- * Produce a comparison result from dashboard month comparison data.
- */
-export function buildMonthComparison(
-  comparison: PerformanceDashboardResponse['comparison'],
-): { month: ComparisonResult; week: ComparisonResult } {
-  return {
-    month: compareValues(comparison.month.currentOrders, comparison.month.previousOrders),
-    week: compareValues(comparison.week.currentOrders, comparison.week.previousOrders),
-  };
-}
-
-/**
- * Build monthly trend data from dashboard response.
- */
-export function buildMonthlyTrend(
-  monthlyTrend: PerformanceDashboardResponse['monthlyTrend'],
-): MonthTrendPoint[] {
-  if (!monthlyTrend || monthlyTrend.length === 0) return [];
-
-  return monthlyTrend.map((m, i) => {
-    const prev = i > 0 ? monthlyTrend[i - 1] : null;
-    const growthPct = prev
-      ? computeGrowthRate(m.totalOrders, prev.totalOrders).rate
-      : 0;
-
-    return {
-      monthYear: m.monthYear,
-      totalOrders: m.totalOrders,
-      activeRiders: m.activeRiders,
-      avgOrdersPerRider: m.avgOrdersPerRider,
-      growthPct,
-    };
-  });
 }
 
 // ─── Enrichment ─────────────────────────────────────────────────────────────

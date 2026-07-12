@@ -6,7 +6,7 @@ interface WhatsAppConfig {
   enabled: boolean;
 }
 
-export function getWhatsAppConfig(): WhatsAppConfig | null {
+function getWhatsAppConfig(): WhatsAppConfig | null {
   try {
     const raw = localStorage.getItem('whatsapp_config');
     if (!raw) return null;
