@@ -6,11 +6,16 @@ export const REALTIME_TABLES_DASHBOARD = [
   'employees',
   'attendance',
   'daily_orders',
-  'audit_log',
   'vehicles',
   'alerts',
   'apps',
   'app_targets',
+] as const;
+
+/** Tables that can change the employee list or app labels shown inside it. */
+export const REALTIME_TABLES_EMPLOYEES = [
+  'employees',
+  'apps',
 ] as const;
 
 /** Subscribe to postgres_changes on the given tables; cleanup on unmount. */

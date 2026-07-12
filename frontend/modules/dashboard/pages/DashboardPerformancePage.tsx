@@ -36,8 +36,6 @@ const LazyDashboardPlatformsTab = lazy(loadPlatformsTab);
 
 const REALTIME_TABLES_PERFORMANCE_PAGE = [
   ...REALTIME_TABLES_DASHBOARD,
-  'employee_apps',
-  'vehicle_assignments',
 ] as const;
 
 function TabFallback() {

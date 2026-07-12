@@ -17,7 +17,7 @@ import { usePagePresence } from '@shared/hooks/usePagePresence';
 import { PresenceAvatars } from '@shared/components/PresenceAvatars';
 import { useAuthQueryGate } from '@shared/hooks/useAuthQueryGate';
 import { useAuth } from '@app/providers/AuthContext';
-import { useRealtimePostgresChanges, REALTIME_TABLES_DASHBOARD } from '@shared/hooks/useRealtimePostgresChanges';
+import { useRealtimePostgresChanges, REALTIME_TABLES_EMPLOYEES } from '@shared/hooks/useRealtimePostgresChanges';
 import { QueryErrorRetry } from '@shared/components/QueryErrorRetry';
 import { isEmployeeVisibleInMonth } from '@shared/lib/employeeVisibility';
 import { getEmployeeCities, applyEmployeeFilters, sortEmployees } from '@modules/employees/model/employeeUtils';
@@ -113,7 +113,7 @@ const Employees = () => {
   const [statusDateSaving, setStatusDateSaving] = useState(false);
   const tableRef = useRef<HTMLTableElement>(null);
 
-  useRealtimePostgresChanges('employees-page-realtime', REALTIME_TABLES_DASHBOARD, () => {
+  useRealtimePostgresChanges('employees-page-realtime', REALTIME_TABLES_EMPLOYEES, () => {
     runSafe(refetchEmployees(), '[EmployeesPage] refetch on mount failed');
   });
 

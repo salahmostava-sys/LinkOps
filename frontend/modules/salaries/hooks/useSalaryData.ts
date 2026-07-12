@@ -172,9 +172,9 @@ export function useSalaryData({ selectedMonth, salariesDraftKey }: UseSalaryData
     },
   });
 
-  const SYNC_TABLES = useMemo(() => ['daily_orders', 'daily_shifts'] as const, []);
+  const SYNC_TABLES = useMemo(() => ['daily_orders'] as const, []);
 
-  // ── Realtime: invalidate on daily_orders or daily_shifts changes ─────────
+  // ── Realtime: invalidate on daily_orders changes ─────────
   // Debounced 2s — avoids rapid re-fetches when multiple rows change at once
   const realtimeDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useRealtimePostgresChanges(
