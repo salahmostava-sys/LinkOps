@@ -719,7 +719,7 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
 
         <TabsContent value="permissions" className="space-y-4">
           {selectedUser ? (
-            <div className="border bg-card rounded-2xl p-5 flex flex-col h-[600px]">
+            <div className="border bg-card rounded-2xl p-5 flex flex-col">
               <div className="flex flex-wrap items-start justify-between gap-4 pb-4 border-b">
                 <div>
                   <h3 className="text-lg font-bold">{selectedUser.name}</h3>
@@ -753,52 +753,50 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
                 </div>
               </div>
 
-              <div className="flex-1 overflow-hidden flex flex-col pt-4">
+              <div className="pt-4">
                 {matrixLoading ? (
-                  <div className="flex-1 flex items-center justify-center text-sm text-muted-foreground">
+                  <div className="py-10 flex items-center justify-center text-sm text-muted-foreground">
                     جاري تحميل الصلاحيات...
                   </div>
                 ) : (
-                  <div className="flex-1 rounded-lg border overflow-hidden">
-                    <ScrollArea className="h-full">
-                      <table className="w-full text-sm">
-                        <thead className="bg-muted/40 sticky top-0 z-10 shadow-sm">
-                          <tr>
-                            <th className="ta-th text-start w-[40%]">الصفحة</th>
-                            {PERMISSION_COLUMNS.map(({ field, label }) => (
-                              <th key={field} className="ta-th">{label}</th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {PERMISSION_PAGE_ENTRIES.map(({ key, labelAr }) => {
-                            const m = matrix[key];
-                            if (!m) return null;
-                            return (
-                              <tr key={key} className="border-b last:border-0 hover:bg-muted/20">
-                                <td className="ta-td font-medium py-2.5">{labelAr}</td>
-                                {PERMISSION_COLUMNS.map(({ field }) => (
-                                  <td key={field} className="ta-td py-2.5 text-center">
-                                    <Checkbox
-                                      checked={m[field]}
-                                      onCheckedChange={(checked) => setCell(key, field, checked === true)}
-                                      disabled={!canEdit}
-                                      className="mx-auto"
-                                    />
-                                  </td>
-                                ))}
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </ScrollArea>
+                  <div className="rounded-lg border overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead className="bg-muted/40">
+                        <tr>
+                          <th className="ta-th text-start w-[40%]">الصفحة</th>
+                          {PERMISSION_COLUMNS.map(({ field, label }) => (
+                            <th key={field} className="ta-th">{label}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {PERMISSION_PAGE_ENTRIES.map(({ key, labelAr }) => {
+                          const m = matrix[key];
+                          if (!m) return null;
+                          return (
+                            <tr key={key} className="border-b last:border-0 hover:bg-muted/20">
+                              <td className="ta-td font-medium py-2.5">{labelAr}</td>
+                              {PERMISSION_COLUMNS.map(({ field }) => (
+                                <td key={field} className="ta-td py-2.5 text-center">
+                                  <Checkbox
+                                    checked={m[field]}
+                                    onCheckedChange={(checked) => setCell(key, field, checked === true)}
+                                    disabled={!canEdit}
+                                    className="mx-auto"
+                                  />
+                                </td>
+                              ))}
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
                   </div>
                 )}
               </div>
             </div>
           ) : (
-            <div className="border bg-card rounded-2xl p-5 flex flex-col items-center justify-center h-[600px] text-muted-foreground">
+            <div className="border bg-card rounded-2xl p-5 flex flex-col items-center justify-center h-[300px] text-muted-foreground">
               <ShieldAlert className="h-12 w-12 opacity-20 mb-3" />
               <p>لا يوجد مستخدمون لتعديل صلاحياتهم</p>
             </div>
