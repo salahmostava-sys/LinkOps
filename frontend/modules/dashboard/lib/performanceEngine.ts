@@ -435,6 +435,9 @@ export function buildFleetSummary(
 
   const { projectedOrders, targetHitProjected } = calculateTargetProjections(dashboard);
 
+  const previousActiveDays = comparison.month.previousActiveDays || 0;
+  const previousAvgOrdersPerActiveDay = previousActiveDays > 0 ? comparison.month.previousOrders / previousActiveDays : 0;
+
   return {
     totalOrders: summary.totalOrders,
     totalOrdersDelta: compareValues(
@@ -447,10 +450,8 @@ export function buildFleetSummary(
     projectedOrders,
     targetHitProjected,
     avgOrdersDelta: compareValues(
-      summary.avgOrdersPerRider,
-      comparison.month.previousOrders > 0
-        ? Math.round(comparison.month.previousOrders / Math.max(summary.activeRiders, 1))
-        : 0,
+      avgOrdersPerActiveDay,
+      previousAvgOrdersPerActiveDay
     ),
     avgPerformanceScore: avgScore,
     topPerformer: topProfile,

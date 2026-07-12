@@ -193,6 +193,26 @@
     font-family: 'Tajawal', 'IBM Plex Sans Arabic', sans-serif;
   }
 
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+
+  button,
+  a,
+  [role='button'] {
+    min-width: 0;
+  }
+
+  h1,
+  h2,
+  h3,
+  p {
+    overflow-wrap: anywhere;
+  }
+
   /* Global table alignment: center all cells */
   table th,
   table td {
@@ -202,6 +222,50 @@
 }
 
 @layer components {
+
+  .app-content-shell {
+    width: 100%;
+    padding: clamp(1rem, 1.35vw, 1.5rem);
+  }
+
+  @media (min-width: 1280px) {
+    .app-content-shell {
+      padding: 1.5rem;
+    }
+  }
+
+  .app-content-shell > * {
+    width: 100%;
+  }
+
+  .app-content-shell .rounded-2xl {
+    border-radius: 0.875rem;
+  }
+
+  .app-content-shell .shadow-card {
+    box-shadow: 0 8px 24px rgba(26, 28, 29, 0.055);
+  }
+
+  .app-content-shell .shadow-card-hover,
+  .app-content-shell .hover\:shadow-card-hover:hover {
+    box-shadow: 0 12px 32px rgba(26, 28, 29, 0.09);
+  }
+
+  .app-content-shell button,
+  .app-content-shell .ds-btn,
+  .app-content-shell .ds-btn-primary {
+    min-height: 2.25rem;
+    max-width: 100%;
+  }
+
+  .app-content-shell table {
+    table-layout: auto;
+  }
+
+  .app-content-shell th,
+  .app-content-shell td {
+    height: 2.75rem;
+  }
 
   /* ─── Editorial card ─────────────────────────────────────────── */
   .tailcard {
