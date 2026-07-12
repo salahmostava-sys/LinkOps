@@ -21,6 +21,7 @@ import {
   mergeImportedOrdersFromMatrixWithMapping,
   type AppEmployeeIdsMap,
 } from '@modules/orders/utils/spreadsheetImportModel';
+import { ImportFactory } from '@modules/orders/utils/import/importFactory';
 import { loadXlsx } from '@modules/orders/utils/xlsx';
 import { matchEmployeeNames, type UnmatchedEmployeeName } from '@shared/lib/nameMatching';
 
@@ -322,7 +323,6 @@ export async function runSpreadsheetImport(params: {
 
     const actualHeaders = (matrix[0] || []).map((h) => String(h ?? '').trim());
 
-    const { ImportFactory } = await import('./import/importFactory');
     const strategy = ImportFactory.detectStrategy(actualHeaders);
 
     if (!strategy) {

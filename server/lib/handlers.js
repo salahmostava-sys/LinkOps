@@ -10,6 +10,7 @@
  */
 
 import { createRequire } from 'node:module';
+import { randomUUID } from 'node:crypto';
 
 const require = createRequire(import.meta.url);
 
@@ -91,7 +92,7 @@ async function executeSalaryEngineMode(adminClient, payload) {
 }
 
 export async function salaryEngineHandler(req, res) {
-  const requestId = crypto.randomUUID();
+  const requestId = randomUUID();
   try {
     const auth = await requireAuth(req, res);
     if (!auth) return;
@@ -289,7 +290,7 @@ async function checkUserManagementAccess(callerClient, callerUserId) {
 }
 
 export async function adminUpdateUserHandler(req, res) {
-  const requestId = crypto.randomUUID();
+  const requestId = randomUUID();
   try {
     const auth = await requireAuth(req, res);
     if (!auth) return;
@@ -331,7 +332,7 @@ export async function adminUpdateUserHandler(req, res) {
 // ─── Groq Chat ────────────────────────────────────────────────────────────────
 
 export async function groqChatHandler(req, res) {
-  const requestId = crypto.randomUUID();
+  const requestId = randomUUID();
   try {
     if (!GROQ_API_KEY) {
       logError('GROQ_API_KEY not configured', { request_id: requestId });
@@ -421,7 +422,7 @@ async function handleAiToolCalls(responseMessage, conversation, callerClient, us
 }
 
 export async function aiChatHandler(req, res) {
-  const requestId = crypto.randomUUID();
+  const requestId = randomUUID();
   try {
     if (!GROQ_API_KEY) {
       return res.status(500).json({ error: 'GROQ_API_KEY not configured' });
