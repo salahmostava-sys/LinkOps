@@ -139,12 +139,11 @@ export async function salaryEngineHandler(req, res) {
 async function handleCreateUser(supabaseAdmin, { email, password, name, role }) {
   const normalizedEmail = String(email ?? '').trim().toLowerCase();
   const normalizedName = String(name ?? '').trim();
-  const normalizedRole = String(role ?? 'viewer').trim();
+  const normalizedRole = normalizeAppRole(role);
 
   if (!normalizedEmail?.includes('@')) throw new Error('Invalid email');
   if (!password || String(password).length < 8) throw new Error('Password must be at least 8 characters');
   if (!normalizedName) throw new Error('name is required');
-  if (!VALID_ROLES.has(normalizedRole)) throw new Error('Invalid role');
 
   let createdUserId = null;
   try {
@@ -223,10 +222,7 @@ async function updateProfileLayer(supabaseAdmin, user_id, { email, name, is_acti
 
 async function updateRoleLayer(supabaseAdmin, user_id, role) {
   if (role === undefined) return;
-  const normalizedRole = role.toLowerCase().trim();
-  if (!['admin', 'operations', 'supervisor', 'accountant'].includes(normalizedRole)) {
-    throw new Error('Invalid role specified');
-  }
+  const normalizedRole = normalizeAppRole(role);
   const { error: roleError } = await supabaseAdmin.from('user_roles')
     .update({ role: normalizedRole })
     .eq('user_id', user_id);
@@ -238,6 +234,12 @@ async function handleUpdateUser(supabaseAdmin, user_id, { email, password, name,
   await updateProfileLayer(supabaseAdmin, user_id, { email, name, is_active });
   await updateRoleLayer(supabaseAdmin, user_id, role);
   return { success: true };
+}
+
+function normalizeAppRole(role) {
+  const normalizedRole = String(role ?? 'viewer').trim().toLowerCase();
+  if (!VALID_ROLES.has(normalizedRole)) throw new Error('Invalid role');
+  return normalizedRole;
 }
 
 async function dispatchAction(supabaseAdmin, normalizedAction, { user_id, password, email, name, role, is_active }, callerId) {
