@@ -177,6 +177,12 @@ export function DashboardPerformanceOverviewTab(props: Readonly<{
 
   const { summary, comparison, distribution, ordersByApp, ordersByCity, rankings, alerts, targets } = dashboard;
 
+  const projectedText =
+    fleetSummary.projectedOrders !== null
+      ? ` • متوقع: ${fleetSummary.projectedOrders.toLocaleString('en-US')} ${fleetSummary.targetHitProjected ? '✅' : '⚠️'}`
+      : '';
+
+
   return (
     <div className="space-y-6">
       {/* ── Top KPIs Row (Enriched) ───────────────────────────────────────── */}
