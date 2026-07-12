@@ -1,6 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
-@import url('https://fonts.googleapis.com/earlyaccess/droidarabickufi.css');
 
 @tailwind base;
 @tailwind components;
@@ -9,8 +8,8 @@
 @layer base {
   :root {
     /* Typography tokens (shared across app) */
-    --font-sans: 'Droid Arabic Kufi', 'Tajawal', 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, sans-serif;
-    --font-ar: 'Droid Arabic Kufi', 'Tajawal', 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, sans-serif;
+    --font-sans: 'Tajawal', 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, sans-serif;
+    --font-ar: 'Tajawal', 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, sans-serif;
     --text-xs: 0.75rem;
     --text-sm: 0.875rem;
     --text-md: 0.9375rem;
