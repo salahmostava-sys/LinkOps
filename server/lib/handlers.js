@@ -223,10 +223,16 @@ async function updateProfileLayer(supabaseAdmin, user_id, { email, name, is_acti
 async function updateRoleLayer(supabaseAdmin, user_id, role) {
   if (role === undefined) return;
   const normalizedRole = normalizeAppRole(role);
-  const { error: roleError } = await supabaseAdmin.from('user_roles')
+  const { data: updatedRows, error: roleError } = await supabaseAdmin.from('user_roles')
     .update({ role: normalizedRole })
-    .eq('user_id', user_id);
+    .eq('user_id', user_id)
+    .select('id');
   if (roleError) throw roleError;
+  if (updatedRows?.length) return;
+
+  const { error: insertRoleError } = await supabaseAdmin.from('user_roles')
+    .insert({ user_id, role: normalizedRole });
+  if (insertRoleError) throw insertRoleError;
 }
 
 async function handleUpdateUser(supabaseAdmin, user_id, { email, password, name, role, is_active }) {

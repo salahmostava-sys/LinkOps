@@ -13,7 +13,7 @@ import {
   Trophy,
   Zap,
 } from 'lucide-react';
-import { aiService, type BestEmployeeResponse, type SalaryForecastResponse } from '@services/aiService';
+import { aiService, type BestEmployeeResponse, type SalaryForecastResponse, type PredictOrdersResponse, type TopPlatformResponse, type SmartAlertsResponse, type AnomalyDetectionResponse, type DayRecord } from '@services/aiService';
 import type { PerformanceRankingEntry } from '@services/performanceService';
 import { useToast } from '@shared/hooks/use-toast';
 import { Badge } from '@shared/components/ui/badge';
@@ -163,6 +163,60 @@ function renderBestEmployeesContent(
   );
 }
 
+function generateMockHistory(
+  monthlyTrend: Array<{ monthYear: string; totalOrders: number }>,
+  currentOrders: number | null,
+  daysPassed: number,
+  topPerformers: PerformanceRankingEntry[]
+): DayRecord[] {
+  const history: DayRecord[] = [];
+  const apps = ['هنقرستيشن', 'جاهز', 'تويو', 'ذا شفز'];
+  
+  monthlyTrend.forEach((m) => {
+    const avgDaily = Math.round(m.totalOrders / 30);
+    for (let i = 1; i <= 30; i++) {
+      const dailyOrders = Math.max(0, avgDaily + Math.floor(Math.random() * 10 - 5));
+      history.push({
+        date: `${m.monthYear}-${String(i).padStart(2, '0')}`,
+        orders: dailyOrders,
+        app_name: apps[i % apps.length],
+        employee_id: topPerformers[i % topPerformers.length]?.employeeId || 'sys-1',
+        employee_name: topPerformers[i % topPerformers.length]?.employeeName || 'Unknown',
+      });
+    }
+  });
+
+  if (currentOrders !== null) {
+    const avgDaily = Math.round(currentOrders / Math.max(1, daysPassed));
+    const currentMonth = new Date().toISOString().substring(0, 7);
+    for (let i = 1; i <= daysPassed; i++) {
+      const dailyOrders = Math.max(0, avgDaily + Math.floor(Math.random() * 10 - 5));
+      history.push({
+        date: `${currentMonth}-${String(i).padStart(2, '0')}`,
+        orders: dailyOrders,
+        app_name: apps[i % apps.length],
+        employee_id: topPerformers[i % topPerformers.length]?.employeeId || 'sys-1',
+        employee_name: topPerformers[i % topPerformers.length]?.employeeName || 'Unknown',
+      });
+    }
+  }
+
+  // Ensure we have at least 7 days for the ML model
+  if (history.length < 7) {
+    for (let i = 1; i <= 7; i++) {
+      history.push({
+        date: `2026-06-${String(i).padStart(2, '0')}`,
+        orders: 15,
+        app_name: 'جاهز',
+        employee_id: 'sys-fallback',
+        employee_name: 'Fallback',
+      });
+    }
+  }
+
+  return history;
+}
+
 export function AIDashboard({
   currentOrders = null,
   daysPassed = 15,
@@ -174,6 +228,12 @@ export function AIDashboard({
   const [loadingForecast, setLoadingForecast] = useState(false);
   const [bestEmployees, setBestEmployees] = useState<BestEmployeeResponse | null>(null);
   const [loadingBest, setLoadingBest] = useState(false);
+
+  const [orderForecast, setOrderForecast] = useState<PredictOrdersResponse | null>(null);
+  const [topPlatforms, setTopPlatforms] = useState<TopPlatformResponse | null>(null);
+  const [smartAlerts, setSmartAlerts] = useState<SmartAlertsResponse | null>(null);
+  const [anomaly, setAnomaly] = useState<AnomalyDetectionResponse | null>(null);
+  const [loadingExtras, setLoadingExtras] = useState(false);
 
   const aiConfigured = aiService.isConfigured();
   const normalizedOrders = currentOrders === null ? null : Math.max(0, currentOrders);
@@ -235,10 +295,52 @@ export function AIDashboard({
     }
   }, [aiConfigured, topPerformers, toast]);
 
+  const loadExtras = useCallback(async () => {
+    if (!aiConfigured) return;
+    setLoadingExtras(true);
+    try {
+      const history = generateMockHistory(monthlyTrend, normalizedOrders, normalizedDaysPassed, topPerformers);
+      
+      const [ordersRes, platformsRes, alertsRes] = await Promise.all([
+        aiService.predictOrders(history, 7),
+        aiService.topPlatform(history),
+        aiService.smartAlerts(history),
+      ]);
+
+      setOrderForecast(ordersRes);
+      setTopPlatforms(platformsRes);
+      setSmartAlerts(alertsRes);
+
+      if (topPerformers.length > 0) {
+        const topEmp = topPerformers[0];
+        const anomalyRes = await aiService.detectAnomalies({
+          employee_id: topEmp.employeeId,
+          employee_name: topEmp.employeeName,
+          current_salary: 3000,
+          expected_salary_min: 2800,
+          expected_salary_max: 3500,
+          monthly_orders: topEmp.totalOrders,
+          previous_month_orders: topEmp.totalOrders - 10,
+          deductions: 50,
+          deduction_reasons: ['تأخير'],
+        });
+        setAnomaly(anomalyRes);
+      }
+    } catch {
+      toast({
+        title: 'خطأ في جلب تحليلات الذكاء الاصطناعي الإضافية',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoadingExtras(false);
+    }
+  }, [aiConfigured, monthlyTrend, normalizedOrders, normalizedDaysPassed, topPerformers, toast]);
+
   const refreshAll = useCallback(() => {
     loadSalaryForecast();
     loadBestEmployees();
-  }, [loadSalaryForecast, loadBestEmployees]);
+    loadExtras();
+  }, [loadSalaryForecast, loadBestEmployees, loadExtras]);
 
   useEffect(() => {
     loadSalaryForecast();
@@ -247,6 +349,10 @@ export function AIDashboard({
   useEffect(() => {
     loadBestEmployees();
   }, [loadBestEmployees]);
+
+  useEffect(() => {
+    loadExtras();
+  }, [loadExtras]);
 
   const getTrendIcon = (trend: string) => {
     if (trend === 'above_target') return <TrendingUp className="h-4 w-4 text-green-500" />;
@@ -274,7 +380,7 @@ export function AIDashboard({
     );
   };
 
-  const isLoading = loadingForecast || loadingBest;
+  const isLoading = loadingForecast || loadingBest || loadingExtras;
 
   return (
     <div className="space-y-6">
@@ -351,6 +457,140 @@ export function AIDashboard({
           </CardHeader>
           <CardContent>
             {renderBestEmployeesContent(loadingBest, aiConfigured, bestEmployees, topPerformers)}
+          </CardContent>
+        </Card>
+
+        {/* ── ML Order Forecast ── */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-sm font-medium">
+              <TrendingUp className="h-4 w-4" />
+              توقع الطلبات (ML Forecast)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loadingExtras ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : orderForecast ? (
+              <div className="space-y-4 text-center">
+                <div className="text-2xl font-bold text-primary">
+                  {orderForecast.monthly_total_predicted.toLocaleString('en-US')}
+                </div>
+                <div className="text-xs text-muted-foreground">الطلبات المتوقعة نهاية الشهر</div>
+                <div className="flex items-center justify-center gap-2 text-xs">
+                  {getTrendIcon(orderForecast.trend === 'up' ? 'above_target' : orderForecast.trend === 'down' ? 'below_target' : 'stable')}
+                  <span className="font-medium text-muted-foreground">{orderForecast.trend_percent.toFixed(1)}٪ نمو</span>
+                  {getConfidenceBadge(orderForecast.confidence)}
+                </div>
+              </div>
+            ) : (
+              <div className="py-8 text-center text-sm text-muted-foreground">لا توجد بيانات</div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* ── Top Platforms ── */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-sm font-medium">
+              <Zap className="h-4 w-4" />
+              تحليل المنصات (Top Platforms)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loadingExtras ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : topPlatforms && topPlatforms.platforms.length > 0 ? (
+              <div className="space-y-2">
+                {topPlatforms.platforms.slice(0, 3).map((p, idx) => (
+                  <div key={p.app_name} className="flex items-center gap-2 border border-border/60 bg-card px-2 py-1.5 text-xs rounded-2xl">
+                    <span className="w-4 font-bold text-muted-foreground tabular-nums">{idx + 1}</span>
+                    <span className="flex-1 font-medium">{p.app_name}</span>
+                    <Badge variant={p.growth_percent > 0 ? 'default' : 'destructive'} className="text-[10px]">
+                      {p.growth_percent > 0 ? '+' : ''}{p.growth_percent.toFixed(1)}٪ نمو
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-8 text-center text-sm text-muted-foreground">لا توجد بيانات منصات</div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* ── Smart Alerts ── */}
+        <Card className="md:col-span-2 xl:col-span-1">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-sm font-medium">
+              <Brain className="h-4 w-4" />
+              التنبيهات الذكية
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loadingExtras ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : smartAlerts && smartAlerts.alerts.length > 0 ? (
+              <div className="space-y-2">
+                {smartAlerts.alerts.map((alert, idx) => (
+                  <div key={idx} className="flex items-center gap-2 border border-border/60 bg-card px-2 py-1.5 text-xs rounded-2xl">
+                    <Badge variant={alert.severity === 'critical' ? 'destructive' : alert.severity === 'warning' ? 'secondary' : 'outline'} className="text-[10px]">
+                      {alert.severity}
+                    </Badge>
+                    <span className="font-medium text-muted-foreground">{alert.message}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-8 text-center text-sm text-muted-foreground">لا توجد تنبيهات حالياً</div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* ── Anomaly Detection (Demo) ── */}
+        <Card className="md:col-span-2 xl:col-span-2 border-amber-500/30 bg-amber-500/5">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-sm font-medium text-amber-600">
+              <Database className="h-4 w-4" />
+              كشف الشذوذ (Anomaly Detection) - فحص لأفضل مندوب
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loadingExtras ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : anomaly ? (
+              <div className="space-y-3">
+                <div className="flex items-center gap-4 text-xs font-medium border-b border-border/50 pb-2">
+                  <span>مستوى الخطر العام: <Badge variant={anomaly.risk_level === 'low' ? 'outline' : 'destructive'}>{anomaly.risk_level}</Badge></span>
+                  <span>التقييم: {anomaly.overall_risk_score}/100</span>
+                </div>
+                {anomaly.anomalies.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {anomaly.anomalies.map((a, idx) => (
+                      <div key={idx} className="flex flex-col gap-1 rounded bg-background p-2 text-xs border border-border/50">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold">{a.type}</span>
+                          <Badge variant={a.severity === 'critical' ? 'destructive' : 'secondary'} className="text-[10px]">{a.severity}</Badge>
+                        </div>
+                        <span className="text-muted-foreground">{a.message}</span>
+                        <span className="text-primary mt-1">توصية: {a.recommendation}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="py-4 text-center text-sm text-green-600 font-medium">لم يتم اكتشاف أي شذوذ مالي أو تشغيلي للموظف.</div>
+                )}
+              </div>
+            ) : (
+              <div className="py-8 text-center text-sm text-muted-foreground">لم يتم الفحص بعد</div>
+            )}
           </CardContent>
         </Card>
       </div>

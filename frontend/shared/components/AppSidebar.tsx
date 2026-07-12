@@ -92,6 +92,7 @@ const iconByRouteId: Record<string, ComponentType<{ size?: string | number; clas
   alerts: Bell,
   apps: Smartphone,
   salaries: Wallet,
+  wallet: Wallet,
   advances: CreditCard,
   orders: Package,
   ai_analytics: Sparkles,
