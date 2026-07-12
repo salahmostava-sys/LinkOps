@@ -33,6 +33,54 @@ async function sendTelegramMessage(chatId, text, replyMarkup) {
   }
 }
 
+async function answerTelegramCallbackQuery(callbackQueryId, text) {
+  if (!TELEGRAM_BOT_TOKEN) {
+    throw new Error('TELEGRAM_BOT_TOKEN is not configured');
+  }
+
+  const response = await fetch(`${TELEGRAM_API_BASE_URL}/bot${TELEGRAM_BOT_TOKEN}/answerCallbackQuery`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      callback_query_id: callbackQueryId,
+      text,
+      show_alert: false,
+    }),
+  });
+
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`Telegram answerCallbackQuery failed (${response.status}): ${body}`);
+  }
+}
+
+function buildDummyFleetSummary() {
+  return [
+    'Fleet dashboard summary',
+    '',
+    'Active Drivers: 42',
+    'Completed Deliveries: 318',
+    'Pending Orders: 27',
+    'Cash Collected: SAR 18,450',
+  ].join('\n');
+}
+
+async function handleCallbackQuery(callbackQuery) {
+  const callbackQueryId = callbackQuery?.id;
+  const chatId = callbackQuery?.message?.chat?.id;
+  const callbackData = callbackQuery?.data;
+
+  if (!callbackQueryId || !chatId) return { ok: true };
+
+  await answerTelegramCallbackQuery(callbackQueryId, 'Request received');
+
+  if (callbackData === 'dashboard') {
+    await sendTelegramMessage(chatId, buildDummyFleetSummary());
+  }
+
+  return { ok: true };
+}
+
 function contactKeyboard() {
   return {
     keyboard: [[{ text: '📱 مشاركة رقم الجوال', request_contact: true }]],
@@ -100,6 +148,39 @@ async function fetchUserTelegramAccess(adminClient, userId) {
     role: roleResult.data?.role ?? 'viewer',
     permissions: permissionsResult.data ?? [],
   };
+}
+
+async function fetchLinkedTelegramAccess(adminClient, chatId) {
+  const { data: integration, error } = await adminClient
+    .from('user_telegram_integrations')
+    .select('user_id')
+    .eq('telegram_chat_id', String(chatId))
+    .eq('is_linked', true)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!integration) return null;
+
+  const access = await fetchUserTelegramAccess(adminClient, integration.user_id);
+  if (!access.profile?.is_active) return null;
+
+  return access;
+}
+
+async function handleUserChat(text, role) {
+  return `I received your message: "${text}". As a ${role}, I am checking the system data for you...`;
+}
+
+async function handleGenericTextMessage(adminClient, chatId, text) {
+  const access = await fetchLinkedTelegramAccess(adminClient, chatId);
+
+  if (!access) {
+    await sendTelegramMessage(chatId, 'اضغط /start لبدء ربط حسابك.');
+    return;
+  }
+
+  const replyText = await handleUserChat(text.trim(), access.role);
+  await sendTelegramMessage(chatId, replyText);
 }
 
 async function handleStart(chatId) {
@@ -185,6 +266,10 @@ async function handleOtp(adminClient, chatId, text) {
 }
 
 async function handleTelegramUpdate(update) {
+  if (update?.callback_query) {
+    return handleCallbackQuery(update.callback_query);
+  }
+
   const message = update?.message;
   const chatId = message?.chat?.id;
 
@@ -207,6 +292,11 @@ async function handleTelegramUpdate(update) {
     return { ok: true };
   }
 
+  if (typeof message.text === 'string' && !message.text.trim().startsWith('/')) {
+    await handleGenericTextMessage(adminClient, chatId, message.text);
+    return { ok: true };
+  }
+
   await sendTelegramMessage(chatId, 'اضغط /start لبدء ربط حسابك.');
   return { ok: true };
 }
@@ -223,8 +313,14 @@ async function telegramWebhookHandler(req, res) {
 }
 
 module.exports = {
+  answerTelegramCallbackQuery,
   buildDashboardKeyboard,
+  buildDummyFleetSummary,
+  fetchLinkedTelegramAccess,
+  handleCallbackQuery,
+  handleGenericTextMessage,
   handleTelegramUpdate,
+  handleUserChat,
   normalizePhoneNumber,
   sendTelegramMessage,
   telegramWebhookHandler,
