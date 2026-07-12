@@ -497,7 +497,7 @@ export const SalaryTable = memo(function SalaryTable(props: Readonly<SalaryTable
                 const pc = platformColors[p];
                 return (
                   <th key={`${p}-col`}
-                    className={`${thBase} border-b border-l border-border/30 cursor-pointer select-none hover:opacity-90 transition-opacity`}
+                    className="ta-th border-b border-l border-border/30 cursor-pointer select-none hover:opacity-90 transition-opacity"
                     style={{ backgroundColor: pc?.header, color: pc?.headerText }}
                     onClick={() => handleSort(p)}>
                     <div className="flex flex-col items-center gap-0">
@@ -510,7 +510,7 @@ export const SalaryTable = memo(function SalaryTable(props: Readonly<SalaryTable
               <th className="ta-th text-foreground border border-border/30 bg-primary/10 cursor-pointer select-none hover:brightness-95" onClick={() => handleSort('totalPlatformOrders')}>
                 إجمالي الطلبات <SalarySortIcon field="totalPlatformOrders" sortField={sortField} sortDir={sortDir} />
               </th>
-              <th className={`${thBase} bg-primary/10 cursor-pointer select-none hover:brightness-95`} onClick={() => handleSort('platformSalaries')}>
+              <th className={`${thBase} bg-card cursor-pointer select-none hover:brightness-95`} onClick={() => handleSort('platformSalaries')}>
                 الراتب الأساسي <SalarySortIcon field="platformSalaries" sortField={sortField} sortDir={sortDir} />
               </th>
               <th className={`${thBase} bg-success/5 cursor-pointer select-none hover:brightness-95`} onClick={() => handleSort('incentives')}>

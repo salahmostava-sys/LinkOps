@@ -46,14 +46,14 @@ describe('useSpareParts', () => {
 
   it('fetches spare parts when authenticated', async () => {
     vi.mocked(maintenanceService.getSpareparts).mockResolvedValue([
-      { id: 'sp1', name_ar: 'ÙÙ„ØªØ± Ø²ÙŠØª', stock_quantity: 10, min_stock_alert: 5, unit: 'Ù‚Ø·Ø¹Ø©', unit_cost: 25 },
+      { id: 'sp1', name_ar: 'فلتر زيت', stock_quantity: 10, min_stock_alert: 5, unit: 'قطعة', unit_cost: 25 },
     ]);
 
     const { result } = renderHook(() => useSpareParts(), { wrapper: createQueryClientWrapper() });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toHaveLength(1);
-    expect(result.current.data![0].name_ar).toBe('ÙÙ„ØªØ± Ø²ÙŠØª');
+    expect(result.current.data![0].name_ar).toBe('فلتر زيت');
   });
 
   it('returns error on failure', async () => {
@@ -87,8 +87,8 @@ describe('useMaintenanceLogs', () => {
   it('fetches logs when authenticated', async () => {
     vi.mocked(maintenanceService.getMaintenanceLogs).mockResolvedValue([
       {
-        id: 'ml1', vehicle_id: 'v1', maintenance_date: '2026-03-01', type: 'ØºÙŠØ§Ø± Ø²ÙŠØª',
-        total_cost: 200, status: 'Ù…ÙƒØªÙ…Ù„Ø©', notes: null, vehicles: { plate_number: 'ABC', type: 'car' },
+        id: 'ml1', vehicle_id: 'v1', maintenance_date: '2026-03-01', type: 'غيار زيت',
+        total_cost: 200, status: 'مكتملة', notes: null, vehicles: { plate_number: 'ABC', type: 'car' },
         maintenance_parts: [],
       },
     ] as Awaited<ReturnType<typeof maintenanceService.getMaintenanceLogs>>);

@@ -116,13 +116,13 @@ function mapHeadersToDbKeysStrict(
   headerErrors: string[]
 ): (DbKey | null)[] {
   if (headerRow.length !== EMPLOYEE_IMPORT_COLUMNS.length) {
-    headerErrors.push(`??? ??????? ??? ????: ??????? ${EMPLOYEE_IMPORT_COLUMNS.length}? ???????? ${headerRow.length}`);
+    headerErrors.push(`عدد الأعمدة غير مطابق: المتوقع ${EMPLOYEE_IMPORT_COLUMNS.length}، الموجود ${headerRow.length}`);
     return [];
   }
   return headerRow.map((h, idx) => {
     const expected = EMPLOYEE_IMPORT_COLUMNS[idx].label;
     if (h !== expected) {
-      headerErrors.push(`?????? ??? ${idx + 1} ??? ????: ??????? "${expected}" ???????? "${h || '????'}"`);
+      headerErrors.push(`العمود رقم ${idx + 1} غير مطابق: المتوقع "${expected}" والموجود "${h || 'فارغ'}"`);
       return null;
     }
     return HEADER_TO_DB[h] ?? null;
@@ -161,20 +161,20 @@ export async function parseEmployeeArabicWorkbook(buffer: ArrayBuffer): Promise<
   try {
     wb = XLSX.read(buffer, { type: 'array', cellDates: false });
   } catch {
-    return { rows: [], headerErrors: ['???? ????? ??? Excel'] };
+    return { rows: [], headerErrors: ['تعذر قراءة ملف Excel'] };
   }
   const sheetName = wb.SheetNames[0];
-  if (!sheetName) return { rows: [], headerErrors: ['????? ?? ????? ??? ????? ???'] };
+  if (!sheetName) return { rows: [], headerErrors: ['الملف لا يحتوي على أي ورقة عمل'] };
 
   const ws = wb.Sheets[sheetName];
   const matrix: unknown[][] = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
 
-  if (matrix.length < 2) return { rows: [], headerErrors: ['?? ???? ???? ??????'] };
+  if (matrix.length < 2) return { rows: [], headerErrors: ['لا توجد صفوف بيانات'] };
 
   const headerRow = matrix[0].map(normalizeHeaderCell);
   const colIndexToKey = mapHeadersToDbKeysStrict(headerRow, headerErrors);
   if (headerErrors.length > 0 || !colIndexToKey.every(Boolean)) {
-    return { rows: [], headerErrors: headerErrors.length > 0 ? headerErrors : ['???? ??????? ??? ????? ??????'] };
+    return { rows: [], headerErrors: headerErrors.length > 0 ? headerErrors : ['رؤوس الأعمدة غير صالحة للاستيراد'] };
   }
 
   const rows: EmployeeArabicRow[] = [];
@@ -254,7 +254,7 @@ export async function upsertEmployeeArabicRows(
     try {
       const nm = strVal(row.name);
       if (!nm) {
-        failures.push({ name: nameHint, error: '????? ?????' });
+        failures.push({ name: nameHint, error: 'الاسم مطلوب' });
         continue;
       }
 

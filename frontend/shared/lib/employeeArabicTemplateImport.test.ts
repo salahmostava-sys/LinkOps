@@ -33,14 +33,14 @@ describe('employeeArabicTemplateImport', () => {
     it('returns error if no sheets', async () => {
       readMock.mockReturnValue({ SheetNames: [] });
       const result = await parseEmployeeArabicWorkbook(new ArrayBuffer(0));
-      expect(result.headerErrors[0]).toBe('????? ?? ????? ??? ????? ???');
+      expect(result.headerErrors[0]).toBe('الملف لا يحتوي على أي ورقة عمل');
     });
 
     it('returns error if missing expected headers', async () => {
       readMock.mockReturnValue({ SheetNames: ['Sheet1'], Sheets: { Sheet1: {} } });
       sheetToJsonMock.mockReturnValue([['Name'], ['Row 1']]); // Wrong headers
       const result = await parseEmployeeArabicWorkbook(new ArrayBuffer(0));
-      expect(result.headerErrors[0]).toMatch(/\?\?\? \?\?\?\?\?\?\? \?\?\? \?\?\?\?: \?\?\?\?\?\?\? 21\? \?\?\?\?\?\?\?\? 1/);
+      expect(result.headerErrors[0]).toBe('عدد الأعمدة غير مطابق: المتوقع 21، الموجود 1');
     });
 
     it('parses valid rows correctly', async () => {

@@ -93,8 +93,8 @@
     --ds-info:              #1f6fd1;
     --ds-field-bg:          #f4f6f9;
     --ds-field-border:      #d8e0ec;
-    --ds-table-header-bg:   #1f54ad;
-    --ds-table-header-text: #ffffff;
+    --ds-table-header-bg:   #f4f6f9;
+    --ds-table-header-text: #061735;
 
     /* ── shadcn chart palette (accessible & brand-aligned) ──── */
     --chart-1: 218 70% 40%;   /* reference admin blue */
@@ -177,8 +177,8 @@
     --ds-info:              #4f93e8;
     --ds-field-bg:          #121b2c;
     --ds-field-border:      #2a3850;
-    --ds-table-header-bg:   #1f54ad;
-    --ds-table-header-text: #ffffff;
+    --ds-table-header-bg:   #18202f;
+    --ds-table-header-text: #dde3ec;
 
     /* ── Header glass background — dark ─────────────────────── */
     --header-glass-bg: rgba(12, 17, 25, 0.88);
@@ -554,7 +554,7 @@
     @apply px-1.5 py-2 text-xs font-bold leading-4 normal-case tracking-normal;
     background: var(--ds-table-header-bg) !important;
     color: var(--ds-table-header-text) !important;
-    border-bottom: 1px solid color-mix(in srgb, var(--ds-table-header-bg) 86%, white);
+    border-bottom: 1px solid var(--ds-surface-container);
   }
 
   .employees-table .ta-td {
