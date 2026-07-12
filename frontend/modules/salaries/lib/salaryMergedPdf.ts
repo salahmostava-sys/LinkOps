@@ -8,7 +8,7 @@ import type { MergedPdfComputed, SalaryRow } from '@modules/salaries/types/salar
 export const MERGED_PDF_STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;600;700&display=swap');
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Noto Naskh Arabic','Segoe UI',Tahoma,sans-serif;padding:0;color:#1a1a1a;font-size:13px;background:#fff}
+  body{font-family:'Droid Arabic Kufi','Tajawal','Segoe UI',Tahoma,sans-serif;padding:0;color:#061735;font-size:13px;background:#fff}
   .page-break{max-width:700px;margin:0 auto;padding:24px}
   .break-before{page-break-before:always}
   .header{display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #4f46e5;padding-bottom:12px;margin-bottom:16px}
@@ -26,7 +26,7 @@ export const MERGED_PDF_STYLES = `
   table{width:100%;border-collapse:collapse;margin-bottom:10px}
   td{padding:7px 10px;border:1px solid #e5e7eb;font-size:12px}
   .label{background:#f3f4f6;font-weight:600;width:55%}
-  .val-blue{color:#2563eb;font-weight:700}
+  .val-blue{color:#0b276b;font-weight:700}
   .val-green{color:#16a34a;font-weight:700}
   .val-red{color:#dc2626;font-weight:700}
   .val-orange{color:#ea580c;font-weight:600}

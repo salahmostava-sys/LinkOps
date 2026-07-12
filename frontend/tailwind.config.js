@@ -19,15 +19,15 @@ const config = {
     },
     extend: {
       fontFamily: {
-        sans: ['Tajawal', '"IBM Plex Sans Arabic"', 'sans-serif'],
-        arabic: ['Tajawal', '"IBM Plex Sans Arabic"', 'sans-serif'],
-        mono: ['Tajawal', '"IBM Plex Sans Arabic"', 'sans-serif'],
+        sans: ['"Droid Arabic Kufi"', 'Tajawal', '"IBM Plex Sans Arabic"', 'sans-serif'],
+        arabic: ['"Droid Arabic Kufi"', 'Tajawal', '"IBM Plex Sans Arabic"', 'sans-serif'],
+        mono: ['"Droid Arabic Kufi"', 'Tajawal', '"IBM Plex Sans Arabic"', 'sans-serif'],
       },
       fontSize: {
-        xs: ['0.8125rem', { lineHeight: '1.25rem' }],
-        sm: ['0.9375rem', { lineHeight: '1.5rem' }],
-        base: ['1rem', { lineHeight: '1.625rem' }],
-        lg: ['1.125rem', { lineHeight: '1.75rem' }],
+        xs: ['0.75rem', { lineHeight: '1.35rem' }],
+        sm: ['0.875rem', { lineHeight: '1.55rem' }],
+        base: ['0.9375rem', { lineHeight: '1.7rem' }],
+        lg: ['1.0625rem', { lineHeight: '1.9rem' }],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -38,12 +38,12 @@ const config = {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
-          container: "#465fff",
+          container: "#174ea6",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",
-          container: "#5165f5",
+          container: "#163b7a",
         },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
@@ -103,17 +103,17 @@ const config = {
         "outline-variant": "#dce2eb",
         /* ── Brand palette ────────────────────────────────────────── */
         brand: {
-          25:  '#f0f2ff',
-          50:  '#e6e9ff',
-          100: '#c7cdff',
-          200: '#9aa5ff',
-          300: '#6d7dff',
-          400: '#465fff',
-          500: '#2642e6',
-          600: '#1c33cc',
-          700: '#1426a8',
-          800: '#0d1a85',
-          900: '#08126b',
+          25:  '#f5f8fc',
+          50:  '#eef3fa',
+          100: '#dbe6f4',
+          200: '#b8cce6',
+          300: '#8aaad1',
+          400: '#5684ba',
+          500: '#2f609d',
+          600: '#174ea6',
+          700: '#0f3b85',
+          800: '#0b276b',
+          900: '#061735',
         },
       },
       borderRadius: {
@@ -125,11 +125,11 @@ const config = {
         "4xl": "1.5rem",
       },
       boxShadow: {
-        'card':       '0px 10px 40px rgba(26, 28, 29, 0.06)',
-        'card-hover': '0px 16px 48px rgba(26, 28, 29, 0.10)',
-        'brand':      '0 4px 16px 0 rgba(38, 66, 230, 0.28)',
-        'brand-sm':   '0 2px 8px 0 rgba(38, 66, 230, 0.20)',
-        'sidebar':    '4px 0 24px 0 rgba(26, 28, 29, 0.06)',
+        'card':       '0px 8px 28px rgba(20, 31, 52, 0.045)',
+        'card-hover': '0px 14px 42px rgba(20, 31, 52, 0.075)',
+        'brand':      '0 4px 16px 0 rgba(11, 39, 107, 0.18)',
+        'brand-sm':   '0 2px 8px 0 rgba(11, 39, 107, 0.14)',
+        'sidebar':    '4px 0 24px 0 rgba(11, 39, 107, 0.08)',
       },
       keyframes: {
         "accordion-down": {

@@ -460,7 +460,7 @@ const VehicleReportPage = () => {
   <title>تقرير المركبات الشامل</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
-    body { font-family: 'Tajawal', sans-serif; padding: 20px; color: #111; background:#fff; margin:0; }
+    body { font-family: 'Droid Arabic Kufi', 'Tajawal', sans-serif; padding: 20px; color: #061735; background:#fff; margin:0; }
     .company { text-align:center; font-size:22px; font-weight:bold; margin-bottom:4px; }
     h1 { text-align:center; font-size:17px; margin:0 0 4px; }
     .meta { text-align:center; font-size:12px; color:#64748b; margin-bottom:20px; }

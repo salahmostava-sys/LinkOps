@@ -1,8 +1,8 @@
 ﻿export type SlipLanguage = 'ar' | 'en';
 
 export const LANGUAGE_META: Record<SlipLanguage, { label: string; dir: 'rtl' | 'ltr'; flag: string; fontFamily: string }> = {
-  ar: { label: 'العربية', dir: 'rtl', flag: 'SA', fontFamily: 'Arial, sans-serif' },
-  en: { label: 'English', dir: 'ltr', flag: 'GB', fontFamily: 'Arial, sans-serif' },
+  ar: { label: 'العربية', dir: 'rtl', flag: 'SA', fontFamily: '"Droid Arabic Kufi", "Tajawal", Arial, sans-serif' },
+  en: { label: 'English', dir: 'ltr', flag: 'GB', fontFamily: '"Droid Arabic Kufi", "Tajawal", Arial, sans-serif' },
 };
 
 export interface SlipTranslations {

@@ -48,10 +48,10 @@ export function BaseTable<T>({
   return (
     <div className={`w-full overflow-x-auto border rounded-xl bg-card ${className}`}>
       <table className="w-full text-sm text-right">
-        <thead className="bg-muted/50 border-b">
+        <thead className="bg-[var(--ds-table-header-bg)] text-[var(--ds-table-header-text)]">
           <tr>
             {columns.map((col, idx) => (
-              <th key={String(col.key) + idx} className={`p-4 font-medium text-muted-foreground min-w-[120px] whitespace-normal text-center align-middle ${col.className || ''}`}>
+              <th key={String(col.key) + idx} className={`p-4 font-bold min-w-[120px] whitespace-normal text-center align-middle ${col.className || ''}`}>
                 {col.title}
               </th>
             ))}

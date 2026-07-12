@@ -30,7 +30,7 @@ describe('appsModel', () => {
       const values = toAppFormValues(null);
       expect(values.name).toBe('');
       expect(values.name_en).toBe('');
-      expect(values.brand_color).toBe('#6366f1');
+      expect(values.brand_color).toBe('#0b276b');
       expect(values.is_active).toBe(true);
       expect(values.custom_columns).toEqual([]);
     });

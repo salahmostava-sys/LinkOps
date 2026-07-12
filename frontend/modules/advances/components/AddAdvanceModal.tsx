@@ -356,14 +356,14 @@ export const PrintSlip = ({ employeeName, nationalId, totalDebt, totalPaid, rema
 
     const style = doc.createElement('style');
     style.textContent = `
-      body { font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; direction: rtl; }
+      body { font-family: 'Droid Arabic Kufi', 'Tajawal', Arial, sans-serif; padding: 20px; direction: rtl; }
       table { width: 100%; border-collapse: collapse; margin-top: 12px; }
       th { background: #f3f4f6; padding: 8px; font-size: 12px; border: 1px solid #d1d5db; }
       td { padding: 7px 8px; font-size: 12px; border: 1px solid #e5e7eb; }
-      .header { border-bottom: 2px solid #4f46e5; padding-bottom: 12px; margin-bottom: 16px; }
+      .header { border-bottom: 2px solid #0b276b; padding-bottom: 12px; margin-bottom: 16px; }
       .stat { display: inline-block; margin-left: 20px; font-size: 13px; }
       .stat-val { font-weight: bold; font-size: 16px; }
-      .red { color: #dc2626; } .green { color: #16a34a; } .blue { color: #2563eb; }
+      .red { color: #ba1a1a; } .green { color: #16805d; } .blue { color: #0b276b; }
       @media print { button { display: none; } }
     `;
     doc.head.appendChild(style);

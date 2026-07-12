@@ -28,7 +28,7 @@ export type PresenceUser = {
 
 /** Stable avatar colors assigned per user index. */
 const PRESENCE_COLORS = [
-  '#2563eb', '#dc2626', '#16a34a', '#9333ea',
+  '#0b276b', '#ba1a1a', '#16805d', '#1f6fd1',
   '#ea580c', '#0891b2', '#c026d3', '#65a30d',
   '#d97706', '#4f46e5', '#be123c', '#059669',
 ];

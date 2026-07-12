@@ -18,7 +18,7 @@ export interface AppColorData {
   custom_columns?: CustomColumn[];
 }
 
-const FALLBACK_COLORS = ['#2563eb', '#16a34a', '#9333ea', '#ea580c', '#0891b2', '#dc2626'];
+const FALLBACK_COLORS = ['#0b276b', '#16805d', '#d98b00', '#1f6fd1', '#163b7a', '#ba1a1a'];
 
 const appColorsQueryKey = (userId: string) => ['apps', userId, 'colors'] as const;
 

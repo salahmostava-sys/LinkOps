@@ -100,7 +100,7 @@ export function useFaviconBadge(count: number) {
       // إذا فشل تحميل الأيقونة، أنشئ أيقونة بسيطة مع badge
       if (count > 0) {
         ctx.clearRect(0, 0, 32, 32);
-        ctx.fillStyle = '#2642e6';
+        ctx.fillStyle = '#0b276b';
         ctx.fillRect(0, 0, 32, 32);
 
         const badgeText = count > 99 ? '99+' : String(count);

@@ -188,8 +188,7 @@ function LoginBrandingPanel({
     <section
       className="hidden lg:flex lg:w-[52%] relative flex-col justify-between overflow-hidden px-12 py-10 xl:px-16 xl:py-12"
       style={{
-        background:
-          'linear-gradient(225deg, #0f2f9b 0%, #1d4ed8 54%, #17358f 100%)',
+        background: '#0b276b',
       }}
     >
       <div
@@ -218,11 +217,11 @@ function LoginBrandingPanel({
             </div>
           )}
           <div className="min-w-0">
-            <h1 className="text-2xl xl:text-3xl font-extrabold text-white leading-tight max-w-lg drop-shadow-md">{projectName}</h1>
-            <p className="text-white/90 text-sm mt-1 truncate max-w-md drop-shadow-sm">{projectSubtitle}</p>
+            <h1 className="text-2xl xl:text-3xl font-extrabold text-white leading-tight max-w-lg">{projectName}</h1>
+            <p className="text-white/90 text-sm mt-1 truncate max-w-md">{projectSubtitle}</p>
           </div>
         </div>
-        <p className="text-white/90 text-lg max-w-xl leading-8 drop-shadow-sm">
+        <p className="text-white/90 text-lg max-w-xl leading-8">
           {t('systemSubtitleDesc')}
         </p>
       </div>
@@ -242,13 +241,13 @@ function LoginBrandingPanel({
             <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center group-hover:bg-white/15 transition-colors">
               <span className="material-symbols-outlined text-white text-lg">{f.icon}</span>
             </div>
-            <h3 className="text-white font-bold text-base drop-shadow-sm">{f.title}</h3>
-            <p className="text-white/90 text-sm leading-relaxed drop-shadow-sm">{f.desc}</p>
+            <h3 className="text-white font-bold text-base">{f.title}</h3>
+            <p className="text-white/90 text-sm leading-relaxed">{f.desc}</p>
           </div>
         ))}
       </div>
 
-      <p className={`relative z-10 text-white/80 text-sm mt-8 drop-shadow-sm ${isRtl ? 'text-right' : 'text-left'}`}>
+      <p className={`relative z-10 text-white/80 text-sm mt-8 ${isRtl ? 'text-right' : 'text-left'}`}>
         {`© ${new Date().getFullYear()} ${projectName}`}
       </p>
     </section>
@@ -300,7 +299,7 @@ function PasswordField({ password, setPassword, showPw, setShowPw, capsLock, set
         autoComplete="current-password"
         autoFocus={!!email}
         aria-invalid={!!loginError}
-        className={`block h-12 w-full ${isRtl ? 'pr-14 pl-14' : 'pl-14 pr-14'} text-base bg-muted/40 border border-border/60 rounded-xl focus-visible:ring-4 focus-visible:ring-primary/20 focus-visible:border-primary hover:border-border transition-all duration-200 outline-none text-foreground placeholder:text-muted-foreground/50 dark:bg-muted/20 dark:hover:border-border/80`}
+        className={`block h-12 w-full ${isRtl ? 'pr-14 pl-14' : 'pl-14 pr-14'} text-base bg-[var(--ds-field-bg)] border border-[var(--ds-field-border)] rounded-xl focus-visible:ring-4 focus-visible:ring-primary/20 focus-visible:border-primary hover:border-[var(--ds-field-border)] transition-all duration-200 outline-none text-foreground placeholder:text-muted-foreground/50`}
         style={{ fontFamily: 'system-ui, sans-serif', letterSpacing: !showPw ? '0.12em' : 'normal', textAlign: 'left', direction: 'ltr' }} // NOSONAR
       />
       <button
@@ -377,7 +376,7 @@ function LoginFormSection(props: LoginFormSectionProps) {
             />
           </span>
         ) : (
-          <div className="w-20 h-20 rounded-xl mb-3 flex items-center justify-center shadow-brand" style={{ background: 'linear-gradient(225deg, #00288e, #1e40af)' }}>
+          <div className="w-20 h-20 rounded-xl mb-3 flex items-center justify-center" style={{ background: '#0b276b' }}>
             <span className="material-symbols-outlined text-5xl text-white" style={{ fontVariationSettings: "'FILL' 1" }}>local_shipping</span>
           </div>
         )}
@@ -418,7 +417,7 @@ function LoginFormSection(props: LoginFormSectionProps) {
                 autoComplete="email"
                 autoFocus={!email}
                 aria-invalid={!!loginError}
-                className={`block h-12 w-full ${isRtl ? 'pr-12 pl-4' : 'pl-12 pr-4'} text-base bg-muted/40 border border-border/60 rounded-xl focus-visible:ring-4 focus-visible:ring-primary/20 focus-visible:border-primary hover:border-border transition-all duration-200 outline-none text-foreground placeholder:text-muted-foreground/50 dark:bg-muted/20 dark:hover:border-border/80`}
+                className={`block h-12 w-full ${isRtl ? 'pr-12 pl-4' : 'pl-12 pr-4'} text-base bg-[var(--ds-field-bg)] border border-[var(--ds-field-border)] rounded-xl focus-visible:ring-4 focus-visible:ring-primary/20 focus-visible:border-primary hover:border-[var(--ds-field-border)] transition-all duration-200 outline-none text-foreground placeholder:text-muted-foreground/50`}
               />
             </div>
           </div>
@@ -463,8 +462,8 @@ function LoginFormSection(props: LoginFormSectionProps) {
             <button
               type="submit"
               disabled={loading}
-              className="relative h-12 w-full px-5 text-white font-bold rounded-xl overflow-hidden shadow-brand hover:shadow-brand active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed group"
-              style={{ background: 'linear-gradient(135deg, #00288e 0%, #1e40af 50%, #2563eb 100%)' }}
+              className="relative h-12 w-full px-5 text-white font-bold rounded-xl overflow-hidden active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed group"
+              style={{ background: '#0b276b' }}
             >
               <span
                 className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"

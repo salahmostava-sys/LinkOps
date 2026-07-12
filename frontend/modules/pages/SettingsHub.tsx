@@ -183,7 +183,7 @@ export default function SettingsHub() {
                   style={
                     isActive
                       ? {
-                          background: 'linear-gradient(135deg, #2642e6, #465fff)',
+                          background: '#0b276b',
                           color: '#ffffff',
                           fontWeight: 600,
                           boxShadow: '0 4px 12px rgba(38,66,230,0.20)',

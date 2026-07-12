@@ -22,7 +22,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
     document.documentElement.lang = lang;
-    document.documentElement.style.fontFamily = isRTL ? "'IBM Plex Sans Arabic', 'Tajawal', sans-serif" : "'Inter', 'Roboto', sans-serif";
+    document.documentElement.style.fontFamily = "'Droid Arabic Kufi', 'Tajawal', 'IBM Plex Sans Arabic', sans-serif";
     i18n.changeLanguage(lang);
     localStorage.setItem('app-lang', lang);
   }, [lang, isRTL]);

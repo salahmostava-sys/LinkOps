@@ -51,7 +51,7 @@ export const normalizeCustomColumns = (value: unknown): CustomColumn[] => {
 };
 
 export const toAppFormValues = (app?: Partial<AppData> | null): AppFormValues => {
-  const brand_color = app?.brand_color ?? '#6366f1';
+  const brand_color = app?.brand_color ?? '#0b276b';
   return {
     name: app?.name ?? '',
     name_en: app?.name_en ?? '',

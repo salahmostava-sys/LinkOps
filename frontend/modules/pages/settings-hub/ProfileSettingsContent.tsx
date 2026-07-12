@@ -35,7 +35,7 @@ const strengthColor = (s: number) => {
 const SectionHeader = ({ icon, title, subtitle }: Readonly<{ icon: React.ReactNode; title: string; subtitle?: string }>) => (
   <div className="flex items-center gap-3 pb-4 mb-5" style={{ borderBottom: '1px solid var(--ds-surface-container)' }}>
     <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-      style={{ background: 'rgba(38,66,230,0.08)', color: '#2642e6' }}>
+      style={{ background: 'rgba(11,39,107,0.08)', color: '#0b276b' }}>
       {icon}
     </div>
     <div>
@@ -218,7 +218,7 @@ export default function ProfileSettingsContent({ omitPageHeading = false }: Read
               <img src={avatarSrc} alt="الصورة الشخصية" className="w-20 h-20 rounded-full object-cover border-2 border-border" />
             ) : (
               <div className="w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold border-2 border-border"
-                style={{ background: 'rgba(38,66,230,0.1)', color: '#2642e6' }}>
+                style={{ background: 'rgba(11,39,107,0.1)', color: '#0b276b' }}>
                 {initial}
               </div>
             )}
@@ -226,7 +226,7 @@ export default function ProfileSettingsContent({ omitPageHeading = false }: Read
               type="button"
               onClick={() => fileRef.current?.click()}
               className="absolute bottom-0 end-0 w-7 h-7 text-white flex items-center justify-center shadow-card transition-opacity hover:opacity-90 rounded-2xl"
-              style={{ background: 'linear-gradient(135deg, #2642e6, #465fff)' }}
+              style={{ background: '#0b276b' }}
             >
               <Camera size={12} />
             </button>

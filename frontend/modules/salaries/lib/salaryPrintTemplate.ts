@@ -21,7 +21,7 @@ export interface PrintTableParams {
 
 const PRINT_STYLES = `
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Noto Naskh Arabic', 'Segoe UI', Tahoma, sans-serif; padding: 24px; color: #111; background: #fff; font-size: 12px; }
+  body { font-family: 'Droid Arabic Kufi', 'Tajawal', 'Segoe UI', Tahoma, sans-serif; padding: 24px; color: #061735; background: #fff; font-size: 12px; }
   .header { display: flex; align-items: flex-start; justify-content: space-between; border-bottom: 3px solid #4f46e5; padding-bottom: 14px; margin-bottom: 20px; }
   .company-name { font-size: 22px; font-weight: 900; color: #4f46e5; }
   .report-title { font-size: 15px; font-weight: 700; color: #333; margin-top: 4px; }

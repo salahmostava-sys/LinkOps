@@ -92,7 +92,7 @@ const STATUS_CLASSES: Record<string, string> = {
 const COLOR_MAP: Record<string, string> = {
   green: '#16a34a',
   red: '#dc2626',
-  blue: '#2563eb',
+  blue: '#0b276b',
   orange: '#ea580c',
 };
 
@@ -101,7 +101,7 @@ const COLOR_MAP: Record<string, string> = {
 const SLIP_CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;600;700&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{direction:rtl;font-family:'Noto Naskh Arabic','Segoe UI',Tahoma,sans-serif;font-size:13px;color:#1a1a1a;background:#fff;padding:0}
+html,body{direction:rtl;font-family:'Droid Arabic Kufi','Tajawal','Segoe UI',Tahoma,sans-serif;font-size:13px;color:#061735;background:#fff;padding:0}
 .slip-container{max-width:700px;margin:0 auto;padding:24px}
 .header{display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #4f46e5;padding-bottom:12px;margin-bottom:16px}
 .header-brand{font-size:20px;font-weight:800;color:#4f46e5}
@@ -201,12 +201,12 @@ const buildPlatformsTable = (platforms: SlipPlatformRow[]): string => {
         <tr>
           <td class="label-cell">${escapeHtml(p.name)}</td>
           <td class="value-cell">${fmt(p.orders)}</td>
-          <td class="value-cell" style="color:#2563eb">${fmt(p.salary)} ر.س</td>
+          <td class="value-cell" style="color:#0b276b">${fmt(p.salary)} ر.س</td>
         </tr>`).join('')}
       <tr class="total-row">
         <td class="label-cell">إجمالي المنصات</td>
         <td class="value-cell">${fmt(totalOrders)}</td>
-        <td class="value-cell" style="color:#2563eb">${fmt(totalPlatformSalary)} ر.س</td>
+        <td class="value-cell" style="color:#0b276b">${fmt(totalPlatformSalary)} ر.س</td>
       </tr>
     </table>`;
 };

@@ -496,7 +496,7 @@ export function VehicleReportsTab() {
       <title>تقرير صيانة المركبات</title>
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
-        body { font-family: 'Tajawal', system-ui, sans-serif; padding: 20px; margin: 0; color: #111; background: #fff; }
+        body { font-family: 'Droid Arabic Kufi', 'Tajawal', system-ui, sans-serif; padding: 20px; margin: 0; color: #061735; background: #fff; }
         .company-name { text-align: center; font-size: 22px; font-weight: bold; margin-bottom: 5px; color: #1e293b; }
         h1 { text-align: center; margin-bottom: 5px; color: #0f172a; font-size: 18px; }
         .header-info { text-align: center; margin-bottom: 20px; font-size: 13px; color: #64748b; }

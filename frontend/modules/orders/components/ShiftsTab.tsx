@@ -388,7 +388,7 @@ export function ShiftsTab({
     const meta = doc.createElement('meta'); meta.setAttribute('charset', 'UTF-8'); doc.head.appendChild(meta);
     doc.title = `دوام ${month}/${year}`;
     const style = doc.createElement('style');
-    style.textContent = '*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:10px;direction:rtl}h2{text-align:center;margin:8px 0}table{width:100%;border-collapse:collapse}th{background:#1e3a5f;color:#fff;padding:4px;text-align:center;font-size:9px}td{padding:3px;border:1px solid #ddd;text-align:center}@media print{body{print-color-adjust:exact}}';
+    style.textContent = '*{box-sizing:border-box;margin:0;padding:0}body{font-family:"Droid Arabic Kufi","Tajawal",Arial,sans-serif;font-size:10px;direction:rtl;color:#061735}h2{text-align:center;margin:8px 0}table{width:100%;border-collapse:collapse}th{background:#0b276b;color:#fff;padding:4px;text-align:center;font-size:9px}td{padding:3px;border:1px solid #ddd;text-align:center}@media print{body{print-color-adjust:exact}}';
     doc.head.appendChild(style);
     const h2 = doc.createElement('h2');
     h2.textContent = `دوام شهر ${month}/${year} — ${filteredEmployees.length} موظف`;

@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+@import url('https://fonts.googleapis.com/earlyaccess/droidarabickufi.css');
 
 @tailwind base;
 @tailwind components;
@@ -8,35 +9,41 @@
 @layer base {
   :root {
     /* Typography tokens (shared across app) */
-    --font-sans: 'Tajawal', 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, sans-serif;
-    --font-ar: 'Tajawal', 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, sans-serif;
+    --font-sans: 'Droid Arabic Kufi', 'Tajawal', 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, sans-serif;
+    --font-ar: 'Droid Arabic Kufi', 'Tajawal', 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, sans-serif;
+    --text-xs: 0.75rem;
+    --text-sm: 0.875rem;
+    --text-md: 0.9375rem;
+    --text-lg: 1.0625rem;
+    --text-xl: 1.25rem;
+    --text-line: 1.7;
 
     /* ─── High-End Editorial Dashboard — Light Palette ─────────── */
 
     /* Page canvas */
     --background: 0 0% 100%;          /* #ffffff app canvas */
-    --foreground: 210 6% 11%;         /* #1a1c1d on-surface */
+    --foreground: 222 75% 12%;        /* #061735 */
 
     /* Cards / popups — pure white */
     --card: 0 0% 100%;
-    --card-foreground: 210 6% 11%;
+    --card-foreground: 222 75% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 210 6% 11%;
+    --popover-foreground: 222 75% 12%;
 
-    /* Primary: #2642e6 → HSL 232 77% 52% */
-    --primary: 220 83% 53%;
+    /* Primary: #0b276b */
+    --primary: 222 81% 23%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary: #3549db */
+    /* Secondary: #163b7a */
     --secondary: 215 28% 17%;
     --secondary-foreground: 0 0% 100%;
 
     --muted: 220 30% 97%;             /* #f6f8fb subtle surface */
-    --muted-foreground: 226 17% 34%;  /* #485166 on-surface-variant */
+    --muted-foreground: 215 18% 53%;  /* #73829a */
 
-    --accent: 232 100% 95%;           /* very light blue tint */
-    --accent-foreground: 232 77% 52%;
+    --accent: 218 54% 95%;            /* very light navy tint */
+    --accent-foreground: 222 81% 23%;
 
     --destructive: 0 72% 41%;         /* error #ba1a1a */
     --destructive-foreground: 0 0% 100%;
@@ -52,20 +59,20 @@
 
     --border: 220 24% 89%;            /* #dce2eb outline */
     --input: 220 24% 89%;
-    --ring: 232 77% 52%;
+    --ring: 222 81% 23%;
 
     --radius: 0.75rem;                /* 12px base */
 
     /* ── Sidebar tokens ───────────────────────────────────────── */
-    --sidebar-background: 0 0% 100%;      /* white navigation rail */
-    --sidebar-foreground: 226 17% 34%;    /* on-surface-variant */
-    --sidebar-primary: 232 77% 52%;       /* #2642e6 */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222 75% 12%;
+    --sidebar-primary: 222 81% 23%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 30% 97%;        /* subtle hover surface */
-    --sidebar-accent-foreground: 210 6% 11%;
-    --sidebar-border: 220 24% 91%;
-    --sidebar-ring: 232 77% 52%;
-    --sidebar-muted: 237 13% 55%;
+    --sidebar-accent: 218 54% 95%;
+    --sidebar-accent-foreground: 222 81% 23%;
+    --sidebar-border: 218 36% 92%;
+    --sidebar-ring: 222 81% 23%;
+    --sidebar-muted: 215 18% 53%;
 
     /* ── MD3 surface raw hex tokens ──────────────────────────── */
     --ds-surface:            #ffffff;
@@ -73,18 +80,25 @@
     --ds-surface-low:        #fafbfc;
     --ds-surface-container:  #f4f6fa;
     --ds-surface-high:       #eef2f7;
-    --ds-on-surface:         #1a1c1d;
-    --ds-on-surface-variant: #485166;
+    --ds-on-surface:         #061735;
+    --ds-on-surface-variant: #73829a;
     --ds-outline-variant:    #dce2eb;
 
     /* ── Brand hex tokens ────────────────────────────────────── */
-    --ds-primary:           #2642e6;
-    --ds-primary-container: #465fff;
-    --ds-secondary:         #3549db;
+    --ds-primary:           #0b276b;
+    --ds-primary-container: #174ea6;
+    --ds-secondary:         #163b7a;
     --ds-error:             #ba1a1a;
+    --ds-success:           #16805d;
+    --ds-warning:           #d98b00;
+    --ds-info:              #1f6fd1;
+    --ds-field-bg:          #f4f6f9;
+    --ds-field-border:      #d8e0ec;
+    --ds-table-header-bg:   #0b276b;
+    --ds-table-header-text: #ffffff;
 
     /* ── shadcn chart palette (accessible & brand-aligned) ──── */
-    --chart-1: 232 77% 52%;   /* brand blue */
+    --chart-1: 222 81% 23%;   /* brand navy */
     --chart-2: 152 65% 36%;   /* green  */
     --chart-3: 38  92% 50%;   /* amber  */
     --chart-4: 280 65% 55%;   /* purple */
@@ -110,8 +124,8 @@
     /* ── Shadows ─────────────────────────────────────────────── */
     --shadow-card:    0px 8px 28px rgba(20, 31, 52, 0.045);
     --shadow-card-md: 0px 14px 42px rgba(20, 31, 52, 0.075);
-    --shadow-brand:   0 4px 16px rgba(38, 66, 230, 0.28);
-    --shadow-focus:   0 0 0 3px rgba(38, 66, 230, 0.25);
+    --shadow-brand:   0 4px 16px rgba(11, 39, 107, 0.18);
+    --shadow-focus:   0 0 0 3px rgba(11, 39, 107, 0.22);
   }
 
   .dark {
@@ -121,14 +135,14 @@
     --card-foreground: 213 20% 92%;
     --popover: 222 40% 11%;
     --popover-foreground: 213 20% 92%;
-    --primary: 232 85% 65%;
+    --primary: 222 81% 23%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 235 70% 60%;
+    --secondary: 215 28% 17%;
     --secondary-foreground: 0 0% 100%;
     --muted: 222 30% 16%;
     --muted-foreground: 213 15% 50%;
     --accent: 222 35% 20%;
-    --accent-foreground: 232 100% 75%;
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 70% 55%;
     --destructive-foreground: 0 0% 100%;
     --success: 151 55% 46%;
@@ -139,15 +153,15 @@
     --info-foreground: 0 0% 100%;
     --border: 222 28% 20%;
     --input: 222 28% 20%;
-    --ring: 232 85% 65%;
+    --ring: 222 81% 23%;
     --sidebar-background: 222 47% 7%;
     --sidebar-foreground: 213 18% 72%;
-    --sidebar-primary: 232 85% 65%;
+    --sidebar-primary: 222 81% 23%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 220 20% 16%;
     --sidebar-accent-foreground: 213 18% 88%;
     --sidebar-border: 222 30% 14%;
-    --sidebar-ring: 232 85% 65%;
+    --sidebar-ring: 222 81% 23%;
     --sidebar-muted: 213 14% 42%;
 
     /* ── MD3 surface tokens — dark overrides ─────────────────── */
@@ -159,12 +173,19 @@
     --ds-on-surface:         #dde3ec;
     --ds-on-surface-variant: #8b9ab4;
     --ds-outline-variant:    #2a3850;
+    --ds-success:           #25a576;
+    --ds-warning:           #f0a51a;
+    --ds-info:              #4f93e8;
+    --ds-field-bg:          #121b2c;
+    --ds-field-border:      #2a3850;
+    --ds-table-header-bg:   #0b276b;
+    --ds-table-header-text: #ffffff;
 
     /* ── Header glass background — dark ─────────────────────── */
     --header-glass-bg: rgba(12, 17, 25, 0.88);
 
     /* ── shadcn chart palette — dark overrides ───────────────── */
-    --chart-1: 232 85% 68%;   /* brighter blue */
+    --chart-1: 222 81% 33%;   /* brand navy */
     --chart-2: 152 60% 42%;   /* green  */
     --chart-3: 38  88% 55%;   /* amber  */
     --chart-4: 280 55% 58%;   /* purple */
@@ -184,15 +205,15 @@
   html {
     direction: rtl;
     scrollbar-gutter: auto;
-    font-family: 'Tajawal', 'IBM Plex Sans Arabic', sans-serif;
+    font-family: var(--font-sans);
   }
 
   body {
     @apply bg-background text-foreground antialiased;
     overflow-y: scroll;
-    font-family: 'Tajawal', 'IBM Plex Sans Arabic', sans-serif;
-    font-size: 0.9375rem;
-    line-height: 1.55;
+    font-family: var(--font-sans);
+    font-size: var(--text-md);
+    line-height: var(--text-line);
     text-rendering: optimizeLegibility;
   }
 
@@ -334,12 +355,35 @@
     max-width: 100%;
   }
 
+  .app-content-shell {
+    color: var(--ds-on-surface);
+    font-size: var(--text-md);
+  }
+
+  .app-content-shell :is(p, span, label, input, select, textarea, button, td, th) {
+    letter-spacing: 0;
+  }
+
+  .app-content-shell .text-muted-foreground {
+    color: var(--ds-on-surface-variant);
+  }
+
+  .app-content-shell .text-primary {
+    color: var(--ds-primary);
+  }
+
+  .app-content-shell .bg-primary {
+    background-color: var(--ds-primary);
+  }
+
   .app-content-shell input:not([type='checkbox']):not([type='radio']):not([type='range']),
   .app-content-shell select,
   .app-content-shell textarea,
   .app-content-shell [role='combobox'] {
     min-height: 2.5rem;
     border-radius: 0.75rem;
+    background: var(--ds-field-bg);
+    border-color: var(--ds-field-border);
   }
 
   .app-content-shell input:not([type='checkbox']):not([type='radio']):not([type='range']),
@@ -407,7 +451,7 @@
     transition: box-shadow 300ms ease, transform 300ms ease;
   }
   .metric-card:hover { 
-    box-shadow: var(--shadow-card-md), 0 0 20px rgba(38, 66, 230, 0.08); 
+    box-shadow: var(--shadow-card-md), 0 0 20px rgba(11, 39, 107, 0.08);
     transform: translateY(-2px);
   }
 
@@ -419,7 +463,7 @@
     transition: box-shadow 300ms ease, transform 300ms ease;
   }
   .stat-card:hover { 
-    box-shadow: var(--shadow-card-md), 0 0 20px rgba(38, 66, 230, 0.08);
+    box-shadow: var(--shadow-card-md), 0 0 20px rgba(11, 39, 107, 0.08);
     transform: translateY(-2px);
   }
 
@@ -449,17 +493,19 @@
   }
 
   .ta-thead {
-    background: var(--ds-surface-low);
+    background: var(--ds-table-header-bg) !important;
   }
 
   .ta-th {
     @apply px-2 py-2.5 text-xs font-semibold uppercase tracking-wide whitespace-nowrap text-center;
-    color: var(--ds-on-surface-variant);
+    background: var(--ds-table-header-bg) !important;
+    color: var(--ds-table-header-text) !important;
   }
 
   .ta-th-center {
     @apply px-2 py-2.5 text-xs font-semibold uppercase tracking-wide whitespace-nowrap text-center;
-    color: var(--ds-on-surface-variant);
+    background: var(--ds-table-header-bg) !important;
+    color: var(--ds-table-header-text) !important;
   }
 
   .ta-tr {
@@ -471,7 +517,7 @@
   }
   .ta-tr:hover {
     background: var(--ds-surface-low);
-    box-shadow: inset 0 0 0 9999px rgba(38, 66, 230, 0.035), 0 4px 14px rgba(15, 23, 42, 0.08);
+    box-shadow: inset 0 0 0 9999px rgba(11, 39, 107, 0.035), 0 4px 14px rgba(15, 23, 42, 0.08);
   }
 
   .ta-td {
@@ -490,7 +536,7 @@
 
   .ta-table-wrap tbody tr:hover {
     background: var(--ds-surface-low);
-    box-shadow: inset 0 0 0 9999px rgba(38, 66, 230, 0.035), 0 4px 14px rgba(15, 23, 42, 0.08);
+    box-shadow: inset 0 0 0 9999px rgba(11, 39, 107, 0.035), 0 4px 14px rgba(15, 23, 42, 0.08);
   }
 
   .employees-table-wrap {
@@ -507,9 +553,9 @@
 
   .employees-table .ta-th {
     @apply px-1.5 py-2 text-xs font-bold leading-4 normal-case tracking-normal;
-    background: color-mix(in srgb, var(--ds-surface-container) 88%, var(--ds-on-surface) 12%);
-    color: var(--ds-on-surface);
-    border-bottom: 1px solid var(--ds-border);
+    background: var(--ds-table-header-bg) !important;
+    color: var(--ds-table-header-text) !important;
+    border-bottom: 1px solid color-mix(in srgb, var(--ds-table-header-bg) 86%, white);
   }
 
   .employees-table .ta-td {
@@ -530,7 +576,7 @@
   .employees-table tbody tr:hover {
     position: relative;
     background: color-mix(in srgb, var(--ds-surface-low) 82%, white);
-    box-shadow: inset 0 0 0 9999px rgba(38, 66, 230, 0.035), 0 6px 18px rgba(15, 23, 42, 0.10);
+    box-shadow: inset 0 0 0 9999px rgba(11, 39, 107, 0.035), 0 6px 18px rgba(15, 23, 42, 0.10);
     transform: translateY(-1px);
   }
 
@@ -573,12 +619,13 @@
   }
 
   .data-table thead {
-    background: var(--ds-surface-low);
+    background: var(--ds-table-header-bg) !important;
   }
 
   .data-table thead th {
     @apply px-4 py-2.5 text-xs font-semibold whitespace-nowrap text-center;
-    color: var(--ds-on-surface-variant);
+    background: var(--ds-table-header-bg) !important;
+    color: var(--ds-table-header-text) !important;
   }
 
   .data-table tbody tr {
@@ -588,7 +635,7 @@
 
   .data-table tbody tr:hover {
     background: var(--ds-surface-low);
-    box-shadow: inset 0 0 0 9999px rgba(38, 66, 230, 0.035), 0 4px 14px rgba(15, 23, 42, 0.08);
+    box-shadow: inset 0 0 0 9999px rgba(11, 39, 107, 0.035), 0 4px 14px rgba(15, 23, 42, 0.08);
     transform: translateY(-1px);
   }
   .data-table tbody tr:last-child { border-bottom: none; }
@@ -620,19 +667,27 @@
 
   /* ─── Badges — dot + color, no borders ────────────────────────── */
   .badge-urgent {
-    @apply inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200;
+    @apply inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full;
+    background: color-mix(in srgb, var(--ds-error) 14%, white);
+    color: var(--ds-error);
   }
 
   .badge-warning {
-    @apply inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200;
+    @apply inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full;
+    background: color-mix(in srgb, var(--ds-warning) 16%, white);
+    color: #7a4a00;
   }
 
   .badge-success {
-    @apply inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200;
+    @apply inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full;
+    background: color-mix(in srgb, var(--ds-success) 15%, white);
+    color: var(--ds-success);
   }
 
   .badge-info {
-    @apply inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200;
+    @apply inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full;
+    background: color-mix(in srgb, var(--ds-info) 14%, white);
+    color: var(--ds-info);
   }
 
   /* ─── Icon box ────────────────────────────────────────────────── */
@@ -694,7 +749,7 @@
     white-space: nowrap;
     transition: opacity 150ms ease, transform 100ms ease, box-shadow 150ms ease;
     text-decoration: none;
-    font-family: 'Tajawal', 'IBM Plex Sans Arabic', sans-serif;
+    font-family: var(--font-sans);
   }
 
   .ds-btn:focus-visible {
@@ -706,13 +761,13 @@
   .ds-btn:disabled { opacity: 0.45; pointer-events: none; cursor: not-allowed; }
 
   .ds-btn--primary {
-    background: linear-gradient(135deg, var(--ds-primary), var(--ds-primary-container));
+    background: var(--ds-primary);
     color: #ffffff;
-    box-shadow: var(--shadow-brand);
+    box-shadow: none;
   }
   .ds-btn--primary:hover:not(:disabled) { 
     opacity: 0.95;
-    box-shadow: 0 0 15px rgba(38, 66, 230, 0.4), var(--shadow-brand); 
+    box-shadow: none;
   }
 
   .ds-btn--secondary {
@@ -748,14 +803,14 @@
     cursor: pointer;
     white-space: nowrap;
     transition: opacity 150ms ease, transform 100ms ease, box-shadow 150ms ease;
-    background: linear-gradient(135deg, var(--ds-primary), var(--ds-primary-container));
+    background: var(--ds-primary);
     color: #ffffff;
-    box-shadow: var(--shadow-brand);
-    font-family: 'Tajawal', 'IBM Plex Sans Arabic', sans-serif;
+    box-shadow: none;
+    font-family: var(--font-sans);
   }
   .ds-btn-primary:hover:not(:disabled) { 
     opacity: 0.95; 
-    box-shadow: 0 0 15px rgba(38, 66, 230, 0.4), var(--shadow-brand);
+    box-shadow: none;
   }
   .ds-btn-primary:active:not(:disabled) { transform: scale(0.97); }
   .ds-btn-primary:disabled { opacity: 0.45; pointer-events: none; }
@@ -810,11 +865,11 @@
 
   /* ─── NProgress bar — matches brand primary ──────────────────── */
   #nprogress .bar {
-    background: linear-gradient(90deg, var(--ds-primary), var(--ds-primary-container)) !important;
+    background: var(--ds-primary) !important;
     height: 3px !important;
   }
   #nprogress .peg {
-    box-shadow: 0 0 12px var(--ds-primary), 0 0 6px var(--ds-primary) !important;
+    box-shadow: none !important;
   }
 
   /* ─── RTL-friendly fade-in (no horizontal shift) ──────────────── */

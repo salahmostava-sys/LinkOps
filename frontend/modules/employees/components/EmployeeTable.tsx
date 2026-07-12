@@ -198,7 +198,7 @@ function EmployeeDetailedTableInner() {
                 return (
                   <th
                     key={col.key}
-                    className={`ta-th !px-1 select-none whitespace-nowrap text-center text-black ${col.key === "seq" ? "w-10 !px-1" : ""}`}
+                    className={`ta-th !px-1 select-none whitespace-nowrap text-center ${col.key === "seq" ? "w-10 !px-1" : ""}`}
                   >
                     <div className="flex min-w-0 items-center justify-center gap-1">
                       {col.sortable ? (

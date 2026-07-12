@@ -50,7 +50,7 @@ export function printHtmlTable(
   const style = doc.createElement('style');
   style.textContent = `
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Arial, sans-serif; font-size: 11px; direction: rtl; color: #111; background: white; }
+    body { font-family: 'Droid Arabic Kufi', 'Tajawal', Arial, sans-serif; font-size: 11px; direction: rtl; color: #061735; background: white; }
     h2 { text-align: center; margin-bottom: 8px; font-size: 15px; }
     p.subtitle { text-align: center; color: #666; font-size: 11px; margin-bottom: 12px; }
     table { width: 100%; border-collapse: collapse; }

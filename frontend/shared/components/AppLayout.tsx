@@ -224,7 +224,7 @@ const AppLayoutInner = ({ children }: Readonly<AppLayoutProps>) => { // NOSONAR:
                   ) : (
                     <div
                       className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 ring-2 ring-background"
-                      style={{ background: 'linear-gradient(135deg, #2642e6, #465fff)' }}
+                      style={{ background: '#0b276b' }}
                       title={displayName}
                     >
                       {initials || 'A'}
@@ -256,7 +256,7 @@ const AppLayoutInner = ({ children }: Readonly<AppLayoutProps>) => { // NOSONAR:
                     ) : (
                       <div
                         className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
-                        style={{ background: 'linear-gradient(135deg, #2642e6, #465fff)' }}
+                        style={{ background: '#0b276b' }}
                       >
                         {initials || 'A'}
                       </div>
@@ -328,7 +328,7 @@ function MobileLogo({ logoSrc }: Readonly<{ logoSrc?: string }>) {
     );
   }
   return (
-    <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-full flex items-center justify-center shrink-0 border-2 border-border/80 shadow-sm bg-gradient-to-br from-primary to-primary/80 text-primary-foreground">
+    <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-full flex items-center justify-center shrink-0 border-2 border-border/80 shadow-sm bg-primary text-primary-foreground">
       <Sparkles size={20} aria-hidden />
     </div>
   );
