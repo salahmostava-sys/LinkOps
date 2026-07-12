@@ -497,7 +497,7 @@ export const SalaryTable = memo(function SalaryTable(props: Readonly<SalaryTable
                 const pc = platformColors[p];
                 return (
                   <th key={`${p}-col`}
-                    className="ta-th border-b border-l border-border/30 cursor-pointer select-none hover:opacity-90 transition-opacity"
+                    className={`${thBase} border-b border-l border-border/30 cursor-pointer select-none hover:opacity-90 transition-opacity`}
                     style={{ backgroundColor: pc?.header, color: pc?.headerText }}
                     onClick={() => handleSort(p)}>
                     <div className="flex flex-col items-center gap-0">

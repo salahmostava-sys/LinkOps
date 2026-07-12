@@ -775,9 +775,9 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
                           if (!m) return null;
                           return (
                             <tr key={key} className="border-b last:border-0 hover:bg-muted/20">
-                              <td className="ta-td font-medium py-2.5">{labelAr}</td>
+                              <td className="ta-td font-medium py-1">{labelAr}</td>
                               {PERMISSION_COLUMNS.map(({ field }) => (
-                                <td key={field} className="ta-td py-2.5 text-center">
+                                <td key={field} className="ta-td py-1 text-center">
                                   <Checkbox
                                     checked={m[field]}
                                     onCheckedChange={(checked) => setCell(key, field, checked === true)}
