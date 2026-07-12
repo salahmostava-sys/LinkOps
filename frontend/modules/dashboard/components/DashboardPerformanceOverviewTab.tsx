@@ -202,16 +202,22 @@ export function DashboardPerformanceOverviewTab(props: Readonly<{
           icon={Target}
         />
         <EnrichedStatCard
-          label="متوسط الطلبات/مندوب"
-          value={summary.avgOrdersPerRider.toFixed(1)}
+          label="متوسط الطلبات/يوم عمل"
+          value={fleetSummary.avgOrdersPerActiveDay.toFixed(1)}
           delta={fleetSummary.avgOrdersDelta}
-          sub={`${summary.activeEmployees} موظف مسجل`}
+          sub={`${dashboard.comparison.month.currentActiveDays || 0} إجمالي أيام العمل`}
           icon={Users}
         />
         <EnrichedStatCard
           label="تحقيق الهدف"
           value={`${targets.targetAchievementPct.toFixed(0)}%`}
-          sub={`الهدف: ${targets.totalTargetOrders.toLocaleString('en-US')} طلب`}
+          sub={`الهدف: ${targets.totalTargetOrders.toLocaleString('en-US')} طلب${
+            fleetSummary.projectedOrders
+              ? ` • المتوقع بنهاية الشهر: ${fleetSummary.projectedOrders.toLocaleString('en-US')} (${
+                  fleetSummary.targetHitProjected ? 'سنحقق الهدف 🎯' : 'نحتاج لجهد أكبر ⚠️'
+                })`
+              : ''
+          }`}
           icon={Trophy}
           tier={targetTier(targets.targetAchievementPct)}
         />
