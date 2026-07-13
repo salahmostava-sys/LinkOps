@@ -108,6 +108,74 @@ const getProbationSeverity = (daysLeft: number): Alert["severity"] => {
   return "warning";
 };
 
+const shouldSkipEmployeeExpiryAlerts = (emp: EmployeeAlertRow) => {
+  if (emp.status && emp.status.toLowerCase() !== 'active') {
+    return true;
+  }
+
+  const invalidStatuses = ['absconded', 'expired', 'terminated', 'inactive', 'canceled', 'final_exit'];
+  return Boolean(emp.sponsorship_status && invalidStatuses.includes(emp.sponsorship_status.toLowerCase()));
+};
+
+const getEmployeeAlertLabel = (emp: EmployeeAlertRow) =>
+  emp.commercial_record?.trim()
+    ? `${emp.name} • السجل: ${emp.commercial_record.trim()}`
+    : emp.name;
+
+const getResidencyRenewalLabel = (renewal: ReturnType<typeof getResidencyRenewalCost>) =>
+  renewal.cost === null
+    ? ""
+    : ` — تكلفة التجديد: ${fmtNum(renewal.cost)} ر.س (${renewal.period === "yearly" ? "سنوي" : "3 شهور"})`;
+
+const buildResidencyAlert = (
+  emp: EmployeeAlertRow,
+  employeeLabel: string,
+  today: Date,
+  renewalCostByRecord: Map<string, CommercialRecordRenewalCostRow>
+): Alert | null => {
+  if (!emp.residency_expiry) return null;
+  const daysLeft = differenceInDays(parseISO(emp.residency_expiry), today);
+  const renewal = getResidencyRenewalCost(emp, renewalCostByRecord);
+  return {
+    id: `res-${emp.id}`,
+    type: "residency",
+    entityName: `${employeeLabel}${getResidencyRenewalLabel(renewal)}`,
+    dueDate: emp.residency_expiry,
+    daysLeft,
+    severity: getStandardSeverity(daysLeft),
+    resolved: false,
+    residencyRenewalCost: renewal.cost,
+    residencyRenewalCostPeriod: renewal.period,
+  };
+};
+
+const buildEmployeeDateAlert = (
+  id: string,
+  type: string,
+  entityName: string,
+  dueDate: string | null | undefined,
+  today: Date,
+  severityForDays: (daysLeft: number) => Alert["severity"]
+): Alert | null => {
+  if (!dueDate) return null;
+  const daysLeft = differenceInDays(parseISO(dueDate), today);
+  return {
+    id,
+    type,
+    entityName,
+    dueDate,
+    daysLeft,
+    severity: severityForDays(daysLeft),
+    resolved: false,
+  };
+};
+
+const pushIfDue = (out: Alert[], alert: Alert | null, threshold: string) => {
+  if (alert && alert.dueDate <= threshold) {
+    out.push(alert);
+  }
+};
+
 const pushEmployeeExpiryAlerts = (
   generatedAlerts: Alert[],
   emp: EmployeeAlertRow,
@@ -115,78 +183,13 @@ const pushEmployeeExpiryAlerts = (
   today: Date,
   renewalCostByRecord: Map<string, CommercialRecordRenewalCostRow>
 ) => {
-  // Ignore inactive or terminated employees
-  if (emp.status && emp.status.toLowerCase() !== 'active') {
-    return;
-  }
-  
-  // Ignore employees with absconded, expired, or terminated sponsorship statuses
-  const invalidStatuses = ['absconded', 'expired', 'terminated', 'inactive', 'canceled', 'final_exit'];
-  if (emp.sponsorship_status && invalidStatuses.includes(emp.sponsorship_status.toLowerCase())) {
-    return;
-  }
+  if (shouldSkipEmployeeExpiryAlerts(emp)) return;
 
-  const employeeLabel = emp.commercial_record?.trim()
-    ? `${emp.name} • السجل: ${emp.commercial_record.trim()}`
-    : emp.name;
-
-  if (emp.residency_expiry && emp.residency_expiry <= threshold) {
-    const daysLeft = differenceInDays(parseISO(emp.residency_expiry), today);
-    const renewal = getResidencyRenewalCost(emp, renewalCostByRecord);
-    const renewalLabel = renewal.cost === null
-      ? ""
-      : ` — تكلفة التجديد: ${fmtNum(renewal.cost)} ر.س (${renewal.period === "yearly" ? "سنوي" : "3 شهور"})`;
-    generatedAlerts.push({
-      id: `res-${emp.id}`,
-      type: "residency",
-      entityName: `${employeeLabel}${renewalLabel}`,
-      dueDate: emp.residency_expiry,
-      daysLeft,
-      severity: getStandardSeverity(daysLeft),
-      resolved: false,
-      residencyRenewalCost: renewal.cost,
-      residencyRenewalCostPeriod: renewal.period,
-    });
-  }
-
-  if (emp.probation_end_date && emp.probation_end_date <= threshold) {
-    const daysLeft = differenceInDays(parseISO(emp.probation_end_date), today);
-    generatedAlerts.push({
-      id: `prob-${emp.id}`,
-      type: "probation",
-      entityName: employeeLabel,
-      dueDate: emp.probation_end_date,
-      daysLeft,
-      severity: getProbationSeverity(daysLeft),
-      resolved: false,
-    });
-  }
-
-  if (emp.health_insurance_expiry && emp.health_insurance_expiry <= threshold) {
-    const daysLeft = differenceInDays(parseISO(emp.health_insurance_expiry), today);
-    generatedAlerts.push({
-      id: `hi-${emp.id}`,
-      type: "health_insurance",
-      entityName: employeeLabel,
-      dueDate: emp.health_insurance_expiry,
-      daysLeft,
-      severity: getStandardSeverity(daysLeft),
-      resolved: false,
-    });
-  }
-
-  if (emp.license_expiry && emp.license_expiry <= threshold) {
-    const daysLeft = differenceInDays(parseISO(emp.license_expiry), today);
-    generatedAlerts.push({
-      id: `lic-${emp.id}`,
-      type: "driving_license",
-      entityName: employeeLabel,
-      dueDate: emp.license_expiry,
-      daysLeft,
-      severity: getStandardSeverity(daysLeft),
-      resolved: false,
-    });
-  }
+  const employeeLabel = getEmployeeAlertLabel(emp);
+  pushIfDue(generatedAlerts, buildResidencyAlert(emp, employeeLabel, today, renewalCostByRecord), threshold);
+  pushIfDue(generatedAlerts, buildEmployeeDateAlert(`prob-${emp.id}`, "probation", employeeLabel, emp.probation_end_date, today, getProbationSeverity), threshold);
+  pushIfDue(generatedAlerts, buildEmployeeDateAlert(`hi-${emp.id}`, "health_insurance", employeeLabel, emp.health_insurance_expiry, today, getStandardSeverity), threshold);
+  pushIfDue(generatedAlerts, buildEmployeeDateAlert(`lic-${emp.id}`, "driving_license", employeeLabel, emp.license_expiry, today, getStandardSeverity), threshold);
 };
 
 const vehicleTypeLabelAr = (type: string | null | undefined): string => {
