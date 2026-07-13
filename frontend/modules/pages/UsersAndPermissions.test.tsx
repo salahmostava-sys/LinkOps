@@ -143,12 +143,21 @@ describe('UsersAndPermissions', () => {
     expect(nameInput).toHaveValue('Admin User');
 
     fireEvent.change(nameInput, { target: { value: 'Updated Admin User' } });
+    fireEvent.change(screen.getByLabelText('البريد الإلكتروني'), {
+      target: { value: 'updated-admin@test.com' },
+    });
+    fireEvent.change(screen.getByLabelText('كلمة المرور الجديدة (اختياري)'), {
+      target: { value: 'newpassword123' },
+    });
 
     fireEvent.click(screen.getByRole('button', { name: 'حفظ التعديلات' }));
 
     await waitFor(() =>
       expect(authServiceMock.updateManagedUser).toHaveBeenCalledWith('admin-1', expect.objectContaining({
         name: 'Updated Admin User',
+        email: 'updated-admin@test.com',
+        password: 'newpassword123',
+        role: 'admin',
       })),
     );
   });

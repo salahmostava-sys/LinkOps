@@ -848,6 +848,26 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
                 placeholder="example@muhimmat.com"
                 dir="ltr"
                 disabled={editingUser} />
+
+            <div className="space-y-2">
+              <Label>الدور</Label>
+              <Select
+                value={editUserForm.role}
+                onValueChange={(value) => setEditUserForm((p) => ({ ...p, role: value as AppRole }))}
+                disabled={editingUser}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="اختر الدور" />
+                </SelectTrigger>
+                <SelectContent>
+                  {ROLES.map((role) => (
+                    <SelectItem key={role} value={role}>
+                      {ROLE_LABELS_AR[role]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             
             <div className="flex items-center space-x-2 space-x-reverse pt-2 pb-2">
               <Checkbox
