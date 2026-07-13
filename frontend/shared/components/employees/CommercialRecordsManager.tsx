@@ -12,6 +12,7 @@ import {
   type CommercialRecordItem,
 } from '@services/commercialRecordService';
 import { getErrorMessage } from '@services/serviceError';
+import { fmtNum } from '@shared/lib/utils';
 
 type CommercialRecordsManagerProps = {
   open: boolean;
@@ -32,9 +33,7 @@ const emptyCommercialRecordForm: CommercialRecordFormState = {
 
 const RESIDENCY_RENEWAL_MINIMUM_MONTHS = 3;
 
-const moneyFormatter = new Intl.NumberFormat('ar-SA', {
-  style: 'currency',
-  currency: 'SAR',
+const moneyFormatter = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 2,
 });
 
@@ -56,7 +55,7 @@ const toCommercialRecordForm = (record: CommercialRecordItem): CommercialRecordF
 });
 
 const formatOptionalMoney = (value: number | null) =>
-  value === null ? 'غير محدد' : moneyFormatter.format(value);
+  value === null ? 'غير محدد' : `${moneyFormatter.format(value)} ر.س`;
 
 const calculateMinimumRenewalTotal = (record: CommercialRecordItem) =>
   record.residency_renewal_monthly_cost === null
@@ -322,7 +321,7 @@ export function CommercialRecordsManager({
                               <div className="flex flex-wrap items-center gap-2.5">
                                 <span className="truncate text-base font-bold text-foreground">{record.name}</span>
                                 <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
-                                  {record.usage_count} مندوب
+                                  {fmtNum(record.usage_count)} مندوب
                                 </span>
                               </div>
                               <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
@@ -434,7 +433,7 @@ export function CommercialRecordsManager({
                             </p>
                           </div>
                           <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
-                            {record.usage_count}
+                            {fmtNum(record.usage_count)}
                           </span>
                         </div>
                         {record.source === 'managed' && (
