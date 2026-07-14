@@ -83,6 +83,18 @@ rg -n "CREATE TRIGGER|CREATE OR REPLACE FUNCTION|CREATE POLICY|ALTER TABLE .* EN
 
 ## المرحلة 3: تنظيف منخفض الخطورة
 
+الحالة: مكتملة ومتحقق منها بتاريخ 2026-07-14.
+
+```text
+Decision: تقليل تكلفة قراءة سجل النشاط
+Target: settingsHubService.getAuditLogs + audit_log
+Proposed change: استخدام estimated count بدل exact count مع الإبقاء على نفس الصفوف والفلاتر والترتيب
+Evidence: audit_log حجمه 121 MB وفيه نحو 119,644 صفًا، والاستعلام يحسب العدد عند كل صفحة
+Risk: العدد الإجمالي قد يكون تقريبيًا عندما يكون السجل كبيرًا، بدون تأثير على الصفوف المعروضة
+Rollback: إعادة count إلى exact
+Approved by user: طلب تنفيذ المرحلة 3 بتاريخ 2026-07-14
+```
+
 أمثلة:
 
 - إزالة جداول غير مستخدمة من `supabase_realtime`.
@@ -110,6 +122,18 @@ Decision:
 ```
 
 ## المرحلة 4: تنظيف متوسط الخطورة
+
+الحالة: مكتملة ومطبقة على Supabase بتاريخ 2026-07-14.
+
+```text
+Decision: إكمال أرشفة جدول الصيانة القديم بدون حذف
+Target: maintenance_logs_legacy_pre_fleet
+Proposed change: إبقاء الجدول والصف التاريخي مع سحب صلاحيات الكتابة من PUBLIC وanon وauthenticated
+Evidence: لا توجد مراجع تشغيل في frontend/server/api، والجدول مسمى legacy ويحتوي صفًا واحدًا فقط
+Risk: أي تكامل غير موجود في المستودع ويكتب بهذا الجدول عبر authenticated سيتوقف
+Rollback: migration عكسية تعيد صلاحيات الكتابة المطلوبة؛ service_role لم تُسحب صلاحياته
+Approved by user: طلب تنفيذ المرحلة 4 بتاريخ 2026-07-14
+```
 
 أمثلة:
 
@@ -168,6 +192,16 @@ npx supabase migration list
 - `VACUUM` لا يوضع داخل migration عادية إذا كانت تعمل داخل transaction. يفضل تنفيذه يدويًا كـ maintenance script عند الحاجة.
 
 ## سجل القرارات
+
+```text
+Date: 2026-07-14
+Target: Cleanup phases 3 and 4
+Decision: Use estimated audit counts and make the pre-fleet maintenance archive explicitly read-only
+Reason: Reduce repeated count cost on 119,644 audit rows and prevent accidental writes to the one-row legacy archive
+Risk: Audit page totals may be approximate at high volume; service_role archive recovery remains available
+Rollback: Restore exact count and apply a forward migration granting only the required archive privileges
+Status: Complete; migration 20260714010000 applied remotely
+```
 
 ```text
 Date: 2026-07-14

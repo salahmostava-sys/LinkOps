@@ -12,6 +12,16 @@ export interface Alert {
   severity: "urgent" | "warning" | "info";
   resolved: boolean;
   persisted?: boolean;
+  persistedId?: string;
+  sourceKey?: string;
+  entityId?: string | null;
+  entityType?: string | null;
+  workflowStatus?: "open" | "in_progress" | "snoozed" | "resolved";
+  assignedTo?: string | null;
+  assignedName?: string | null;
+  estimatedCost?: number | null;
+  resolutionNote?: string | null;
+  snoozedUntil?: string | null;
   residencyRenewalCost?: number | null;
   residencyRenewalCostPeriod?: "monthly" | "yearly" | null;
 }
@@ -64,6 +74,15 @@ export type PersistedAlertRow = {
   is_resolved: boolean | null;
   message: string | null;
   details: Record<string, unknown> | null;
+  entity_id?: string | null;
+  entity_type?: string | null;
+  source_key?: string | null;
+  status?: "open" | "in_progress" | "snoozed" | "resolved" | null;
+  assigned_to?: string | null;
+  estimated_cost?: number | null;
+  resolution_note?: string | null;
+  snoozed_until?: string | null;
+  assigned_profile?: { name?: string | null; email?: string | null } | null;
 };
 
 export type LowStockSparePartAlertRow = {
@@ -139,6 +158,9 @@ const buildResidencyAlert = (
   const renewal = getResidencyRenewalCost(emp, renewalCostByRecord);
   return {
     id: `res-${emp.id}`,
+    sourceKey: `res-${emp.id}`,
+    entityId: emp.id,
+    entityType: "employee",
     type: "residency",
     entityName: `${employeeLabel}${getResidencyRenewalLabel(renewal)}`,
     dueDate: emp.residency_expiry,
@@ -162,6 +184,9 @@ const buildEmployeeDateAlert = (
   const daysLeft = differenceInDays(parseISO(dueDate), today);
   return {
     id,
+    sourceKey: id,
+    entityId: id.slice(id.indexOf("-") + 1),
+    entityType: "employee",
     type,
     entityName,
     dueDate,
@@ -223,6 +248,9 @@ const pushAbscondedSummaryAlerts = (
 
     out.push({
       id: `absconded-${emp.id}`,
+      sourceKey: `absconded-${emp.id}`,
+      entityId: emp.id,
+      entityType: "employee",
       type: "employee_absconded",
       entityName: `${emp.name} — حالة هروب. العهدة: ${custody}. ${platforms}.`,
       dueDate,
@@ -245,6 +273,9 @@ const pushVehicleExpiryAlerts = (
       const days = differenceInDays(parseISO(v.insurance_expiry), today);
       out.push({
         id: `ins-${v.id}`,
+        sourceKey: `ins-${v.id}`,
+        entityId: v.id,
+        entityType: "vehicle",
         type: "insurance",
         entityName: `مركبة ${v.plate_number}`,
         dueDate: v.insurance_expiry,
@@ -257,6 +288,9 @@ const pushVehicleExpiryAlerts = (
       const days = differenceInDays(parseISO(v.authorization_expiry), today);
       out.push({
         id: `auth-${v.id}`,
+        sourceKey: `auth-${v.id}`,
+        entityId: v.id,
+        entityType: "vehicle",
         type: "authorization",
         entityName: `مركبة ${v.plate_number}`,
         dueDate: v.authorization_expiry,
@@ -276,6 +310,9 @@ const pushPlatformAccountAlerts = (out: Alert[], rows: PlatformAccountAlertRow[]
     const expiryFormatted = format(parseISO(acc.iqama_expiry_date), "dd/MM/yyyy");
     out.push({
       id: `pla-${acc.id}`,
+      sourceKey: `pla-${acc.id}`,
+      entityId: acc.id,
+      entityType: "platform_account",
       type: "platform_account",
       entityName: `إقامة الحساب ${acc.account_username} على منصة ${appName} ستنتهي في ${expiryFormatted}، قد يتوقف الحساب.`,
       dueDate: acc.iqama_expiry_date,
@@ -290,20 +327,43 @@ const pushPlatformAccountAlerts = (out: Alert[], rows: PlatformAccountAlertRow[]
 
 const pushPersistedDbAlerts = (out: Alert[], rows: PersistedAlertRow[], today: Date) => {
   for (const a of rows) {
-    const dueDate = a.due_date ?? format(today, ISO_DATE_FORMAT);
+    const dueDate = a.snoozed_until ?? a.due_date ?? format(today, ISO_DATE_FORMAT);
     const daysLeft = differenceInDays(parseISO(dueDate), today);
     const details = a.details ?? {};
     const detailsEmployeeName = typeof details.employee_name === "string" ? details.employee_name : null;
     const entityName = detailsEmployeeName ?? a.message ?? "—";
+    const workflowStatus = a.status ?? (a.is_resolved ? "resolved" : "open");
+    const generatedAlert = a.source_key
+      ? out.find((candidate) => candidate.sourceKey === a.source_key)
+      : undefined;
+    const workflowFields = {
+      persisted: true,
+      persistedId: a.id,
+      workflowStatus,
+      assignedTo: a.assigned_to ?? null,
+      assignedName: a.assigned_profile?.name ?? a.assigned_profile?.email ?? null,
+      estimatedCost: a.estimated_cost ?? null,
+      resolutionNote: a.resolution_note ?? null,
+      snoozedUntil: a.snoozed_until ?? null,
+      resolved: workflowStatus === "resolved" || !!a.is_resolved,
+    };
+
+    if (generatedAlert) {
+      Object.assign(generatedAlert, workflowFields, { dueDate, daysLeft });
+      continue;
+    }
+
     out.push({
-      id: a.id,
+      id: a.source_key ?? a.id,
+      sourceKey: a.source_key ?? undefined,
+      entityId: a.entity_id ?? null,
+      entityType: a.entity_type ?? null,
       type: a.type,
       entityName,
       dueDate,
       daysLeft,
       severity: getStandardSeverity(daysLeft),
-      resolved: !!a.is_resolved,
-      persisted: true,
+      ...workflowFields,
     });
   }
 };

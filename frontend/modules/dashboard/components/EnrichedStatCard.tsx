@@ -45,7 +45,7 @@ export function EnrichedStatCard({
 
   return (
     <div
-      className="bg-card -2xl p-4 shadow-card hover:shadow-card-hover transition-all duration-300 relative overflow-hidden group rounded-2xl"
+      className="group relative overflow-hidden rounded-2xl bg-card p-3 shadow-card transition-all duration-300 hover:shadow-card-hover sm:p-4"
       style={borderAccent ? { borderBottom: `3px solid ${borderAccent}` } : undefined}
     >
       {/* Subtle background shimmer on hover */}
@@ -53,7 +53,7 @@ export function EnrichedStatCard({
 
       <div className="flex items-start justify-between gap-2">
         <div
-          className={`w-10 h-10 rounded-xl flex items-center justify-center ${iconBg} ${iconColor} transition-transform duration-200 group-hover:scale-110`}
+          className={`flex h-9 w-9 items-center justify-center rounded-xl sm:h-10 sm:w-10 ${iconBg} ${iconColor} transition-transform duration-200 group-hover:scale-110`}
         >
           <Icon size={18} />
         </div>
@@ -63,7 +63,7 @@ export function EnrichedStatCard({
           </span>
         )}
       </div>
-      <div className="mt-3">
+      <div className="mt-2 sm:mt-3">
         <p className="text-xl font-black text-foreground leading-tight">{value}</p>
         <p className="text-xs font-semibold text-foreground/75 mt-2">{label}</p>
         {sub && <p className="text-[11px] text-muted-foreground mt-1">{sub}</p>}

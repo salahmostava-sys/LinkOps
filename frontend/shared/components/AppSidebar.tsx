@@ -47,10 +47,14 @@ function mergeNewGroupsSectionDefaults(
   stored: Record<string, boolean> | null,
 ): Record<string, boolean> {
   const next = { ...prev };
+  let changed = false;
   navGroups.forEach((g) => {
-    next[g.key] ??= stored?.[g.key] ?? true;
+    if (next[g.key] === undefined) {
+      next[g.key] = stored?.[g.key] ?? true;
+      changed = true;
+    }
   });
-  return next;
+  return changed ? next : prev;
 }
 
 function ensureSectionOpenForActiveRoute(

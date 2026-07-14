@@ -35,9 +35,9 @@ export default function GlobalSearch() {
         out.push({
           id: e.id,
           label: e.name,
-          sub: e.phone || undefined,
+          sub: e.phone || e.national_id || undefined,
           type: 'employee',
-          href: '/employees',
+          href: `/employees?employee=${encodeURIComponent(e.id)}`,
         });
       });
 

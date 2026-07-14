@@ -46,7 +46,7 @@ import { usePermissions, DEFAULT_PERMISSIONS, type AppRole, type PagePermission 
 import { PERMISSION_PAGE_ENTRIES } from '@shared/constants/permissionPages';
 import { defaultQueryRetry } from '@shared/lib/query';
 import { cn } from '@shared/lib/utils';
-import { ScrollArea } from '@shared/components/ui/scroll-area';
+import { ScrollArea, ScrollBar } from '@shared/components/ui/scroll-area';
 import { Input } from '@shared/components/ui/input';
 
 type ProfileRow = {
@@ -63,6 +63,8 @@ type UserRow = {
   isActive: boolean;
   role: AppRole;
 };
+
+const EMPTY_USER_ROWS: UserRow[] = [];
 
 const ROLES: AppRole[] = ['admin', 'hr', 'finance', 'operations', 'viewer'];
 
@@ -286,7 +288,7 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
 
   const [rows, setRows] = useState<UserRow[]>([]);
   const {
-    data: usersRows = [],
+    data: usersRows = EMPTY_USER_ROWS,
     isLoading: loading,
     error: usersError,
     refetch: refetchUsersData,
@@ -719,6 +721,7 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
                     )}
                   </tbody>
                 </table>
+                <ScrollBar orientation="horizontal" />
               </ScrollArea>
             </div>
           </div>

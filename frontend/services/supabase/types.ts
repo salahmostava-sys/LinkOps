@@ -229,42 +229,71 @@ export type Database = {
       }
       alerts: {
         Row: {
+          assigned_to: string | null
           created_at: string
           details: Json | null
           due_date: string | null
+          estimated_cost: number | null
           entity_id: string | null
           entity_type: string | null
           id: string
           is_resolved: boolean
           message: string | null
+          resolution_note: string | null
           resolved_by: string | null
+          snoozed_until: string | null
+          source_key: string | null
+          status: string
           type: string
+          updated_at: string
         }
         Insert: {
+          assigned_to?: string | null
           created_at?: string
           details?: Json | null
           due_date?: string | null
+          estimated_cost?: number | null
           entity_id?: string | null
           entity_type?: string | null
           id?: string
           is_resolved?: boolean
           message?: string | null
+          resolution_note?: string | null
           resolved_by?: string | null
+          snoozed_until?: string | null
+          source_key?: string | null
+          status?: string
           type: string
+          updated_at?: string
         }
         Update: {
+          assigned_to?: string | null
           created_at?: string
           details?: Json | null
           due_date?: string | null
+          estimated_cost?: number | null
           entity_id?: string | null
           entity_type?: string | null
           id?: string
           is_resolved?: boolean
           message?: string | null
+          resolution_note?: string | null
           resolved_by?: string | null
+          snoozed_until?: string | null
+          source_key?: string | null
+          status?: string
           type?: string
+          updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "alerts_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       app_hybrid_rules: {
         Row: {

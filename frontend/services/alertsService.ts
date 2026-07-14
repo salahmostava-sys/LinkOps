@@ -16,6 +16,33 @@ export interface AlertsSummary {
   urgentCount: number;
 }
 
+export type AlertWorkflowStatus = "open" | "in_progress" | "snoozed" | "resolved";
+
+export type AlertWorkflowTarget = {
+  persistedId?: string;
+  sourceKey?: string;
+  type: string;
+  entityId?: string | null;
+  entityType?: string | null;
+  message: string;
+  dueDate: string;
+};
+
+export type AlertWorkflowUpdate = {
+  status: AlertWorkflowStatus;
+  assignedTo: string | null;
+  estimatedCost: number | null;
+  resolutionNote: string | null;
+  dueDate: string;
+  actorId: string | null;
+};
+
+export type AssignableAlertUser = {
+  id: string;
+  name: string | null;
+  email: string | null;
+};
+
 type AlertsFetchResult = [
   { data: unknown[] | null; error: QueryError },
   { data: unknown[] | null; error: QueryError },
@@ -72,7 +99,7 @@ export const alertsService = {
         .lte("iqama_expiry_date", expiryHorizon),
       supabase
         .from("alerts")
-        .select("id, type, due_date, is_resolved, message, details")
+        .select("id, type, due_date, is_resolved, message, details, entity_id, entity_type, source_key, status, assigned_to, estimated_cost, resolution_note, snoozed_until, assigned_profile:profiles!alerts_assigned_to_fkey(name,email)")
         .order("created_at", { ascending: false })
         .limit(500),
       Promise.resolve({ data: [], error: null }), // Disabled spare_parts query per user request
@@ -128,6 +155,8 @@ export const alertsService = {
       .update({
         is_resolved: true,
         resolved_by: resolvedBy,
+        status: "resolved",
+        snoozed_until: null,
       })
       .eq("id", alertId)
       .select("id")
@@ -147,6 +176,8 @@ export const alertsService = {
         due_date: dueDate,
         is_resolved: false,
         resolved_by: null,
+        status: "snoozed",
+        snoozed_until: dueDate,
       })
       .eq("id", alertId)
       .select("id")
@@ -155,6 +186,50 @@ export const alertsService = {
     if (!data?.id) {
       throw new Error("alertsService.deferAlert: alert not found");
     }
+    return { id: data.id };
+  },
+
+  fetchAssignableUsers: async (): Promise<AssignableAlertUser[]> => {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id, name, email")
+      .eq("is_active", true)
+      .order("name")
+      .limit(200);
+    throwIfError(error, "alertsService.fetchAssignableUsers");
+    return data ?? [];
+  },
+
+  saveWorkflow: async (
+    target: AlertWorkflowTarget,
+    workflow: AlertWorkflowUpdate,
+  ): Promise<{ id: string }> => {
+    const isResolved = workflow.status === "resolved";
+    const payload = {
+      status: workflow.status,
+      assigned_to: workflow.assignedTo,
+      estimated_cost: workflow.estimatedCost,
+      resolution_note: workflow.resolutionNote,
+      due_date: workflow.dueDate,
+      snoozed_until: workflow.status === "snoozed" ? workflow.dueDate : null,
+      is_resolved: isResolved,
+      resolved_by: isResolved ? workflow.actorId : null,
+    };
+
+    const query = target.persistedId
+      ? supabase.from("alerts").update(payload).eq("id", target.persistedId)
+      : supabase.from("alerts").upsert({
+          ...payload,
+          source_key: target.sourceKey,
+          type: target.type,
+          entity_id: target.entityId,
+          entity_type: target.entityType,
+          message: target.message,
+        }, { onConflict: "source_key" });
+
+    const { data, error } = await query.select("id").maybeSingle();
+    throwIfError(error, "alertsService.saveWorkflow");
+    if (!data?.id) throw new Error("alertsService.saveWorkflow: alert not found");
     return { id: data.id };
   },
 };

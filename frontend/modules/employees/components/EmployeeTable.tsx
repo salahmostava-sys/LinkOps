@@ -206,14 +206,17 @@ function EmployeeDetailedTableInner() {
                           type="button"
                           className="flex w-full min-w-0 items-center justify-center bg-transparent px-4 text-current cursor-pointer hover:opacity-80"
                           onClick={() => handleSort(col.key)}
+                          title={`ترتيب حسب ${col.label}`}
                         >
                           <span className="truncate">{col.label}</span>
                           <span className="absolute start-0 flex items-center justify-center">
-                            <SortIcon
-                              field={col.key}
-                              sortField={sortField}
-                              sortDir={sortDir}
-                            />
+                            {sortField === col.key && (
+                              <SortIcon
+                                field={col.key}
+                                sortField={sortField}
+                                sortDir={sortDir}
+                              />
+                            )}
                           </span>
                         </button>
                       ) : (

@@ -1,5 +1,6 @@
 import { Suspense, lazy, useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router-dom';
 import { Loader2, CalendarDays, BarChart2, Table2 } from 'lucide-react';
 import { Input } from '@shared/components/ui/input';
 import { Button } from '@shared/components/ui/button';
@@ -57,6 +58,7 @@ const Employees = () => {
   useSystemSettings();
   const { permissions } = usePermissions('employees');
   const { role } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const presence = usePagePresence('employees');
   const [data, setData] = useState<Employee[]>([]);
   const {
@@ -226,6 +228,22 @@ const Employees = () => {
     ? isEmployeeVisibleInMonth(selectedEmp, activeEmployeeIdsInMonth)
     : false;
 
+  const requestedEmployeeId = searchParams.get('employee');
+
+  useEffect(() => {
+    if (!requestedEmployeeId || selectedEmployee === requestedEmployeeId) return;
+    if (data.some((employee) => employee.id === requestedEmployeeId)) {
+      setSelectedEmployee(requestedEmployeeId);
+    }
+  }, [data, requestedEmployeeId, selectedEmployee]);
+
+  const closeEmployeeProfile = useCallback(() => {
+    setSelectedEmployee(null);
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete('employee');
+    setSearchParams(nextParams, { replace: true });
+  }, [searchParams, setSearchParams]);
+
   useEffect(() => {
     if (selectedEmployee && selectedEmp && !selectedEmpVisible) {
       setSelectedEmployee(null);
@@ -238,7 +256,7 @@ const Employees = () => {
       <Suspense fallback={<InlineLoader minHeightClassName="min-h-[420px]" />}>
         <EmployeeProfile
           employee={selectedEmp}
-          onBack={() => setSelectedEmployee(null)}
+          onBack={closeEmployeeProfile}
           onEdit={permissions.can_edit ? (emp) => {
             setEditEmployee(emp);
             setShowAddModal(true);

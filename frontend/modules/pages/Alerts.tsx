@@ -1,7 +1,7 @@
-import { formatStandardDateTime } from '@shared/lib/formatters';
+import { formatCurrency, formatStandardDateTime } from '@shared/lib/formatters';
 
 import { useState } from 'react';
-import { Bell, Search, CheckCircle, Clock, Download } from 'lucide-react';
+import { Bell, Search, CheckCircle, Clock, Download, ExternalLink, UserRoundCog } from 'lucide-react';
 import { Input } from '@shared/components/ui/input';
 import { Button } from '@shared/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@shared/components/ui/dialog';
@@ -15,9 +15,19 @@ import { QueryErrorRetry } from '@shared/components/QueryErrorRetry';
 import { loadXlsx } from '@modules/orders/utils/xlsx';
 import { useAlerts } from '@shared/hooks/useAlerts';
 import type { Alert } from '@shared/lib/alertsBuilder';
-import { alertsService } from '@services/alertsService';
+import {
+  alertsService,
+  type AlertWorkflowTarget,
+} from '@services/alertsService';
+import { getErrorMessage } from '@services/serviceError';
 import { useAuth } from '@app/providers/AuthContext';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import { usePermissions } from '@shared/hooks/usePermissions';
+import {
+  AlertWorkflowDialog,
+  type AlertWorkflowForm,
+} from '@modules/alerts/components/AlertWorkflowDialog';
 
 function severityColor(severity: string): string {
   if (severity === 'urgent') return 'hsl(var(--destructive))';
@@ -58,28 +68,72 @@ const typeIcons: Record<string, string> = {
   residency: '🪪', insurance: '🛡️', authorization: '📋', probation: '⏳', platform_account: '📱',
 };
 
+const workflowLabels = {
+  open: 'مفتوح',
+  in_progress: 'قيد التنفيذ',
+  snoozed: 'مؤجل',
+  resolved: 'محسوم',
+} as const;
+
+const workflowStyles = {
+  open: 'bg-muted text-foreground',
+  in_progress: 'bg-info/15 text-info',
+  snoozed: 'bg-warning/15 text-warning',
+  resolved: 'bg-success/15 text-success',
+} as const;
+
+function getWorkflowStatus(alert: Alert): keyof typeof workflowLabels {
+  if (alert.resolved) return 'resolved';
+  return alert.workflowStatus ?? 'open';
+}
+
+function getWorkflowTarget(alert: Alert): AlertWorkflowTarget {
+  return {
+    persistedId: alert.persistedId,
+    sourceKey: alert.sourceKey ?? alert.id,
+    type: alert.type,
+    entityId: alert.entityId,
+    entityType: alert.entityType,
+    message: alert.entityName,
+    dueDate: alert.dueDate,
+  };
+}
+
+function getAlertCost(alert: Alert): number | null {
+  return alert.estimatedCost ?? alert.residencyRenewalCost ?? null;
+}
+
+function canOpenAlertEntity(alert: Alert): boolean {
+  return Boolean(alert.entityId && (alert.entityType === 'employee' || alert.entityType === 'vehicle'));
+}
+
 const Alerts = () => {
   const [typeFilter, setTypeFilter] = useState('all');
   const [severityFilter, setSeverityFilter] = useState('all');
+  const [workflowFilter, setWorkflowFilter] = useState('all');
   const [crFilter, setCrFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [resolveDialog, setResolveDialog] = useState<Alert | null>(null);
   const [deferDialog, setDeferDialog] = useState<Alert | null>(null);
   const [deferDays, setDeferDays] = useState('7');
   const [resolveNote, setResolveNote] = useState('');
-  // Generated date alerts have no database row, so their temporary UI state stays local.
-  const [localOverrides, setLocalOverrides] = useState<Record<string, Partial<Alert>>>({});
+  const [workflowDialog, setWorkflowDialog] = useState<Alert | null>(null);
+  const [workflowSaving, setWorkflowSaving] = useState(false);
 
   const { toast } = useToast();
   const { user } = useAuth();
+  const { permissions } = usePermissions('alerts');
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const alertsQuery = useAlerts();
+  const assigneesQuery = useQuery({
+    queryKey: ['alerts', 'assignable-users'],
+    queryFn: alertsService.fetchAssignableUsers,
+    enabled: permissions.can_edit,
+    staleTime: 5 * 60_000,
+  });
 
-  // Build Alert[] from raw data + merge localOverrides
-  const rawAlerts: Alert[] = alertsQuery.data ?? [];
-
-  // Apply local overrides for generated alerts; persisted alerts are updated through the service.
-  const localAlerts: Alert[] = rawAlerts.map(a => ({ ...a, ...(localOverrides[a.id]) }));
+  const localAlerts: Alert[] = alertsQuery.data ?? [];
 
   // ── Derived state ─────────────────────────────────────────────────────────
   const commercialRecords = [...new Set(
@@ -94,9 +148,10 @@ const Alerts = () => {
       a.type === typeFilter ||
       (typeFilter === 'expired_residency_cost' && a.type === 'residency' && a.daysLeft < 0 && (a.residencyRenewalCost ?? 0) > 0);
     const matchSeverity = severityFilter === 'all' || a.severity === severityFilter;
+    const matchWorkflow = workflowFilter === 'all' || getWorkflowStatus(a) === workflowFilter;
     const matchSearch = a.entityName.includes(search);
     const matchCr = crFilter === 'all' || a.entityName.includes(`سجل: ${crFilter}`);
-    return matchType && matchSeverity && matchSearch && matchCr && !a.resolved;
+    return matchType && matchSeverity && matchWorkflow && matchSearch && matchCr && !a.resolved;
   });
 
   const resolved = localAlerts.filter(a => a.resolved);
@@ -109,17 +164,20 @@ const Alerts = () => {
   const handleResolve = async () => {
     if (!resolveDialog) return;
     try {
-      if (resolveDialog.persisted) {
-        await alertsService.resolveAlert(resolveDialog.id, user?.id ?? null);
-        await queryClient.invalidateQueries({ queryKey: ['alerts'] });
-      } else {
-        setLocalOverrides(prev => ({ ...prev, [resolveDialog.id]: { resolved: true } }));
-      }
+      await alertsService.saveWorkflow(getWorkflowTarget(resolveDialog), {
+        status: 'resolved',
+        assignedTo: resolveDialog.assignedTo ?? user?.id ?? null,
+        estimatedCost: getAlertCost(resolveDialog),
+        resolutionNote: resolveNote.trim() || resolveDialog.resolutionNote || null,
+        dueDate: resolveDialog.dueDate,
+        actorId: user?.id ?? null,
+      });
+      await queryClient.invalidateQueries({ queryKey: ['alerts'] });
       toast({ title: 'تم الحسم', description: `تم حسم تنبيه: ${resolveDialog.entityName}` });
       setResolveDialog(null);
       setResolveNote('');
-    } catch {
-      toast({ title: 'تعذر حسم التنبيه', variant: 'destructive' });
+    } catch (error) {
+      toast({ title: 'تعذر حسم التنبيه', description: getErrorMessage(error), variant: 'destructive' });
     }
   };
 
@@ -131,29 +189,56 @@ const Alerts = () => {
     const dueDate = format(newDate, 'yyyy-MM-dd');
 
     try {
-      if (deferDialog.persisted) {
-        await alertsService.deferAlert(deferDialog.id, dueDate);
-        await queryClient.invalidateQueries({ queryKey: ['alerts'] });
-      } else {
-        setLocalOverrides(prev => ({
-          ...prev,
-          [deferDialog.id]: {
-            daysLeft: deferDialog.daysLeft + days,
-            dueDate,
-          },
-        }));
-      }
+      await alertsService.saveWorkflow(getWorkflowTarget(deferDialog), {
+        status: 'snoozed',
+        assignedTo: deferDialog.assignedTo ?? null,
+        estimatedCost: getAlertCost(deferDialog),
+        resolutionNote: deferDialog.resolutionNote ?? null,
+        dueDate,
+        actorId: user?.id ?? null,
+      });
+      await queryClient.invalidateQueries({ queryKey: ['alerts'] });
       toast({ title: 'تم التأجيل', description: `تم تأجيل التنبيه ${days} يوم` });
       setDeferDialog(null);
       setDeferDays('7');
-    } catch {
-      toast({ title: 'تعذر تأجيل التنبيه', variant: 'destructive' });
+    } catch (error) {
+      toast({ title: 'تعذر تأجيل التنبيه', description: getErrorMessage(error), variant: 'destructive' });
+    }
+  };
+
+  const handleWorkflowSave = async (alert: Alert, form: AlertWorkflowForm) => {
+    setWorkflowSaving(true);
+    try {
+      await alertsService.saveWorkflow(getWorkflowTarget(alert), {
+        status: form.status,
+        assignedTo: form.assignedTo,
+        estimatedCost: form.estimatedCost,
+        resolutionNote: form.note,
+        dueDate: alert.dueDate,
+        actorId: user?.id ?? null,
+      });
+      await queryClient.invalidateQueries({ queryKey: ['alerts'] });
+      setWorkflowDialog(null);
+      toast({ title: 'تم حفظ متابعة التنبيه' });
+    } catch (error) {
+      toast({ title: 'تعذر حفظ المتابعة', description: getErrorMessage(error), variant: 'destructive' });
+    } finally {
+      setWorkflowSaving(false);
+    }
+  };
+
+  const openAlertEntity = (alert: Alert) => {
+    if (!alert.entityId) return;
+    if (alert.entityType === 'employee') {
+      navigate(`/employees?employee=${encodeURIComponent(alert.entityId)}`);
+    } else if (alert.entityType === 'vehicle') {
+      navigate('/motorcycles');
     }
   };
 
   const handlePrint = () => {
     const severityLabels2: Record<string, string> = { urgent: 'عاجل', warning: 'تحذير', info: 'معلومات' };
-    const rows = filtered.map(a => `<tr><td>${escapeHtml(alertTypeLabels[a.type] || a.type)}</td><td>${escapeHtml(a.entityName)}</td><td>${escapeHtml(a.dueDate || '—')}</td><td style="text-align:center">${escapeHtml(toSafeText(a.daysLeft ?? '—'))}</td><td style="text-align:center;font-weight:700;color:${severityColor(a.severity)}">${escapeHtml(severityLabels2[a.severity] || a.severity)}</td></tr>`).join('');
+    const rows = filtered.map(a => `<tr><td>${escapeHtml(alertTypeLabels[a.type] || a.type)}</td><td>${escapeHtml(a.entityName)}</td><td>${escapeHtml(a.dueDate || '—')}</td><td style="text-align:center">${escapeHtml(String(a.daysLeft ?? '—'))}</td><td style="text-align:center;font-weight:700;color:${severityColor(a.severity)}">${escapeHtml(severityLabels2[a.severity] || a.severity)}</td></tr>`).join('');
     const printWindow = globalThis.open('', '_blank');
     if (!printWindow) return;
     const htmlContent = `<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8"/><title>تقرير التنبيهات</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:"Droid Arabic Kufi","Tajawal",Arial,sans-serif;font-size:11px;direction:rtl;color:#061735;background:#fff}h2{text-align:center;margin-bottom:8px;font-size:15px}p.sub{text-align:center;color:#73829a;font-size:11px;margin-bottom:12px}table{width:100%;border-collapse:collapse}th{background:#1f54ad;color:#fff;padding:6px 8px;text-align:right;font-size:10px}td{padding:5px 8px;border-bottom:1px solid #e0e0e0;text-align:right}tr:nth-child(even) td{background:#f9f9f9}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body><h2>تقرير التنبيهات التلقائية</h2><p class="sub">المجموع: ${filtered.length} تنبيه — ${formatStandardDateTime()}</p><table><thead><tr><th>النوع</th><th>الكيان</th><th>تاريخ الاستحقاق</th><th>المتبقي (يوم)</th><th>الأولوية</th></tr></thead><tbody>${rows}</tbody></table></body></html>`;
@@ -215,8 +300,11 @@ const Alerts = () => {
     alertsContent = [...filtered].sort((a, b) => {
       const order: Record<string, number> = { urgent: 0, warning: 1, info: 2 };
       return (order[a.severity] ?? 3) - (order[b.severity] ?? 3);
-    }).map(a => (
-      <div key={a.id} className={`bg-card rounded-xl border shadow-card p-4 flex items-center gap-4 hover:shadow-card-hover transition-shadow ${severityBorderClass(a.severity)}`}>
+    }).map(a => {
+      const workflowStatus = getWorkflowStatus(a);
+      const alertCost = getAlertCost(a);
+      return (
+      <div key={a.id} className={`bg-card rounded-lg border shadow-card p-4 flex flex-col gap-4 transition-shadow hover:shadow-card-hover sm:flex-row sm:items-center ${severityBorderClass(a.severity)}`}>
         <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-xl flex-shrink-0 ${severityBgClass(a.severity)}`}>
           {typeIcons[a.type] || '🔔'}
         </div>
@@ -226,6 +314,9 @@ const Alerts = () => {
             <span className="text-muted-foreground text-xs">—</span>
             <p className="text-sm text-foreground">{a.entityName}</p>
             <span className={severityStyles[a.severity]}>{severityLabels[a.severity]}</span>
+            <span className={`rounded-md px-2 py-0.5 text-xs font-semibold ${workflowStyles[workflowStatus]}`}>
+              {workflowLabels[workflowStatus]}
+            </span>
           </div>
           <p className="text-xs text-muted-foreground mt-1">
             تاريخ الاستحقاق: <span className="font-medium">{a.dueDate}</span>
@@ -233,17 +324,36 @@ const Alerts = () => {
               {a.daysLeft < 0 ? `منتهي منذ ${Math.abs(a.daysLeft)} يوم` : `متبقي ${a.daysLeft} يوم`}
             </span>
           </p>
+          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+            <span>المسؤول: <strong className="text-foreground">{a.assignedName || 'غير مسند'}</strong></span>
+            {alertCost !== null && (
+              <span>التكلفة: <strong className="text-foreground">{formatCurrency(alertCost)}</strong></span>
+            )}
+          </div>
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <Button size="sm" variant="outline" className="gap-1 text-xs h-8" onClick={() => setDeferDialog(a)}>
-            <Clock size={12} /> تأجيل
-          </Button>
-          <Button size="sm" className="gap-1 text-xs h-8 bg-success hover:bg-success/90" onClick={() => setResolveDialog(a)}>
-            <CheckCircle size={12} /> حسم
-          </Button>
+        <div className="flex flex-wrap items-center gap-2 sm:flex-shrink-0">
+          {canOpenAlertEntity(a) && (
+            <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => openAlertEntity(a)} title="فتح السجل المرتبط">
+              <ExternalLink size={14} />
+            </Button>
+          )}
+          {permissions.can_edit && (
+            <>
+              <Button size="sm" variant="outline" className="gap-1 text-xs h-8" onClick={() => setWorkflowDialog(a)}>
+                <UserRoundCog size={12} /> إدارة
+              </Button>
+              <Button size="sm" variant="outline" className="gap-1 text-xs h-8" onClick={() => setDeferDialog(a)}>
+                <Clock size={12} /> تأجيل
+              </Button>
+              <Button size="sm" className="gap-1 text-xs h-8 bg-success hover:bg-success/90" onClick={() => setResolveDialog(a)}>
+                <CheckCircle size={12} /> حسم
+              </Button>
+            </>
+          )}
         </div>
       </div>
-    ));
+      );
+    });
   }
 
   return (
@@ -354,6 +464,24 @@ const Alerts = () => {
             </button>
           ))}
         </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs font-semibold text-muted-foreground">حالة المتابعة:</span>
+          {[
+            { value: 'all', label: 'كل الحالات' },
+            { value: 'open', label: 'مفتوح' },
+            { value: 'in_progress', label: 'قيد التنفيذ' },
+            { value: 'snoozed', label: 'مؤجل' },
+          ].map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => setWorkflowFilter(option.value)}
+              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${workflowFilter === option.value ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-accent'}`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
         {commercialRecords.length > 0 && (
           <div className="flex gap-2 flex-wrap items-center">
             <span className="text-xs text-muted-foreground font-semibold">السجل التجاري:</span>
@@ -392,7 +520,7 @@ const Alerts = () => {
         </div>
       )}
 
-      <Dialog open={!!resolveDialog} onOpenChange={() => setResolveDialog(null)}>
+      <Dialog open={!!resolveDialog} onOpenChange={(open) => !open && setResolveDialog(null)}>
         <DialogContent dir="rtl" className="max-w-md">
           <DialogHeader><DialogTitle>حسم التنبيه</DialogTitle></DialogHeader>
           <div className="space-y-4">
@@ -414,7 +542,7 @@ const Alerts = () => {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={!!deferDialog} onOpenChange={() => setDeferDialog(null)}>
+      <Dialog open={!!deferDialog} onOpenChange={(open) => !open && setDeferDialog(null)}>
         <DialogContent dir="rtl" className="max-w-md">
           <DialogHeader><DialogTitle>تأجيل التنبيه</DialogTitle></DialogHeader>
           <div className="space-y-4">
@@ -441,6 +569,14 @@ const Alerts = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertWorkflowDialog
+        alert={workflowDialog}
+        users={assigneesQuery.data ?? []}
+        saving={workflowSaving}
+        onClose={() => setWorkflowDialog(null)}
+        onSave={handleWorkflowSave}
+      />
     </div>
   );
 };

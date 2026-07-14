@@ -43,6 +43,7 @@ import {
   statusStyles,
 } from './profile/employeeProfile.utils';
 import { SecureDocThumb } from './profile/EmployeeProfileComponents';
+import { EmployeeProfileOverview } from './profile/EmployeeProfileOverview';
 
 // eslint-disable-next-line sonarjs/cognitive-complexity
 const EmployeeProfile = ({ employee, onBack, onEdit }: Readonly<Props>) => {
@@ -50,7 +51,7 @@ const EmployeeProfile = ({ employee, onBack, onEdit }: Readonly<Props>) => {
   const uid = authQueryUserId(userId);
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState('basic');
+  const [activeTab, setActiveTab] = useState('overview');
   const [expandedAdv, setExpandedAdv] = useState<string | null>(null);
   const [expandedMonth, setExpandedMonth] = useState<string | null>(null);
   const [editingNationality, setEditingNationality] = useState(false);
@@ -162,6 +163,7 @@ const EmployeeProfile = ({ employee, onBack, onEdit }: Readonly<Props>) => {
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="bg-muted/50 flex-wrap h-auto gap-1 p-1">
+          <TabsTrigger value="overview" className="gap-1.5"><TrendingUp size={14} /> نظرة عامة</TabsTrigger>
           <TabsTrigger value="basic" className="gap-1.5"><User size={14} /> البيانات الأساسية</TabsTrigger>
           <TabsTrigger value="docs" className="gap-1.5"><FileText size={14} /> الوثائق والتواريخ</TabsTrigger>
           <TabsTrigger value="salary" className="gap-1.5"><Wallet size={14} /> الراتب</TabsTrigger> {/* NOSONAR */}
@@ -172,6 +174,17 @@ const EmployeeProfile = ({ employee, onBack, onEdit }: Readonly<Props>) => {
           <TabsTrigger value="orders" className="gap-1.5"><TrendingUp size={14} /> الطلبات الشهرية</TabsTrigger>
           <TabsTrigger value="performance" className="gap-1.5"><TrendingUp size={14} /> الأداء</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="overview">
+          <EmployeeProfileOverview
+            employee={employee}
+            advances={advances}
+            salaries={salaries}
+            employeeApps={employeeApps}
+            dailyOrders={dailyOrders}
+            loading={loading}
+          />
+        </TabsContent>
 
         {/* Tab 1: Basic Data */}
         <TabsContent value="basic">

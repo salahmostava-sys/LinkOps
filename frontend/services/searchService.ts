@@ -7,6 +7,7 @@ type EmployeeSearchRow = {
   name: string;
   name_en: string | null;
   phone: string | null;
+  national_id: string | null;
   status: string;
 };
 
@@ -28,7 +29,7 @@ export const searchService = {
     const [employeesRes, vehiclesRes] = await Promise.all([
       supabase
         .from('employees')
-        .select('id, name, name_en, phone, status')
+        .select('id, name, name_en, phone, national_id, status')
         .or(`name.ilike.${safeTerm},name_en.ilike.${safeTerm},phone.ilike.${safeTerm},national_id.ilike.${safeTerm}`)
         .eq('status', 'active')
         .limit(5),

@@ -167,7 +167,7 @@ export function DashboardPerformanceOverviewTab(props: Readonly<{
 
   if (loading || !dashboard || !fleetSummary || !aiInsights) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 8 }, (_, index) => (
           <Skeleton key={index}  className="bg-card -2xl h-32 shadow-card rounded-2xl" />
         ))}
@@ -187,7 +187,7 @@ export function DashboardPerformanceOverviewTab(props: Readonly<{
   return (
     <div className="space-y-6">
       {/* ── Top KPIs Row (Enriched) ───────────────────────────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
         <EnrichedStatCard
           label="إجمالي الطلبات"
           value={summary.totalOrders.toLocaleString('en-US')}

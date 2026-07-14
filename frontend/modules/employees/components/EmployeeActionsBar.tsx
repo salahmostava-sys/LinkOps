@@ -98,17 +98,17 @@ export function EmployeeActionsBar({
           </nav>
           <h1 className="page-title">الموظفين</h1>
         </div>
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-1 w-full lg:w-auto">
-          <div className="flex flex-wrap items-center gap-2">
+        <div className="mb-1 grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-center">
+          <div className="contents sm:flex sm:flex-wrap sm:items-center sm:gap-2">
             {/* Search */}
-            <div className="relative">
+            <div className="relative col-span-2 sm:col-auto">
               <Search size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
               <input
                 type="text"
                 placeholder="بحث عن موظف..."
                 value={colFilters.name ?? ''}
                 onChange={e => setColFilter('name', e.target.value)}
-                className="h-9 w-48 rounded-lg border border-border bg-background ps-8 pe-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                className="h-9 w-full rounded-lg border border-border bg-background ps-8 pe-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring sm:w-48"
               />
             </div>
 
@@ -119,12 +119,12 @@ export function EmployeeActionsBar({
               onPrint={onPrint}
               onImportFile={onImportFile}
               hideImport={!permissions.can_edit}
-              className="!w-auto !justify-start"
+              className="!w-full !justify-stretch [&_button]:w-full sm:!w-auto sm:!justify-start sm:[&_button]:w-auto"
             />
 
             <DropdownMenu modal={false}>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-1.5 h-9">
+                <Button variant="outline" size="sm" className="h-9 w-full gap-1.5 sm:w-auto">
                   <Columns size={14} /> الأعمدة
                 </Button>
               </DropdownMenuTrigger>
@@ -157,10 +157,10 @@ export function EmployeeActionsBar({
 
           {permissions.can_edit && (
             <>
-              <Button variant="outline" onClick={onManageCommercialRecords} className="gap-2 h-9">
+              <Button variant="outline" onClick={onManageCommercialRecords} className="h-9 w-full gap-2 sm:w-auto">
                 <Building2 size={15} /> السجلات التجارية
               </Button>
-              <Button onClick={onAddEmployee} className="gap-2 h-9">
+              <Button onClick={onAddEmployee} className="h-9 w-full gap-2 sm:w-auto">
               <Plus size={15} /> إضافة موظف
             </Button>
             </>

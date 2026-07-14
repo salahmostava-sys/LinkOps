@@ -76,7 +76,7 @@ export const settingsHubService = {
   ) => {
     let query = supabase
       .from('audit_log')
-      .select('*', { count: 'exact' })
+      .select('*', { count: 'estimated' })
       .order('created_at', { ascending: false })
       .range(from, to);
 
