@@ -3,7 +3,7 @@
 <cite>
 **Referenced Files in This Document**
 - [frontend/package.json](file://frontend/package.json)
-- [frontend/ARCHITECTURE.md](file://frontend/ARCHITECTURE.md)
+- [docs/FRONTEND_ARCHITECTURE.md](file://docs/FRONTEND_ARCHITECTURE.md)
 - [frontend/services/supabase/client.ts](file://frontend/services/supabase/client.ts)
 - [frontend/services/aiService.ts](file://frontend/services/aiService.ts)
 - [frontend/modules/apps/services/appsPageService.ts](file://frontend/modules/apps/services/appsPageService.ts)
@@ -104,7 +104,7 @@ FastAPI --> DB
   - Internal API key auth, rate limiting, and CORS configuration
 
 **Section sources**
-- [frontend/ARCHITECTURE.md:1-35](file://frontend/ARCHITECTURE.md#L1-L35)
+- [docs/FRONTEND_ARCHITECTURE.md:1-35](file://docs/FRONTEND_ARCHITECTURE.md#L1-L35)
 - [frontend/package.json:25-68](file://frontend/package.json#L25-L68)
 - [server/index.js:1-69](file://server/index.js#L1-L69)
 - [supabase/functions/ai-chat/index.ts:1-890](file://supabase/functions/ai-chat/index.ts#L1-L890)
@@ -151,7 +151,7 @@ Edge-->>Page : Final response
 - [supabase/functions/ai-chat/index.ts:734-890](file://supabase/functions/ai-chat/index.ts#L734-L890)
 
 **Section sources**
-- [frontend/ARCHITECTURE.md:30-35](file://frontend/ARCHITECTURE.md#L30-L35)
+- [docs/FRONTEND_ARCHITECTURE.md:30-35](file://docs/FRONTEND_ARCHITECTURE.md#L30-L35)
 - [frontend/modules/apps/services/appsPageService.ts:13-59](file://frontend/modules/apps/services/appsPageService.ts#L13-L59)
 
 ## Detailed Component Analysis
@@ -179,7 +179,7 @@ Hook --> Page
 - [frontend/services/supabase/client.ts:38-76](file://frontend/services/supabase/client.ts#L38-L76)
 
 **Section sources**
-- [frontend/ARCHITECTURE.md:30-35](file://frontend/ARCHITECTURE.md#L30-L35)
+- [docs/FRONTEND_ARCHITECTURE.md:30-35](file://docs/FRONTEND_ARCHITECTURE.md#L30-L35)
 - [frontend/modules/apps/services/appsPageService.ts:13-59](file://frontend/modules/apps/services/appsPageService.ts#L13-L59)
 - [frontend/services/supabase/client.ts:12-76](file://frontend/services/supabase/client.ts#L12-L76)
 

@@ -7,7 +7,7 @@
 - [AuthContext.tsx](file://frontend/app/providers/AuthContext.tsx)
 - [security.ts](file://frontend/shared/lib/security.ts)
 - [permissionPages.ts](file://frontend/shared/constants/permissionPages.ts)
-- [PERMISSIONS.md](file://frontend/docs/PERMISSIONS.md)
+- [PERMISSIONS.md](file://docs/PERMISSIONS.md)
 - [cors.ts](file://supabase/functions/_shared/cors.ts)
 - [20260324213000_seed_roles_permissions_matrix.sql](file://supabase/migrations/20260324213000_seed_roles_permissions_matrix.sql)
 - [20260324220000_roles_upsert_and_permissions_bootstrap.sql](file://supabase/migrations/20260324220000_roles_upsert_and_permissions_bootstrap.sql)
@@ -110,7 +110,7 @@ EF_CORS --> DB_Config
 - [AuthContext.tsx:1-411](file://frontend/app/providers/AuthContext.tsx#L1-L411)
 - [security.ts:1-38](file://frontend/shared/lib/security.ts#L1-L38)
 - [permissionPages.ts:1-27](file://frontend/shared/constants/permissionPages.ts#L1-L27)
-- [PERMISSIONS.md:1-25](file://frontend/docs/PERMISSIONS.md#L1-L25)
+- [PERMISSIONS.md:1-25](file://docs/PERMISSIONS.md#L1-L25)
 - [cors.ts:1-65](file://supabase/functions/_shared/cors.ts#L1-L65)
 - [20260324213000_seed_roles_permissions_matrix.sql:1-79](file://supabase/migrations/20260324213000_seed_roles_permissions_matrix.sql#L1-L79)
 - [20260325234500_admin_action_log.sql:1-55](file://supabase/migrations/20260325234500_admin_action_log.sql#L1-L55)
@@ -293,11 +293,11 @@ API --> Enforcement["Deny if not permitted"]
 
 **Diagram sources**
 - [permissionPages.ts:1-27](file://frontend/shared/constants/permissionPages.ts#L1-L27)
-- [PERMISSIONS.md:1-25](file://frontend/docs/PERMISSIONS.md#L1-L25)
+- [PERMISSIONS.md:1-25](file://docs/PERMISSIONS.md#L1-L25)
 
 **Section sources**
 - [permissionPages.ts:1-27](file://frontend/shared/constants/permissionPages.ts#L1-L27)
-- [PERMISSIONS.md:1-25](file://frontend/docs/PERMISSIONS.md#L1-L25)
+- [PERMISSIONS.md:1-25](file://docs/PERMISSIONS.md#L1-L25)
 
 ### JWT Token Management and Claims
 - JWT claims include company_id mapped to the tenant key for tenant isolation.
@@ -384,7 +384,7 @@ Common issues and resolutions:
 - [AuthContext.tsx:87-101](file://frontend/app/providers/AuthContext.tsx#L87-L101)
 - [AuthContext.tsx:327-340](file://frontend/app/providers/AuthContext.tsx#L327-L340)
 - [cors.ts:1-65](file://supabase/functions/_shared/cors.ts#L1-L65)
-- [PERMISSIONS.md:1-25](file://frontend/docs/PERMISSIONS.md#L1-L25)
+- [PERMISSIONS.md:1-25](file://docs/PERMISSIONS.md#L1-L25)
 
 ## Conclusion
 MuhimmatAltawseel employs a robust, layered security model: Supabase authentication and Edge Functions for identity and privileged operations, PostgreSQL RLS for tenant-aware, role-based access control, and comprehensive audit logging. Frontend guards complement backend enforcement, ensuring a secure and maintainable authorization framework. Adhering to the documented best practices and verification steps will sustain system integrity.
@@ -412,7 +412,7 @@ MuhimmatAltawseel employs a robust, layered security model: Supabase authenticat
 - Monitor admin action logs and apply rate limits to sensitive endpoints.
 
 **Section sources**
-- [PERMISSIONS.md:1-25](file://frontend/docs/PERMISSIONS.md#L1-L25)
+- [PERMISSIONS.md:1-25](file://docs/PERMISSIONS.md#L1-L25)
 - [cors.ts:44-52](file://supabase/functions/_shared/cors.ts#L44-L52)
 - [security.ts:1-38](file://frontend/shared/lib/security.ts#L1-L38)
 - [20260325234500_admin_action_log.sql:1-55](file://supabase/migrations/20260325234500_admin_action_log.sql#L1-L55)

@@ -3,7 +3,7 @@
 <cite>
 **Referenced Files in This Document**
 - [README.md](file://README.md)
-- [ARCHITECTURE.md](file://frontend/ARCHITECTURE.md)
+- [ARCHITECTURE.md](file://docs/FRONTEND_ARCHITECTURE.md)
 - [requirements.txt](file://ai-backend/requirements.txt)
 - [main.py](file://ai-backend/main.py)
 - [model.py](file://ai-backend/model.py)
@@ -334,7 +334,7 @@ FE_TS --> FE_TYPES["Typed interfaces"]
 
 **Section sources**
 - [requirements.txt:1-6](file://ai-backend/requirements.txt#L1-L6)
-- [ARCHITECTURE.md:7-28](file://frontend/ARCHITECTURE.md#L7-L28)
+- [ARCHITECTURE.md:7-28](file://docs/FRONTEND_ARCHITECTURE.md#L7-L28)
 
 ## Performance Considerations
 - Inference characteristics:
