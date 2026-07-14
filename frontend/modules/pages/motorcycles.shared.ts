@@ -17,6 +17,8 @@ export type Vehicle = {
   serial_number?: string | null;
   notes: string | null;
   current_rider?: string | null;
+  rental_start_date?: string | null;
+  rental_monthly_amount?: number | null;
 };
 
 export const statusLabels: Record<VehicleStatus, string> = {

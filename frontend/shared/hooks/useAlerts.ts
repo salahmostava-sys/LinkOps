@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+﻿import { useQuery } from '@tanstack/react-query';
 import { format, addDays } from 'date-fns';
 import { useSystemSettings } from '@app/providers/SystemSettingsContext';
 import { authQueryUserId, useAuthQueryGate } from '@shared/hooks/useAuthQueryGate';
@@ -12,6 +12,7 @@ import {
   type LowStockSparePartAlertRow,
   type AbscondedEmployeeAlertRow,
   type CommercialRecordRenewalCostRow,
+  type VehicleRentalAlertRow,
 } from '@shared/lib/alertsBuilder';
 import { defaultQueryRetry } from '@shared/lib/query';
 
@@ -57,7 +58,7 @@ export const useAlerts = (options: { enabled?: boolean } = {}) => {
       const today = new Date();
       /** كل التنبيهات الزمنية ضمن N يومًا من اليوم (يُضبط من إعدادات المشروع: أيام تنبيه الإقامة/المنصات) */
       const expiryHorizon = format(addDays(today, iqamaAlertDays), ISO_DATE_FORMAT);
-      const [employeesRes, vehiclesRes, platformAccountsRes, dbAlertsRes, sparePartsRes, abscondedRes, commercialRecordsRes] =
+      const [employeesRes, vehiclesRes, platformAccountsRes, dbAlertsRes, sparePartsRes, abscondedRes, commercialRecordsRes, rentalVehiclesRes] =
         await alertsService.fetchAlertsDataWithTimeout(expiryHorizon, FETCH_ALERTS_TIMEOUT_MS);
       // Supabase responses are { data, error } — buildAlertsFromResponses reads only .data
       return buildAlertsFromResponses(
@@ -69,6 +70,7 @@ export const useAlerts = (options: { enabled?: boolean } = {}) => {
           sparePartsRes: sparePartsRes as { data: LowStockSparePartAlertRow[] | null },
           abscondedRes: abscondedRes as { data: AbscondedEmployeeAlertRow[] | null },
           commercialRecordsRes: commercialRecordsRes as { data: CommercialRecordRenewalCostRow[] | null },
+          rentalVehiclesRes: rentalVehiclesRes as { data: VehicleRentalAlertRow[] | null },
         },
         expiryHorizon, today,
       );

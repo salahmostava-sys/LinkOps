@@ -627,6 +627,7 @@ const Motorcycles = () => {
                     <th className="ta-th">التسجيل (الاستمارة)</th>
                     <th className="ta-th">التفويض</th>
                     <th className="ta-th">تكلفة الصيانة</th>
+                    <th className="ta-th">الإيجار</th>
                     <th className="ta-th">الإجراءات</th>
                   </tr>
                 </thead>
@@ -682,6 +683,24 @@ const Motorcycles = () => {
                         <td className="ta-td whitespace-nowrap">{formatDateCell(v.authorization_expiry)}</td>
                         <td className="ta-td font-bold text-rose-600 dark:text-rose-400">
                           {formatCurrency(totalCost)}
+                        </td>
+                        <td className="ta-td whitespace-nowrap">
+                          {v.status === 'rental' && (v.rental_start_date || v.rental_monthly_amount) ? (
+                            <div className="text-xs">
+                              {v.rental_start_date && (
+                                <p className="text-blue-700 dark:text-blue-400 font-medium">
+                                  📅 {formatDateCell(v.rental_start_date)}
+                                </p>
+                              )}
+                              {v.rental_monthly_amount != null && (
+                                <p className="text-blue-600 dark:text-blue-300">
+                                  💰 {formatCurrency(v.rental_monthly_amount)}/شهر
+                                </p>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground">—</span>
+                          )}
                         </td>
                         <td className="ta-td">
                           <div className="flex items-center gap-1">

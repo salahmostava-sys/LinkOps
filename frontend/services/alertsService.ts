@@ -1,4 +1,4 @@
-import { supabase } from "./supabase/client";
+﻿import { supabase } from "./supabase/client";
 import { throwIfError } from "./serviceError";
 
 type QueryError = { message?: string } | null;
@@ -44,6 +44,7 @@ export type AssignableAlertUser = {
 };
 
 type AlertsFetchResult = [
+  { data: unknown[] | null; error: QueryError },
   { data: unknown[] | null; error: QueryError },
   { data: unknown[] | null; error: QueryError },
   { data: unknown[] | null; error: QueryError },
@@ -117,6 +118,11 @@ export const alertsService = {
       supabase
         .from("commercial_records")
         .select("name, residency_renewal_monthly_cost, residency_renewal_cost_period"),
+      supabase
+        .from("vehicles")
+        .select("id, plate_number, rental_start_date, rental_monthly_amount, status")
+        .eq("status", "rental")
+        .not("rental_start_date", "is", null)
     ]);
 
     const timeoutError = () =>
@@ -135,13 +141,15 @@ export const alertsService = {
       if (timeoutId) clearTimeout(timeoutId);
     }
 
-    const [employeesRes, vehiclesRes, platformAccountsRes, dbAlertsRes, sparePartsRes, abscondedRes, commercialRecordsRes] = results;
+    const [employeesRes, vehiclesRes, platformAccountsRes, dbAlertsRes, sparePartsRes, abscondedRes, commercialRecordsRes, rentalVehiclesRes] = results;
     throwIfError(employeesRes.error, "alertsService.fetchAlertsDataWithTimeout.employees");
     throwIfError(vehiclesRes.error, "alertsService.fetchAlertsDataWithTimeout.vehicles");
     throwIfError(platformAccountsRes.error, "alertsService.fetchAlertsDataWithTimeout.platformAccounts");
     throwIfError(dbAlertsRes.error, "alertsService.fetchAlertsDataWithTimeout.alerts");
     throwIfError(abscondedRes.error, "alertsService.fetchAlertsDataWithTimeout.absconded");
     throwIfError(commercialRecordsRes.error, "alertsService.fetchAlertsDataWithTimeout.commercialRecords");
+    throwIfError(rentalVehiclesRes.error, "alertsService.fetchAlertsDataWithTimeout.rentalVehicles");
+    
     if (sparePartsRes.error) {
       results[4] = { data: [], error: null };
     }

@@ -1,4 +1,4 @@
-import { differenceInDays, format, parseISO } from "date-fns";
+﻿import { differenceInDays, format, parseISO } from "date-fns";
 import { fmtNum } from "@shared/lib/utils";
 
 const ISO_DATE_FORMAT = "yyyy-MM-dd";
@@ -57,6 +57,14 @@ export type VehicleExpiryRow = {
   plate_number: string;
   insurance_expiry: string | null;
   authorization_expiry: string | null;
+};
+
+export type VehicleRentalAlertRow = {
+  id: string;
+  plate_number: string;
+  rental_start_date: string | null;
+  rental_monthly_amount: number | null;
+  status: string;
 };
 
 export type PlatformAccountAlertRow = {
@@ -202,6 +210,58 @@ const pushIfDue = (out: Alert[], alert: Alert | null, threshold: string) => {
   }
 };
 
+/** عدد الأيام قبل تاريخ استحقاق الإيجار لإظهار التنبيه */
+const RENTAL_ALERT_LEAD_DAYS = 5;
+
+/**
+ * تحسب تاريخ الاستحقاق الشهري القادم بناءً على يوم بدء الإيجار.
+ * مثال: بدأ الإيجار في 5 يناير → الاستحقاق كل شهر في اليوم 5.
+ * إذا كان اليوم 5 مضى هذا الشهر ينتقل للشهر القادم.
+ */
+const getNextRentalDueDate = (rentalStartDate: string, today: Date): Date => {
+  const startDay = parseISO(rentalStartDate).getDate();
+  const year = today.getFullYear();
+  const month = today.getMonth(); // 0-indexed
+
+  // جرب استحقاق هذا الشهر
+  const thisMonthDue = new Date(year, month, startDay);
+  // إذا الاستحقاق لم يمر بعد (today < dueDate) أو لا يزال ضمن نافذة التنبيه → استخدمه
+  if (today <= thisMonthDue) return thisMonthDue;
+  // وإلا انتقل للشهر القادم
+  return new Date(year, month + 1, startDay);
+};
+
+const pushVehicleRentalAlerts = (
+  out: Alert[],
+  vehicles: VehicleRentalAlertRow[] | null | undefined,
+  today: Date
+) => {
+  if (!vehicles?.length) return;
+  for (const v of vehicles) {
+    if (v.status !== "rental" || !v.rental_start_date) continue;
+    const dueDate = getNextRentalDueDate(v.rental_start_date, today);
+    const dueDateStr = format(dueDate, ISO_DATE_FORMAT);
+    const daysLeft = differenceInDays(dueDate, today);
+    // إظهار التنبيه فقط متى كان الاستحقاق خلال نافذة RENTAL_ALERT_LEAD_DAYS
+    if (daysLeft > RENTAL_ALERT_LEAD_DAYS) continue;
+    const amountStr = v.rental_monthly_amount != null
+      ? ` — المبلغ: ${fmtNum(v.rental_monthly_amount)} ر.س`
+      : "";
+    out.push({
+      id: `rental-${v.id}`,
+      sourceKey: `rental-${v.id}`,
+      entityId: v.id,
+      entityType: "vehicle",
+      type: "vehicle_rental",
+      entityName: `إيجار مركبة ${v.plate_number}${amountStr}`,
+      dueDate: dueDateStr,
+      daysLeft,
+      severity: daysLeft <= 1 ? "urgent" : daysLeft <= 3 ? "warning" : "info",
+      resolved: false,
+    });
+  }
+};
+
 const pushEmployeeExpiryAlerts = (
   generatedAlerts: Alert[],
   emp: EmployeeAlertRow,
@@ -323,8 +383,6 @@ const pushPlatformAccountAlerts = (out: Alert[], rows: PlatformAccountAlertRow[]
   }
 };
 
-
-
 const pushPersistedDbAlerts = (out: Alert[], rows: PersistedAlertRow[], today: Date) => {
   for (const a of rows) {
     const dueDate = a.snoozed_until ?? a.due_date ?? format(today, ISO_DATE_FORMAT);
@@ -376,6 +434,7 @@ export type AlertSourceResponses = {
   sparePartsRes: { data: LowStockSparePartAlertRow[] | null };
   abscondedRes: { data: AbscondedEmployeeAlertRow[] | null };
   commercialRecordsRes: { data: CommercialRecordRenewalCostRow[] | null };
+  rentalVehiclesRes: { data: VehicleRentalAlertRow[] | null };
 };
 
 export function buildAlertsFromResponses(
@@ -383,7 +442,7 @@ export function buildAlertsFromResponses(
   threshold: string,
   today: Date
 ): Alert[] {
-  const { employeesRes, vehiclesRes, platformAccountsRes, dbAlertsRes, sparePartsRes: _sparePartsRes, abscondedRes, commercialRecordsRes } = responses;
+  const { employeesRes, vehiclesRes, platformAccountsRes, dbAlertsRes, sparePartsRes: _sparePartsRes, abscondedRes, commercialRecordsRes, rentalVehiclesRes } = responses;
   const generatedAlerts: Alert[] = [];
   const employees = employeesRes.data ?? [];
   const platformAccounts = platformAccountsRes.data ?? [];
@@ -396,6 +455,7 @@ export function buildAlertsFromResponses(
   );
   employees.forEach((emp) => pushEmployeeExpiryAlerts(generatedAlerts, emp, threshold, today, renewalCostByRecord));
   pushVehicleExpiryAlerts(generatedAlerts, vehiclesRes.data, threshold, today);
+  pushVehicleRentalAlerts(generatedAlerts, rentalVehiclesRes.data, today);
   pushPlatformAccountAlerts(generatedAlerts, platformAccounts, today);
   // Inventory alerts disabled per user request
   pushPersistedDbAlerts(generatedAlerts, dbAlerts, today);

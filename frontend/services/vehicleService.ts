@@ -1,4 +1,4 @@
-import { supabase } from '@services/supabase/client';
+﻿import { supabase } from '@services/supabase/client';
 import { handleSupabaseError } from '@services/serviceError';
 import { filterOperationallyVisibleEmployees } from '@shared/lib/employeeVisibility';
 import type { TablesInsert } from '@services/supabase/types';
@@ -22,6 +22,8 @@ export interface VehiclePayload {
   serial_number?: string | null;
   assigned_employee_id?: string | null;
   notes?: string;
+  rental_start_date?: string | null;
+  rental_monthly_amount?: number | null;
 }
 
 export type VehicleDocumentType = 'license' | 'insurance' | 'registration' | 'authorization' | 'other';

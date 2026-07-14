@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { Button } from '@shared/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@shared/components/ui/dialog';
 import { Input } from '@shared/components/ui/input';
@@ -32,6 +32,8 @@ type VehicleFormState = {
   chassis_number: string;
   serial_number: string;
   notes: string;
+  rental_start_date: string;
+  rental_monthly_amount: string;
 };
 
 const EMPTY_FORM: VehicleFormState = {
@@ -49,12 +51,16 @@ const EMPTY_FORM: VehicleFormState = {
   chassis_number: '',
   serial_number: '',
   notes: '',
+  rental_start_date: '',
+  rental_monthly_amount: '',
 };
 
 export function VehicleFormModal({ open, onClose, onSaved, editVehicle }: Readonly<VehicleFormModalProps>) {
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<VehicleFormState>(EMPTY_FORM);
+
+  const isRental = form.status === 'rental';
 
   useEffect(() => {
     if (!editVehicle) {
@@ -77,6 +83,8 @@ export function VehicleFormModal({ open, onClose, onSaved, editVehicle }: Readon
       chassis_number: editVehicle.chassis_number ?? '',
       serial_number: editVehicle.serial_number ?? '',
       notes: editVehicle.notes ?? '',
+      rental_start_date: editVehicle.rental_start_date ?? '',
+      rental_monthly_amount: editVehicle.rental_monthly_amount?.toString() ?? '',
     });
   }, [editVehicle, open]);
 
@@ -90,6 +98,11 @@ export function VehicleFormModal({ open, onClose, onSaved, editVehicle }: Readon
   const handleSave = async () => {
     if (!form.plate_number.trim()) {
       toast({ title: 'يرجى إدخال رقم اللوحة', variant: 'destructive' });
+      return;
+    }
+
+    if (isRental && !form.rental_start_date) {
+      toast({ title: 'يرجى إدخال تاريخ بدء الإيجار', variant: 'destructive' });
       return;
     }
 
@@ -110,6 +123,10 @@ export function VehicleFormModal({ open, onClose, onSaved, editVehicle }: Readon
         chassis_number: form.chassis_number.trim() || null,
         serial_number: form.serial_number.trim() || null,
         notes: form.notes || null,
+        rental_start_date: isRental ? (form.rental_start_date || null) : null,
+        rental_monthly_amount: isRental && form.rental_monthly_amount
+          ? Number.parseFloat(form.rental_monthly_amount)
+          : null,
       };
 
       if (editVehicle) {
@@ -177,6 +194,44 @@ export function VehicleFormModal({ open, onClose, onSaved, editVehicle }: Readon
               </SelectContent>
             </Select>
           </div>
+
+          {/* حقول الإيجار — تظهر فقط عند اختيار حالة إيجار */}
+          {isRental && (
+            <div className="col-span-2 rounded-xl border border-blue-200 bg-blue-50/60 p-3 dark:border-blue-800/50 dark:bg-blue-950/30">
+              <p className="mb-2.5 flex items-center gap-1.5 text-sm font-semibold text-blue-700 dark:text-blue-400">
+                🚙 بيانات الإيجار
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label htmlFor="vehicle-rental-start" className="mb-1 block text-sm font-medium">
+                    تاريخ بدء الإيجار *
+                  </label>
+                  <Input
+                    id="vehicle-rental-start"
+                    type="date"
+                    value={form.rental_start_date}
+                    onChange={(event) => setForm((previous) => ({ ...previous, rental_start_date: event.target.value }))}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="vehicle-rental-amount" className="mb-1 block text-sm font-medium">
+                    المبلغ الشهري (ر.س)
+                  </label>
+                  <Input
+                    id="vehicle-rental-amount"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={form.rental_monthly_amount}
+                    onChange={(event) => setForm((previous) => ({ ...previous, rental_monthly_amount: event.target.value }))}
+                    placeholder="1500"
+                    dir="ltr"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
           <div>
             <label htmlFor="vehicle-brand" className="mb-1 block text-sm font-medium">الماركة</label>
             <Input
@@ -260,7 +315,7 @@ export function VehicleFormModal({ open, onClose, onSaved, editVehicle }: Readon
               onCheckedChange={(checked) => setForm((previous) => ({ ...previous, has_fuel_chip: checked }))}
               aria-label="تبديل شريحة البنزين"
             />
-            <span className={`text-xs font-semibold ${form.has_fuel_chip ? 'text-primary' : 'text-muted-foreground'}`}>
+            <span className="text-xs font-semibold ${form.has_fuel_chip ? 'text-primary' : 'text-muted-foreground'}">
               {form.has_fuel_chip ? 'يوجد' : 'لا يوجد'}
             </span>
           </div>
