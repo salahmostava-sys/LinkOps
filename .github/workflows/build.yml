@@ -61,6 +61,9 @@ jobs:
       - name: Build
         run: npm run build -w frontend
 
+      - name: Check frontend bundle budget
+        run: npm run audit:bundle
+
       - name: Install Playwright browsers
         working-directory: frontend
         run: npx playwright install --with-deps
