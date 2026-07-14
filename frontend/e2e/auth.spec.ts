@@ -1,11 +1,10 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
-test.describe('Auth Flow', () => {
-  test('login with valid credentials', async ({ page }) => {
-    await page.goto('https://muhimat.vercel.app/login');
-    await page.fill('input[name="email"]', 'admin@example.com');
-    await page.fill('input[name="password"]', 'password123');
-    await page.click('button[type="submit"]');
-    await expect(page).toHaveURL(/dashboard/);
+test.describe('حماية المسارات', () => {
+  test('تعيد المستخدم غير المسجل إلى صفحة الدخول', async ({ page }) => {
+    await page.goto('/employees');
+
+    await expect(page).toHaveURL(/\/login$/);
+    await expect(page.locator('#login-email')).toBeVisible();
   });
 });

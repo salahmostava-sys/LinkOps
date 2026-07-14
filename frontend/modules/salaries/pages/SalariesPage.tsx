@@ -6,7 +6,7 @@ import { useAppColors } from '@shared/hooks/useAppColors';
 import { useAuth } from '@app/providers/AuthContext';
 import { authQueryUserId, useAuthQueryGate } from '@shared/hooks/useAuthQueryGate';
 import { usePermissions } from '@shared/hooks/usePermissions';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useSystemSettings } from '@app/providers/SystemSettingsContext';
 import type { PricingRule } from '@services/salaryService';
 import { useQueryClient } from '@tanstack/react-query';
@@ -31,6 +31,7 @@ import { months } from '@modules/salaries/lib/salaryMonths';
 import type { SalaryRow, SchemeData, SortDir } from '@modules/salaries/types/salary.types';
 import type JSZip from 'jszip';
 import { useTemporalContext } from '@app/providers/TemporalContext';
+import { useUrlParamState } from '@shared/hooks/useUrlParamState';
 
 const PayslipModal = lazy(() =>
   import('@modules/salaries/components/PayslipModal').then((module) => ({
@@ -64,7 +65,6 @@ const Salaries = () => {
   const { enabled: _enabled, userId } = useAuthQueryGate();
   const uid = authQueryUserId(userId);
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const { permissions } = usePermissions('salaries');
   const { projectName } = useSystemSettings();
   const { apps: appColorsList } = useAppColors();
@@ -81,8 +81,8 @@ const Salaries = () => {
     pricingRulesByAppId: Record<string, PricingRule[]>;
   }>({ appsWithoutScheme: [], appsWithoutPricingRules: [], appIdByName: {}, pricingRulesByAppId: {} });
 
-  const [search, setSearch] = useState(() => searchParams.get('search') ?? '');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [search, setSearch] = useUrlParamState('search');
+  const [statusFilter, setStatusFilter] = useUrlParamState('status', 'all');
   // cityFilter is not exposed in the UI yet — kept as constant for future use
   const cityFilter = 'all';
   const [payslipRow, setPayslipRow] = useState<SalaryRow | null>(null);

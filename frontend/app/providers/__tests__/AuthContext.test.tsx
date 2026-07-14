@@ -20,6 +20,7 @@ vi.mock('@services/authService', () => ({
       unsubscribe: vi.fn()
     })),
     getSession: vi.fn(),
+    refreshSession: vi.fn(),
   },
 }));
 
@@ -69,6 +70,7 @@ describe('AuthContext', () => {
 
   it('provides null user and role when not authenticated', async () => {
     vi.mocked(authService.getSession).mockResolvedValue(null);
+    vi.mocked(authService.refreshSession).mockResolvedValue({ session: null, user: null });
 
     renderWithProviders(<TestConsumer />);
     
@@ -78,6 +80,7 @@ describe('AuthContext', () => {
 
     expect(screen.getByTestId('user-id')).toHaveTextContent('no-user');
     expect(screen.getByTestId('role')).toHaveTextContent('no-role');
+    await waitFor(() => expect(authService.refreshSession).toHaveBeenCalledTimes(1));
   });
 
   it('provides user and role when authenticated', async () => {

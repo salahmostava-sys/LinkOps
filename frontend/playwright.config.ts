@@ -35,9 +35,18 @@ export default defineConfig({
     viewport: { width: 1280, height: 720 },
   },
   projects: [
+    {
+      name: 'public',
+      testMatch: ['login.spec.ts', 'auth.spec.ts'],
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: { cookies: [], origins: [] },
+      },
+    },
     { name: 'setup', testMatch: /\.setup\.ts$/ },
     {
       name: 'chromium',
+      testIgnore: ['login.spec.ts', 'auth.spec.ts'],
       use: {
         ...devices['Desktop Chrome'],
         storageState: 'playwright/.auth/user.json',

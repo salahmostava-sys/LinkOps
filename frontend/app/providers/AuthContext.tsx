@@ -65,6 +65,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [refreshing, setRefreshing] = useState(false);
   const queryClient = useQueryClient();
   const recoverInFlightRef = useRef<Promise<boolean> | null>(null);
+  const unauthenticatedRecoveryAttemptedRef = useRef(false);
   const isFirstLoad = useRef(true);
   const redirectLockRef = useRef(false);
   const redirectCooldownUntilRef = useRef(0);
@@ -290,11 +291,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // Try one silent recovery before giving up and redirecting.
   useEffect(() => {
     if (loading || refreshing) return;
-    if (session) return;
+    if (session) {
+      unauthenticatedRecoveryAttemptedRef.current = false;
+      return;
+    }
+    if (isPublicAuthRoute(pathnameRef.current)) return;
+    if (unauthenticatedRecoveryAttemptedRef.current) {
+      redirectToLoginIfNeeded();
+      return;
+    }
+    unauthenticatedRecoveryAttemptedRef.current = true;
     recoverSessionSilently().then((recovered) => {
       if (!recovered) redirectToLoginIfNeeded();
     });
-  }, [loading, refreshing, session, redirectToLoginIfNeeded, recoverSessionSilently]);
+  }, [loading, refreshing, session, isPublicAuthRoute, redirectToLoginIfNeeded, recoverSessionSilently]);
 
   // ── Wake / reconnect: silent session recovery + data refresh ─────────────
   useEffect(() => {

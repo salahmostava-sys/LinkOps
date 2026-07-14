@@ -189,6 +189,14 @@ describe('authService', () => {
       const res = await authService.refreshSession();
       expect(res).toEqual({ session: { id: 's2' }, user: { id: 'u2' } });
     });
+    it('returns an empty session when no refresh session exists', async () => {
+      refreshSessionMock.mockResolvedValue({
+        data: { session: null, user: null },
+        error: new Error('Auth session missing!'),
+      });
+
+      await expect(authService.refreshSession()).resolves.toEqual({ session: null, user: null });
+    });
     it('throws on error', async () => {
       refreshSessionMock.mockResolvedValue({ data: { session: null, user: null }, error: new Error('refresh err') });
       await expect(authService.refreshSession()).rejects.toThrow('authService.refreshSession: refresh err');

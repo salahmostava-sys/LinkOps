@@ -18,21 +18,20 @@ import { getErrorMessage } from '@services/serviceError';
 import { exportSpreadsheetExcel, runSpreadsheetImport, downloadSpreadsheetTemplate, printSpreadsheetTable, saveSpreadsheetMonth } from '@modules/orders/utils/spreadsheetFileOps';
 import { getDaysInMonth, monthYear, shiftMonth, isPastMonth } from '@modules/orders/utils/dateMonth';
 import { useTemporalContext } from '@app/providers/TemporalContext';
-import { useSearchParams } from 'react-router-dom';
+import { useUrlParamState } from '@shared/hooks/useUrlParamState';
 
 export function useSpreadsheetGrid() {
   const queryClient = useQueryClient();
   const { enabled, userId } = useAuthQueryGate();
   const uid = authQueryUserId(userId);
   const { permissions } = usePermissions('orders');
-  const [searchParams] = useSearchParams();
   const { selectedMonth: globalMonth, setSelectedMonth: setGlobalMonth } = useTemporalContext();
 
   // Derived from Global Temporal Context (YYYY-MM)
   const [yearStr, monthStr] = globalMonth.split('-');
   const year = Number(yearStr);
   const month = Number(monthStr);
-  const [search, setSearch] = useState(() => searchParams.get('search') ?? '');
+  const [search, setSearch] = useUrlParamState('search');
   const importRef = useRef<HTMLInputElement>(null);
   const tableRef = useRef<HTMLTableElement>(null);
 
@@ -40,7 +39,7 @@ export function useSpreadsheetGrid() {
   const [saving, setSaving] = useState(false);
   const [expandedEmp, setExpandedEmp] = useState<Set<string>>(new Set());
   const [cellPopover, setCellPopover] = useState<OrdersPopoverState | null>(null);
-  const [platformFilter, setPlatformFilter] = useState('all');
+  const [platformFilter, setPlatformFilter] = useUrlParamState('platform', 'all');
   const [isMonthLocked, setIsMonthLocked] = useState(false);
   const [lockingMonth, setLockingMonth] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);

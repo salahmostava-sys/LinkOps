@@ -62,14 +62,17 @@ jobs:
         run: npm run build -w frontend
 
       - name: Install Playwright browsers
-        if: env.E2E_DASHBOARD_EMAIL != '' && env.E2E_DASHBOARD_PASSWORD != ''
         working-directory: frontend
         run: npx playwright install --with-deps
 
-      - name: Run E2E and accessibility tests
+      - name: Run public E2E tests
+        working-directory: frontend
+        run: npx playwright test --project=public
+
+      - name: Run authenticated E2E tests
         if: env.E2E_DASHBOARD_EMAIL != '' && env.E2E_DASHBOARD_PASSWORD != ''
         working-directory: frontend
-        run: npm run test:e2e
+        run: npx playwright test --project=chromium
 
   sonarcloud:
     name: SonarCloud

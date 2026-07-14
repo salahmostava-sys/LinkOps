@@ -68,6 +68,12 @@ function dedupe<T>(key: string, fn: () => Promise<T>): Promise<T> {
   return p;
 }
 
+function isMissingSessionError(error: unknown): boolean {
+  const rawMessage = (error as { message?: unknown } | null)?.message;
+  const message = (typeof rawMessage === 'string' ? rawMessage : '').toLowerCase();
+  return message.includes('session') && message.includes('missing');
+}
+
 export const authService = {
   signIn: async (email: string, password: string): Promise<{ session: Session | null; user: User | null }> => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -87,11 +93,7 @@ export const authService = {
   signOut: async (): Promise<void> => {
     const { error } = await supabase.auth.signOut({ scope: "local" });
     if (!error) return;
-    const rawMessage = (error as { message?: unknown }).message;
-    const message = (typeof rawMessage === "string" ? rawMessage : "").toLowerCase();
-    if (message.includes("session") && message.includes("missing")) {
-      return;
-    }
+    if (isMissingSessionError(error)) return;
     throwIfError(error, "authService.signOut");
   },
 
@@ -159,6 +161,7 @@ export const authService = {
 
   refreshSession: async (): Promise<{ session: Session | null; user: User | null }> => {
     const { data, error } = await supabase.auth.refreshSession();
+    if (isMissingSessionError(error)) return { session: null, user: null };
     throwIfError(error, "authService.refreshSession");
     return { session: data.session, user: data.user };
   },
