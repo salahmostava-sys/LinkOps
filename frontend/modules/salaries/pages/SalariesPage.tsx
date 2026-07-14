@@ -6,7 +6,7 @@ import { useAppColors } from '@shared/hooks/useAppColors';
 import { useAuth } from '@app/providers/AuthContext';
 import { authQueryUserId, useAuthQueryGate } from '@shared/hooks/useAuthQueryGate';
 import { usePermissions } from '@shared/hooks/usePermissions';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useSystemSettings } from '@app/providers/SystemSettingsContext';
 import type { PricingRule } from '@services/salaryService';
 import { useQueryClient } from '@tanstack/react-query';
@@ -64,6 +64,7 @@ const Salaries = () => {
   const { enabled: _enabled, userId } = useAuthQueryGate();
   const uid = authQueryUserId(userId);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { permissions } = usePermissions('salaries');
   const { projectName } = useSystemSettings();
   const { apps: appColorsList } = useAppColors();
@@ -80,7 +81,7 @@ const Salaries = () => {
     pricingRulesByAppId: Record<string, PricingRule[]>;
   }>({ appsWithoutScheme: [], appsWithoutPricingRules: [], appIdByName: {}, pricingRulesByAppId: {} });
 
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(() => searchParams.get('search') ?? '');
   const [statusFilter, setStatusFilter] = useState('all');
   // cityFilter is not exposed in the UI yet — kept as constant for future use
   const cityFilter = 'all';

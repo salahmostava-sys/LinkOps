@@ -40,7 +40,7 @@ type Props = {
 };
 
 const SortIcon = ({ active, dir }: { active: boolean; dir: SortDir }) => {
-  if (!active) return <span className="text-muted-foreground/40 text-[10px] mr-0.5">⇅</span>;
+  if (!active) return <span className="inline-block w-2.5 mr-0.5" aria-hidden />;
   return <span className="text-[10px] mr-0.5">{dir === 'asc' ? '↑' : '↓'}</span>;
 };
 

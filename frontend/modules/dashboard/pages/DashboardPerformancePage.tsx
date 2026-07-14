@@ -14,6 +14,10 @@ import {
 import { DashboardPerformanceOverviewTab } from '@modules/dashboard/components/DashboardPerformanceOverviewTab';
 import { DashboardRiderProfileModal } from '@modules/dashboard/components/DashboardRiderProfileModal';
 import { Skeleton } from '@shared/components/ui/skeleton';
+import { exportExecutivePerformanceReport } from '@modules/dashboard/lib/executiveReportExport';
+import { useSystemSettings } from '@app/providers/SystemSettingsContext';
+import { toast } from '@shared/components/ui/sonner';
+import { getErrorMessage } from '@services/serviceError';
 
 const loadAnalyticsTab = () =>
   import('@modules/dashboard/components/DashboardPerformanceAnalyticsTab').then((module) => ({
@@ -50,6 +54,7 @@ export default function DashboardPerformancePage() {
   const uid = authQueryUserId(userId);
   const queryClient = useQueryClient();
   const { selectedMonth: currentMonth } = useTemporalContext();
+  const { projectName } = useSystemSettings();
   const [activeTab, setActiveTab] = useState<DashboardPerformanceTabKey>('overview');
   const [selectedRiderId, setSelectedRiderId] = useState<string | null>(null);
 
@@ -63,6 +68,7 @@ export default function DashboardPerformancePage() {
     {
       shouldHandle: (change) => {
         if (!MONTH_SCOPED_REALTIME_TABLES.has(change.table)) return true;
+        if (change.eventType === 'DELETE') return true;
         const changedMonth = change.new.month_year ?? change.old.month_year;
         const changedDate = change.new.date ?? change.old.date;
         return changedMonth === currentMonth
@@ -93,6 +99,16 @@ export default function DashboardPerformancePage() {
     });
   };
 
+  const exportExecutiveReport = async () => {
+    if (!dashboardQuery.data) return;
+    try {
+      await exportExecutivePerformanceReport(dashboardQuery.data, projectName);
+      toast.success('تم تصدير التقرير التنفيذي');
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'تعذر تصدير التقرير التنفيذي'));
+    }
+  };
+
   return (
     <div className="space-y-5" dir="rtl">
       <DashboardPerformanceHeader
@@ -103,6 +119,7 @@ export default function DashboardPerformancePage() {
           loadRankingTab();
           loadPlatformsTab();
         }}
+        onExportReport={dashboardQuery.data ? exportExecutiveReport : undefined}
       />
 
       {dashboardQuery.isError ? (

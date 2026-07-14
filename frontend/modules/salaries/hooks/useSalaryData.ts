@@ -185,6 +185,7 @@ export function useSalaryData({ selectedMonth, salariesDraftKey }: UseSalaryData
     },
     {
       shouldHandle: (change) => {
+        if (change.eventType === 'DELETE') return true;
         const orderDate = change.new.date ?? change.old.date;
         return typeof orderDate === 'string' && orderDate.startsWith(selectedMonth);
       },

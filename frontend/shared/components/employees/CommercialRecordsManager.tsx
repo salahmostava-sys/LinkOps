@@ -308,7 +308,7 @@ export function CommercialRecordsManager({
 
                   return (
                     <div
-                      key={record.id}
+                      key={`${record.id ?? 'legacy'}-${record.name}`}
                       className="rounded-2xl border border-border/70 bg-card p-4 shadow-sm"
                     >
                       <div className="flex flex-col gap-4">

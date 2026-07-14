@@ -1,7 +1,7 @@
 import { formatCurrency, formatStandardDateTime } from '@shared/lib/formatters';
 
 import { useState } from 'react';
-import { Bell, Search, CheckCircle, Clock, Download, ExternalLink, UserRoundCog } from 'lucide-react';
+import { Bell, Search, CheckCircle, Clock, ClipboardCopy, Download, ExternalLink, UserRoundCog } from 'lucide-react';
 import { Input } from '@shared/components/ui/input';
 import { Button } from '@shared/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@shared/components/ui/dialog';
@@ -109,6 +109,17 @@ function getAlertCost(alert: Alert): number | null {
 
 function canOpenAlertEntity(alert: Alert): boolean {
   return Boolean(alert.entityId && (alert.entityType === 'employee' || alert.entityType === 'vehicle'));
+}
+
+function workflowSummaryLine(alert: Alert): string {
+  const cost = getAlertCost(alert);
+  const details = [
+    workflowLabels[getWorkflowStatus(alert)],
+    `المسؤول: ${alert.assignedName || 'غير مسند'}`,
+    cost === null ? null : `التكلفة: ${formatCurrency(cost)}`,
+    alert.resolutionNote || null,
+  ].filter(Boolean).join(' | ');
+  return `- ${alertTypeLabels[alert.type] || alert.type}: ${alert.entityName} | ${details}`;
 }
 
 const Alerts = () => {
@@ -266,12 +277,28 @@ const Alerts = () => {
         'الكيان': a.entityName,
         'تاريخ الاستحقاق': a.dueDate,
         'المتبقي (يوم)': a.daysLeft,
-        'الحالة': a.resolved ? 'محسوم' : 'نشط',
+        'حالة المتابعة': workflowLabels[getWorkflowStatus(a)],
+        'المسؤول': a.assignedName || 'غير مسند',
+        'التكلفة المتوقعة': getAlertCost(a) ?? '',
+        'ملاحظة المتابعة': a.resolutionNote ?? '',
       }));
     const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'التنبيهات');
     XLSX.writeFile(wb, `التنبيهات_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
+  };
+
+  const copyWorkflowSummary = async () => {
+    try {
+      const visibleAlerts = filtered.slice(0, 50);
+      const lines = visibleAlerts.map(workflowSummaryLine);
+      const remaining = filtered.length - visibleAlerts.length;
+      const footer = remaining > 0 ? `\n... و${remaining} تنبيه إضافي` : '';
+      await navigator.clipboard.writeText(`ملخص متابعة التنبيهات (${filtered.length})\n${lines.join('\n')}${footer}`);
+      toast({ title: 'تم نسخ ملخص المتابعة' });
+    } catch (error) {
+      toast({ title: 'تعذر نسخ الملخص', description: getErrorMessage(error), variant: 'destructive' });
+    }
   };
 
   const handleDownloadTemplate = async () => {
@@ -385,6 +412,7 @@ const Alerts = () => {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={handleExport}>📊 تصدير Excel (مرتب حسب الأولوية)</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => void copyWorkflowSummary()}><ClipboardCopy size={14} className="ml-2" /> نسخ ملخص المتابعة</DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleDownloadTemplate}>📥 تحميل القالب</DropdownMenuItem>
                 <DropdownMenuSeparator />

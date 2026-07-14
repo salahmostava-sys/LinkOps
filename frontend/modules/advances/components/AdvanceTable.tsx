@@ -7,7 +7,7 @@ import type { Advance, EmployeeSummary } from '@modules/advances/types/advance.t
 import { Skeleton } from '@shared/components/ui/skeleton';
 
 const SortIcon = ({ field, sortField, sortDir }: Readonly<{ field: string; sortField: string | null; sortDir: 'asc' | 'desc' }>) => {
-  if (sortField !== field) return <span className="text-muted-foreground/40 text-[10px] ms-0.5">⇅</span>;
+  if (sortField !== field) return <span className="inline-block w-2.5 ms-0.5" aria-hidden />;
   return <span className="text-[10px] ms-0.5">{sortDir === 'asc' ? '↑' : '↓'}</span>;
 };
 

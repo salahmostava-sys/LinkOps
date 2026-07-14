@@ -44,6 +44,7 @@ import {
 } from './profile/employeeProfile.utils';
 import { SecureDocThumb } from './profile/EmployeeProfileComponents';
 import { EmployeeProfileOverview } from './profile/EmployeeProfileOverview';
+import { EmployeeOperationsNav } from './profile/EmployeeOperationsNav';
 
 // eslint-disable-next-line sonarjs/cognitive-complexity
 const EmployeeProfile = ({ employee, onBack, onEdit }: Readonly<Props>) => {
@@ -159,6 +160,8 @@ const EmployeeProfile = ({ employee, onBack, onEdit }: Readonly<Props>) => {
           </div>
         </div>
       </div>
+
+      <EmployeeOperationsNav employeeName={employee.name} />
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>

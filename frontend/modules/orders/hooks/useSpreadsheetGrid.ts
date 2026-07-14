@@ -18,19 +18,21 @@ import { getErrorMessage } from '@services/serviceError';
 import { exportSpreadsheetExcel, runSpreadsheetImport, downloadSpreadsheetTemplate, printSpreadsheetTable, saveSpreadsheetMonth } from '@modules/orders/utils/spreadsheetFileOps';
 import { getDaysInMonth, monthYear, shiftMonth, isPastMonth } from '@modules/orders/utils/dateMonth';
 import { useTemporalContext } from '@app/providers/TemporalContext';
+import { useSearchParams } from 'react-router-dom';
 
 export function useSpreadsheetGrid() {
   const queryClient = useQueryClient();
   const { enabled, userId } = useAuthQueryGate();
   const uid = authQueryUserId(userId);
   const { permissions } = usePermissions('orders');
+  const [searchParams] = useSearchParams();
   const { selectedMonth: globalMonth, setSelectedMonth: setGlobalMonth } = useTemporalContext();
 
   // Derived from Global Temporal Context (YYYY-MM)
   const [yearStr, monthStr] = globalMonth.split('-');
   const year = Number(yearStr);
   const month = Number(monthStr);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(() => searchParams.get('search') ?? '');
   const importRef = useRef<HTMLInputElement>(null);
   const tableRef = useRef<HTMLTableElement>(null);
 

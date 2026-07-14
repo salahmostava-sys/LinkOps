@@ -17,6 +17,7 @@ import type { Advance } from '@modules/advances/types/advance.types';
 import { useAdvanceTable } from '@modules/advances/hooks/useAdvanceTable';
 import { AdvanceFilters } from '@modules/advances/components/AdvanceFilters';
 import { AdvanceTable } from '@modules/advances/components/AdvanceTable';
+import { useSearchParams } from 'react-router-dom';
 const loadAdvanceDialogs = () => import('@modules/advances/components/AddAdvanceModal');
 
 const EditAdvanceModal = lazy(() =>
@@ -46,6 +47,7 @@ const Advances = () => {
   const { enabled, userId } = useAuthQueryGate();
   const uid = authQueryUserId(userId);
   const { permissions } = usePermissions('advances');
+  const [searchParams] = useSearchParams();
   const [advances, setAdvances] = useState<Advance[]>([]);
   const [employees, setEmployees] = useState<{ id: string; name: string; national_id?: string | null; sponsorship_status?: string | null }[]>([]);
   const {
@@ -69,7 +71,7 @@ const Advances = () => {
     retry: defaultQueryRetry,
     staleTime: 60_000,
   });
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(() => searchParams.get('search') ?? '');
   const [statusFilter, setStatusFilter] = useState('all');
   const { filters, setFilter, resetFilters, activeCount } = useAdvancedFilter(ADVANCES_FILTERS);
   const [showWrittenOff, setShowWrittenOff] = useState(false);

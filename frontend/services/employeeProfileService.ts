@@ -1,6 +1,11 @@
 import { supabase } from '@services/supabase/client';
 import { handleSupabaseError } from '@services/serviceError';
 
+const PROFILE_ADVANCES_LIMIT = 200;
+const PROFILE_SALARIES_LIMIT = 60;
+const PROFILE_APPS_LIMIT = 100;
+const PROFILE_ORDERS_LIMIT = 2000;
+
 export interface EmployeeProfileInstallment {
   id: string;
   month_year: string;
@@ -61,23 +66,27 @@ export const employeeProfileService = {
     const [advancesRes, salariesRes, appsRes, ordersRes] = await Promise.all([
       supabase
         .from('advances')
-        .select('*, advance_installments(*)')
+        .select('id, amount, monthly_amount, disbursement_date, first_deduction_month, status, note, advance_installments(id, month_year, amount, status, deducted_at)')
         .eq('employee_id', employeeId)
-        .order('disbursement_date', { ascending: false }),
+        .order('disbursement_date', { ascending: false })
+        .limit(PROFILE_ADVANCES_LIMIT),
       supabase
         .from('salary_records')
-        .select('*')
+        .select('id, month_year, base_salary, allowances, attendance_deduction, advance_deduction, external_deduction, manual_deduction, net_salary, is_approved')
         .eq('employee_id', employeeId)
-        .order('month_year', { ascending: false }),
+        .order('month_year', { ascending: false })
+        .limit(PROFILE_SALARIES_LIMIT),
       supabase
         .from('employee_apps')
-        .select('*, apps(name)')
-        .eq('employee_id', employeeId),
+        .select('id, app_id, status, username, apps(name)')
+        .eq('employee_id', employeeId)
+        .limit(PROFILE_APPS_LIMIT),
       supabase
         .from('daily_orders')
         .select('id, date, orders_count, app_id, apps(name, brand_color)')
         .eq('employee_id', employeeId)
-        .order('date', { ascending: false }),
+        .order('date', { ascending: false })
+        .limit(PROFILE_ORDERS_LIMIT),
     ]);
 
     if (advancesRes.error) handleSupabaseError(advancesRes.error, 'employeeProfileService.getRelatedData.advances');

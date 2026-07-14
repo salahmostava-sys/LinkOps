@@ -4,7 +4,7 @@
  */
 
 import { useState, useMemo } from 'react';
-import { Search, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Search, ArrowUp, ArrowDown } from 'lucide-react';
 import {
   type RiderPerformanceProfile,
   type PerformanceTier,
@@ -61,7 +61,7 @@ function GrowthBadge({ pct }: Readonly<{ pct: number }>) {
 }
 
 function SortIcon({ colKey, sortKey, sortDir }: Readonly<{ colKey: SortKey; sortKey: SortKey; sortDir: SortDir }>) {
-  if (sortKey !== colKey) return <ArrowUpDown size={12} className="text-muted-foreground/40" />;
+  if (sortKey !== colKey) return <span className="size-3" aria-hidden />;
   return sortDir === 'asc' ? (
     <ArrowUp size={12} className="text-foreground" />
   ) : (

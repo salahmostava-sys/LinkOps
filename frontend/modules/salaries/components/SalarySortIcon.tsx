@@ -1,4 +1,4 @@
-import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
+import { ChevronUp, ChevronDown } from 'lucide-react';
 import type { SortDir } from '@modules/salaries/types/salary.types';
 
 type SalarySortIconProps = Readonly<{
@@ -7,20 +7,8 @@ type SalarySortIconProps = Readonly<{
   sortDir: SortDir;
 }>;
 
-/**
- * FIX P2: three-state sort indicator.
- * - Not active field        → faint double-chevron (hint that column is sortable)
- * - Active + asc            → solid up-chevron
- * - Active + desc           → solid down-chevron
- * - Active + null (cleared) → should not appear (handleSort resets sortField too)
- *
- * The column header `title` attribute now communicates the next action to the user.
- * Usage: wrap the <th> onClick with title={nextSortLabel} — handled in SalaryTable.
- */
 export function SalarySortIcon({ field, sortField, sortDir }: Readonly<SalarySortIconProps>) {
-  if (sortField !== field) return <ChevronsUpDown size={10} className="inline me-0.5 opacity-40" />;
+  if (sortField !== field || sortDir === null) return <span className="inline-block size-[10px] me-0.5" aria-hidden />;
   if (sortDir === 'asc') return <ChevronUp size={10} className="inline me-0.5 text-primary" />;
-  if (sortDir === 'desc') return <ChevronDown size={10} className="inline me-0.5 text-primary" />;
-  // null state (sort cleared) — show faint icon to indicate it's still clickable
-  return <ChevronsUpDown size={10} className="inline me-0.5 opacity-60 text-primary" />;
+  return <ChevronDown size={10} className="inline me-0.5 text-primary" />;
 }

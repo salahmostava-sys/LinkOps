@@ -58,22 +58,22 @@ export default function ViolationTable({
         <thead className="bg-muted/40 border-b border-border">
           <tr>
             <th onClick={() => toggleVSort('employee_name')} className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground whitespace-nowrap cursor-pointer hover:text-foreground select-none">
-              اسم الموظف {sortArrowOrNeutral(vSortField, 'employee_name', vSortDir, '⇅')}
+              اسم الموظف {sortArrowOrNeutral(vSortField, 'employee_name', vSortDir, '')}
             </th>
             <th onClick={() => toggleVSort('violation_details')} className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground cursor-pointer hover:text-foreground select-none min-w-[200px]">
-              تفاصيل المخالفة {sortArrowOrNeutral(vSortField, 'violation_details', vSortDir, '⇅')}
+              تفاصيل المخالفة {sortArrowOrNeutral(vSortField, 'violation_details', vSortDir, '')}
             </th>
             <th onClick={() => toggleVSort('incident_date')} className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground whitespace-nowrap cursor-pointer hover:text-foreground select-none">
-              التاريخ {sortArrowOrNeutral(vSortField, 'incident_date', vSortDir, '⇅')}
+              التاريخ {sortArrowOrNeutral(vSortField, 'incident_date', vSortDir, '')}
             </th>
             <th onClick={() => toggleVSort('amount')} className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground whitespace-nowrap cursor-pointer hover:text-foreground select-none">
-              المبلغ {sortArrowOrNeutral(vSortField, 'amount', vSortDir, '⇅')}
+              المبلغ {sortArrowOrNeutral(vSortField, 'amount', vSortDir, '')}
             </th>
             <th onClick={() => toggleVSort('status')} className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground whitespace-nowrap cursor-pointer hover:text-foreground select-none">
-              الحالة {sortArrowOrNeutral(vSortField, 'status', vSortDir, '⇅')}
+              الحالة {sortArrowOrNeutral(vSortField, 'status', vSortDir, '')}
             </th>
             <th onClick={() => toggleVSort('advance_status')} className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground whitespace-nowrap cursor-pointer hover:text-foreground select-none" title="مربوط بجدول السلف في قاعدة البيانات أو سجل قديم في الملاحظة">
-              حالة السلفة {sortArrowOrNeutral(vSortField, 'advance_status', vSortDir, '⇅')}
+              حالة السلفة {sortArrowOrNeutral(vSortField, 'advance_status', vSortDir, '')}
             </th>
             <th className="ta-th">إجراءات</th>
           </tr>

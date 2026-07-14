@@ -103,7 +103,7 @@ export const EmployeeSelect = ({
 };
 
 export const SortIcon = ({ field, sortField, sortDir }: { field: string; sortField: string | null; sortDir: SortDir }) => {
-  if (sortField !== field) return <ChevronsUpDown size={11} className="text-muted-foreground/40 inline ms-1" />;
+  if (sortField !== field) return <span className="inline-block size-[11px] ms-1" aria-hidden />;
   if (sortDir === 'asc') return <ChevronUp size={11} className="text-primary inline ms-1" />;
   return <ChevronDown size={11} className="text-primary inline ms-1" />;
 };

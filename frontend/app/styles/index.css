@@ -486,7 +486,7 @@
   /* ─── Table style ─────────────────────────────────────────────── */
   .ta-table-wrap {
     overflow: hidden;
-    border-radius: var(--radius-xl);
+    border-radius: var(--radius-lg);
     background: var(--ds-surface-lowest);
     box-shadow: var(--shadow-card);
   }
@@ -496,7 +496,7 @@
   }
 
   .ta-th {
-    @apply px-2 py-2.5 text-xs font-semibold uppercase tracking-wide whitespace-nowrap text-center;
+    @apply px-2 py-2 text-xs font-semibold uppercase tracking-wide whitespace-nowrap text-center;
     background: var(--ds-table-header-bg) !important;
     color: var(--ds-table-header-text) !important;
   }
@@ -507,7 +507,7 @@
   }
 
   .ta-th-center {
-    @apply px-2 py-2.5 text-xs font-semibold uppercase tracking-wide whitespace-nowrap text-center;
+    @apply px-2 py-2 text-xs font-semibold uppercase tracking-wide whitespace-nowrap text-center;
     background: var(--ds-table-header-bg) !important;
     color: var(--ds-table-header-text) !important;
   }
@@ -525,12 +525,12 @@
   }
 
   .ta-td {
-    @apply px-2 py-2 text-sm text-center whitespace-nowrap;
+    @apply px-2 py-1.5 text-sm text-center whitespace-nowrap;
     color: var(--ds-on-surface);
   }
 
   .ta-td-center {
-    @apply px-2 py-2 text-sm text-center whitespace-nowrap;
+    @apply px-2 py-1.5 text-sm text-center whitespace-nowrap;
     color: var(--ds-on-surface);
   }
 
@@ -643,7 +643,7 @@
   .data-table-wrapper {
     width: 100%;
     overflow-x: auto;
-    border-radius: var(--radius-xl);
+    border-radius: var(--radius-lg);
     background: var(--ds-surface-lowest);
     box-shadow: var(--shadow-card);
     -webkit-overflow-scrolling: touch;
