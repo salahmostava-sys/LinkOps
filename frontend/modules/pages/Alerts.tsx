@@ -58,14 +58,18 @@ export const alertTypeLabels: Record<string, string> = {
   insurance: 'تأمين',
   authorization: 'تفويض',
   probation: 'فترة التجربة',
+  health_insurance: 'تأمين صحي',
+  driving_license: 'رخصة قيادة',
   platform_account: 'حساب منصة',
+  employee_absconded: 'موظف مسجل هروب',
 };
 
 const severityStyles: Record<string, string> = { urgent: 'badge-urgent', warning: 'badge-warning', info: 'badge-info' };
 const severityLabels: Record<string, string> = { urgent: '🔴 عاجل', warning: '🟡 تحذير', info: '🔵 معلومات' };
 
 const typeIcons: Record<string, string> = {
-  residency: '🪪', insurance: '🛡️', authorization: '📋', probation: '⏳', platform_account: '📱',
+  residency: '🪪', insurance: '🛡️', authorization: '📋', probation: '⏳',
+  health_insurance: '🏥', driving_license: '🪪', platform_account: '📱', employee_absconded: '⚠️',
 };
 
 const workflowLabels = {

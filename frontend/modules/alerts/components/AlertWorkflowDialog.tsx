@@ -80,7 +80,10 @@ export function AlertWorkflowDialog({
 
   return (
     <Dialog open={Boolean(alert)} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent dir="rtl" className="max-w-lg">
+      <DialogContent
+        dir="rtl"
+        className="max-h-[calc(100dvh-2rem)] w-[calc(100%-1.5rem)] max-w-lg overflow-y-auto rounded-lg bg-background shadow-xl"
+      >
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <UserRoundCog size={18} /> إدارة التنبيه
