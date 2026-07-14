@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { useAlerts } from './useAlerts';
+import { useAlerts, useAlertSummary } from './useAlerts';
 import { alertsService } from '@services/alertsService';
 import { buildAlertsFromResponses } from '@shared/lib/alertsBuilder';
 import { createQueryClientWrapper } from '@shared/test/authedQuerySetup';
@@ -10,7 +10,7 @@ vi.mock('@app/providers/AuthContext', () => ({
 }));
 
 vi.mock('@shared/hooks/useAuthQueryGate', () => ({
-  useAuthQueryGate: () => ({ userId: 'user-1', authReady: true }),
+  useAuthQueryGate: () => ({ userId: 'user-1', authReady: true, enabled: true }),
   authQueryUserId: (id: string) => id,
 }));
 
@@ -28,6 +28,7 @@ vi.mock('@shared/hooks/useMonthlyActiveEmployeeIds', () => ({
 
 vi.mock('@services/alertsService', () => ({
   alertsService: {
+    fetchSummary: vi.fn(),
     fetchAlertsDataWithTimeout: vi.fn(),
   },
 }));
@@ -78,6 +79,19 @@ describe('useAlerts', () => {
 
     await waitFor(() => expect(result.current.isError).toBe(true), { timeout: 6000 });
     expect((result.current.error as Error | null)?.message).toContain('timeout');
+  });
+
+  it('loads the lightweight summary without fetching alert details', async () => {
+    vi.mocked(alertsService.fetchSummary).mockResolvedValue({
+      unresolvedCount: 12,
+      urgentCount: 3,
+    });
+
+    const { result } = renderHook(() => useAlertSummary(), { wrapper: createQueryClientWrapper() });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data).toEqual({ unresolvedCount: 12, urgentCount: 3 });
+    expect(alertsService.fetchAlertsDataWithTimeout).not.toHaveBeenCalled();
   });
 });
 

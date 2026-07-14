@@ -1,17 +1,19 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createQueryBuilder, type MockQueryResult } from '@shared/test/mocks/supabaseClientMock';
 
-const { tableResults, fromMock } = vi.hoisted(() => {
+const { tableResults, fromMock, rpcMock } = vi.hoisted(() => {
   const tableResultsLocal: Record<string, MockQueryResult> = {};
   return {
     tableResults: tableResultsLocal,
     fromMock: vi.fn((table: string) => createQueryBuilder(tableResultsLocal[table] ?? { data: null, error: null })),
+    rpcMock: vi.fn(),
   };
 });
 
 vi.mock('@services/supabase/client', () => ({
   supabase: {
     from: fromMock,
+    rpc: rpcMock,
   },
 }));
 
@@ -21,6 +23,18 @@ describe('alertsService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     for (const k of Object.keys(tableResults)) delete tableResults[k];
+  });
+
+  it('maps the lightweight alert summary', async () => {
+    rpcMock.mockResolvedValue({
+      data: { unresolved_count: 14, urgent_count: 4 },
+      error: null,
+    });
+
+    await expect(alertsService.fetchSummary('2026-10-01', '2026-07-21')).resolves.toEqual({
+      unresolvedCount: 14,
+      urgentCount: 4,
+    });
   });
 
   describe('resolveAlert', () => {

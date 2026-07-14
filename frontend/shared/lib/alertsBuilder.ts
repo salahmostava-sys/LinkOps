@@ -11,6 +11,7 @@ export interface Alert {
   daysLeft: number;
   severity: "urgent" | "warning" | "info";
   resolved: boolean;
+  persisted?: boolean;
   residencyRenewalCost?: number | null;
   residencyRenewalCostPeriod?: "monthly" | "yearly" | null;
 }
@@ -302,6 +303,7 @@ const pushPersistedDbAlerts = (out: Alert[], rows: PersistedAlertRow[], today: D
       daysLeft,
       severity: getStandardSeverity(daysLeft),
       resolved: !!a.is_resolved,
+      persisted: true,
     });
   }
 };

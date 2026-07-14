@@ -1,3 +1,5 @@
+import { callServerFunction } from '@services/serverFunction';
+
 /**
  * AI Service - Analytics and Analysis Functions Only
  * Chat functionality has been removed
@@ -139,27 +141,9 @@ class AIService {
     return this.isConfiguredValue;
   }
 
-  private getBackendUrl(): string {
-    if (!this.isConfiguredValue) {
-      throw new Error('AI backend is not configured');
-    }
-    const aiBackendUrl = import.meta.env.VITE_AI_BACKEND_URL;
-    if (!aiBackendUrl) {
-      throw new Error('AI backend URL is not configured');
-    }
-    return aiBackendUrl;
-  }
-
   private async post<T>(path: string, body: unknown): Promise<T> {
-    const response = await fetch(`${this.getBackendUrl()}${path}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-    if (!response.ok) {
-      throw new Error(`AI service error: ${response.statusText}`);
-    }
-    return (await response.json()) as T;
+    if (!this.isConfiguredValue) throw new Error('AI backend is not configured');
+    return callServerFunction<T>('ai-analytics', { path, payload: body });
   }
 
   async predictSalary(params: {

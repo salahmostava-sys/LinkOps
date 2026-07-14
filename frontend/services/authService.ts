@@ -73,11 +73,11 @@ export const authService = {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     throwIfError(error, "authService.signIn");
     if (data.user) {
-      const { error: logError } = await supabase.from('admin_action_log').insert({
+      const { error: logError } = await supabase.from('audit_log').insert({
         user_id: data.user.id,
         action: 'auth.login',
         table_name: 'auth.users',
-        meta: { email },
+        new_value: { meta: { email } },
       });
       if (logError) console.warn('[authService] Failed to log login action:', logError);
     }

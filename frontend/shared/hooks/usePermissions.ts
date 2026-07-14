@@ -1,6 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@app/providers/AuthContext';
-import { permissionsService, type PagePermission } from '@services/permissionsService';
+import {
+  permissionsService,
+  type PagePermission,
+  type PermissionMap,
+} from '@services/permissionsService';
 
 type AppRole = 'admin' | 'hr' | 'finance' | 'operations' | 'viewer';
 
@@ -131,38 +135,29 @@ const DEFAULT_PERMISSIONS: Record<AppRole, Record<string, PagePermission>> = {
   },
 };
 
-export const usePermissions = (pageKey: string) => {
-  const { user, role } = useAuth();
-
+export const usePermissionMap = () => {
+  const { user } = useAuth();
   const query = useQuery({
-    queryKey: ['permissions', user?.id ?? '__none__', pageKey] as const,
+    queryKey: ['permissions', user?.id ?? '__none__'] as const,
     enabled: Boolean(user?.id),
     staleTime: 5 * 60_000,
-    queryFn: async (): Promise<PagePermission> => {
-      if (!user?.id) return DENY_ALL;
-
-      const customPermission = await permissionsService.getUserPermission(user.id, pageKey);
-      if (customPermission) return customPermission;
-
-      const defaults = role ? DEFAULT_PERMISSIONS[role] || DEFAULT_PERMISSIONS.viewer : DEFAULT_PERMISSIONS.viewer;
-      return defaults[pageKey] || DENY_ALL;
+    queryFn: async (): Promise<PermissionMap> => {
+      if (!user?.id) return {};
+      return permissionsService.getUserPermissions(user.id);
     },
   });
 
-  const fallbackPermission =
-    role === null ? DEFAULT_PERMISSIONS.viewer[pageKey] || DENY_ALL : (DEFAULT_PERMISSIONS[role] || DEFAULT_PERMISSIONS.viewer)[pageKey] || DENY_ALL;
-
-  // Hardening: while permissions are loading, do NOT render edit buttons based on
-  // a permissive fallback. Default to deny-all until the query resolves.
-  let permissions: PagePermission = DENY_ALL;
-  if (user && !query.isLoading) {
-    // On DB error: Deny access to prevent unauthorized actions.
-    permissions = query.isError ? DENY_ALL : (query.data ?? fallbackPermission);
-  }
-
   const loading = Boolean(user) && query.isLoading;
+  const permissionsByPage = user && !loading && !query.isError ? (query.data ?? {}) : {};
 
-  return { permissions, loading, isAdmin: role === 'admin' };
+  return { permissionsByPage, loading };
+};
+
+export const usePermissions = (pageKey: string) => {
+  const { permissionsByPage, loading } = usePermissionMap();
+  const permissions = permissionsByPage[pageKey] ?? DENY_ALL;
+
+  return { permissions, loading };
 };
 
 export { DEFAULT_PERMISSIONS };

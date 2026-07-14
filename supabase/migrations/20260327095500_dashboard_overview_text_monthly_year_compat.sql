@@ -8,11 +8,14 @@ CREATE OR REPLACE FUNCTION public.dashboard_overview_rpc(
   p_today date DEFAULT CURRENT_DATE
 )
 RETURNS jsonb
-LANGUAGE sql
+LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public /* NOSONAR */
 AS $$
-  SELECT public.dashboard_overview_rpc(p_monthly_year, COALESCE(p_today, CURRENT_DATE));
+BEGIN
+  PERFORM p_cip;
+  RETURN public.dashboard_overview_rpc(p_monthly_year, COALESCE(p_today, CURRENT_DATE));
+END;
 $$;
 
 CREATE OR REPLACE FUNCTION public.dashboard_overview(

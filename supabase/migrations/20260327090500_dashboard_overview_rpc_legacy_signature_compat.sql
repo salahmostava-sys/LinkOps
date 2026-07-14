@@ -35,6 +35,7 @@ SECURITY DEFINER
 SET search_path = public /* NOSONAR */
 AS $$
 BEGIN
+  PERFORM p_cip;
   RETURN public.dashboard_overview_rpc(p_month, p_year, COALESCE(p_today, CURRENT_DATE));
 END;
 $$;

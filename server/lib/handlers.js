@@ -130,7 +130,7 @@ export async function salaryEngineHandler(req, res) {
     const message = getErrorMessage(err);
     logError('Salary engine failed', { request_id: requestId, error: message });
     const status = classifySalaryError(message);
-    const safeMessage = status === 500 ? 'Internal server error: ' + message : message;
+    const safeMessage = status === 500 ? 'Internal server error' : message;
     return res.status(status).json({ error: safeMessage });
   }
 }
@@ -465,5 +465,97 @@ export async function aiChatHandler(req, res) {
     const message = e instanceof Error ? e.message : String(e);
     logError('[ai-chat] error', { request_id: requestId, error: message });
     return res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+const AI_ANALYTICS_PATHS = new Set([
+  '/predict-salary',
+  '/best-employee',
+  '/analyze',
+  '/predict-orders',
+  '/best-driver',
+  '/top-platform',
+  '/smart-alerts',
+  '/detect-anomalies',
+]);
+
+async function callAiAnalyticsBackend(path, payload) {
+  const backendUrl = process.env.AI_BACKEND_URL;
+  const internalKey = process.env.AI_INTERNAL_KEY;
+  if (!backendUrl || !internalKey) throw new Error('AI analytics backend is not configured');
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30_000);
+  try {
+    return await fetch(`${backendUrl.replace(/\/$/, '')}${path}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Internal-Key': internalKey,
+      },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+async function canUseAiAnalytics(callerClient) {
+  const { data: allowed, error } = await callerClient.rpc('has_permission', {
+    p_resource: 'ai_analytics',
+    p_action: 'view',
+  });
+  if (error) throw new Error(error.message);
+  return Boolean(allowed);
+}
+
+function parseAiAnalyticsRequest(body) {
+  const { path, payload } = body ?? {};
+  if (!AI_ANALYTICS_PATHS.has(path) || !payload || typeof payload !== 'object') return null;
+  return { path, payload };
+}
+
+async function sendAiAnalyticsResponse(res, requestId, path, payload) {
+  const upstreamResponse = await callAiAnalyticsBackend(path, payload);
+  if (upstreamResponse.ok) return res.json(await upstreamResponse.json());
+
+  logError('AI analytics upstream failed', { request_id: requestId, status: upstreamResponse.status });
+  const status = upstreamResponse.status < 500 ? upstreamResponse.status : 502;
+  return res.status(status).json({ error: 'AI analytics service temporarily unavailable' });
+}
+
+export async function aiAnalyticsHandler(req, res) {
+  const requestId = randomUUID();
+  try {
+    const auth = await requireAuth(req, res);
+    if (!auth) return;
+    const { user, callerClient } = auth;
+    if (!await canUseAiAnalytics(callerClient)) {
+      return res.status(403).json({ error: 'AI analytics permission required' });
+    }
+
+    const analyticsRequest = parseAiAnalyticsRequest(req.body);
+    if (!analyticsRequest) {
+      return res.status(400).json({ error: 'Invalid AI analytics request' });
+    }
+
+    const adminClient = getAdminClient();
+    const rateLimitResult = await checkRateLimit(adminClient, user.id, 'ai_analytics', 30, 60);
+    if (!rateLimitResult.allowed) {
+      return res.status(429).json({ error: 'Too many requests. Please wait before trying again.' });
+    }
+
+    return sendAiAnalyticsResponse(
+      res,
+      requestId,
+      analyticsRequest.path,
+      analyticsRequest.payload,
+    );
+  } catch (error) {
+    const message = getErrorMessage(error);
+    logError('AI analytics request failed', { request_id: requestId, error: message });
+    const status = error?.name === 'AbortError' ? 504 : 500;
+    return res.status(status).json({ error: status === 504 ? 'AI analytics request timed out' : 'Internal server error' });
   }
 }

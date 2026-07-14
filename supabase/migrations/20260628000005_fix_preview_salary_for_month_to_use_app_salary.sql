@@ -29,7 +29,6 @@ DECLARE
   v_external_deduction NUMERIC; v_advance_deduction NUMERIC;
   v_net NUMERIC; v_platform_breakdown JSONB;
   v_calculation_method TEXT;
-  v_tier RECORD;
   v_hybrid_rule RECORD;
   v_day RECORD; v_hours_worked NUMERIC;
   v_monthly_amount NUMERIC;
@@ -133,8 +132,10 @@ BEGIN
         ELSE
           FOR v_day IN SELECT generate_series(v_start, v_end, '1 day'::interval)::date AS day_date LOOP
             SELECT hours_worked INTO v_hours_worked
-            FROM daily_shifts
-            WHERE employee_id = v_emp.id AND app_id = v_app.app_id AND date = v_day.day_date;
+            FROM daily_shifts ds
+            WHERE ds.employee_id = v_emp.id
+              AND ds.app_id = v_app.app_id
+              AND ds.date = v_day.day_date;
 
             IF v_hours_worked IS NOT NULL AND v_hours_worked > 0 THEN
               v_app_earnings := v_app_earnings + v_hybrid_rule.shift_rate;
@@ -316,8 +317,10 @@ BEGIN
       ELSE
         FOR v_day IN SELECT generate_series(v_start, v_end, '1 day'::interval)::date AS day_date LOOP
           SELECT hours_worked INTO v_hours_worked
-          FROM daily_shifts
-          WHERE employee_id = p_employee_id AND app_id = v_app.app_id AND date = v_day.day_date;
+          FROM daily_shifts ds
+          WHERE ds.employee_id = p_employee_id
+            AND ds.app_id = v_app.app_id
+            AND ds.date = v_day.day_date;
 
           IF v_hours_worked IS NOT NULL AND v_hours_worked > 0 THEN
             v_app_earnings := v_app_earnings + v_hybrid_rule.shift_rate;

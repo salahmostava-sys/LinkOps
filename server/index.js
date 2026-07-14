@@ -4,7 +4,13 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import compression from 'compression';
-import { salaryEngineHandler, adminUpdateUserHandler, groqChatHandler, aiChatHandler } from './lib/handlers.js';
+import {
+  salaryEngineHandler,
+  adminUpdateUserHandler,
+  groqChatHandler,
+  aiChatHandler,
+  aiAnalyticsHandler,
+} from './lib/handlers.js';
 
 const app = express();
 app.disable('x-powered-by'); // Fix: javascript:S5689 - Disable Express version disclosure
@@ -43,6 +49,10 @@ app.use(cors({
 // This protects against clickjacking, MIME-sniffing, and XSS reflected attacks.
 app.use(helmet());
 app.use(compression());
+app.use(
+  ['/api/functions/groq-chat', '/api/functions/ai-chat', '/api/functions/ai-analytics'],
+  express.json({ limit: '2mb' }),
+);
 // FIX #12: 2mb is too large for most endpoints (salary IDs, chat fields).
 // Reduced to 256kb globally; AI endpoints override this per-route.
 // This prevents memory exhaustion from large payloads before auth is checked.
@@ -77,10 +87,12 @@ app.post('/api/functions/salary-engine', salaryEngineHandler);
 app.post('/api/functions/admin-update-user', adminUpdateUserHandler);
 
 // ── Groq Chat (replaces groq-chat edge function) — larger body for AI payloads ──
-app.post('/api/functions/groq-chat', express.json({ limit: '2mb' }), groqChatHandler);
+app.post('/api/functions/groq-chat', groqChatHandler);
 
 // ── AI Chat (replaces ai-chat edge function) — larger body for AI payloads ──────
-app.post('/api/functions/ai-chat', express.json({ limit: '2mb' }), aiChatHandler);
+app.post('/api/functions/ai-chat', aiChatHandler);
+
+app.post('/api/functions/ai-analytics', aiAnalyticsHandler);
 
 // ── Error Handling ────────────────────────────────────────────────────────────
 

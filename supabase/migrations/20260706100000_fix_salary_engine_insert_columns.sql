@@ -149,8 +149,10 @@ BEGIN
       ELSE
         FOR v_day IN SELECT generate_series(v_start, v_end, '1 day'::interval)::date AS day_date LOOP
           SELECT hours_worked INTO v_hours_worked
-          FROM public.daily_shifts
-          WHERE employee_id = p_employee_id AND app_id = v_app.app_id AND date = v_day.day_date;
+          FROM public.daily_shifts ds
+          WHERE ds.employee_id = p_employee_id
+            AND ds.app_id = v_app.app_id
+            AND ds.date = v_day.day_date;
 
           IF v_hours_worked IS NOT NULL AND v_hours_worked > 0 THEN
             v_app_earnings := v_app_earnings + v_hybrid_rule.shift_rate;
@@ -241,7 +243,7 @@ BEGIN
   -- FIX: was missing this upsert clause, even though the table has a
   -- UNIQUE(employee_id, month_year) constraint â€” recalculating an
   -- already-saved month previously failed with a duplicate key error.
-  ON CONFLICT (employee_id, month_year)
+  ON CONFLICT ON CONSTRAINT salary_records_employee_id_month_year_key
   DO UPDATE SET
     base_salary = EXCLUDED.base_salary,
     attendance_deduction = EXCLUDED.attendance_deduction,

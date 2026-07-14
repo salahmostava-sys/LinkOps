@@ -2,9 +2,10 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import UsersAndPermissions from './UsersAndPermissions';
 
-const { toastMock, refetchMock, authServiceMock, queryRowsMock } = vi.hoisted(() => ({
+const { toastMock, refetchMock, invalidateQueriesMock, authServiceMock, queryRowsMock } = vi.hoisted(() => ({
   toastMock: vi.fn(),
   refetchMock: vi.fn().mockResolvedValue(undefined),
+  invalidateQueriesMock: vi.fn().mockResolvedValue(undefined),
   authServiceMock: {
     createManagedUser: vi.fn(),
     deleteManagedUser: vi.fn(),
@@ -17,6 +18,7 @@ const { toastMock, refetchMock, authServiceMock, queryRowsMock } = vi.hoisted(()
 }));
 
 vi.mock('@tanstack/react-query', () => ({
+  useQueryClient: () => ({ invalidateQueries: invalidateQueriesMock }),
   useQuery: () => ({
     data: queryRowsMock,
     isLoading: false,

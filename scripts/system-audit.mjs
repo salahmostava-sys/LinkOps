@@ -60,20 +60,23 @@ function runCommand(name, command, commandArgs, options = {}) {
   }
 }
 
-function reportRootPackageFiles() {
-  const legacyFiles = ['package.json', 'package-lock.json', 'bun.lock', 'bun.lockb']
-    .filter((file) => existsSync(path.join(repoRoot, file)));
-
-  if (legacyFiles.length > 0) {
-    process.stdout.write(
-      `Note: root-level package manifest(s) present (${legacyFiles.join(', ')}); frontend installs use frontend/package-lock.json only.\n`,
-    );
+function verifyPackageLayout() {
+  if (!existsSync(path.join(repoRoot, 'package-lock.json'))) {
+    throw new Error('Root package-lock.json is required for workspace installs.');
   }
+
+  const nestedLocks = ['frontend/package-lock.json', 'server/package-lock.json']
+    .filter((file) => existsSync(path.join(repoRoot, file)));
+  if (nestedLocks.length > 0) {
+    throw new Error(`Nested workspace lockfiles are not allowed: ${nestedLocks.join(', ')}`);
+  }
+
+  process.stdout.write('Workspace dependencies use the root package-lock.json.\n');
 }
 
 if (!skipFrontend) {
   logStep('Frontend package layout');
-  reportRootPackageFiles();
+  verifyPackageLayout();
 
   const npmCommand = getNpmCommand();
   const frontendCwd = path.join(repoRoot, 'frontend');

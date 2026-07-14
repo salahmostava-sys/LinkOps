@@ -1,6 +1,6 @@
 import { BaseInput } from '@shared/components/ui/base-input';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Shield,
   RefreshCw,
@@ -278,7 +278,8 @@ function CreateUserDialog({
 
 const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsProps>) => {
   const { toast } = useToast();
-  const { user, role: authRole, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const queryClient = useQueryClient();
   const { enabled, userId } = useAuthQueryGate();
   const uid = authQueryUserId(userId);
   const { permissions: settingsPerm } = usePermissions('settings');
@@ -330,13 +331,12 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
   const [editUserForm, setEditUserForm] = useState({ name: '', email: '', password: '', role: 'viewer' as AppRole, isActive: true });
   const [editingUser, setEditingUser] = useState(false);
 
-  const isAdmin = authRole === 'admin';
   // Access to this page (viewing and managing other users' roles/permissions) is driven by the
   // "settings" permission itself, not hardcoded to the admin role — an admin can delegate it to
   // anyone via the permissions matrix below (see supabase/migrations/*_allow_settings_delegate_*).
-  const canView = settingsPerm.can_view || isAdmin;
-  const canEdit = settingsPerm.can_edit || isAdmin;
-  const canDelete = settingsPerm.can_delete || isAdmin;
+  const canView = settingsPerm.can_view;
+  const canEdit = settingsPerm.can_edit;
+  const canDelete = settingsPerm.can_delete;
   const currentUserId = user?.id ?? null;
 
   useEffect(() => {
@@ -435,6 +435,7 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
         meta: { target_user_role: selectedUser.role },
       });
       toast({ title: 'تم حفظ الصلاحيات' });
+      await queryClient.invalidateQueries({ queryKey: ['permissions', selectedUser.id] });
       await loadMatrix(selectedUser.id, selectedUser.role);
     } catch (err: unknown) {
       const message = getErrorMessage(err, 'فشل الحفظ');

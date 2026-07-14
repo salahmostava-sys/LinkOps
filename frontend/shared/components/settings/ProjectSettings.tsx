@@ -196,7 +196,7 @@ export default function ProjectSettings() {
   const { isDark, toggleTheme } = useTheme();
   const { user } = useAuth();
   const { settings, refresh } = useSystemSettings();
-  const { isAdmin } = usePermissions('settings');
+  const { permissions } = usePermissions('settings');
 
   const [nameAr, setNameAr] = useState('');
   const [nameEn, setNameEn] = useState('');
@@ -473,7 +473,7 @@ export default function ProjectSettings() {
       </div>
 
       {/* Backup Section (Admin only) */}
-      {isAdmin && (
+      {permissions.can_edit && (
         <div className="bg-card border border-border/50 p-5 shadow-sm rounded-2xl">
           <ProjectSettingsSectionHeader icon={<Database size={14} />} title={t(isRTL, 'النسخ الاحتياطي', 'Backup')} />
           <div className="flex items-start gap-4">

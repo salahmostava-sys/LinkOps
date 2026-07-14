@@ -7,19 +7,6 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const isAnalyze = process.env.ANALYZE === 'true';
 
-function manualChunks(id: string): string | undefined {
-  if (!id.includes('node_modules')) return undefined;
-  if (id.includes('recharts')) return 'vendor-charts';
-  if (id.includes('xlsx')) return 'vendor-xlsx';
-  if (id.includes('html2canvas')) return 'vendor-html2canvas';
-  if (id.includes('jspdf')) return 'vendor-jspdf';
-  if (id.includes('jszip')) return 'vendor-jszip';
-  if (id.includes('@supabase')) return 'vendor-supabase';
-  if (id.includes('@tanstack')) return 'vendor-query';
-  if (id.includes('react')) return 'vendor-react';
-  return undefined;
-}
-
 export default defineConfig({
   server: {
     host: "0.0.0.0",
@@ -32,14 +19,6 @@ export default defineConfig({
       "/api/functions": {
         target: "http://localhost:3001",
         changeOrigin: true,
-      },
-      "/ai": {
-        target: "http://localhost:8000",
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/ai/, ""),
-        headers: {
-          "X-Internal-Key": process.env.AI_INTERNAL_KEY ?? "",
-        },
       },
     },
   },
@@ -67,10 +46,5 @@ export default defineConfig({
   },
   build: {
     chunkSizeWarningLimit: 600,
-    rollupOptions: {
-      output: {
-        manualChunks,
-      },
-    },
   },
 });

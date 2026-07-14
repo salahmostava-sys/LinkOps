@@ -176,16 +176,18 @@ export function useSalaryData({ selectedMonth, salariesDraftKey }: UseSalaryData
 
   // ── Realtime: invalidate on daily_orders changes ─────────
   // Debounced 2s — avoids rapid re-fetches when multiple rows change at once
-  const realtimeDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useRealtimePostgresChanges(
     `salaries-orders-sync-${uid}-${selectedMonth}`,
     SYNC_TABLES,
     () => {
-      if (realtimeDebounceRef.current) clearTimeout(realtimeDebounceRef.current);
-      realtimeDebounceRef.current = setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: phase1Key });
-        queryClient.invalidateQueries({ queryKey: phase2Key });
-      }, 2_000);
+      queryClient.invalidateQueries({ queryKey: phase1Key });
+      queryClient.invalidateQueries({ queryKey: phase2Key });
+    },
+    {
+      shouldHandle: (change) => {
+        const orderDate = change.new.date ?? change.old.date;
+        return typeof orderDate === 'string' && orderDate.startsWith(selectedMonth);
+      },
     },
   );
 

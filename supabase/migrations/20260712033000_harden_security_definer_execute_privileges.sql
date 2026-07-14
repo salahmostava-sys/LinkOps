@@ -14,8 +14,6 @@ GRANT EXECUTE ON FUNCTION public.has_settings_management_access() TO authenticat
 
 -- Internal salary/accounting maintenance RPCs should run through trusted
 -- backend/service-role paths only.
-REVOKE EXECUTE ON FUNCTION public.sync_salaries_as_expenses(TEXT) FROM public, anon, authenticated;
-GRANT EXECUTE ON FUNCTION public.sync_salaries_as_expenses(TEXT) TO service_role;
 
 REVOKE EXECUTE ON FUNCTION public.preview_salary_for_month_v2(TEXT) FROM public, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.preview_salary_for_month_v2(TEXT) TO service_role;

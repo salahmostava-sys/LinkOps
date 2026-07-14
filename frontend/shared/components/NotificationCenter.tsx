@@ -3,11 +3,12 @@ import { useState, useEffect, useRef } from 'react';
 import { Bell, X, CheckCheck, FileWarning, AlertTriangle, Clock, ShieldAlert } from 'lucide-react';
 import { useLanguage } from '@app/providers/LanguageContext';
 import { useAuth } from '@app/providers/AuthContext';
-import { useAlerts } from '@shared/hooks/useAlerts';
+import { useAlerts, useAlertSummary } from '@shared/hooks/useAlerts';
 import { cn } from '@shared/lib/utils';
 import { logError } from '@shared/lib/logger';
 import { Link } from 'react-router-dom';
 import type { Alert } from '@shared/lib/alertsBuilder';
+import type { AlertsSummary } from '@services/alertsService';
 
 /* ── Config ─────────────────────────────────────────────────── */
 
@@ -76,28 +77,50 @@ function daysLabel(days: number, isRTL: boolean): string {
 
 /* ── Main component ─────────────────────────────────────────── */
 
+function readDismissed(storageKey: string): Set<string> {
+  try {
+    return new Set(JSON.parse(localStorage.getItem(storageKey) || '[]'));
+  } catch (error) {
+    logError('[NotificationCenter] invalid nc_dismissed in storage', error, { level: 'warn' });
+    return new Set();
+  }
+}
+
+function getNotificationStatus(
+  active: Alert[],
+  isSuccess: boolean,
+  summary: AlertsSummary | undefined,
+  dismissedCount: number,
+) {
+  const unread = isSuccess
+    ? active.length
+    : Math.max((summary?.unresolvedCount ?? 0) - dismissedCount, 0);
+  const hasUrgent = isSuccess
+    ? active.some(alert => alert.severity === 'urgent')
+    : (summary?.urgentCount ?? 0) > 0;
+  const hasWarning = !hasUrgent && (isSuccess
+    ? active.some(alert => alert.severity === 'warning')
+    : unread > 0);
+  return { unread, hasUrgent, hasWarning };
+}
+
 export default function NotificationCenter() {
   const [open, setOpen] = useState(false);
   const { user } = useAuth();
   const storageKey = user?.id ? `nc_dismissed_${user.id}` : 'nc_dismissed';
 
-  const [dismissed, setDismissed] = useState<Set<string>>(() => {
-    try { return new Set(JSON.parse(localStorage.getItem(storageKey) || '[]')); }
-    catch (e) {
-      logError('[NotificationCenter] invalid nc_dismissed in storage', e, { level: 'warn' });
-      return new Set();
-    }
-  });
+  const [dismissed, setDismissed] = useState<Set<string>>(() => readDismissed(storageKey));
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { isRTL } = useLanguage();
   const {
     data: alertsData = [],
     isLoading,
     isFetching,
-    refetch,
-  } = useAlerts();
+    isSuccess,
+  } = useAlerts({ enabled: open });
+  const { data: summary } = useAlertSummary();
   const alerts: Alert[] = alertsData;
-  const loading = isLoading || isFetching;
+  const loading = open && (isLoading || isFetching);
 
   // Close on outside click
   useEffect(() => {
@@ -110,10 +133,12 @@ export default function NotificationCenter() {
 
   /* ── Active (non-dismissed) alerts ──────────────────────── */
   const active = alerts.filter(a => !dismissed.has(a.id));
-  const unread  = active.length;
-
-  const hasUrgent  = active.some(a => a.severity === 'urgent');
-  const hasWarning = !hasUrgent && active.some(a => a.severity === 'warning');
+  const { unread, hasUrgent, hasWarning } = getNotificationStatus(
+    active,
+    isSuccess,
+    summary,
+    dismissed.size,
+  );
 
   /* ── Dismiss one ─────────────────────────────────────────── */
   const dismiss = (id: string, e: React.MouseEvent) => {
@@ -144,10 +169,7 @@ export default function NotificationCenter() {
       {/* ── Bell button ─────────────────────────────────────── */}
       <button
         type="button"
-        onClick={() => {
-          setOpen(v => !v);
-          if (!open) refetch().catch(() => {});
-        }}
+        onClick={() => setOpen(v => !v)}
         className="relative h-9 w-9 flex items-center justify-center border border-border/60 bg-card/80 hover:bg-muted transition-colors text-muted-foreground hover:text-foreground rounded-2xl"
         title={isRTL ? 'الإشعارات' : 'Notifications'}
       >

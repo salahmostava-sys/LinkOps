@@ -11,6 +11,11 @@ export interface DeferAlertResult {
   id: string;
 }
 
+export interface AlertsSummary {
+  unresolvedCount: number;
+  urgentCount: number;
+}
+
 type AlertsFetchResult = [
   { data: unknown[] | null; error: QueryError },
   { data: unknown[] | null; error: QueryError },
@@ -22,6 +27,23 @@ type AlertsFetchResult = [
 ];
 
 export const alertsService = {
+  fetchSummary: async (
+    expiryHorizon: string,
+    urgentHorizon: string,
+  ): Promise<AlertsSummary> => {
+    const { data, error } = await supabase.rpc("alerts_summary_rpc", {
+      p_expiry_horizon: expiryHorizon,
+      p_urgent_horizon: urgentHorizon,
+    });
+    throwIfError(error, "alertsService.fetchSummary");
+
+    const summary = data as { unresolved_count?: unknown; urgent_count?: unknown } | null;
+    return {
+      unresolvedCount: Number(summary?.unresolved_count ?? 0),
+      urgentCount: Number(summary?.urgent_count ?? 0),
+    };
+  },
+
   /**
    * @param expiryHorizon تاريخ ISO (yyyy-MM-dd): تنبيه لكل ما ينتهي قبل هذا التاريخ (حسب «أيام التنبيه» في الإعدادات)
    */
@@ -73,12 +95,18 @@ export const alertsService = {
     const timeoutError = () =>
       new Error("انتهت مهلة تحميل البيانات. تحقق من الاتصال ثم أعد فتح الصفحة.");
 
-    const results = (await Promise.race([
-      fetchAll,
-      new Promise<never>((_, reject) => {
-        setTimeout(() => reject(timeoutError()), timeoutMs);
-      }),
-    ])) as AlertsFetchResult;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    let results: AlertsFetchResult;
+    try {
+      results = await Promise.race([
+        fetchAll,
+        new Promise<never>((_, reject) => {
+          timeoutId = setTimeout(() => reject(timeoutError()), timeoutMs);
+        }),
+      ]);
+    } finally {
+      if (timeoutId) clearTimeout(timeoutId);
+    }
 
     const [employeesRes, vehiclesRes, platformAccountsRes, dbAlertsRes, sparePartsRes, abscondedRes, commercialRecordsRes] = results;
     throwIfError(employeesRes.error, "alertsService.fetchAlertsDataWithTimeout.employees");

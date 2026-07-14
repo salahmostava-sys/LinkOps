@@ -38,6 +38,8 @@ const REALTIME_TABLES_PERFORMANCE_PAGE = [
   ...REALTIME_TABLES_DASHBOARD,
 ] as const;
 
+const MONTH_SCOPED_REALTIME_TABLES = new Set(['attendance', 'daily_orders', 'app_targets']);
+
 function TabFallback() {
   return <Skeleton  className="bg-card h-80 shadow-card rounded-2xl" />;
 }
@@ -51,10 +53,23 @@ export default function DashboardPerformancePage() {
   const [activeTab, setActiveTab] = useState<DashboardPerformanceTabKey>('overview');
   const [selectedRiderId, setSelectedRiderId] = useState<string | null>(null);
 
-  useRealtimePostgresChanges('performance-dashboard-realtime', REALTIME_TABLES_PERFORMANCE_PAGE, () => {
-    if (!user?.id) return;
-    queryClient.invalidateQueries({ queryKey: ['performance-dashboard', uid, currentMonth] });
-  });
+  useRealtimePostgresChanges(
+    'performance-dashboard-realtime',
+    REALTIME_TABLES_PERFORMANCE_PAGE,
+    () => {
+      if (!user?.id) return;
+      queryClient.invalidateQueries({ queryKey: ['performance-dashboard', uid, currentMonth] });
+    },
+    {
+      shouldHandle: (change) => {
+        if (!MONTH_SCOPED_REALTIME_TABLES.has(change.table)) return true;
+        const changedMonth = change.new.month_year ?? change.old.month_year;
+        const changedDate = change.new.date ?? change.old.date;
+        return changedMonth === currentMonth
+          || (typeof changedDate === 'string' && changedDate.startsWith(currentMonth));
+      },
+    },
+  );
 
   const dashboardQuery = useQuery({
     queryKey: ['performance-dashboard', uid, currentMonth] as const,

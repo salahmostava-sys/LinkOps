@@ -44,10 +44,6 @@ CREATE INDEX IF NOT EXISTS idx_daily_orders_perf_date_employee
   ON public.daily_orders(date, employee_id, app_id)
   WHERE orders_count > 0;
 
-CREATE INDEX IF NOT EXISTS idx_daily_orders_perf_employee_date
-  ON public.daily_orders(employee_id, date)
-  WHERE orders_count > 0;
-
 CREATE INDEX IF NOT EXISTS idx_salary_records_month_employee
   ON public.salary_records(month_year, employee_id);
 

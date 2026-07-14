@@ -82,8 +82,7 @@ function ensureSectionOpenForActiveRoute(
   if (changed) persistSectionOpenState(next);
   return changed ? next : prev;
 }
-import { useAuth } from '@app/providers/AuthContext';
-import { DEFAULT_PERMISSIONS, type AppRole } from '@shared/hooks/usePermissions';
+import { usePermissionMap } from '@shared/hooks/usePermissions';
 
 const iconByRouteId: Record<string, ComponentType<{ size?: string | number; className?: string }>> = {
   dashboard: LayoutDashboard,
@@ -186,7 +185,7 @@ const SidebarNavLink = memo(function SidebarNavLink({
 const AppSidebar = () => {
   const location = useLocation();
   const { isRTL } = useLanguage();
-  const { role } = useAuth();
+  const { permissionsByPage } = usePermissionMap();
   const { projectName, projectSubtitle, settings } = useSystemSettings();
   const { isOpen, close } = useMobileSidebar();
   const [collapsed, setCollapsed] = useState<boolean>(
@@ -216,13 +215,8 @@ const AppSidebar = () => {
   const canViewRoute = useCallback((permission?: string) => {
     const pageKey = toPagePermissionKey(permission);
     if (!pageKey) return true;
-    if (role === 'admin') return true;
-    // When role is still loading (null), optimistically show all pages.
-    // PageGuard will handle the actual permission enforcement per page.
-    if (!role) return true;
-    const defaults = DEFAULT_PERMISSIONS[role as AppRole] ?? DEFAULT_PERMISSIONS.viewer;
-    return defaults[pageKey]?.can_view ?? false;
-  }, [role]);
+    return permissionsByPage[pageKey]?.can_view ?? false;
+  }, [permissionsByPage]);
 
   const navGroups = useMemo(() => {
     const groupsOrder: RouteGroup[] = [

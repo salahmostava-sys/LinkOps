@@ -3178,6 +3178,10 @@ export type Database = {
       _const_work_hybrid: { Args: never; Returns: string }
       _const_work_orders: { Args: never; Returns: string }
       _const_work_shift: { Args: never; Returns: string }
+      alerts_summary_rpc: {
+        Args: { p_expiry_horizon: string; p_urgent_horizon?: string }
+        Returns: Json
+      }
       advance_in_my_company: { Args: { _advance_id: string }; Returns: boolean }
       assign_platform_account: {
         Args: {
@@ -3779,31 +3783,6 @@ export type Database = {
       rider_profile_performance_rpc: {
         Args: { p_employee_id: string; p_month_year: string; p_today?: string }
         Returns: Json
-      }
-      sync_salaries_as_expenses: {
-        Args: { p_month_year: string }
-        Returns: {
-          amount: number
-          category: string
-          created_at: string
-          created_by: string | null
-          date: string
-          description: string | null
-          id: string
-          is_auto: boolean
-          month_year: string
-          notes: string | null
-          reference_id: string | null
-          reference_type: string | null
-          type: string
-          updated_at: string
-        }
-        SetofOptions: {
-          from: "*"
-          to: "finance_transactions"
-          isOneToOne: true
-          isSetofReturn: false
-        }
       }
       text_to_employee_status: {
         Args: { "": string }

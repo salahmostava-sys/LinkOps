@@ -8,17 +8,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@shared/components/ui/dropdown-menu';
 import { Textarea } from '@shared/components/ui/textarea';
 import { Label } from '@shared/components/ui/label';
-import { supabase } from '@services/supabase/client';
 import { useToast } from '@shared/hooks/use-toast';
-import { useAuthQueryGate, authQueryUserId } from '@shared/hooks/useAuthQueryGate';
-import { useSystemSettings } from '@app/providers/SystemSettingsContext';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { escapeHtml } from '@shared/lib/security';
-import { format, differenceInDays, parseISO, addDays } from 'date-fns';
-import { cityLabel } from '@modules/employees/model/employeeCity';
+import { format } from 'date-fns';
 import { QueryErrorRetry } from '@shared/components/QueryErrorRetry';
 import { loadXlsx } from '@modules/orders/utils/xlsx';
-import { fmtNum } from '@shared/lib/utils';
+import { useAlerts } from '@shared/hooks/useAlerts';
+import type { Alert } from '@shared/lib/alertsBuilder';
+import { alertsService } from '@services/alertsService';
+import { useAuth } from '@app/providers/AuthContext';
+import { useQueryClient } from '@tanstack/react-query';
 
 function severityColor(severity: string): string {
   if (severity === 'urgent') return 'hsl(var(--destructive))';
@@ -44,40 +43,6 @@ function daysLeftClass(daysLeft: number): string {
   return 'text-muted-foreground';
 }
 
-function toSafeText(value: unknown): string {
-  if (value === null || value === undefined) return '';
-  if (typeof value === 'string') return value;
-  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
-  try {
-    return JSON.stringify(value);
-  } catch {
-    return '';
-  }
-}
-
-function empAlertName(emp: Record<string, unknown>): string {
-  const name = toSafeText(emp.name);
-  const cityDisplay = getCityDisplay(emp);
-  const cr = emp.commercial_record ? toSafeText(emp.commercial_record) : null;
-  const parts = [name];
-  if (cityDisplay) parts.push(`فرع: ${cityDisplay}`);
-  if (cr) parts.push(`سجل: ${cr}`);
-  return parts.join(' — ');
-}
-
-function getCityDisplay(emp: Record<string, unknown>): string | null {
-  const cities = Array.isArray(emp.cities) && emp.cities.length > 0
-    ? emp.cities.map((c: unknown) => {
-      const city = toSafeText(c);
-      return cityLabel(city, city);
-    }).join('، ')
-    : null;
-  
-  if (cities) return cities;
-  if (emp.city) return cityLabel(toSafeText(emp.city), toSafeText(emp.city));
-  return null;
-}
-
 export const alertTypeLabels: Record<string, string> = {
   residency: 'إقامة',
   insurance: 'تأمين',
@@ -86,216 +51,12 @@ export const alertTypeLabels: Record<string, string> = {
   platform_account: 'حساب منصة',
 };
 
-export interface Alert {
-  id: string;
-  type: string;
-  entityName: string;
-  dueDate: string;
-  daysLeft: number;
-  severity: 'urgent' | 'warning' | 'info';
-  resolved: boolean;
-  residencyRenewalCost?: number | null;
-  residencyRenewalCostPeriod?: 'monthly' | 'yearly' | null;
-}
-
-type CommercialRecordRenewalCost = {
-  name: string;
-  residency_renewal_monthly_cost: number | null;
-  residency_renewal_cost_period?: 'monthly' | 'yearly' | null;
-};
-
 const severityStyles: Record<string, string> = { urgent: 'badge-urgent', warning: 'badge-warning', info: 'badge-info' };
 const severityLabels: Record<string, string> = { urgent: '🔴 عاجل', warning: '🟡 تحذير', info: '🔵 معلومات' };
 
 const typeIcons: Record<string, string> = {
   residency: '🪪', insurance: '🛡️', authorization: '📋', probation: '⏳', platform_account: '📱',
 };
-
-/** Compute severity for residency alert based on days left. */
-function residencySeverity(daysLeft: number): Alert['severity'] {
-  if (daysLeft < 0 || daysLeft <= 7) return 'urgent';
-  if (daysLeft <= 14) return 'warning';
-  return 'info';
-}
-
-/** Compute severity for probation alert based on days left. */
-function probationSeverity(daysLeft: number): Alert['severity'] {
-  if (daysLeft < 0) return 'info';
-  if (daysLeft <= 7) return 'urgent';
-  return 'warning';
-}
-
-/** Compute severity for vehicle alert based on days left. */
-function vehicleSeverity(days: number): Alert['severity'] {
-  if (days < 0 || days <= 7) return 'urgent';
-  return 'warning';
-}
-
-/** Compute severity for platform account iqama alert. */
-function iqamaSeverity(days: number): Alert['severity'] {
-  if (days < 0 || days <= 7) return 'urgent';
-  if (days <= 14) return 'warning';
-  return 'info';
-}
-
-function buildEmployeeAlerts(
-  emp: Record<string, unknown>,
-  today: Date,
-  threshold: string,
-): Alert[] {
-  const sponsorshipStatus = toSafeText(emp.sponsorship_status).toLowerCase();
-  if (['absconded', 'terminated', 'final_exit', 'expired', 'inactive', 'canceled'].includes(sponsorshipStatus)) {
-    return [];
-  }
-
-  const alerts: Alert[] = [];
-  const empDisplay = empAlertName(emp);
-  const resExpiry = emp.residency_expiry as string | null;
-  const probEnd = emp.probation_end_date as string | null;
-  if (resExpiry && resExpiry <= threshold) {
-    const daysLeft = differenceInDays(parseISO(resExpiry), today);
-    const renewalCost = typeof emp.residency_renewal_alert_cost === 'number'
-      ? emp.residency_renewal_alert_cost
-      : null;
-    const renewalPeriod = emp.residency_renewal_cost_period === 'yearly' ? 'yearly' : 'monthly';
-    const renewalCostLabel = renewalCost === null
-      ? ''
-      : ` — تكلفة التجديد: ${fmtNum(renewalCost)} ر.س (${renewalPeriod === 'yearly' ? 'سنوي' : '3 شهور'})`;
-    alerts.push({
-      id: `res-${emp.id}`, type: 'residency', entityName: `${empDisplay}${renewalCostLabel}`,
-      dueDate: resExpiry, daysLeft, severity: residencySeverity(daysLeft), resolved: false,
-      residencyRenewalCost: renewalCost,
-      residencyRenewalCostPeriod: renewalPeriod,
-    });
-  }
-  if (probEnd && probEnd <= threshold) {
-    const daysLeft = differenceInDays(parseISO(probEnd), today);
-    alerts.push({
-      id: `prob-${emp.id}`, type: 'probation', entityName: empDisplay,
-      dueDate: probEnd, daysLeft, severity: probationSeverity(daysLeft), resolved: false,
-    });
-  }
-  return alerts;
-}
-
-function buildVehicleAlerts(
-  v: Record<string, string | null>,
-  today: Date,
-  threshold: string,
-): Alert[] {
-  const alerts: Alert[] = [];
-  if (v.insurance_expiry && v.insurance_expiry <= threshold) {
-    const days = differenceInDays(parseISO(v.insurance_expiry), today);
-    alerts.push({
-      id: `ins-${v.id}`, type: 'insurance', entityName: `مركبة ${v.plate_number}`,
-      dueDate: v.insurance_expiry, daysLeft: days, severity: vehicleSeverity(days), resolved: false,
-    });
-  }
-  if (v.authorization_expiry && v.authorization_expiry <= threshold) {
-    const days = differenceInDays(parseISO(v.authorization_expiry), today);
-    alerts.push({
-      id: `auth-${v.id}`, type: 'authorization', entityName: `مركبة ${v.plate_number}`,
-      dueDate: v.authorization_expiry, daysLeft: days, severity: vehicleSeverity(days), resolved: false,
-    });
-  }
-  return alerts;
-}
-
-function buildPlatformAccountAlerts(
-  acc: Record<string, unknown>,
-  today: Date,
-  iqamaThreshold: string,
-): Alert | null {
-  const iqamaDate = acc.iqama_expiry_date as string | null;
-  if (!iqamaDate || iqamaDate > iqamaThreshold) return null;
-  const days = differenceInDays(parseISO(iqamaDate), today);
-  const appName = (acc.apps as { name?: string } | null)?.name ?? 'منصة';
-  const expiryFormatted = format(parseISO(iqamaDate), 'dd/MM/yyyy');
-  return {
-    id: `pla-${acc.id}`, type: 'platform_account',
-    entityName: `إقامة الحساب ${acc.account_username} على منصة ${appName} ستنتهي في ${expiryFormatted} ولن يتجدد الحساب.`,
-    dueDate: iqamaDate, daysLeft: days, severity: iqamaSeverity(days), resolved: false,
-  };
-}
-
-/** Pure function — builds Alert[] from raw Supabase results. No side effects. */
-function buildAlerts(
-  employeesData: Record<string, unknown>[],
-  vehiclesData: Record<string, string | null>[],
-  platformAccountsData: Record<string, unknown>[],
-  iqamaAlertDays: number,
-): Alert[] {
-  const today = new Date();
-  const endOfCurrentMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-  const threshold = format(endOfCurrentMonth, 'yyyy-MM-dd');
-  const iqamaThreshold = format(addDays(today, iqamaAlertDays), 'yyyy-MM-dd');
-
-  const alerts: Alert[] = [];
-  employeesData.forEach((emp) => alerts.push(...buildEmployeeAlerts(emp, today, threshold)));
-  vehiclesData.forEach((v) => alerts.push(...buildVehicleAlerts(v, today, threshold)));
-  platformAccountsData.forEach((acc) => {
-    const alert = buildPlatformAccountAlerts(acc, today, iqamaThreshold);
-    if (alert) alerts.push(alert);
-  });
-
-  return alerts.sort((a, b) => a.daysLeft - b.daysLeft);
-}
-
-/** Fetch all raw data needed for alerts — called by React Query queryFn. */
-async function fetchAlertsRaw(iqamaAlertDays: number) {
-  const today = new Date();
-  const endOfCurrentMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-  const threshold = format(endOfCurrentMonth, 'yyyy-MM-dd');
-  const iqamaThreshold = format(addDays(today, iqamaAlertDays), 'yyyy-MM-dd');
-
-  const [employeesRes, vehiclesRes, platformAccountsRes, commercialRecordsRes] = await Promise.all([
-    supabase
-      .from('employees')
-      .select('id, name, residency_expiry, probation_end_date, city, cities, commercial_record, sponsorship_status')
-      .eq('status', 'active')
-      .or(`residency_expiry.lte.${threshold},probation_end_date.lte.${threshold}`),
-    supabase
-      .from('vehicles')
-      .select('id, plate_number, insurance_expiry, authorization_expiry')
-      .in('status', ['active', 'maintenance', 'rental'])
-      .or(`insurance_expiry.lte.${threshold},authorization_expiry.lte.${threshold}`),
-    supabase.from('platform_accounts')
-      .select('id, account_username, iqama_expiry_date, app_id, apps(name)')
-      .eq('status', 'active')
-      .not('iqama_expiry_date', 'is', null)
-      .lte('iqama_expiry_date', iqamaThreshold),
-    supabase
-      .from('commercial_records')
-      .select('name, residency_renewal_monthly_cost, residency_renewal_cost_period'),
-  ]);
-
-  if (employeesRes.error) throw new Error(employeesRes.error.message);
-  if (vehiclesRes.error) throw new Error(vehiclesRes.error.message);
-  if (commercialRecordsRes.error) throw new Error(commercialRecordsRes.error.message);
-  // platform_accounts error is non-fatal — log and continue
-
-  const renewalCostByRecord = new Map(
-    ((commercialRecordsRes.data ?? []) as CommercialRecordRenewalCost[])
-      .map((record) => [record.name.trim().toLocaleLowerCase(), record] as const)
-  );
-  const employees = ((employeesRes.data ?? []) as Record<string, unknown>[]).map((employee) => {
-    const recordCost = renewalCostByRecord.get(toSafeText(employee.commercial_record).trim().toLocaleLowerCase());
-    const rawCost = recordCost?.residency_renewal_monthly_cost ?? null;
-    const period = recordCost?.residency_renewal_cost_period === 'yearly' ? 'yearly' : 'monthly';
-    const alertCost = rawCost === null ? null : period === 'yearly' ? rawCost : rawCost * 3;
-    return {
-      ...employee,
-      residency_renewal_alert_cost: alertCost,
-      residency_renewal_cost_period: period,
-    };
-  });
-
-  return {
-    employees,
-    vehicles: (vehiclesRes.data ?? []) as Record<string, string | null>[],
-    platformAccounts: (platformAccountsRes.data ?? []) as Record<string, unknown>[],
-  };
-}
 
 const Alerts = () => {
   const [typeFilter, setTypeFilter] = useState('all');
@@ -306,40 +67,18 @@ const Alerts = () => {
   const [deferDialog, setDeferDialog] = useState<Alert | null>(null);
   const [deferDays, setDeferDays] = useState('7');
   const [resolveNote, setResolveNote] = useState('');
-  // resolved/deferred are local-only UI state (no DB persistence needed)
+  // Generated date alerts have no database row, so their temporary UI state stays local.
   const [localOverrides, setLocalOverrides] = useState<Record<string, Partial<Alert>>>({});
 
   const { toast } = useToast();
-  const { enabled, userId } = useAuthQueryGate();
-  const uid = authQueryUserId(userId);
-  const { settings } = useSystemSettings();
-  const iqamaAlertDays = settings?.iqama_alert_days ?? 90;
+  const { user } = useAuth();
   const queryClient = useQueryClient();
-
-  // ── React Query — replaces useEffect + setLoading ─────────────────────────
-  // staleTime: 60s → cached for 60s, no refetch on window focus
-  // refetchInterval: 5min → auto-refreshes every 5 minutes in background
-  const alertsQuery = useQuery({
-    queryKey: ['alerts', uid, iqamaAlertDays] as const,
-    enabled,
-    staleTime: 60_000,
-    refetchInterval: 5 * 60_000, // refresh every 5 minutes (was setInterval 60s before)
-    retry: 2,
-    queryFn: () => fetchAlertsRaw(iqamaAlertDays),
-  });
+  const alertsQuery = useAlerts();
 
   // Build Alert[] from raw data + merge localOverrides
-  let rawAlerts: Alert[] = [];
-  if (alertsQuery.data) {
-    rawAlerts = buildAlerts(
-      alertsQuery.data.employees,
-      alertsQuery.data.vehicles,
-      alertsQuery.data.platformAccounts,
-      iqamaAlertDays,
-    );
-  }
+  const rawAlerts: Alert[] = alertsQuery.data ?? [];
 
-  // Apply local overrides (resolve/defer — stored in component state only)
+  // Apply local overrides for generated alerts; persisted alerts are updated through the service.
   const localAlerts: Alert[] = rawAlerts.map(a => ({ ...a, ...(localOverrides[a.id]) }));
 
   // ── Derived state ─────────────────────────────────────────────────────────
@@ -367,29 +106,49 @@ const Alerts = () => {
   const infoCount = filtered.filter(a => a.severity === 'info').length;
 
   // ── Handlers ──────────────────────────────────────────────────────────────
-  const handleResolve = () => {
+  const handleResolve = async () => {
     if (!resolveDialog) return;
-    setLocalOverrides(prev => ({ ...prev, [resolveDialog.id]: { resolved: true } }));
-    toast({ title: 'تم الحسم', description: `تم حسم تنبيه: ${resolveDialog.entityName}` });
-    setResolveDialog(null);
-    setResolveNote('');
+    try {
+      if (resolveDialog.persisted) {
+        await alertsService.resolveAlert(resolveDialog.id, user?.id ?? null);
+        await queryClient.invalidateQueries({ queryKey: ['alerts'] });
+      } else {
+        setLocalOverrides(prev => ({ ...prev, [resolveDialog.id]: { resolved: true } }));
+      }
+      toast({ title: 'تم الحسم', description: `تم حسم تنبيه: ${resolveDialog.entityName}` });
+      setResolveDialog(null);
+      setResolveNote('');
+    } catch {
+      toast({ title: 'تعذر حسم التنبيه', variant: 'destructive' });
+    }
   };
 
-  const handleDefer = () => {
+  const handleDefer = async () => {
     if (!deferDialog) return;
     const days = Number.parseInt(deferDays) || 7;
     const newDate = new Date(deferDialog.dueDate);
     newDate.setDate(newDate.getDate() + days);
-    setLocalOverrides(prev => ({
-      ...prev,
-      [deferDialog.id]: {
-        daysLeft: deferDialog.daysLeft + days,
-        dueDate: newDate.toISOString().split('T')[0],
-      },
-    }));
-    toast({ title: 'تم التأجيل', description: `تم تأجيل التنبيه ${days} يوم` });
-    setDeferDialog(null);
-    setDeferDays('7');
+    const dueDate = format(newDate, 'yyyy-MM-dd');
+
+    try {
+      if (deferDialog.persisted) {
+        await alertsService.deferAlert(deferDialog.id, dueDate);
+        await queryClient.invalidateQueries({ queryKey: ['alerts'] });
+      } else {
+        setLocalOverrides(prev => ({
+          ...prev,
+          [deferDialog.id]: {
+            daysLeft: deferDialog.daysLeft + days,
+            dueDate,
+          },
+        }));
+      }
+      toast({ title: 'تم التأجيل', description: `تم تأجيل التنبيه ${days} يوم` });
+      setDeferDialog(null);
+      setDeferDays('7');
+    } catch {
+      toast({ title: 'تعذر تأجيل التنبيه', variant: 'destructive' });
+    }
   };
 
   const handlePrint = () => {
@@ -436,8 +195,6 @@ const Alerts = () => {
   };
 
   const typeOptions = ['all', 'expired_residency_cost', 'residency', 'insurance', 'authorization', 'probation', 'platform_account'];
-
-  if (!enabled) return null;
 
   let alertsContent = null;
   if (alertsQuery.isLoading) {
@@ -519,7 +276,7 @@ const Alerts = () => {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handlePrint}>🖨️ طباعة التقرير</DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => queryClient.invalidateQueries({ queryKey: ['alerts', uid, iqamaAlertDays] }).catch(() => {})}>
+                <DropdownMenuItem onClick={() => alertsQuery.refetch().catch(() => {})}>
                   🔄 تحديث الآن
                 </DropdownMenuItem>
               </DropdownMenuContent>

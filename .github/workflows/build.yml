@@ -16,6 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NODE_OPTIONS: --max-old-space-size=4096
+      E2E_DASHBOARD_EMAIL: ${{ secrets.E2E_DASHBOARD_EMAIL }}
+      E2E_DASHBOARD_PASSWORD: ${{ secrets.E2E_DASHBOARD_PASSWORD }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -25,23 +27,19 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
-        working-directory: frontend
         run: npm ci
 
       - name: TypeScript check
-        working-directory: frontend
-        run: npm run typecheck
+        run: npm run typecheck -w frontend
 
       - name: Lint (strict – zero warnings)
-        working-directory: frontend
-        run: npm run lint:strict
+        run: npm run lint:strict -w frontend
 
       - name: Tests
-        working-directory: frontend
-        run: npm run test:coverage
+        run: npm run test:coverage -w frontend
 
       - name: Fix coverage paths for SonarCloud
         run: sed -i 's/SF:/SF:frontend\//g' frontend/coverage/lcov.info
@@ -61,8 +59,17 @@ jobs:
           fail_ci_if_error: false
 
       - name: Build
+        run: npm run build -w frontend
+
+      - name: Install Playwright browsers
+        if: env.E2E_DASHBOARD_EMAIL != '' && env.E2E_DASHBOARD_PASSWORD != ''
         working-directory: frontend
-        run: npm run build
+        run: npx playwright install --with-deps
+
+      - name: Run E2E and accessibility tests
+        if: env.E2E_DASHBOARD_EMAIL != '' && env.E2E_DASHBOARD_PASSWORD != ''
+        working-directory: frontend
+        run: npm run test:e2e
 
   sonarcloud:
     name: SonarCloud

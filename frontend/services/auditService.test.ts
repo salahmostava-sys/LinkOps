@@ -32,19 +32,19 @@ describe('auditService', () => {
   });
 
   it('logAdminAction succeeds when insert succeeds', async () => {
-    tableResults.admin_action_log = { data: null, error: null };
+    tableResults.audit_log = { data: null, error: null };
 
     await expect(
       auditService.logAdminAction({ action: 'settings_change', table_name: 'apps', record_id: 'a1' }),
     ).resolves.toBeUndefined();
 
-    expect(fromMock).toHaveBeenCalledWith('admin_action_log');
+    expect(fromMock).toHaveBeenCalledWith('audit_log');
     expect(getCurrentUser).toHaveBeenCalled();
   });
 
   it('logAdminAction swallows Supabase insert errors (non-fatal audit)', async () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    tableResults.admin_action_log = { data: null, error: new Error('rls denied') };
+    tableResults.audit_log = { data: null, error: new Error('rls denied') };
 
     await expect(auditService.logAdminAction({ action: 'delete' })).resolves.toBeUndefined();
     expect(warnSpy).toHaveBeenCalledWith(

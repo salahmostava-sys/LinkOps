@@ -400,33 +400,18 @@ BEGIN
   )
   RETURNING id INTO v_batch_id;
 
-  CREATE TEMP TABLE tmp_orders_import (
-    employee_id UUID NOT NULL,
-    app_id UUID NOT NULL,
-    date DATE NOT NULL,
-    orders_count INTEGER NOT NULL
-  ) ON COMMIT DROP;
-
   IF v_total_rows > 0 THEN
-    INSERT INTO tmp_orders_import (employee_id, app_id, date, orders_count)
-    SELECT
-      x.employee_id::UUID,
-      x.app_id::UUID,
-      x.date::DATE,
-      x.orders_count::INTEGER
-    FROM jsonb_to_recordset(COALESCE(p_rows, '[]'::jsonb)) AS x(
-      employee_id TEXT,
-      app_id TEXT,
-      date TEXT,
-      orders_count INTEGER
-    );
-
     IF EXISTS (
       SELECT 1
-      FROM tmp_orders_import
-      WHERE date < v_start
-         OR date > v_end
-         OR orders_count <= 0
+      FROM jsonb_to_recordset(COALESCE(p_rows, '[]'::jsonb)) AS x(
+        employee_id TEXT,
+        app_id TEXT,
+        date TEXT,
+        orders_count INTEGER
+      )
+      WHERE x.date::DATE < v_start
+         OR x.date::DATE > v_end
+         OR x.orders_count <= 0
     ) THEN
       RAISE EXCEPTION 'Input rows must belong to the target month and have positive orders_count';
     END IF;
@@ -448,10 +433,10 @@ BEGIN
       import_batch_id
     )
     SELECT
-      employee_id,
-      app_id,
-      date,
-      orders_count,
+      x.employee_id::UUID,
+      x.app_id::UUID,
+      x.date::DATE,
+      x.orders_count,
       'confirmed',
       CASE
         WHEN p_source_type = 'excel' THEN 'excel_import'
@@ -459,7 +444,12 @@ BEGIN
       END,
       auth.uid(),
       v_batch_id
-    FROM tmp_orders_import
+    FROM jsonb_to_recordset(COALESCE(p_rows, '[]'::jsonb)) AS x(
+      employee_id TEXT,
+      app_id TEXT,
+      date TEXT,
+      orders_count INTEGER
+    )
     ON CONFLICT (employee_id, date, app_id)
     DO UPDATE SET
       orders_count = EXCLUDED.orders_count,

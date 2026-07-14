@@ -6,11 +6,10 @@ import { routesManifest } from '@app/routesManifest';
 
 const mockAuthState = vi.hoisted(() => ({
   user: null as { id: string } | null,
-  role: null as string | null,
 }));
 
 const permissionsServiceMock = vi.hoisted(() => ({
-  getUserPermission: vi.fn(() => Promise.resolve(null)),
+  getUserPermissions: vi.fn(() => Promise.resolve({})),
 }));
 
 vi.mock('@app/providers/AuthContext', () => ({
@@ -33,104 +32,59 @@ const createWrapper = () => {
   };
 };
 
-describe('DEFAULT_PERMISSIONS role matrix', () => {
-  it('admin can perform all actions on employees', () => {
-    const permissions = DEFAULT_PERMISSIONS.admin.employees;
-    expect(permissions.can_view).toBe(true);
-    expect(permissions.can_edit).toBe(true);
-    expect(permissions.can_delete).toBe(true);
+describe('DEFAULT_PERMISSIONS role templates', () => {
+  it('keeps the expected high-risk role templates', () => {
+    expect(DEFAULT_PERMISSIONS.admin.employees).toEqual({
+      can_view: true,
+      can_edit: true,
+      can_delete: true,
+    });
+    expect(DEFAULT_PERMISSIONS.finance.salaries).toEqual({
+      can_view: true,
+      can_edit: true,
+      can_delete: false,
+    });
+    expect(DEFAULT_PERMISSIONS.operations.maintenance).toEqual({
+      can_view: true,
+      can_edit: true,
+      can_delete: true,
+    });
   });
 
-  it('admin can perform all actions on salaries', () => {
-    const permissions = DEFAULT_PERMISSIONS.admin.salaries;
-    expect(permissions).toEqual({ can_view: true, can_edit: true, can_delete: true });
-  });
-
-  it('viewer canEdit = false on all pages', () => {
-    for (const page of Object.keys(DEFAULT_PERMISSIONS.viewer)) {
-      expect(DEFAULT_PERMISSIONS.viewer[page].can_edit).toBe(false);
+  it('keeps viewer templates read-only', () => {
+    for (const permission of Object.values(DEFAULT_PERMISSIONS.viewer)) {
+      expect(permission.can_edit).toBe(false);
+      expect(permission.can_delete).toBe(false);
     }
   });
 
-  it('viewer canDelete = false on all pages', () => {
-    for (const page of Object.keys(DEFAULT_PERMISSIONS.viewer)) {
-      expect(DEFAULT_PERMISSIONS.viewer[page].can_delete).toBe(false);
-    }
-  });
-
-  it('finance has access to salary pages', () => {
-    const permissions = DEFAULT_PERMISSIONS.finance.salaries;
-    expect(permissions.can_view).toBe(true);
-    expect(permissions.can_edit).toBe(true);
-  });
-
-  it('finance has access to advances', () => {
-    const permissions = DEFAULT_PERMISSIONS.finance.advances;
-    expect(permissions.can_view).toBe(true);
-    expect(permissions.can_edit).toBe(true);
-  });
-
-  it('hr has no access to finance-only pages (finance module)', () => {
-    const permissions = DEFAULT_PERMISSIONS.hr.finance;
-    expect(permissions.can_view).toBe(false);
-    expect(permissions.can_edit).toBe(false);
-    expect(permissions.can_delete).toBe(false);
-  });
-
-  it('hr cannot edit salaries', () => {
-    const permissions = DEFAULT_PERMISSIONS.hr.salaries;
-    expect(permissions.can_view).toBe(true);
-    expect(permissions.can_edit).toBe(false);
-  });
-
-  it('operations can manage maintenance', () => {
-    const permissions = DEFAULT_PERMISSIONS.operations.maintenance;
-    expect(permissions.can_view).toBe(true);
-    expect(permissions.can_edit).toBe(true);
-    expect(permissions.can_delete).toBe(true);
-  });
-
-  it('operations cannot access salaries', () => {
-    const permissions = DEFAULT_PERMISSIONS.operations.salaries;
-    expect(permissions.can_view).toBe(false);
-  });
-
-  it('covers every gated route in the default permission matrix', () => {
+  it('covers every gated route', () => {
     const pageKeys = routesManifest
       .filter((route) => route.permission)
       .map((route) => route.permission?.replace(/^view_/, ''));
 
-    const roles = Object.keys(DEFAULT_PERMISSIONS) as Array<'admin' | 'hr' | 'finance' | 'operations' | 'viewer'>;
-    for (const role of roles) {
+    for (const rolePermissions of Object.values(DEFAULT_PERMISSIONS)) {
       for (const pageKey of pageKeys) {
-        expect(DEFAULT_PERMISSIONS[role]).toHaveProperty(pageKey as string);
+        expect(rolePermissions).toHaveProperty(pageKey as string);
       }
     }
   });
 });
 
-describe('usePermissions hook', () => {
+describe('usePermissions', () => {
   beforeEach(() => {
     mockAuthState.user = null;
-    mockAuthState.role = null;
     vi.clearAllMocks();
-    permissionsServiceMock.getUserPermission.mockResolvedValue(null as any);
+    permissionsServiceMock.getUserPermissions.mockResolvedValue({});
   });
 
-  it('deny-all مؤقتاً أثناء تحميل صلاحيات الصفحة', async () => {
-    const createDeferred = <T,>() => {
-      let resolve!: (value: T) => void;
-      const promise = new Promise<T>((res) => {
-        resolve = res;
-      });
-      return { promise, resolve };
-    };
-
-    const deferred = createDeferred<PagePermission | null>();
-
+  it('denies actions while the permission map is loading', async () => {
+    let resolvePermissions!: (permissions: Record<string, PagePermission>) => void;
+    const pendingPermissions = new Promise<Record<string, PagePermission>>((resolve) => {
+      resolvePermissions = resolve;
+    });
     mockAuthState.user = { id: 'u1' };
-    mockAuthState.role = 'admin';
-    permissionsServiceMock.getUserPermission.mockReturnValue(deferred.promise);
+    permissionsServiceMock.getUserPermissions.mockReturnValue(pendingPermissions);
 
     const { result } = renderHook(() => usePermissions('employees'), { wrapper: createWrapper() });
 
@@ -141,18 +95,17 @@ describe('usePermissions hook', () => {
       can_delete: false,
     });
 
-    deferred.resolve(null);
-
+    resolvePermissions({
+      employees: { can_view: true, can_edit: false, can_delete: false },
+    });
     await waitFor(() => expect(result.current.loading).toBe(false));
-    expect(result.current.permissions.can_edit).toBe(true);
+    expect(result.current.permissions.can_view).toBe(true);
   });
 
-  it('denies all when no user', async () => {
-    const { result } = renderHook(() => usePermissions('employees'), {
-      wrapper: createWrapper(),
-    });
+  it('denies actions when there is no authenticated user', () => {
+    const { result } = renderHook(() => usePermissions('employees'), { wrapper: createWrapper() });
 
-    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.loading).toBe(false);
     expect(result.current.permissions).toEqual({
       can_view: false,
       can_edit: false,
@@ -160,100 +113,47 @@ describe('usePermissions hook', () => {
     });
   });
 
-  it('reads frontend permissions when user exists even if role has not resolved yet', async () => {
+  it('uses one permission-map request for every page in the session', async () => {
     mockAuthState.user = { id: 'u1' };
-    permissionsServiceMock.getUserPermission.mockResolvedValue({
-      can_view: true,
-      can_edit: false,
-      can_delete: false,
+    permissionsServiceMock.getUserPermissions.mockResolvedValue({
+      employees: { can_view: true, can_edit: true, can_delete: false },
+      salaries: { can_view: true, can_edit: false, can_delete: false },
     });
 
-    const { result } = renderHook(() => usePermissions('employees'), {
-      wrapper: createWrapper(),
+    const { result } = renderHook(() => ({
+      employees: usePermissions('employees'),
+      salaries: usePermissions('salaries'),
+    }), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.employees.loading).toBe(false));
+    expect(result.current.employees.permissions.can_edit).toBe(true);
+    expect(result.current.salaries.permissions.can_edit).toBe(false);
+    expect(permissionsServiceMock.getUserPermissions).toHaveBeenCalledTimes(1);
+  });
+
+  it('denies a page missing from the stored permission map', async () => {
+    mockAuthState.user = { id: 'u1' };
+    permissionsServiceMock.getUserPermissions.mockResolvedValue({
+      alerts: { can_view: true, can_edit: false, can_delete: false },
     });
+
+    const { result } = renderHook(() => usePermissions('employees'), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.permissions.can_view).toBe(false);
+  });
+
+  it('denies all actions when permission loading fails', async () => {
+    mockAuthState.user = { id: 'u1' };
+    permissionsServiceMock.getUserPermissions.mockRejectedValue(new Error('database unavailable'));
+
+    const { result } = renderHook(() => usePermissions('employees'), { wrapper: createWrapper() });
 
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.permissions).toEqual({
-      can_view: true,
+      can_view: false,
       can_edit: false,
       can_delete: false,
     });
-  });
-
-  it('isAdmin = true for admin role', async () => {
-    mockAuthState.user = { id: 'u1' };
-    mockAuthState.role = 'admin';
-
-    const { result } = renderHook(() => usePermissions('employees'), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => expect(result.current.loading).toBe(false));
-    expect(result.current.isAdmin).toBe(true);
-  });
-
-  it('isAdmin = false for non-admin role', async () => {
-    mockAuthState.user = { id: 'u1' };
-    mockAuthState.role = 'viewer';
-
-    const { result } = renderHook(() => usePermissions('employees'), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => expect(result.current.loading).toBe(false));
-    expect(result.current.isAdmin).toBe(false);
-  });
-
-  it('falls back to role defaults when no custom permissions in DB', async () => {
-    mockAuthState.user = { id: 'u1' };
-    mockAuthState.role = 'admin';
-
-    const { result } = renderHook(() => usePermissions('salaries'), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => expect(result.current.loading).toBe(false));
-    expect(result.current.permissions).toEqual({
-      can_view: true,
-      can_edit: true,
-      can_delete: true,
-    });
-  });
-
-  describe('viewer restrictions', () => {
-    it.each([
-      ['employees', false, false, false],
-      ['maintenance', true, false, false],
-    ])('viewer permissions for %s (view: %s, edit: %s, delete: %s)', async (resource, view, edit, del) => {
-      mockAuthState.user = { id: 'u1' };
-      mockAuthState.role = 'viewer';
-
-      const { result } = renderHook(() => usePermissions(resource as any), {
-        wrapper: createWrapper(),
-      });
-
-      await waitFor(() => expect(result.current.loading).toBe(false));
-      expect(result.current.permissions.can_view).toBe(view);
-      expect(result.current.permissions.can_edit).toBe(edit);
-      expect(result.current.permissions.can_delete).toBe(del);
-    });
-  });
-
-  it.each([
-    ['admin', 'employees', { can_view: true, can_edit: true, can_delete: true }],
-    ['finance', 'salaries', { can_view: true, can_edit: true, can_delete: false }],
-    ['finance', 'finance', { can_view: true, can_edit: true, can_delete: true }],
-  ])('role defaults fallback permissions for %s on %s', async (role, resource, expected) => {
-    mockAuthState.user = { id: 'u1' };
-    mockAuthState.role = role as any;
-
-    const { result } = renderHook(() => usePermissions(resource as any), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => expect(result.current.loading).toBe(false));
-    expect(result.current.permissions.can_view).toBe(expected.can_view);
-    expect(result.current.permissions.can_edit).toBe(expected.can_edit);
-    expect(result.current.permissions.can_delete).toBe(expected.can_delete);
   });
 });

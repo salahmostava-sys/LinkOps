@@ -1,5 +1,10 @@
 import { useEffect, useRef } from 'react';
-import { realtimeService } from '@services/realtimeService';
+import { realtimeService, type RealtimeTableChange } from '@services/realtimeService';
+
+type RealtimeSubscriptionOptions = {
+  debounceMs?: number;
+  shouldHandle?: (change: RealtimeTableChange) => boolean;
+};
 
 /** Tables backing Dashboard KPIs + analytics (invalidate on change; read-heavy). */
 export const REALTIME_TABLES_DASHBOARD = [
@@ -22,24 +27,30 @@ export const REALTIME_TABLES_EMPLOYEES = [
 export function useRealtimePostgresChanges(
   channelName: string,
   tables: readonly string[],
-  onEvent: () => void,
-  debounceMs: number = 2000
+  onEvent: (change: RealtimeTableChange) => void,
+  options: RealtimeSubscriptionOptions = {},
 ): void {
   const onEventRef = useRef(onEvent);
   onEventRef.current = onEvent;
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const latestChangeRef = useRef<RealtimeTableChange | null>(null);
   const tablesKey = tables.join('\0');
+  const debounceMs = options.debounceMs ?? 2000;
+  const shouldHandleRef = useRef(options.shouldHandle);
+  shouldHandleRef.current = options.shouldHandle;
 
   useEffect(() => {
     if (tables.length === 0) return;
 
-    const debouncedEvent = () => {
+    const debouncedEvent = (change: RealtimeTableChange) => {
+      if (shouldHandleRef.current && !shouldHandleRef.current(change)) return;
+      latestChangeRef.current = change;
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
       timeoutRef.current = setTimeout(() => {
-        onEventRef.current();
+        if (latestChangeRef.current) onEventRef.current(latestChangeRef.current);
       }, debounceMs);
     };
 
