@@ -79,6 +79,7 @@ function buildRowHtml(
     <td style="text-align:center;font-size:10px;word-break:break-all" dir="ltr">${ibanDisp}</td>
     <td style="text-align:center">${Number(r.workDays ?? 0)}</td>
     <td style="text-align:center">${Number(r.fuelCost ?? 0).toLocaleString('en-US')}</td>
+    <td style="text-align:center">${Number(r.kilometers ?? 0).toLocaleString('en-US')}</td>
     <td style="text-align:center">${Number(r.platformIncome ?? 0).toLocaleString('en-US')}</td>
     <td style="text-align:center">${manual > 0 ? manual.toLocaleString('en-US') : '—'}</td>
     ${platformCols}
@@ -101,7 +102,7 @@ function buildRowHtml(
 export function buildSalaryTablePrintHtml(params: PrintTableParams): string {
   const { rows, platforms, monthLabel, projectName, computeRow } = params;
 
-  const staticLeadColCount = 11;
+  const staticLeadColCount = 12;
 
   const rowsHtml = rows.map((r) => buildRowHtml(r, platforms, computeRow)).join('');
 
@@ -163,6 +164,7 @@ export function buildSalaryTablePrintHtml(params: PrintTableParams): string {
           <th>آيبان / حساب</th>
           <th>أيام العمل</th>
           <th>البنزين</th>
+          <th>الكيلومترات</th>
           <th>دخل المنصات</th>
           <th>خصومات يدوية</th>
           ${platformHeaders}

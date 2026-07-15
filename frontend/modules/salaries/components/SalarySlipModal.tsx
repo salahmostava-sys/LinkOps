@@ -64,6 +64,7 @@ export function SalaryDetailDialog(props: Readonly<SalaryDetailDialogProps>) {
             <div><span className="text-muted-foreground">أيام العمل: </span><span className="font-semibold">{detailRow.workDays ?? 0} يوم</span></div>
             {detailRow.bankAccount && <div><span className="text-muted-foreground">الحساب البنكي: </span><span className="font-semibold" dir="ltr">{detailRow.bankAccount}</span></div>}
             {(detailRow.fuelCost ?? 0) > 0 && <div><span className="text-muted-foreground">تكلفة البنزين: </span><span className="font-semibold">{detailRow.fuelCost?.toLocaleString('en-US')} ر.س</span></div>}
+            {(detailRow.kilometers ?? 0) > 0 && <div><span className="text-muted-foreground">الكيلومترات: </span><span className="font-semibold">{detailRow.kilometers.toLocaleString('en-US')} كم</span></div>}
             {(detailRow.engineBaseSalary ?? 0) > 0 && <div><span className="text-muted-foreground">الراتب الأساسي (محرك): </span><span className="font-semibold">{detailRow.engineBaseSalary?.toLocaleString('en-US')} ر.س</span></div>}
           </div>
 

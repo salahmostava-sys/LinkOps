@@ -32,6 +32,7 @@ const buildRow = (registeredApps: string[]): SalaryRow => ({
   phone: null,
   workDays: 0,
   fuelCost: 0,
+  kilometers: 0,
   platformIncome: 0,
 });
 
@@ -590,7 +591,7 @@ describe('salaryDomain prepareSalaryState', () => {
 
 // ─── FIX REGRESSION TESTS ────────────────────────────────────────────────────
 
-import { buildFuelCostMap } from './salaryDomain';
+import { buildFuelCostMap, buildKilometersMap } from './salaryDomain';
 
 describe('buildFuelCostMap — FIX #2: NaN guard', () => {
   it('treats null fuel_cost as 0 and does not produce NaN', () => {
@@ -624,6 +625,19 @@ describe('buildFuelCostMap — FIX #2: NaN guard', () => {
       { employee_id: 'emp-4', fuel_cost: 75.5 },
     ]);
     expect(map['emp-4']).toBeCloseTo(100.5);
+  });
+});
+
+describe('buildKilometersMap', () => {
+  it('accumulates the daily kilometers for each employee', () => {
+    expect(buildKilometersMap([
+      { employee_id: 'emp-1', km_total: 125.5 },
+      { employee_id: 'emp-1', km_total: 74.5 },
+      { employee_id: 'emp-2', km_total: 50 },
+    ])).toEqual({
+      'emp-1': 200,
+      'emp-2': 50,
+    });
   });
 });
 

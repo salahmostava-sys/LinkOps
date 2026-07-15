@@ -235,6 +235,16 @@ export const buildFuelCostMap = (rows: Array<{ employee_id: string; fuel_cost: n
   return fuelCostMap;
 };
 
+export const buildKilometersMap = (rows: Array<{ employee_id: string; km_total: number | string }> | null | undefined) => {
+  const kilometersMap: Record<string, number> = {};
+  rows?.forEach((row) => {
+    const employeeId = row.employee_id ? String(row.employee_id) : '';
+    if (!employeeId) return;
+    kilometersMap[employeeId] = (kilometersMap[employeeId] || 0) + (Number(row.km_total) || 0);
+  });
+  return kilometersMap;
+};
+
 const buildOrdersMap = (rows: OrderWithAppRow[] | null | undefined) => {
   const ordMap: Record<string, Record<string, number>> = {};
   (rows || []).forEach((r) => {
@@ -395,11 +405,12 @@ function buildEmployeeSalaryRow(params: {
   deductedInstallmentIds: string[];
   advRemaining: number;
   fuelCost: number;
+  kilometers: number;
 }): SalaryRow {
   const {
     emp, selectedMonth, platformNames, appWorkTypeMap, empOrders,
     attendanceDays, saved, preview, pendingInstallmentIds,
-    deductedInstallmentIds, advRemaining, fuelCost
+    deductedInstallmentIds, advRemaining, fuelCost, kilometers
   } = params;
   const employeeId = String(emp.id);
 
@@ -477,6 +488,7 @@ function buildEmployeeSalaryRow(params: {
     phone,
     workDays,
     fuelCost,
+    kilometers,
     platformIncome: 0,
     engineBaseSalary: Number(saved?.base_salary ?? preview.base_salary ?? 0),
     preferEngineBaseSalary: !!saved && !savedSnapshot && Number(saved.base_salary || 0) > 0,
@@ -496,6 +508,7 @@ function buildEmployeeSalaryRow(params: {
         advanceRemaining: advRemaining,
         workDays,
         fuelCost,
+        kilometers,
         preferEngineBaseSalary: false,
       }
     : baseRow;
@@ -523,6 +536,7 @@ export const buildSalaryRows = ({
   deductedInstIds,
   advRemainingMap,
   fuelCostMap,
+  kilometersMap = {},
 }: {
   employees: Array<Record<string, unknown>>;
   selectedMonth: string;
@@ -539,6 +553,7 @@ export const buildSalaryRows = ({
   deductedInstIds: Record<string, string[]>;
   advRemainingMap: Record<string, number>;
   fuelCostMap: Record<string, number>;
+  kilometersMap?: Record<string, number>;
 }) => {
   const newRows: SalaryRow[] = [];
   for (const emp of employees) {
@@ -567,6 +582,7 @@ export const buildSalaryRows = ({
         deductedInstallmentIds: deductedInstIds[employeeId] || [],
         advRemaining: advRemainingMap[employeeId] || 0,
         fuelCost: fuelCostMap[employeeId] || 0,
+        kilometers: kilometersMap[employeeId] || 0,
       })
     );
   }
@@ -727,7 +743,13 @@ export async function prepareSalaryState({
 
   const monthStartIso = `${selectedMonth}-01`;
   const attendanceDaysMap = buildAttendanceDaysMap(attendanceRows as Array<{ employee_id: string }> | null | undefined);
-  const fuelCostMap = buildFuelCostMap(fuelRes as Array<{ employee_id: string; fuel_cost: number | string }> | null | undefined);
+  const consumptionRows = fuelRes as Array<{
+    employee_id: string;
+    fuel_cost: number | string;
+    km_total: number | string;
+  }> | null | undefined;
+  const fuelCostMap = buildFuelCostMap(consumptionRows);
+  const kilometersMap = buildKilometersMap(consumptionRows);
   const ordMap = buildOrdersMap(orders as OrderWithAppRow[] | null);
   const savedEmployeeIds = new Set(Object.keys(savedMap));
   const visibleEmployees = filterRetainedEmployeesForSalaryMonth(
@@ -769,6 +791,7 @@ export async function prepareSalaryState({
     deductedInstIds,
     advRemainingMap,
     fuelCostMap,
+    kilometersMap,
   });
   const hydratedRows = await hydrateRowsWithDraft(newRows, selectedMonth, _salariesDraftKey);
   const { appsWithoutPricingRules, appsWithoutScheme } = buildPlatformSetupWarnings({

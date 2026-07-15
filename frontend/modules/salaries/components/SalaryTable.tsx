@@ -39,10 +39,10 @@ import { getSalaryRowActivityTotals, hasPlatformActivity } from '@modules/salari
 import { Skeleton } from '@shared/components/ui/skeleton';
 
 // ── Style constants ───────────────────────────────────────────────────────────
-const thFrozenBase = "px-3 py-2 text-xs font-semibold text-muted-foreground whitespace-nowrap border border-border/40 bg-card text-start sticky z-20";
-const thBase = "px-3 py-2 text-xs font-semibold text-muted-foreground whitespace-nowrap border border-border/40 bg-card text-center";
-const tdClass = "px-3 py-2 text-[13px] font-medium whitespace-nowrap text-center border border-border/40 text-foreground";
-const tfClass = "px-3 py-2 text-[13px] font-bold whitespace-nowrap text-center border border-border/40 bg-muted/60 text-foreground";
+const thFrozenBase = "min-w-[6rem] px-3 py-2 text-[13px] font-semibold text-muted-foreground whitespace-nowrap border border-border/40 bg-card text-start sticky z-20";
+const thBase = "min-w-[7rem] px-3 py-2 text-[13px] font-semibold text-muted-foreground whitespace-nowrap border border-border/40 bg-card text-center";
+const tdClass = "px-3 py-2 text-sm font-medium whitespace-nowrap text-center border border-border/40 text-foreground";
+const tfClass = "px-3 py-2 text-sm font-bold whitespace-nowrap text-center border border-border/40 bg-muted/60 text-foreground";
 const stickyLeft = (offset: number) => ({ left: offset });
 
 /** Height of each row in pixels — must be fixed for virtual list to work correctly */
@@ -166,6 +166,9 @@ const SalaryRowCells = memo(function SalaryRowCells({
       </td>
       <td className="ta-td border border-border/40 bg-info/5">
         {r.fuelCost > 0 ? <span className="font-semibold text-foreground">{r.fuelCost.toLocaleString('en-US')}</span> : <span className="text-muted-foreground/30">—</span>}
+      </td>
+      <td className="ta-td border border-border/40 bg-info/5">
+        {r.kilometers > 0 ? <span className="font-semibold text-foreground">{r.kilometers.toLocaleString('en-US')}</span> : <span className="text-muted-foreground/30">—</span>}
       </td>
       {platforms.map(p => {
         const pc = platformColors[p];
@@ -368,6 +371,7 @@ export const SalaryTable = memo(function SalaryTable(props: Readonly<SalaryTable
     acc.platformIncome += r.platformIncome;
     acc.workDaysSum += r.workDays;
     acc.fuelCost += r.fuelCost;
+    acc.kilometers += r.kilometers;
     acc.incentives += r.incentives;
     acc.sickAllowance += r.sickAllowance;
     acc.totalAdditions += c?.totalAdditions || 0;
@@ -386,7 +390,7 @@ export const SalaryTable = memo(function SalaryTable(props: Readonly<SalaryTable
     platformSalariesTotals: {},
     customColTotals: {},
     totalOrders: 0, totalShiftDays: 0,
-    platformSalaries: 0, platformIncome: 0, workDaysSum: 0, fuelCost: 0,
+    platformSalaries: 0, platformIncome: 0, workDaysSum: 0, fuelCost: 0, kilometers: 0,
     incentives: 0, sickAllowance: 0,
     totalAdditions: 0, totalWithSalary: 0,
     advance: 0, externalDed: 0, violations: 0,
@@ -451,14 +455,14 @@ export const SalaryTable = memo(function SalaryTable(props: Readonly<SalaryTable
       {/* Scroll container — useVirtualizer reads its scrollTop */}
       {/* contain:layout paint — isolates repaints without breaking sticky positioning */}
       <div ref={scrollContainerRef} className="overflow-auto custom-scrollbar" style={{ maxHeight: '75vh', contain: 'layout paint' }}>
-        <table className="text-sm border-collapse w-full min-w-max">
+        <table className="salary-table text-sm border-collapse w-max min-w-[2400px]">
           {/* ── Header — sticky at top ── */}
           {/* bg-card is solid (not opacity-based) so it covers rows scrolling beneath */}
           <thead className="sticky top-0 z-30" style={{ backgroundColor: 'hsl(var(--card))' }}>
             <tr className="border-b border-border/50" style={{ backgroundColor: 'hsl(var(--card))' }}>
               <th className={`${thFrozenBase} w-10 text-center`} style={stickyLeft(0)}>#</th>
               <th colSpan={3} className={`${thFrozenBase} border-l border-border/50`} style={stickyLeft(40)}>بيانات المندوب</th>
-              <th colSpan={3} className="ta-th border-b border-border/40 border-l">📊 بيانات المندوب الشهرية</th>
+              <th colSpan={4} className="ta-th border-b border-border/40 border-l">📊 بيانات المندوب الشهرية</th>
               {platforms.length > 0 && (
                 <th colSpan={platforms.length} className="ta-th border-b border-border/50 border-l">
                   المنصات (طلبات أو دوام / راتب، ونقر مزدوج لتعديل الطلبات في منصات الطلب فقط)
@@ -492,6 +496,9 @@ export const SalaryTable = memo(function SalaryTable(props: Readonly<SalaryTable
               </th>
               <th className="ta-th border border-border/40 cursor-pointer select-none hover:brightness-95" onClick={() => handleSort('fuelCost')}>
                 البنزين <SalarySortIcon field="fuelCost" sortField={sortField} sortDir={sortDir} />
+              </th>
+              <th className="ta-th border border-border/40 cursor-pointer select-none hover:brightness-95" onClick={() => handleSort('kilometers')}>
+                الكيلومترات <SalarySortIcon field="kilometers" sortField={sortField} sortDir={sortDir} />
               </th>
               {platforms.map(p => {
                 const pc = platformColors[p];
@@ -638,6 +645,9 @@ export const SalaryTable = memo(function SalaryTable(props: Readonly<SalaryTable
               </td>
               <td className="ta-td font-bold border border-border/40 bg-info/10 text-foreground">
                 {totals.fuelCost.toLocaleString('en-US')}
+              </td>
+              <td className="ta-td font-bold border border-border/40 bg-info/10 text-foreground">
+                {totals.kilometers.toLocaleString('en-US')}
               </td>
               {platforms.map(p => {
                 const totalOrders = totals.platformOrders[p] || 0;

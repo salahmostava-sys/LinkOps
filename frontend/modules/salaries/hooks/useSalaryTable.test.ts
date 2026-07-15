@@ -31,6 +31,7 @@ const buildRow = (overrides: Partial<SalaryRow> = {}): SalaryRow => ({
   phone: null,
   workDays: 26,
   fuelCost: 0,
+  kilometers: 0,
   platformIncome: 0,
   engineBaseSalary: 542,
   ...overrides,

@@ -7,6 +7,7 @@ import { salaryService } from '@services/salaryService';
 import { advanceService } from '@services/advanceService';
 import { externalDeductionService } from '@services/externalDeductionService';
 import { performanceService } from '@services/performanceService';
+import { monthStartEnd } from '@services/employeeActivityService';
 import { logError } from '@shared/lib/logger';
 
 async function optionalSalaryContext<T>(
@@ -50,6 +51,7 @@ export const salaryDataService = {
   },
 
   async getMonthlyContext(selectedMonth: string) {
+    const { start: monthStart, end: monthEnd } = monthStartEnd(selectedMonth);
     const [employees, orders, appsWithSchemeRes, savedRecords] =
       await Promise.all([
         employeeService.getActiveForSalaryContext(),
@@ -63,8 +65,8 @@ export const salaryDataService = {
         externalDeductionService.getApprovedByMonth(selectedMonth),
       ),
       optionalSalaryContext(
-        'vehicle_mileage',
-        fuelService.getMonthlyFuelByMonthYear(selectedMonth),
+        'vehicle_mileage_daily',
+        fuelService.getMonthlyDailyMileage(monthStart, monthEnd),
       ),
       optionalSalaryContext(
         'advances',

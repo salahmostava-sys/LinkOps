@@ -35,6 +35,7 @@ export interface SalaryRow {
   phone?: string | null;
   workDays: number;
   fuelCost: number;
+  kilometers: number;
   platformIncome: number;
   engineBaseSalary?: number;
 }

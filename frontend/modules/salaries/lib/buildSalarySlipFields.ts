@@ -48,6 +48,7 @@ export function buildSlipFieldsFromRow(
   fields.push(
     { key: 'workDays', label: 'أيام العمل', value: row.workDays ?? 0, type: 'info' },
     { key: 'fuelCost', label: 'تكلفة البنزين', value: `${(row.fuelCost ?? 0).toLocaleString('en-US')} ${t.currency}`, type: 'info' },
+    { key: 'kilometers', label: 'الكيلومترات', value: `${(row.kilometers ?? 0).toLocaleString('en-US')} كم`, type: 'info' },
     { key: 'platformIncome', label: 'دخل المنصات', value: `${(row.platformIncome ?? 0).toLocaleString('en-US')} ${t.currency}`, type: 'info' },
     { key: 'baseSalary', label: t.platformTotal, value: computed.totalPlatformSalary, type: 'earning', color: 'blue' },
     ...(row.incentives > 0 ? [{ key: 'incentives', label: t.incentives, value: row.incentives, type: 'earning' as const, color: 'green' as const }] : []),

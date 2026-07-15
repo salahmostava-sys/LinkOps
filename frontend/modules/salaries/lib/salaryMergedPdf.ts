@@ -129,6 +129,7 @@ export function buildMergedSalaryPageHtml({
         <div class="info-row"><span class="info-label">الآيبان / الحساب</span><span class="info-value">${ibanLine}</span></div>
         <div class="info-row"><span class="info-label">أيام العمل</span><span class="info-value">${Number(row.workDays ?? 0).toLocaleString('en-US')}</span></div>
         <div class="info-row"><span class="info-label">تكلفة البنزين</span><span class="info-value">${Number(row.fuelCost ?? 0).toLocaleString('en-US')} ر.س</span></div>
+        <div class="info-row"><span class="info-label">الكيلومترات</span><span class="info-value">${Number(row.kilometers ?? 0).toLocaleString('en-US')} كم</span></div>
         <div class="info-row"><span class="info-label">دخل المنصات</span><span class="info-value">${Number(row.platformIncome ?? 0).toLocaleString('en-US')} ر.س</span></div>
       </div>
       <h3>النشاط والراتب حسب المنصة</h3>
