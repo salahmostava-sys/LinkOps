@@ -418,7 +418,7 @@ const VehicleReportPage = () => {
   const generateRowHtml = (v: VehicleReportRow) => {
     const statusLabel = STATUS_LABELS[v.status]?.label ?? v.status;
     const logsHtml = v.maintenance_logs.length === 0
-      ? `<tr><td colspan="4" style="text-align:center;color:#94a3b8;">لا توجد صيانات</td></tr>`
+      ? `<tr><td colspan="4" style="text-align:center;color:#061735;">لا توجد صيانات</td></tr>`
       : v.maintenance_logs.map((l) => `
         <tr>
           <td>${l.maintenance_date ? new Date(l.maintenance_date).toLocaleDateString('ar-SA') : ''}</td>
@@ -433,7 +433,7 @@ const VehicleReportPage = () => {
           <div>
             <strong style="font-size:15px;" dir="ltr">${escapeHtml(v.plate_number)}</strong>
             ${v.brand ? ` — ${escapeHtml(v.brand)} ${escapeHtml(v.model ?? '')}` : ''}
-            <span style="margin-right:8px;font-size:11px;color:#64748b;">(${statusLabel})</span>
+            <span style="margin-right:8px;font-size:11px;color:#061735;">(${statusLabel})</span>
           </div>
           ${v.current_rider ? `<div style="font-size:12px;color:#475569;">السائق: ${escapeHtml(v.current_rider)}</div>` : ''}
         </div>
@@ -463,7 +463,7 @@ const VehicleReportPage = () => {
     body { font-family: 'Droid Arabic Kufi', 'Tajawal', sans-serif; padding: 20px; color: #061735; background:#fff; margin:0; }
     .company { text-align:center; font-size:22px; font-weight:bold; margin-bottom:4px; }
     h1 { text-align:center; font-size:17px; margin:0 0 4px; }
-    .meta { text-align:center; font-size:12px; color:#64748b; margin-bottom:20px; }
+    .meta { text-align:center; font-size:12px; color:#061735; margin-bottom:20px; }
     .summary { background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px; margin-bottom:20px; display:flex; gap:20px; flex-wrap:wrap; font-size:13px; }
     .vehicle-block { margin-bottom:24px; page-break-inside:avoid; }
     .vehicle-header { font-size:14px; background:#1e293b; color:#fff; padding:8px 12px; border-radius:6px 6px 0 0; }

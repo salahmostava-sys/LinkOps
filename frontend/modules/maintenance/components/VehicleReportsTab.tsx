@@ -404,7 +404,7 @@ export function VehicleReportsTab() {
       bodyHtml = filteredGroups.map((g) => {
         const tableHtml = g.logs.length === 0 ? `
               <tr>
-                <td colspan="5" style="text-align: center; color: #94a3b8;">لا توجد صيانات مسجلة</td>
+                <td colspan="5" style="text-align: center; color: #061735;">لا توجد صيانات مسجلة</td>
               </tr>` : g.logs.map(log => `
               <tr>
                 <td>${log.maintenance_date ? new Date(log.maintenance_date).toLocaleDateString('ar-SA') : ''}</td>
@@ -447,7 +447,7 @@ export function VehicleReportsTab() {
         if (g.logs.length === 0) {
           return `<tr>
             <td><strong>${escapeHtml(g.type)}<br/><span style="direction: ltr; display: inline-block;">${escapeHtml(g.plate_number)}</span></strong></td>
-            <td colspan="5" style="text-align: center; color: #94a3b8;">لا توجد صيانات مسجلة</td>
+            <td colspan="5" style="text-align: center; color: #061735;">لا توجد صيانات مسجلة</td>
           </tr>`;
         }
         return g.logs.map((log, idx) => `
@@ -499,7 +499,7 @@ export function VehicleReportsTab() {
         body { font-family: 'Droid Arabic Kufi', 'Tajawal', system-ui, sans-serif; padding: 20px; margin: 0; color: #061735; background: #fff; }
         .company-name { text-align: center; font-size: 22px; font-weight: bold; margin-bottom: 5px; color: #1e293b; }
         h1 { text-align: center; margin-bottom: 5px; color: #0f172a; font-size: 18px; }
-        .header-info { text-align: center; margin-bottom: 20px; font-size: 13px; color: #64748b; }
+        .header-info { text-align: center; margin-bottom: 20px; font-size: 13px; color: #061735; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; text-align: right; font-size: 12px; }
         th, td { border: 1px solid #cbd5e1; padding: 8px; }
         th { background-color: #f8fafc; font-weight: bold; color: #334155; }

@@ -437,7 +437,7 @@ export function printSpreadsheetTable(params: {
   head.appendChild(docTitle);
   const styleEl = doc.createElement('style');
   styleEl.textContent =
-    '*{box-sizing:border-box;margin:0;padding:0}body{font-family:"Droid Arabic Kufi","Tajawal",Arial,sans-serif;font-size:10px;direction:rtl;color:#061735;background:#fff}h2{text-align:center;margin-bottom:8px;font-size:14px}p.sub{text-align:center;color:#73829a;font-size:10px;margin-bottom:10px}table{width:100%;border-collapse:collapse}th{background:#1f54ad;color:#fff;padding:5px 6px;text-align:right;font-size:9px;white-space:nowrap}td{padding:4px 6px;border-bottom:1px solid #e0e0e0;text-align:right;white-space:nowrap}tr:nth-child(even) td{background:#f9f9f9}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}';
+    '*{box-sizing:border-box;margin:0;padding:0}body{font-family:"Droid Arabic Kufi","Tajawal",Arial,sans-serif;font-size:10px;direction:rtl;color:#061735;background:#fff}h2{text-align:center;margin-bottom:8px;font-size:14px}p.sub{text-align:center;color:#061735;font-size:10px;margin-bottom:10px}table{width:100%;border-collapse:collapse}th{background:#1f54ad;color:#fff;padding:5px 6px;text-align:right;font-size:9px;white-space:nowrap}td{padding:4px 6px;border-bottom:1px solid #e0e0e0;text-align:right;white-space:nowrap}tr:nth-child(even) td{background:#f9f9f9}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}';
   head.appendChild(styleEl);
   const title = doc.createElement('h2');
   title.textContent = `طلبات شهر ${month}/${year}`;

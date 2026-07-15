@@ -384,7 +384,7 @@ export const PrintSlip = ({ employeeName, nationalId, totalDebt, totalPaid, rema
         <div ref={printRef}>
           <div className="header">
             <h2 style={{ margin: 0, fontSize: 18 }}>كشف سلف المندوب</h2>
-            <p style={{ margin: '4px 0 0', color: '#6b7280', fontSize: 13 }}>تاريخ الطباعة: {format(new Date(), 'yyyy-MM-dd')}</p>
+            <p style={{ margin: '4px 0 0', color: '#061735', fontSize: 13 }}>تاريخ الطباعة: {format(new Date(), 'yyyy-MM-dd')}</p>
           </div>
           <div className="mb-3">
             <p><strong>الاسم:</strong> {employeeName}</p>
