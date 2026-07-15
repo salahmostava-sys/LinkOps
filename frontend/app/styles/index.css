@@ -354,7 +354,7 @@
     box-shadow: var(--shadow-card-md);
   }
 
-  .app-content-shell button,
+  .app-content-shell button:not([role='checkbox']),
   .app-content-shell .ds-btn,
   .app-content-shell .ds-btn-primary {
     min-height: 2.25rem;
