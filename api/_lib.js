@@ -61,6 +61,25 @@ async function requireAuth(req, res) {
     res.status(401).json({ error: 'Not authenticated' });
     return null;
   }
+
+  const { data: isActive, error: activeError } = await callerClient.rpc('is_active_user', {
+    _user_id: user.id,
+  });
+  if (activeError) {
+    console.error(JSON.stringify({
+      level: 'error',
+      message: 'Active account verification failed',
+      user_id: user.id,
+      error: activeError.message,
+      ts: new Date().toISOString(),
+    }));
+    res.status(503).json({ error: 'Authentication service temporarily unavailable' });
+    return null;
+  }
+  if (!isActive) {
+    res.status(403).json({ error: 'Account is disabled' });
+    return null;
+  }
   return { user, callerClient };
 }
 

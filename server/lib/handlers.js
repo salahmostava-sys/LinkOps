@@ -11,12 +11,19 @@
 
 import { createRequire } from 'node:module';
 import { randomUUID } from 'node:crypto';
+import {
+  validateAdminRequest,
+  validateAiAnalyticsRequest,
+  validateAiChatRequest,
+  validateGroqRequest,
+  validateSalaryRequest,
+} from './requestValidation.js';
 
 const require = createRequire(import.meta.url);
 
 const {
   requireAuth, getAdminClient, getErrorMessage,
-  isUuid, isValidMonth, VALID_ROLES, logInfo, logError,
+  logInfo, logError,
   GROQ_API_KEY, GROQ_BASE_URL, DEFAULT_GROQ_MODEL,
   AI_CHAT_SYSTEM_PROMPT, AI_CHAT_TOOLS, executeAiTool, callGroqChat,
 } = require('../../api/_lib.js');
@@ -53,7 +60,6 @@ function classifySalaryError(message) {
 
 async function executeEmployeeMode(adminClient, payload) {
   const { month_year, payment_method, employee_id, manual_deduction, manual_deduction_note } = payload;
-  if (!isUuid(employee_id)) return { status: 400, error: 'Invalid employee_id' };
   const { data, error } = await adminClient.rpc('calculate_salary_for_employee_month', {
     p_employee_id: employee_id,
     p_month_year: month_year,
@@ -109,10 +115,9 @@ export async function salaryEngineHandler(req, res) {
       return res.status(403).json({ error: 'Only admin/finance can run salary engine' });
     }
 
-    const payload = req.body;
-    if (!payload?.month_year || !isValidMonth(payload.month_year)) {
-      return res.status(400).json({ error: 'Invalid month_year format. Expected YYYY-MM' });
-    }
+    const validation = validateSalaryRequest(req.body);
+    if (!validation.ok) return res.status(400).json({ error: validation.error });
+    const payload = validation.value;
 
     const adminClient = getAdminClient();
     
@@ -140,11 +145,6 @@ export async function salaryEngineHandler(req, res) {
 async function handleCreateUser(supabaseAdmin, { email, password, name, role }) {
   const normalizedEmail = String(email ?? '').trim().toLowerCase();
   const normalizedName = String(name ?? '').trim();
-  const normalizedRole = normalizeAppRole(role);
-
-  if (!normalizedEmail?.includes('@')) throw new Error('Invalid email');
-  if (!password || String(password).length < 8) throw new Error('Password must be at least 8 characters');
-  if (!normalizedName) throw new Error('name is required');
 
   let createdUserId = null;
   try {
@@ -163,7 +163,7 @@ async function handleCreateUser(supabaseAdmin, { email, password, name, role }) 
 
     await supabaseAdmin.from('user_roles').delete().eq('user_id', createdUserId);
     const { error: insertRoleError } = await supabaseAdmin.from('user_roles')
-      .insert({ user_id: createdUserId, role: normalizedRole });
+      .insert({ user_id: createdUserId, role });
     if (insertRoleError) throw insertRoleError;
   } catch (err) {
     if (createdUserId) {
@@ -189,7 +189,6 @@ async function handleRevokeSession(supabaseAdmin, user_id) {
 }
 
 async function handleUpdatePassword(supabaseAdmin, user_id, password) {
-  if (!password) throw new Error('password is required for update_password');
   const { error } = await supabaseAdmin.auth.admin.updateUserById(user_id, { password });
   if (error) throw error;
   return { success: true };
@@ -223,16 +222,15 @@ async function updateProfileLayer(supabaseAdmin, user_id, { email, name, is_acti
 
 async function updateRoleLayer(supabaseAdmin, user_id, role) {
   if (role === undefined) return;
-  const normalizedRole = normalizeAppRole(role);
   const { data: updatedRows, error: roleError } = await supabaseAdmin.from('user_roles')
-    .update({ role: normalizedRole })
+    .update({ role })
     .eq('user_id', user_id)
     .select('id');
   if (roleError) throw roleError;
   if (updatedRows?.length) return;
 
   const { error: insertRoleError } = await supabaseAdmin.from('user_roles')
-    .insert({ user_id, role: normalizedRole });
+    .insert({ user_id, role });
   if (insertRoleError) throw insertRoleError;
 }
 
@@ -241,12 +239,6 @@ async function handleUpdateUser(supabaseAdmin, user_id, { email, password, name,
   await updateProfileLayer(supabaseAdmin, user_id, { email, name, is_active });
   await updateRoleLayer(supabaseAdmin, user_id, role);
   return { success: true };
-}
-
-function normalizeAppRole(role) {
-  const normalizedRole = String(role ?? 'viewer').trim().toLowerCase();
-  if (!VALID_ROLES.has(normalizedRole)) throw new Error('Invalid role');
-  return normalizedRole;
 }
 
 async function dispatchAction(supabaseAdmin, normalizedAction, { user_id, password, email, name, role, is_active }, callerId) {
@@ -308,14 +300,9 @@ export async function adminUpdateUserHandler(req, res) {
       return res.status(429).json({ error: 'Too many requests. Please wait before trying again.' });
     }
 
-    const { user_id, password, email, name, role, is_active, action } = req.body;
-    const normalizedAction = action || (password ? 'update_password' : undefined);
-    if (!normalizedAction) throw new Error('action is required');
-
-    if (normalizedAction !== 'create_user') {
-      if (!user_id) throw new Error('user_id is required');
-      if (!isUuid(user_id)) throw new Error('Invalid user_id');
-    }
+    const validation = validateAdminRequest(req.body);
+    if (!validation.ok) return res.status(400).json({ error: validation.error });
+    const { user_id, password, email, name, role, is_active, action: normalizedAction } = validation.value;
 
     logInfo('Admin update user request', { request_id: requestId, admin_user_id: callerUser.id, action: normalizedAction });
 
@@ -359,10 +346,9 @@ export async function groqChatHandler(req, res) {
       return res.status(429).json({ error: 'Too many requests. Please wait before trying again.' });
     }
 
-    const { messages, model, temperature, max_tokens } = req.body;
-    if (!Array.isArray(messages) || messages.length === 0) {
-      return res.status(400).json({ error: 'messages must be a non-empty array' });
-    }
+    const validation = validateGroqRequest(req.body);
+    if (!validation.ok) return res.status(400).json({ error: validation.error });
+    const { messages, model, temperature, max_tokens } = validation.value;
 
     logInfo('groq-chat request accepted', { request_id: requestId, user_id: callerUser.id, message_count: messages.length });
 
@@ -447,10 +433,9 @@ export async function aiChatHandler(req, res) {
       logError('[ai-chat] get_my_role failed; defaulting to viewer', { request_id: requestId, error: e?.message });
     }
 
-    const { messages: clientMessages } = req.body;
-    if (!Array.isArray(clientMessages) || clientMessages.length === 0) {
-      return res.status(400).json({ error: 'messages array required' });
-    }
+    const validation = validateAiChatRequest(req.body);
+    if (!validation.ok) return res.status(400).json({ error: validation.error });
+    const { messages: clientMessages } = validation.value;
 
     const conversation = [
       { role: 'system', content: AI_CHAT_SYSTEM_PROMPT },
@@ -467,17 +452,6 @@ export async function aiChatHandler(req, res) {
     return res.status(500).json({ error: 'Internal server error' });
   }
 }
-
-const AI_ANALYTICS_PATHS = new Set([
-  '/predict-salary',
-  '/best-employee',
-  '/analyze',
-  '/predict-orders',
-  '/best-driver',
-  '/top-platform',
-  '/smart-alerts',
-  '/detect-anomalies',
-]);
 
 async function callAiAnalyticsBackend(path, payload) {
   const backendUrl = process.env.AI_BACKEND_URL;
@@ -510,12 +484,6 @@ async function canUseAiAnalytics(callerClient) {
   return Boolean(allowed);
 }
 
-function parseAiAnalyticsRequest(body) {
-  const { path, payload } = body ?? {};
-  if (!AI_ANALYTICS_PATHS.has(path) || !payload || typeof payload !== 'object') return null;
-  return { path, payload };
-}
-
 async function sendAiAnalyticsResponse(res, requestId, path, payload) {
   const upstreamResponse = await callAiAnalyticsBackend(path, payload);
   if (upstreamResponse.ok) return res.json(await upstreamResponse.json());
@@ -535,10 +503,9 @@ export async function aiAnalyticsHandler(req, res) {
       return res.status(403).json({ error: 'AI analytics permission required' });
     }
 
-    const analyticsRequest = parseAiAnalyticsRequest(req.body);
-    if (!analyticsRequest) {
-      return res.status(400).json({ error: 'Invalid AI analytics request' });
-    }
+    const validation = validateAiAnalyticsRequest(req.body);
+    if (!validation.ok) return res.status(400).json({ error: validation.error });
+    const analyticsRequest = validation.value;
 
     const adminClient = getAdminClient();
     const rateLimitResult = await checkRateLimit(adminClient, user.id, 'ai_analytics', 30, 60);

@@ -97,8 +97,11 @@ app.post('/api/functions/ai-analytics', aiAnalyticsHandler);
 // ── Error Handling ────────────────────────────────────────────────────────────
 
 app.use(async (err, req, res, next) => {
+  if (err?.type === 'entity.too.large') {
+    return res.status(413).json({ error: 'Request body is too large.' });
+  }
   console.error('[server] Unhandled Error:', err);
-  res.status(500).json({ error: 'Internal server error occurred.' });
+  return res.status(500).json({ error: 'Internal server error occurred.' });
 });
 
 // ── Startup checks ────────────────────────────────────────────────────────────
