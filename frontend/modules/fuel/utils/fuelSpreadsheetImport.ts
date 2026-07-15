@@ -12,10 +12,24 @@ function buildFuelIoHeaders(dayArr: number[]): string[] {
   return ['اسم المندوب', ...dayArr.map((d) => `اليوم ${d}`)];
 }
 
-export async function downloadFuelMetricTemplate(dayArr: number[], metric: FuelMetric): Promise<void> {
+export function buildFuelMetricTemplateRows(
+  dayArr: number[],
+  employees: Pick<Employee, 'name'>[],
+): string[][] {
+  const blankDayCells = dayArr.map(() => '');
+  const employeeRows = employees.map((employee) => [employee.name, ...blankDayCells]);
+  return [buildFuelIoHeaders(dayArr), ...employeeRows];
+}
+
+export async function downloadFuelMetricTemplate(
+  dayArr: number[],
+  metric: FuelMetric,
+  employees: Pick<Employee, 'name'>[],
+): Promise<void> {
   const XLSX = await loadXlsx();
-  const headers = buildFuelIoHeaders(dayArr);
-  const ws = XLSX.utils.aoa_to_sheet([headers]);
+  const rows = buildFuelMetricTemplateRows(dayArr, employees);
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = [{ wch: 36 }, ...dayArr.map(() => ({ wch: 12 }))];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'قالب');
   const fileName = metric === 'km' ? 'template_km.xlsx' : 'template_fuel.xlsx';

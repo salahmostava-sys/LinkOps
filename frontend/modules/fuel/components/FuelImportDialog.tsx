@@ -121,7 +121,7 @@ export function FuelImportDialog({
           <DialogHeader>
             <DialogTitle>رفع ملف {METRIC_LABEL[metric]} لكل المناديب</DialogTitle>
             <DialogDescription>
-              ارفع ملف Excel يحتوي على عمود اسم المندوب، ثم عمود لكل يوم في الشهر. حمّل القالب أولاً لضمان التنسيق الصحيح.
+              القالب يحتوي على أسماء المناديب جاهزة، ثم عمود لكل يوم في الشهر. أدخل القيم المطلوبة وارفع الملف مباشرة.
             </DialogDescription>
           </DialogHeader>
 
@@ -129,7 +129,7 @@ export function FuelImportDialog({
             <Button
               variant="outline"
               className="gap-2 justify-start"
-              onClick={() => downloadFuelMetricTemplate(dayArr, metric)}
+              onClick={() => downloadFuelMetricTemplate(dayArr, metric, employees)}
             >
               <Download size={16} /> تحميل القالب
             </Button>
