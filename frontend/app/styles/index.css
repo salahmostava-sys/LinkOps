@@ -223,6 +223,12 @@
     font: inherit;
   }
 
+  input::placeholder,
+  textarea::placeholder {
+    color: hsl(var(--foreground)) !important;
+    opacity: 1;
+  }
+
   button,
   a,
   [role='button'] {
@@ -359,7 +365,16 @@
     letter-spacing: 0;
   }
 
-  [class*='text-muted-foreground'] {
+  :is(
+    [class~='text-muted-foreground'],
+    [class~='text-muted-foreground/20'],
+    [class~='text-muted-foreground/30'],
+    [class~='text-muted-foreground/40'],
+    [class~='text-muted-foreground/50'],
+    [class~='text-muted-foreground/60'],
+    [class~='text-muted-foreground/80'],
+    [class~='text-muted-foreground/90']
+  ) {
     color: hsl(var(--foreground)) !important;
   }
 
