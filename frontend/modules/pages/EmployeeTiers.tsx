@@ -15,6 +15,7 @@ import { usePermissions } from '@shared/hooks/usePermissions';
 import { differenceInDays, parseISO } from 'date-fns';
 import { employeeTierService } from '@services/employeeTierService';
 import { isEmployeeExcluded } from '@shared/lib/employeeVisibility';
+import { countUnassignedOrUnusedTierNumbers } from '@modules/employees/lib/tierInventory';
 
 import { authQueryUserId, useAuthQueryGate } from '@shared/hooks/useAuthQueryGate';
 import { defaultQueryRetry } from '@shared/lib/query';
@@ -591,9 +592,7 @@ const EmployeeTiers = () => {
   const total      = tiers.length;
   const delivered  = tiers.filter(r => r.delivery_status === STATUS_DELIVERED).length;
   const notDelivered = tiers.filter(r => r.delivery_status === STATUS_NOT_DELIVERED).length;
-  const unassignedOrUnusedNumbers = tiers.filter((tier) =>
-    Boolean(tier.sim_number?.trim()) && (!tier.employee_id || tier.delivery_status !== STATUS_DELIVERED)
-  ).length;
+  const unassignedOrUnusedNumbers = countUnassignedOrUnusedTierNumbers(tiers);
   const renewingSoon = tiers.filter(r => {
     const days = differenceInDays(parseISO(r.renewal_date), new Date());
     return days >= 0 && days <= 30;
