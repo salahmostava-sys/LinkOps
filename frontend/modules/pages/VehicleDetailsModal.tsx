@@ -14,6 +14,8 @@ import type { VehicleDocument, VehicleDocumentType } from '@services/vehicleServ
 import { storageService } from '@services/storageService';
 import { getErrorMessage } from '@services/serviceError';
 import { logError } from '@shared/lib/logger';
+import { formatCurrency } from '@shared/lib/formatters';
+import { getNextMonthlyRentalDueDate } from '@shared/lib/vehicleRental';
 
 const DOC_TYPE_LABELS: Record<VehicleDocumentType, string> = {
   license: 'رخصة السير',
@@ -50,6 +52,9 @@ export function VehicleDetailsModal({ vehicle, canEdit, canDelete, onClose }: Re
   const [deleteTarget, setDeleteTarget] = useState<VehicleDocument | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [busyDocId, setBusyDocId] = useState<string | null>(null);
+  const nextRentalDueDate = vehicle.rental_start_date
+    ? getNextMonthlyRentalDueDate(vehicle.rental_start_date)
+    : null;
 
   const loadDocuments = async () => {
     setLoading(true);
@@ -205,6 +210,18 @@ export function VehicleDetailsModal({ vehicle, canEdit, canDelete, onClose }: Re
             {infoRow('الماركة / الموديل', [vehicle.brand, vehicle.model].filter(Boolean).join(' / '))}
             {infoRow('سنة الصنع', vehicle.year ? String(vehicle.year) : '')}
             {infoRow('الحالة', statusLabels[vehicle.status])}
+            {vehicle.status === 'rental' && infoRow(
+              'تاريخ بدء الإيجار',
+              vehicle.rental_start_date ? format(parseISO(vehicle.rental_start_date), 'yyyy/MM/dd') : '',
+            )}
+            {vehicle.status === 'rental' && infoRow(
+              'قيمة الإيجار الشهري',
+              vehicle.rental_monthly_amount == null ? '' : formatCurrency(vehicle.rental_monthly_amount),
+            )}
+            {vehicle.status === 'rental' && infoRow(
+              'الاستحقاق القادم',
+              nextRentalDueDate ? format(nextRentalDueDate, 'yyyy/MM/dd') : '',
+            )}
             {infoRow('المندوب الحالي', vehicle.current_rider ?? '')}
             {infoRow('انتهاء التأمين', vehicle.insurance_expiry ? format(parseISO(vehicle.insurance_expiry), 'yyyy/MM/dd') : '')}
             {infoRow('انتهاء التسجيل', vehicle.registration_expiry ? format(parseISO(vehicle.registration_expiry), 'yyyy/MM/dd') : '')}

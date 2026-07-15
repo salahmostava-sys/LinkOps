@@ -21,6 +21,7 @@ import { logError } from '@shared/lib/logger';
 import type { Vehicle, VehicleStatus } from '@modules/pages/motorcycles.shared';
 import type { VehicleReportRow } from '@services/vehicleReportService';
 import { getErrorMessage } from '@services/serviceError';
+import { getNextMonthlyRentalDueDate } from '@shared/lib/vehicleRental';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 import { loadXlsx } from '@modules/orders/utils/xlsx';
@@ -78,6 +79,12 @@ const displayCell = (value: string | number | null | undefined) => value || '—
 const formatDateCell = (date: string | null | undefined) => {
   if (!date) return '—';
   return format(new Date(date), 'yyyy/MM/dd');
+};
+
+const formatNextRentalDueDate = (rentalStartDate: string | null | undefined) => {
+  if (!rentalStartDate) return null;
+  const dueDate = getNextMonthlyRentalDueDate(rentalStartDate);
+  return dueDate ? format(dueDate, 'yyyy/MM/dd') : null;
 };
 
 const VEHICLE_TEMPLATE_HEADERS = MOTORCYCLE_IO_COLUMNS.map((c) => c.label);
@@ -634,6 +641,7 @@ const Motorcycles = () => {
                 <tbody>
                   {filtered.map((v) => {
                     const totalCost = v.total_maintenance_cost ?? 0;
+                    const nextRentalDueDate = formatNextRentalDueDate(v.rental_start_date);
                     return (
                       <tr key={v.id} className="border-b border-border/40 transition-colors last:border-b-0 hover:bg-muted/30">
                         <td className="ta-td">
@@ -695,6 +703,11 @@ const Motorcycles = () => {
                               {v.rental_monthly_amount != null && (
                                 <p className="text-blue-600 dark:text-blue-300">
                                   💰 {formatCurrency(v.rental_monthly_amount)}/شهر
+                                </p>
+                              )}
+                              {nextRentalDueDate && (
+                                <p className="text-muted-foreground">
+                                  الاستحقاق: {nextRentalDueDate}
                                 </p>
                               )}
                             </div>

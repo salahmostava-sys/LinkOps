@@ -11,6 +11,7 @@ import { exportDailyAppReportExcel, printDailyAppReportTable } from '@modules/or
 import { toast } from '@shared/components/ui/sonner';
 import { getErrorMessage } from '@services/serviceError';
 import { useAppColors, getAppColor as getAppColorFunction } from '@shared/hooks/useAppColors';
+import { buildDailyAppReportRows } from '@modules/orders/utils/dailyAppReportModel';
 
 export function useDailyAppReportTab() {
   const { enabled, userId } = useAuthQueryGate();
@@ -100,46 +101,18 @@ export function useDailyAppReportTab() {
   // Build report data to preview
   const previewData = useMemo(() => {
     if (!selectedApp || sq.loading) return [];
-
-    const targetRow = targetsData?.find((t) => t.app_id === selectedApp);
-    const appTarget = targetRow ? targetRow.target_orders : 0;
-    const employeeTarget = targetRow ? targetRow.employee_target_orders : null;
-
-    const reportData = [];
-    const dayArr = Array.from({ length: endDay - startDay + 1 }, (_, i) => startDay + i);
-
-    for (const emp of sq.employees) {
-      let total = 0;
-      let hasAnyOrdersInPeriod = false;
-      const dailyVals: number[] = [];
-
-      for (const d of dayArr) {
-        const val = sq.spreadsheetMonthData[`${emp.id}::${selectedApp}::${d}`] ?? 0;
-        dailyVals.push(val);
-        total += val;
-        if (val > 0) hasAnyOrdersInPeriod = true;
-      }
-
-      const note = '';
-      const remaining = employeeTarget != null ? employeeTarget - total : null;
-
-      if (hasAnyOrdersInPeriod) {
-        reportData.push({
-          empName: emp.name,
-          dailyVals,
-          total,
-          employeeTarget,
-          appTarget,
-          remaining,
-          note,
-        });
-      }
-    }
-
-    // Sort descending by total
-    reportData.sort((a, b) => b.total - a.total);
-    return reportData;
-  }, [selectedApp, sq.loading, sq.employees, sq.spreadsheetMonthData, startDay, endDay, targetsData]);
+    return buildDailyAppReportRows({
+      employees: sq.employees,
+      apps: sq.apps,
+      selectedAppId: selectedApp,
+      data: sq.spreadsheetMonthData,
+      targets: targetsData ?? [],
+      year,
+      month,
+      startDay,
+      endDay,
+    });
+  }, [selectedApp, sq.loading, sq.employees, sq.apps, sq.spreadsheetMonthData, year, month, startDay, endDay, targetsData]);
 
   return {
     loading: sq.loading,

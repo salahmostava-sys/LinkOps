@@ -8,6 +8,7 @@ import { Label } from '@shared/components/ui/label';
 import { useDailyAppReportTab } from '@modules/orders/hooks/useDailyAppReportTab';
 import { cn } from '@shared/lib/utils';
 import { ScrollArea, ScrollBar } from '@shared/components/ui/scroll-area';
+import { ALL_APPS_REPORT_ID } from '@modules/orders/utils/dailyAppReportModel';
 
 export const DailyAppReportTab = React.memo(() => {
   const r = useDailyAppReportTab();
@@ -40,6 +41,18 @@ export const DailyAppReportTab = React.memo(() => {
           <div className="flex items-center gap-3">
             <Label className="text-sm font-semibold text-muted-foreground whitespace-nowrap">اختر المنصة / التطبيق:</Label>
             <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => r.setSelectedApp(ALL_APPS_REPORT_ID)}
+                className={cn(
+                  'rounded-lg border border-transparent px-4 py-2 text-sm font-medium shadow-sm transition-colors',
+                  r.selectedApp === ALL_APPS_REPORT_ID
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground',
+                )}
+              >
+                الكل
+              </button>
               {r.apps.map((app) => {
                 const isSelected = r.selectedApp === app.id;
                 const color = r.getAppColor(app.id);
@@ -133,14 +146,16 @@ export const DailyAppReportTab = React.memo(() => {
                     ))}
                     <th className="p-3 font-semibold text-primary text-center">الإجمالي</th>
                     <th className="p-3 font-semibold text-muted-foreground text-center">تارجت المندوب</th>
+                    <th className="p-3 font-semibold text-muted-foreground text-center">نسبة الإنجاز</th>
                     <th className="p-3 font-semibold text-muted-foreground text-center">المتبقي</th>
+                    <th className="p-3 font-semibold text-muted-foreground text-center">متوقع تحقيق التارجت</th>
                     <th className="p-3 font-semibold text-muted-foreground min-w-[200px]">الملاحظات (التوصيات)</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/40">
                   {r.previewData.length > 0 ? (
                     r.previewData.map((row) => (
-                      <tr key={row.empName} className="hover:bg-muted/30 transition-colors">
+                      <tr key={row.empId} className="hover:bg-muted/30 transition-colors">
                         <td className="p-3 font-medium text-foreground sticky right-0 bg-card z-10 shadow-[1px_0_0_0_hsl(var(--border)/0.4)]">
                           {row.empName}
                         </td>
@@ -159,6 +174,9 @@ export const DailyAppReportTab = React.memo(() => {
                         <td className="p-3 text-center font-medium text-muted-foreground">
                           {row.employeeTarget ?? '-'}
                         </td>
+                        <td className="p-3 text-center font-semibold text-foreground">
+                          {row.achievementPercentage === null ? '-' : `${row.achievementPercentage.toFixed(1)}%`}
+                        </td>
                         <td className="p-3 text-center">
                           {row.employeeTarget != null ? (
                             <span className={row.remaining <= 0 ? 'text-emerald-500 font-bold' : 'text-amber-500 font-medium'}>
@@ -168,6 +186,21 @@ export const DailyAppReportTab = React.memo(() => {
                             <span className="text-muted-foreground/30">-</span>
                           )}
                         </td>
+                        <td className="p-3 text-center">
+                          {row.expectedToReachTarget === null ? (
+                            <span className="text-muted-foreground/40">-</span>
+                          ) : (
+                            <span className={cn(
+                              'inline-flex rounded-full px-2 py-1 text-xs font-semibold',
+                              row.expectedToReachTarget
+                                ? 'bg-success/10 text-success'
+                                : 'bg-destructive/10 text-destructive',
+                            )}>
+                              {row.expectedToReachTarget ? 'متوقع' : 'غير متوقع'}
+                              {row.projectedTotal !== null ? ` (${row.projectedTotal})` : ''}
+                            </span>
+                          )}
+                        </td>
                         <td className="p-3 text-muted-foreground">
                           {row.note || <span className="text-muted-foreground/30">--</span>}
                         </td>
@@ -175,7 +208,7 @@ export const DailyAppReportTab = React.memo(() => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={dayArr.length + 3} className="p-8 text-center text-muted-foreground">
+                      <td colSpan={dayArr.length + 7} className="p-8 text-center text-muted-foreground">
                         لا توجد طلبات مسجلة لهذه المنصة في النطاق الزمني المحدد.
                       </td>
                     </tr>

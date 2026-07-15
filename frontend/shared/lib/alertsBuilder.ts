@@ -1,5 +1,16 @@
-import { differenceInDays, format, parseISO } from "date-fns";
+import {
+  addMonths,
+  addYears,
+  differenceInCalendarDays,
+  differenceInCalendarMonths,
+  differenceInCalendarYears,
+  differenceInDays,
+  format,
+  isAfter,
+  parseISO,
+} from "date-fns";
 import { fmtNum } from "@shared/lib/utils";
+import { getNextMonthlyRentalDueDate } from "@shared/lib/vehicleRental";
 
 const ISO_DATE_FORMAT = "yyyy-MM-dd";
 
@@ -109,18 +120,60 @@ export type CommercialRecordRenewalCostRow = {
 
 const commercialRecordKey = (value: string | null | undefined) => (value ?? "").trim().toLocaleLowerCase();
 
+type ResidencyRenewalQuote = {
+  cost: number | null;
+  period: "monthly" | "yearly" | null;
+  durationLabel: string | null;
+};
+
+const getRequiredMonthlyRenewalMonths = (expiryDate: Date, today: Date) => {
+  const elapsedCalendarMonths = Math.max(0, differenceInCalendarMonths(today, expiryDate));
+  const monthsUntilValid = isAfter(addMonths(expiryDate, elapsedCalendarMonths), today)
+    ? elapsedCalendarMonths
+    : elapsedCalendarMonths + 1;
+  return Math.max(3, Math.ceil(monthsUntilValid / 3) * 3);
+};
+
+const getRequiredYearlyRenewals = (expiryDate: Date, today: Date) => {
+  const elapsedCalendarYears = Math.max(0, differenceInCalendarYears(today, expiryDate));
+  return isAfter(addYears(expiryDate, elapsedCalendarYears), today)
+    ? Math.max(1, elapsedCalendarYears)
+    : elapsedCalendarYears + 1;
+};
+
+const getYearDurationLabel = (years: number) => {
+  if (years === 1) return "سنة واحدة";
+  if (years === 2) return "سنتان";
+  return `${years} سنوات`;
+};
+
 const getResidencyRenewalCost = (
   emp: EmployeeAlertRow,
-  renewalCostByRecord: Map<string, CommercialRecordRenewalCostRow>
-) => {
+  renewalCostByRecord: Map<string, CommercialRecordRenewalCostRow>,
+  today: Date,
+): ResidencyRenewalQuote => {
   const record = renewalCostByRecord.get(commercialRecordKey(emp.commercial_record));
   const rawCost = record?.residency_renewal_monthly_cost ?? null;
-  if (rawCost === null) return { cost: null, period: null };
+  if (rawCost === null || !emp.residency_expiry) {
+    return { cost: null, period: null, durationLabel: null };
+  }
 
   const period = record?.residency_renewal_cost_period === "yearly" ? "yearly" : "monthly";
+  const expiryDate = parseISO(emp.residency_expiry);
+  if (period === "yearly") {
+    const renewalYears = getRequiredYearlyRenewals(expiryDate, today);
+    return {
+      cost: rawCost * renewalYears,
+      period,
+      durationLabel: getYearDurationLabel(renewalYears),
+    };
+  }
+
+  const renewalMonths = getRequiredMonthlyRenewalMonths(expiryDate, today);
   return {
-    cost: period === "yearly" ? rawCost : rawCost * 3,
+    cost: rawCost * renewalMonths,
     period,
+    durationLabel: `${renewalMonths} شهر`,
   };
 };
 
@@ -152,8 +205,7 @@ const getEmployeeAlertLabel = (emp: EmployeeAlertRow) =>
 
 const getResidencyRenewalLabel = (renewal: ReturnType<typeof getResidencyRenewalCost>) => {
   if (renewal.cost === null) return "";
-  const periodLabel = renewal.period === "yearly" ? "سنوي" : "3 شهور";
-  return ` — تكلفة التجديد: ${fmtNum(renewal.cost)} ر.س (${periodLabel})`;
+  return ` — تكلفة التجديد: ${fmtNum(renewal.cost)} ر.س (${renewal.durationLabel})`;
 };
 
 const buildResidencyAlert = (
@@ -164,7 +216,7 @@ const buildResidencyAlert = (
 ): Alert | null => {
   if (!emp.residency_expiry) return null;
   const daysLeft = differenceInDays(parseISO(emp.residency_expiry), today);
-  const renewal = getResidencyRenewalCost(emp, renewalCostByRecord);
+  const renewal = getResidencyRenewalCost(emp, renewalCostByRecord, today);
   return {
     id: `res-${emp.id}`,
     sourceKey: `res-${emp.id}`,
@@ -214,24 +266,6 @@ const pushIfDue = (out: Alert[], alert: Alert | null, threshold: string) => {
 /** عدد الأيام قبل تاريخ استحقاق الإيجار لإظهار التنبيه */
 const RENTAL_ALERT_LEAD_DAYS = 5;
 
-/**
- * تحسب تاريخ الاستحقاق الشهري القادم بناءً على يوم بدء الإيجار.
- * مثال: بدأ الإيجار في 5 يناير → الاستحقاق كل شهر في اليوم 5.
- * إذا كان اليوم 5 مضى هذا الشهر ينتقل للشهر القادم.
- */
-const getNextRentalDueDate = (rentalStartDate: string, today: Date): Date => {
-  const startDay = parseISO(rentalStartDate).getDate();
-  const year = today.getFullYear();
-  const month = today.getMonth(); // 0-indexed
-
-  // جرب استحقاق هذا الشهر
-  const thisMonthDue = new Date(year, month, startDay);
-  // إذا الاستحقاق لم يمر بعد (today < dueDate) أو لا يزال ضمن نافذة التنبيه → استخدمه
-  if (today <= thisMonthDue) return thisMonthDue;
-  // وإلا انتقل للشهر القادم
-  return new Date(year, month + 1, startDay);
-};
-
 const pushVehicleRentalAlerts = (
   out: Alert[],
   vehicles: VehicleRentalAlertRow[] | null | undefined,
@@ -240,9 +274,10 @@ const pushVehicleRentalAlerts = (
   if (!vehicles?.length) return;
   for (const v of vehicles) {
     if (v.status !== "rental" || !v.rental_start_date) continue;
-    const dueDate = getNextRentalDueDate(v.rental_start_date, today);
+    const dueDate = getNextMonthlyRentalDueDate(v.rental_start_date, today);
+    if (!dueDate) continue;
     const dueDateStr = format(dueDate, ISO_DATE_FORMAT);
-    const daysLeft = differenceInDays(dueDate, today);
+    const daysLeft = differenceInCalendarDays(dueDate, today);
     // إظهار التنبيه فقط متى كان الاستحقاق خلال نافذة RENTAL_ALERT_LEAD_DAYS
     if (daysLeft > RENTAL_ALERT_LEAD_DAYS) continue;
     const amountStr = v.rental_monthly_amount != null
@@ -259,6 +294,7 @@ const pushVehicleRentalAlerts = (
       daysLeft,
       severity: daysLeft <= 1 ? "urgent" : daysLeft <= 3 ? "warning" : "info",
       resolved: false,
+      estimatedCost: v.rental_monthly_amount,
     });
   }
 };

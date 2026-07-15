@@ -9,6 +9,8 @@ import { vehicleService } from '@services/vehicleService';
 import { logError } from '@shared/lib/logger';
 import { ALL_STATUSES, statusLabels, type Vehicle, type VehicleStatus } from '@modules/pages/motorcycles.shared';
 import { getErrorMessage } from '@services/serviceError';
+import { format } from 'date-fns';
+import { getNextMonthlyRentalDueDate } from '@shared/lib/vehicleRental';
 
 type VehicleFormModalProps = {
   open: boolean;
@@ -61,6 +63,9 @@ export function VehicleFormModal({ open, onClose, onSaved, editVehicle }: Readon
   const [form, setForm] = useState<VehicleFormState>(EMPTY_FORM);
 
   const isRental = form.status === 'rental';
+  const nextRentalDueDate = isRental && form.rental_start_date
+    ? getNextMonthlyRentalDueDate(form.rental_start_date)
+    : null;
 
   useEffect(() => {
     if (!editVehicle) {
@@ -106,6 +111,12 @@ export function VehicleFormModal({ open, onClose, onSaved, editVehicle }: Readon
       return;
     }
 
+    const rentalMonthlyAmount = Number.parseFloat(form.rental_monthly_amount);
+    if (isRental && (!Number.isFinite(rentalMonthlyAmount) || rentalMonthlyAmount <= 0)) {
+      toast({ title: 'يرجى إدخال مبلغ إيجار شهري صحيح', variant: 'destructive' });
+      return;
+    }
+
     setSaving(true);
     try {
       const payload = {
@@ -124,9 +135,7 @@ export function VehicleFormModal({ open, onClose, onSaved, editVehicle }: Readon
         serial_number: form.serial_number.trim() || null,
         notes: form.notes || null,
         rental_start_date: isRental ? (form.rental_start_date || null) : null,
-        rental_monthly_amount: isRental && form.rental_monthly_amount
-          ? Number.parseFloat(form.rental_monthly_amount)
-          : null,
+        rental_monthly_amount: isRental ? rentalMonthlyAmount : null,
       };
 
       if (editVehicle) {
@@ -215,20 +224,26 @@ export function VehicleFormModal({ open, onClose, onSaved, editVehicle }: Readon
                 </div>
                 <div>
                   <label htmlFor="vehicle-rental-amount" className="mb-1 block text-sm font-medium">
-                    المبلغ الشهري (ر.س)
+                    المبلغ الشهري (ر.س) *
                   </label>
                   <Input
                     id="vehicle-rental-amount"
                     type="number"
-                    min="0"
+                    min="0.01"
                     step="0.01"
                     value={form.rental_monthly_amount}
                     onChange={(event) => setForm((previous) => ({ ...previous, rental_monthly_amount: event.target.value }))}
                     placeholder="1500"
                     dir="ltr"
+                    required
                   />
                 </div>
               </div>
+              {nextRentalDueDate && (
+                <p className="mt-2 text-xs font-medium text-blue-700 dark:text-blue-300">
+                  الاستحقاق الشهري القادم: {format(nextRentalDueDate, 'yyyy/MM/dd')}
+                </p>
+              )}
             </div>
           )}
 

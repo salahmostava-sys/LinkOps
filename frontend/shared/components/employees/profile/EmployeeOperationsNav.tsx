@@ -5,20 +5,30 @@ import { Button } from '@shared/components/ui/button';
 
 type EmployeeOperationsNavProps = Readonly<{
   employeeName: string;
+  activeTab: string;
 }>;
 
-const operations = [
-  { path: '/orders?tab=grid', label: 'الطلبات', icon: ShoppingBag },
-  { path: '/salaries', label: 'الرواتب', icon: DollarSign },
-  { path: '/advances', label: 'السلف', icon: HandCoins },
-  { path: '/vehicle-assignment', label: 'العهدة', icon: Bike },
-] as const;
+const operationByTab = {
+  orders: { path: '/orders?tab=grid', label: 'فتح صفحة الطلبات', icon: ShoppingBag },
+  salaries: { path: '/salaries', label: 'فتح صفحة الرواتب', icon: DollarSign },
+  advances: { path: '/advances', label: 'فتح صفحة السلف', icon: HandCoins },
+} as const;
 
-export function EmployeeOperationsNav({ employeeName }: EmployeeOperationsNavProps) {
+const vehicleAssignmentOperation = {
+  path: '/vehicle-assignment',
+  label: 'العهدة',
+  icon: Bike,
+} as const;
+
+export function EmployeeOperationsNav({ employeeName, activeTab }: EmployeeOperationsNavProps) {
   const navigate = useNavigate();
+  const activeOperation = operationByTab[activeTab as keyof typeof operationByTab];
+  const operations = activeOperation
+    ? [activeOperation, vehicleAssignmentOperation]
+    : [vehicleAssignmentOperation];
 
   return (
-    <nav className="flex flex-wrap items-center gap-2" aria-label="الانتقال إلى عمليات الموظف">
+    <nav className="flex flex-wrap items-center gap-1" aria-label="إجراءات الموظف المرتبطة بالتبويب">
       {operations.map(({ path, label, icon: Icon }) => {
         const separator = path.includes('?') ? '&' : '?';
         const destination = `${path}${separator}search=${encodeURIComponent(employeeName)}`;
@@ -27,7 +37,7 @@ export function EmployeeOperationsNav({ employeeName }: EmployeeOperationsNavPro
             key={path}
             variant="outline"
             size="sm"
-            className="gap-1.5"
+            className="h-8 gap-1.5"
             onClick={() => navigate(destination)}
           >
             <Icon size={14} />

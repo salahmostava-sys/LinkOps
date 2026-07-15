@@ -62,6 +62,7 @@ export const alertTypeLabels: Record<string, string> = {
   driving_license: 'رخصة قيادة',
   platform_account: 'حساب منصة',
   employee_absconded: 'موظف مسجل هروب',
+  vehicle_rental: 'إيجار مركبة',
 };
 
 const severityStyles: Record<string, string> = { urgent: 'badge-urgent', warning: 'badge-warning', info: 'badge-info' };
@@ -70,6 +71,7 @@ const severityLabels: Record<string, string> = { urgent: '🔴 عاجل', warnin
 const typeIcons: Record<string, string> = {
   residency: '🪪', insurance: '🛡️', authorization: '📋', probation: '⏳',
   health_insurance: '🏥', driving_license: '🪪', platform_account: '📱', employee_absconded: '⚠️',
+  vehicle_rental: '🚙',
 };
 
 const workflowLabels = {
@@ -104,7 +106,7 @@ function getWorkflowTarget(alert: Alert): AlertWorkflowTarget {
 }
 
 function getAlertCost(alert: Alert): number | null {
-  return alert.estimatedCost ?? alert.residencyRenewalCost ?? null;
+  return alert.residencyRenewalCost ?? alert.estimatedCost ?? null;
 }
 
 function canOpenAlertEntity(alert: Alert): boolean {
@@ -310,7 +312,7 @@ const Alerts = () => {
     XLSX.writeFile(wb, 'template_alerts.xlsx');
   };
 
-  const typeOptions = ['all', 'expired_residency_cost', 'residency', 'insurance', 'authorization', 'probation', 'platform_account'];
+  const typeOptions = ['all', 'expired_residency_cost', 'vehicle_rental', 'residency', 'insurance', 'authorization', 'probation', 'platform_account'];
 
   let alertsContent = null;
   if (alertsQuery.isLoading) {

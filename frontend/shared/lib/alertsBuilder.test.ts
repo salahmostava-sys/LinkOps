@@ -98,5 +98,110 @@ describe('buildAlertsFromResponses', () => {
       resolutionNote: 'جارٍ تجهيز الطلب',
     });
   });
+
+  it('creates a monthly rental reminder with the vehicle rental cost', () => {
+    const alerts = buildAlertsFromResponses(
+      {
+        employeesRes: { data: [] },
+        vehiclesRes: { data: [] },
+        platformAccountsRes: { data: [] },
+        dbAlertsRes: { data: [] },
+        sparePartsRes: { data: [] },
+        abscondedRes: { data: [] },
+        commercialRecordsRes: { data: [] },
+        rentalVehiclesRes: {
+          data: [{
+            id: 'vehicle-1',
+            plate_number: 'ABC 1234',
+            status: 'rental',
+            rental_start_date: '2026-01-31',
+            rental_monthly_amount: 1750,
+          }],
+        },
+      },
+      '2026-02-28',
+      new Date(2026, 1, 24),
+    );
+
+    expect(alerts).toContainEqual(expect.objectContaining({
+      id: 'rental-vehicle-1',
+      type: 'vehicle_rental',
+      dueDate: '2026-02-28',
+      daysLeft: 4,
+      estimatedCost: 1750,
+    }));
+  });
+
+  it.each([
+    {
+      description: 'monthly renewal',
+      employeeId: 'emp-expired',
+      employeeName: 'موظف منتهي',
+      recordName: 'سجل المقاولات',
+      expiryDate: '2025-08-18',
+      baseCost: 800,
+      period: 'monthly' as const,
+      expectedCost: 9600,
+      expectedDuration: '12 شهر',
+    },
+    {
+      description: 'annual individual-establishment renewal',
+      employeeId: 'emp-yearly',
+      employeeName: 'موظف مؤسسة فردية',
+      recordName: 'مؤسسة فردية',
+      expiryDate: '2024-04-10',
+      baseCost: 2400,
+      period: 'yearly' as const,
+      expectedCost: 7200,
+      expectedDuration: '3 سنوات',
+    },
+  ])('charges enough $description periods to make the residency valid', ({
+    employeeId,
+    employeeName,
+    recordName,
+    expiryDate,
+    baseCost,
+    period,
+    expectedCost,
+    expectedDuration,
+  }) => {
+    const alerts = buildAlertsFromResponses(
+      {
+        employeesRes: {
+          data: [{
+            id: employeeId,
+            name: employeeName,
+            commercial_record: recordName,
+            residency_expiry: expiryDate,
+            probation_end_date: null,
+            status: 'active',
+          }],
+        },
+        vehiclesRes: { data: [] },
+        platformAccountsRes: { data: [] },
+        dbAlertsRes: { data: [] },
+        sparePartsRes: { data: [] },
+        abscondedRes: { data: [] },
+        commercialRecordsRes: {
+          data: [{
+            name: recordName,
+            residency_renewal_monthly_cost: baseCost,
+            residency_renewal_cost_period: period,
+          }],
+        },
+        rentalVehiclesRes: { data: [] },
+      },
+      '2026-12-31',
+      new Date(2026, 6, 15),
+    );
+
+    expect(alerts[0]).toMatchObject({
+      type: 'residency',
+      residencyRenewalCost: expectedCost,
+      residencyRenewalCostPeriod: period,
+    });
+    expect(alerts[0]?.entityName).toContain(expectedCost.toLocaleString('en-US'));
+    expect(alerts[0]?.entityName).toContain(expectedDuration);
+  });
 });
 

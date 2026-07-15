@@ -24,6 +24,10 @@ import {
 import { ImportFactory } from '@modules/orders/utils/import/importFactory';
 import { loadXlsx } from '@modules/orders/utils/xlsx';
 import { matchEmployeeNames, type UnmatchedEmployeeName } from '@shared/lib/nameMatching';
+import {
+  buildDailyAppReportRows,
+  getDailyAppReportName,
+} from '@modules/orders/utils/dailyAppReportModel';
 
 function summarizeMessages(messages: string[], limit = 3): string {
   if (messages.length === 0) return '';
@@ -137,40 +141,41 @@ export async function exportDailyAppReportExcel(params: {
   const XLSX = await loadXlsx();
   const { year, month, startDay, endDay, appId, employees, data, apps } = params;
 
-  const appName = apps.find(a => a.id === appId)?.name || 'غير معروف';
-
   const my = monthYear(year, month);
   const targets = await orderService.getMonthTargets(my);
-  const targetRow = targets.find((t) => t.app_id === appId);
-  const appTarget = targetRow?.target_orders ?? 0;
-  const empTarget = targetRow?.employee_target_orders ?? null;
-
-  const results = employees.map(emp => {
-    let total = 0;
-    for (let d = startDay; d <= endDay; d++) {
-      const key = `${emp.id}::${appId}::${d}`;
-      total += data[key] || 0;
-    }
-    return { name: emp.name, total, appTarget, empTarget };
-  }).filter(r => r.total > 0).sort((a, b) => b.total - a.total);
+  const appName = getDailyAppReportName(apps, appId);
+  const results = buildDailyAppReportRows({
+    employees, apps, selectedAppId: appId, data, targets,
+    year, month, startDay, endDay,
+  });
 
   const titleText = `تقرير تطبيق ${appName} من يوم ${startDay} إلى ${endDay} (${year}-${String(month).padStart(2, '0')})`;
   
   const rows: Array<Array<string | number>> = [
     [titleText],
     [],
-    ['اسم المندوب', 'إجمالي الطلبات', 'تارجت المندوب', 'المتبقي للوصول للتارجت', 'التوصيات']
+    ['اسم المندوب', 'إجمالي الطلبات', 'تارجت المندوب', 'نسبة الإنجاز', 'المتبقي للوصول للتارجت', 'متوقع تحقيق التارجت', 'التوصيات']
   ];
 
-  results.forEach(r => {
-    const remaining = r.empTarget != null ? r.empTarget - r.total : '—';
-    const displayEmpTarget = r.empTarget ?? 'بدون هدف';
-    rows.push([r.name, r.total, displayEmpTarget, remaining, '']);
+  results.forEach((row) => {
+    const achievement = row.achievementPercentage === null ? '—' : `${row.achievementPercentage.toFixed(1)}%`;
+    const expected = row.expectedToReachTarget === null
+      ? '—'
+      : `${row.expectedToReachTarget ? 'متوقع' : 'غير متوقع'} (${row.projectedTotal})`;
+    rows.push([
+      row.empName,
+      row.total,
+      row.employeeTarget ?? 'بدون هدف',
+      achievement,
+      row.remaining ?? '—',
+      expected,
+      row.note,
+    ]);
   });
 
   const ws = XLSX.utils.aoa_to_sheet(rows);
   if (!ws['!merges']) ws['!merges'] = [];
-  ws['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 0, c: 4 } });
+  ws['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 0, c: 6 } });
 
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'التقرير');
@@ -189,22 +194,13 @@ export async function printDailyAppReportTable(params: {
   apps: App[];
 }) {
   const { year, month, startDay, endDay, appId, employees, data, apps } = params;
-  const appName = apps.find(a => a.id === appId)?.name || 'غير معروف';
-
   const my = monthYear(year, month);
   const targets = await orderService.getMonthTargets(my);
-  const targetRow = targets.find((t) => t.app_id === appId);
-  const appTarget = targetRow?.target_orders ?? 0;
-  const empTarget = targetRow?.employee_target_orders ?? null;
-
-  const results = employees.map(emp => {
-    let total = 0;
-    for (let d = startDay; d <= endDay; d++) {
-      const key = `${emp.id}::${appId}::${d}`;
-      total += data[key] || 0;
-    }
-    return { name: emp.name, total, appTarget, empTarget };
-  }).filter(r => r.total > 0).sort((a, b) => b.total - a.total);
+  const appName = getDailyAppReportName(apps, appId);
+  const results = buildDailyAppReportRows({
+    employees, apps, selectedAppId: appId, data, targets,
+    year, month, startDay, endDay,
+  });
 
   const titleText = `تقرير تطبيق ${appName} من يوم ${startDay} إلى ${endDay} (${year}-${String(month).padStart(2, '0')})`;
 
@@ -250,22 +246,28 @@ export async function printDailyAppReportTable(params: {
       <th>اسم المندوب</th>
       <th>إجمالي الطلبات</th>
       <th>تارجت المندوب</th>
+      <th>نسبة الإنجاز</th>
       <th>المتبقي</th>
+      <th>متوقع تحقيق التارجت</th>
       <th>التوصيات</th>
     </tr>
   `;
   table.appendChild(thead);
 
   const tbody = doc.createElement('tbody');
-  results.forEach(r => {
-    const remaining = r.empTarget != null ? r.empTarget - r.total : '—';
-    const displayEmpTarget = r.empTarget ?? 'بدون هدف';
+  results.forEach((row) => {
+    const achievement = row.achievementPercentage === null ? '—' : `${row.achievementPercentage.toFixed(1)}%`;
+    const expected = row.expectedToReachTarget === null
+      ? '—'
+      : `${row.expectedToReachTarget ? 'متوقع' : 'غير متوقع'} (${row.projectedTotal})`;
     const tr = doc.createElement('tr');
     tr.innerHTML = `
-      <td>${r.name}</td>
-      <td>${r.total}</td>
-      <td>${displayEmpTarget}</td>
-      <td dir="ltr" style="text-align: right;">${remaining}</td>
+      <td>${row.empName}</td>
+      <td>${row.total}</td>
+      <td>${row.employeeTarget ?? 'بدون هدف'}</td>
+      <td>${achievement}</td>
+      <td dir="ltr" style="text-align: right;">${row.remaining ?? '—'}</td>
+      <td>${expected}</td>
       <td></td>
     `;
     tbody.appendChild(tr);

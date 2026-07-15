@@ -17,6 +17,8 @@ export interface VehicleReportRow {
   serial_number: string | null;
   chassis_number: string | null;
   notes: string | null;
+  rental_start_date: string | null;
+  rental_monthly_amount: number | null;
   // computed from joins
   current_rider: string | null;
   total_maintenance_cost: number;
@@ -210,6 +212,8 @@ export async function getVehicleReport(filters: VehicleReportFilters = {}): Prom
       serial_number: v.serial_number ?? null,
       chassis_number: v.chassis_number ?? null,
       notes: v.notes ?? null,
+      rental_start_date: v.rental_start_date ?? null,
+      rental_monthly_amount: v.rental_monthly_amount ?? null,
       current_rider: riderMap[v.id] ?? null,
       total_maintenance_cost: vLogs.reduce((s, l) => s + l.total_cost, 0),
       maintenance_count: vLogs.length,
