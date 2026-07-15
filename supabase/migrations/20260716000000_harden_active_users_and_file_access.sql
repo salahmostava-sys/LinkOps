@@ -37,9 +37,6 @@ GRANT EXECUTE ON FUNCTION public.enforce_rate_limit(text, integer, integer)
 
 -- Vehicle document metadata follows the same per-user permission source as
 -- the vehicles page itself.
-ALTER TABLE public.vehicle_documents
-  ALTER COLUMN created_by SET DEFAULT auth.uid();
-
 DROP POLICY IF EXISTS "Authenticated users can view vehicle documents"
   ON public.vehicle_documents;
 CREATE POLICY "Authenticated users can view vehicle documents"
@@ -52,10 +49,7 @@ DROP POLICY IF EXISTS "Authenticated users can insert vehicle documents"
 CREATE POLICY "Authenticated users can insert vehicle documents"
   ON public.vehicle_documents FOR INSERT
   TO authenticated
-  WITH CHECK (
-    public.has_permission('vehicles', 'write')
-    AND created_by = auth.uid()
-  );
+  WITH CHECK (public.has_permission('vehicles', 'write'));
 
 DROP POLICY IF EXISTS "Authenticated users can update vehicle documents"
   ON public.vehicle_documents;
