@@ -69,7 +69,7 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // ── Health check ─────────────────────────────────────────────────────────────
-app.get('/health', limiter, (req, res) => res.json({ status: 'ok' }));
+app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
 // ── Authentication Middleware ────────────────────────────────────────────────
 app.use('/api/functions/*', (req, res, next) => {

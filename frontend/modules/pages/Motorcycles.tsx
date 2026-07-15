@@ -57,19 +57,16 @@ const statusLabels: Record<string, string> = {
   inactive: 'غير نشطة',
 };
 
-const VEHICLE_STATUS_CELL_CLASSES: Record<VehicleStatus, string> = {
-  active: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200',
-  maintenance: 'bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-200',
-  breakdown: 'bg-rose-100 text-rose-800 dark:bg-rose-950/50 dark:text-rose-200',
-  rental: 'bg-blue-100 text-blue-800 dark:bg-blue-950/50 dark:text-blue-200',
-  inactive: 'bg-slate-100 text-foreground dark:bg-slate-800',
-  ended: 'bg-zinc-200 text-foreground dark:bg-zinc-800',
+const VEHICLE_STATUS_BADGE_CLASSES: Record<VehicleStatus, string> = {
+  active: 'border-emerald-200 bg-emerald-100 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-200',
+  maintenance: 'border-amber-200 bg-amber-100 text-amber-800 dark:border-amber-900 dark:bg-amber-950/50 dark:text-amber-200',
+  breakdown: 'border-rose-200 bg-rose-100 text-rose-800 dark:border-rose-900 dark:bg-rose-950/50 dark:text-rose-200',
+  rental: 'border-blue-200 bg-blue-100 text-blue-800 dark:border-blue-900 dark:bg-blue-950/50 dark:text-blue-200',
+  inactive: 'border-slate-300 bg-slate-100 text-foreground dark:border-slate-700 dark:bg-slate-800',
+  ended: 'border-zinc-300 bg-zinc-200 text-foreground dark:border-zinc-700 dark:bg-zinc-800',
 };
 
-const vehicleStatusLabel = (status: VehicleStatus, rider?: string | null) => {
-  if (status !== 'active') return statusLabels[status];
-  return rider ? 'متاح مع مندوب' : 'متاح بدون مندوب';
-};
+const vehicleStatusLabel = (status: VehicleStatus) => status === 'active' ? 'متاح' : statusLabels[status];
 
 const typeLabels: Record<string, string> = { motorcycle: 'دباب', car: 'سيارة' };
 
@@ -646,13 +643,13 @@ const Motorcycles = () => {
           }
           return (
             <div className="overflow-x-auto rounded-2xl border border-border/60 bg-card shadow-sm">
-              <table className="w-full min-w-[1700px] text-sm">
+              <table className="w-full min-w-[1600px] text-sm">
                 <thead className="bg-muted/70">
                   <tr className="border-b border-border/60">
                     <th className="ta-th">رقم اللوحة</th>
-                    <th className="ta-th">حالة الشريحة</th>
+                    <th className="ta-th w-32">حالة الشريحة</th>
                     <th className="ta-th">المندوب</th>
-                    <th className="ta-th">حالة الدباب</th>
+                    <th className="ta-th w-28">حالة الدباب</th>
                     <th className="ta-th">الماركة والموديل</th>
                     <th className="ta-th">سنة الصنع</th>
                     <th className="ta-th">الرقم التسلسلي</th>
@@ -670,11 +667,11 @@ const Motorcycles = () => {
                     const totalCost = v.total_maintenance_cost ?? 0;
                     const nextRentalDueDate = formatNextRentalDueDate(v.rental_start_date);
                     return (
-                      <tr key={v.id} className="border-b border-border/40 transition-colors last:border-b-0 hover:bg-muted/30">
+                      <tr key={v.id} className="h-12 border-b border-border/40 transition-colors last:border-b-0 hover:bg-muted/30">
                         <td className="ta-td">
                           <div className="flex items-center gap-2">
                             <div
-                              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${
+                              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
                                 v.type === 'motorcycle'
                                   ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
                                   : 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400'
@@ -689,7 +686,7 @@ const Motorcycles = () => {
                           </div>
                         </td>
                         <td className="ta-td">
-                          <div className="flex min-w-40 items-center justify-center gap-2">
+                          <div className="flex min-w-28 items-center justify-center gap-1.5">
                             <Select
                               value={v.has_fuel_chip ? 'present' : 'absent'}
                               onValueChange={(chipStatus) => {
@@ -703,7 +700,7 @@ const Motorcycles = () => {
                               disabled={!permissions.can_edit || updatingVehicleId === v.id}
                             >
                               <SelectTrigger
-                                className={`relative mx-auto h-10 w-36 justify-center px-8 text-center font-bold shadow-none disabled:opacity-100 [&>svg]:absolute [&>svg]:left-3 ${
+                                className={`relative mx-auto h-8 w-28 justify-center px-6 text-center text-xs font-bold shadow-none disabled:opacity-100 [&>svg]:absolute [&>svg]:left-2 [&>svg]:h-3 [&>svg]:w-3 ${
                                   v.has_fuel_chip
                                     ? 'border-emerald-200 bg-emerald-100 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-200'
                                     : 'border-zinc-300 bg-zinc-100 text-foreground dark:border-zinc-700 dark:bg-zinc-800'
@@ -729,7 +726,7 @@ const Motorcycles = () => {
                             <span className="text-muted-foreground">بدون مندوب</span>
                           )}
                         </td>
-                        <td className={`ta-td !p-0 ${VEHICLE_STATUS_CELL_CLASSES[v.status]}`}>
+                        <td className="ta-td text-center">
                           <Select
                             value={v.status}
                             onValueChange={(status) => handleQuickVehicleUpdate(
@@ -740,10 +737,10 @@ const Motorcycles = () => {
                             disabled={!permissions.can_edit || updatingVehicleId === v.id}
                           >
                             <SelectTrigger
-                              className="relative min-h-16 w-full justify-center rounded-none border-0 bg-transparent px-8 text-center font-bold text-current shadow-none hover:bg-black/[0.03] disabled:opacity-100 dark:hover:bg-white/[0.04] [&>svg]:absolute [&>svg]:left-3"
+                              className={`relative mx-auto h-8 w-auto min-w-20 justify-center rounded-md px-6 text-center text-xs font-bold shadow-none disabled:opacity-100 [&>svg]:absolute [&>svg]:left-2 [&>svg]:h-3 [&>svg]:w-3 ${VEHICLE_STATUS_BADGE_CLASSES[v.status]}`}
                               aria-label={`تغيير حالة الدباب ${v.plate_number}`}
                             >
-                              <span>{vehicleStatusLabel(v.status, v.current_rider)}</span>
+                              <span>{vehicleStatusLabel(v.status)}</span>
                             </SelectTrigger>
                             <SelectContent>
                               {ALL_STATUSES.map((status) => (

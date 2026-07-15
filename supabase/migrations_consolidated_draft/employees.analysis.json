@@ -1,0 +1,438 @@
+{
+  "table": "employees",
+  "migration_count": 227,
+  "touching_files": [
+    "20260106000000_update_salary_engine_for_shifts.sql",
+    "20260226083236_a06ac86d-f40a-4105-8231-3099763861e3.sql",
+    "20260305073335_6a77e95f-f6cd-4721-bd47-d67009b898d8.sql",
+    "20260308074600_505a58f7-de3a-4e55-9d20-96bced1928fb.sql",
+    "20260308125350_32da242e-1c8b-4247-8e75-8057d5e57a62.sql",
+    "20260308160244_08e17ad0-0a55-4ec5-b5f2-a2dc4ea0e6b0.sql",
+    "20260308160641_33fe96e5-0f81-4488-8186-8436064285db.sql",
+    "20260309003853_b312456a-78bf-413c-be9d-7ebb91748221.sql",
+    "20260309004512_08955870-3030-4d1b-841a-781651a23ca5.sql",
+    "20260318000852_1d17194a-ce8c-4d75-840d-0226be68a413.sql",
+    "20260318010209_91b4f4a3-6035-43db-aa04-230b6ecf97b6.sql",
+    "20260318014832_8f62f143-4301-4c86-9608-b1b955c9e8b3.sql",
+    "20260318091031_ea72075a-49eb-4399-bdcb-7f2bb16bc19a.sql",
+    "20260320000001_vehicle_mileage_daily.sql",
+    "20260320000002_rls_comprehensive_fix.sql",
+    "20260320100000_restrict_pii_rls.sql",
+    "20260321000001_platform_accounts.sql",
+    "20260323170000_platform_accounts_employee_id_and_alerts_trigger.sql",
+    "20260324002310_e120f636-1ae5-460a-8e63-d591737abd62.sql",
+    "20260324120000_dashboard_alerts_realtime_publication.sql",
+    "20260324123500_signup_pii_rls_fix.sql",
+    "20260324150000_rls_payroll_attendance_employees_hardening.sql",
+    "20260324193000_erd_foundation_roles_salary_structure.sql",
+    "20260324200000_salary_engine_rpc.sql",
+    "20260324213000_seed_roles_permissions_matrix.sql",
+    "20260324220000_roles_upsert_and_permissions_bootstrap.sql",
+    "20260325120001_security_scan_signup_employees_rls.sql",
+    "20260325153000_employees_tenant_rls_hardening.sql",
+    "20260325154500_unify_company_id_on_employees.sql",
+    "20260325160000_drop_legacy_trade_register_id_on_employees.sql",
+    "20260325163000_tenant_rls_platform_accounts_and_employee_links.sql",
+    "20260325170000_tenant_rls_ops_finance_tables.sql",
+    "20260325173000_tenant_integrity_assertions_and_not_null.sql",
+    "20260325174500_add_company_id_to_operational_tables.sql",
+    "20260325181500_company_id_rollout_remaining_tables.sql",
+    "20260325190000_salary_engine_tenant_secure.sql",
+    "20260325193000_salary_preview_rpc.sql",
+    "20260325210500_employees_name_not_empty_check.sql",
+    "20260325233000_fix_employees_rls_company_id_null.sql",
+    "20260326001000_dashboard_overview_rpc.sql",
+    "20260326013000_supabase_single_backend_phase1_core_rls_audit_rpc.sql",
+    "20260326021000_phase_1_1_remove_company_id_single_org.sql",
+    "20260327092500_restore_single_org_salary_functions.sql",
+    "20260327101500_fix_dashboard_overview_city_enum_unknown.sql",
+    "20260327113000_fix_salary_employee_id_ambiguity.sql",
+    "20260327120000_finalize_remove_company_id_single_org.sql",
+    "20260327123500_fix_employees_visibility_after_company_id_removal.sql",
+    "20260327130000_allow_attendance_viewers_to_read_employees.sql",
+    "20260328100000_single_org_platform_accounts_triggers_and_rls.sql",
+    "20260328221000_fleet_maintenance_logs_and_parts.sql",
+    "20260329143000_supervisor_targets_and_assignments.sql",
+    "20260402010000_assign_platform_account_rpc.sql",
+    "20260403000000_add_commercial_record_to_employees.sql",
+    "20260403000001_update_salary_engine_for_shifts.sql",
+    "20260404010000_cleanup_employee_code_and_employee_cities.sql",
+    "20260405000000_add_shifts_and_hybrid_work_types.sql",
+    "20260406000000_fix_salary_preview_for_shifts.sql",
+    "20260407000000_concurrent_editing_protection.sql",
+    "20260407000001_salary_preview_platform_breakdown.sql",
+    "20260407110000_employee_commercial_records_and_iqama_docs.sql",
+    "20260408000000_align_salary_engine_with_sheet_and_admin_titles.sql",
+    "20260410000000_performance_engine_foundation.sql",
+    "20260410010000_performance_dashboard_rpcs.sql",
+    "20260410030000_fix_salary_engine_ambiguous_column.sql",
+    "20260410050000_fix_search_path_and_security_invoker.sql",
+    "20260411020000_fix_shift_threshold_for_attendance.sql",
+    "20260411030000_fix_preview_salary_shift_threshold.sql",
+    "20260411040000_fix_preview_salary_read_scheme.sql",
+    "20260413090000_fix_salary_preview_skip_unlinked_platforms.sql",
+    "20260413100000_fix_salary_rpc_flat_rate_and_scheme.sql",
+    "20260415100000_fix_calc_tier_with_scheme_id.sql",
+    "20260415200000_debug_and_fix_shift_salary.sql",
+    "20260415210000_shift_salary_fallback_full_month.sql",
+    "20260415220000_shift_salary_always_full_month.sql",
+    "20260416000000_apply_constants_pattern.sql",
+    "20260416000001_refactor_shift_salary_with_constants.sql",
+    "20260416000002_fix_security_definer_permissions.sql",
+    "20260503000000_leave_requests.sql",
+    "20260503000001_performance_reviews.sql",
+    "20260510000000_fix_employee_status_cast.sql",
+    "20260606000000_fix_ambiguous_column_references.sql",
+    "20260606000001_fix_advance_due_date_and_unused_vars.sql",
+    "20260606000002_fix_external_deductions_columns.sql",
+    "20260606000006_consolidate_rls_policies.sql",
+    "20260606000007_unified_rls_policies.sql",
+    "20260606000009_index_foreign_keys.sql",
+    "20260628000005_fix_preview_salary_for_month_to_use_app_salary.sql",
+    "20260628135000_add_performance_indexes.sql",
+    "20260629171000_restore_performance_dashboard_rpc_real.sql",
+    "20260702000001_employee_wallets.sql",
+    "20260705000001_fix_preview_salary_authz.sql",
+    "20260706100000_fix_salary_engine_insert_columns.sql",
+    "20260709220003_fix_employees_and_apps_cud_rls.sql",
+    "20260709220004_fix_operations_rls_fallback.sql",
+    "20260709223000_fix_employee_apps_assignment_rls.sql",
+    "20260709224000_fix_all_rls_definitively.sql",
+    "20260710195200_audit_all_application_tables.sql",
+    "20260712002000_backfill_user_permissions_source_of_truth.sql",
+    "20260712230000_reduce_audit_and_realtime_load.sql",
+    "20260714000000_system_integration_performance.sql"
+  ],
+  "columns": [
+    {
+      "name": "id",
+      "definition": "id UUID PRIMARY KEY DEFAULT gen_random_uuid()",
+      "source": "20260226083236_a06ac86d-f40a-4105-8231-3099763861e3.sql"
+    },
+    {
+      "name": "name",
+      "definition": "name TEXT NOT NULL",
+      "source": "20260226083236_a06ac86d-f40a-4105-8231-3099763861e3.sql"
+    },
+    {
+      "name": "name_en",
+      "definition": "name_en TEXT",
+      "source": "20260226083236_a06ac86d-f40a-4105-8231-3099763861e3.sql"
+    },
+    {
+      "name": "phone",
+      "definition": "phone TEXT",
+      "source": "20260226083236_a06ac86d-f40a-4105-8231-3099763861e3.sql"
+    },
+    {
+      "name": "national_id",
+      "definition": "national_id TEXT UNIQUE",
+      "source": "20260226083236_a06ac86d-f40a-4105-8231-3099763861e3.sql"
+    },
+    {
+      "name": "iban",
+      "definition": "iban TEXT",
+      "source": "20260226083236_a06ac86d-f40a-4105-8231-3099763861e3.sql"
+    },
+    {
+      "name": "is_sponsored",
+      "definition": "is_sponsored BOOLEAN NOT NULL DEFAULT false",
+      "source": "20260226083236_a06ac86d-f40a-4105-8231-3099763861e3.sql"
+    },
+    {
+      "name": "dob",
+      "definition": "dob DATE",
+      "source": "20260226083236_a06ac86d-f40a-4105-8231-3099763861e3.sql"
+    },
+    {
+      "name": "residency_expiry",
+      "definition": "residency_expiry DATE",
+      "source": "20260226083236_a06ac86d-f40a-4105-8231-3099763861e3.sql"
+    },
+    {
+      "name": "license_has",
+      "definition": "license_has BOOLEAN NOT NULL DEFAULT false",
+      "source": "20260226083236_a06ac86d-f40a-4105-8231-3099763861e3.sql"
+    },
+    {
+      "name": "license_expiry",
+      "definition": "license_expiry DATE",
+      "source": "20260226083236_a06ac86d-f40a-4105-8231-3099763861e3.sql"
+    },
+    {
+      "name": "email",
+      "definition": "email TEXT",
+      "source": "20260226083236_a06ac86d-f40a-4105-8231-3099763861e3.sql"
+    },
+    {
+      "name": "salary_type",
+      "definition": "salary_type public.salary_type NOT NULL DEFAULT _const_work_orders()",
+      "source": "20260226083236_a06ac86d-f40a-4105-8231-3099763861e3.sql"
+    },
+    {
+      "name": "base_salary",
+      "definition": "base_salary NUMERIC(10,2) NOT NULL DEFAULT 0",
+      "source": "20260226083236_a06ac86d-f40a-4105-8231-3099763861e3.sql"
+    },
+    {
+      "name": "allowances",
+      "definition": "allowances JSONB DEFAULT '{}'",
+      "source": "20260226083236_a06ac86d-f40a-4105-8231-3099763861e3.sql"
+    },
+    {
+      "name": "status",
+      "definition": "status public.employee_status NOT NULL DEFAULT _const_employee_active()",
+      "source": "20260226083236_a06ac86d-f40a-4105-8231-3099763861e3.sql"
+    },
+    {
+      "name": "created_at",
+      "definition": "created_at TIMESTAMPTZ NOT NULL DEFAULT now()",
+      "source": "20260226083236_a06ac86d-f40a-4105-8231-3099763861e3.sql"
+    },
+    {
+      "name": "updated_at",
+      "definition": "updated_at TIMESTAMPTZ NOT NULL DEFAULT now()",
+      "source": "20260226083236_a06ac86d-f40a-4105-8231-3099763861e3.sql"
+    },
+    {
+      "name": "job_title",
+      "definition": "job_title text",
+      "source": "20260305073335_6a77e95f-f6cd-4721-bd47-d67009b898d8.sql"
+    },
+    {
+      "name": "bank_account_number",
+      "definition": "bank_account_number text",
+      "source": "20260305073335_6a77e95f-f6cd-4721-bd47-d67009b898d8.sql"
+    },
+    {
+      "name": "city",
+      "definition": "city text",
+      "source": "20260404010000_cleanup_employee_code_and_employee_cities.sql"
+    },
+    {
+      "name": "join_date",
+      "definition": "join_date date",
+      "source": "20260305073335_6a77e95f-f6cd-4721-bd47-d67009b898d8.sql"
+    },
+    {
+      "name": "license_status",
+      "definition": "license_status public.license_status_enum DEFAULT 'no_license'",
+      "source": "20260305073335_6a77e95f-f6cd-4721-bd47-d67009b898d8.sql"
+    },
+    {
+      "name": "sponsorship_status",
+      "definition": "sponsorship_status public.sponsorship_status_enum DEFAULT 'not_sponsored'",
+      "source": "20260305073335_6a77e95f-f6cd-4721-bd47-d67009b898d8.sql"
+    },
+    {
+      "name": "id_photo_url",
+      "definition": "id_photo_url text",
+      "source": "20260305073335_6a77e95f-f6cd-4721-bd47-d67009b898d8.sql"
+    },
+    {
+      "name": "license_photo_url",
+      "definition": "license_photo_url text",
+      "source": "20260305073335_6a77e95f-f6cd-4721-bd47-d67009b898d8.sql"
+    },
+    {
+      "name": "personal_photo_url",
+      "definition": "personal_photo_url text",
+      "source": "20260305073335_6a77e95f-f6cd-4721-bd47-d67009b898d8.sql"
+    },
+    {
+      "name": "preferred_language",
+      "definition": "preferred_language text NOT NULL DEFAULT 'ar'",
+      "source": "20260404010000_cleanup_employee_code_and_employee_cities.sql"
+    },
+    {
+      "name": "nationality",
+      "definition": "nationality text",
+      "source": "20260308160244_08e17ad0-0a55-4ec5-b5f2-a2dc4ea0e6b0.sql"
+    },
+    {
+      "name": "birth_date",
+      "definition": "birth_date date",
+      "source": "20260308160641_33fe96e5-0f81-4488-8186-8436064285db.sql"
+    },
+    {
+      "name": "department_id",
+      "definition": "department_id UUID REFERENCES public.departments(id) ON DELETE SET NULL",
+      "source": "20260309004512_08955870-3030-4d1b-841a-781651a23ca5.sql"
+    },
+    {
+      "name": "position_id",
+      "definition": "position_id UUID REFERENCES public.positions(id) ON DELETE SET NULL",
+      "source": "20260309004512_08955870-3030-4d1b-841a-781651a23ca5.sql"
+    },
+    {
+      "name": "probation_end_date",
+      "definition": "probation_end_date date NULL",
+      "source": "20260318000852_1d17194a-ce8c-4d75-840d-0226be68a413.sql"
+    },
+    {
+      "name": "health_insurance_expiry",
+      "definition": "health_insurance_expiry date",
+      "source": "20260318091031_ea72075a-49eb-4399-bdcb-7f2bb16bc19a.sql"
+    },
+    {
+      "name": "role_id",
+      "definition": "role_id UUID REFERENCES public.roles(id) ON DELETE SET NULL",
+      "source": "20260324193000_erd_foundation_roles_salary_structure.sql"
+    },
+    {
+      "name": "created_by",
+      "definition": "created_by uuid REFERENCES auth.users(id) ON DELETE SET NULL",
+      "source": "20260326013000_supabase_single_backend_phase1_core_rls_audit_rpc.sql"
+    },
+    {
+      "name": "updated_by",
+      "definition": "updated_by uuid REFERENCES auth.users(id) ON DELETE SET NULL",
+      "source": "20260326013000_supabase_single_backend_phase1_core_rls_audit_rpc.sql"
+    },
+    {
+      "name": "commercial_record",
+      "definition": "commercial_record TEXT",
+      "source": "20260403000000_add_commercial_record_to_employees.sql"
+    },
+    {
+      "name": "cities",
+      "definition": "cities text[] DEFAULT '{}'::text[]",
+      "source": "20260404010000_cleanup_employee_code_and_employee_cities.sql"
+    },
+    {
+      "name": "iqama_photo_url",
+      "definition": "iqama_photo_url text",
+      "source": "20260407110000_employee_commercial_records_and_iqama_docs.sql"
+    }
+  ],
+  "constraints": [
+    {
+      "name": "employees_name_not_empty",
+      "statement": "CONSTRAINT employees_name_not_empty\n  CHECK (name IS NOT NULL AND length(btrim(name)) > 0)",
+      "source": "20260325210500_employees_name_not_empty_check.sql"
+    },
+    {
+      "name": "employees_preferred_language_check",
+      "statement": "CONSTRAINT employees_preferred_language_check\n  CHECK (preferred_language IN ('ar', 'en'))",
+      "source": "20260404010000_cleanup_employee_code_and_employee_cities.sql"
+    }
+  ],
+  "policies": [
+    {
+      "name": "unified_select_policy",
+      "statement": "CREATE POLICY \"unified_select_policy\" ON \"public\".\"employees\" FOR SELECT\n  USING (\n    ((is_internal_user() AND (has_permission('employees'::text, 'view'::text) OR has_permission('attendance'::text, 'view'::text))))\n  );",
+      "source": "20260606000007_unified_rls_policies.sql"
+    },
+    {
+      "name": "unified_insert_policy",
+      "statement": "CREATE POLICY \"unified_insert_policy\" ON public.employees FOR INSERT\nWITH CHECK (\n  is_active_user(auth.uid()) AND (\n    has_role(auth.uid(), 'admin'::app_role)\n    OR has_role(auth.uid(), 'hr'::app_role)\n    OR has_role(auth.uid(), 'operations'::app_role)\n    OR EXISTS (\n      SELECT 1 FROM public.user_permissions up\n      WHERE up.user_id = auth.uid()\n        AND up.permission_key = 'employees'\n        AND up.can_edit = true\n    )\n  )\n);",
+      "source": "20260709224000_fix_all_rls_definitively.sql"
+    },
+    {
+      "name": "unified_update_policy",
+      "statement": "CREATE POLICY \"unified_update_policy\" ON public.employees FOR UPDATE\nUSING (\n  is_active_user(auth.uid()) AND (\n    has_role(auth.uid(), 'admin'::app_role)\n    OR has_role(auth.uid(), 'hr'::app_role)\n    OR has_role(auth.uid(), 'operations'::app_role)\n    OR EXISTS (\n      SELECT 1 FROM public.user_permissions up\n      WHERE up.user_id = auth.uid()\n        AND up.permission_key = 'employees'\n        AND up.can_edit = true\n    )\n  )\n)\nWITH CHECK (\n  is_active_user(auth.uid()) AND (\n    has_role(auth.uid(), 'admin'::app_role)\n    OR has_role(auth.uid(), 'hr'::app_role)\n    OR has_role(auth.uid(), 'operations'::app_role)\n    OR EXISTS (\n      SELECT 1 FROM public.user_permissions up\n      WHERE up.user_id = auth.uid()\n        AND up.permission_key = 'employees'\n        AND up.can_edit = true\n    )\n  )\n);",
+      "source": "20260709224000_fix_all_rls_definitively.sql"
+    },
+    {
+      "name": "unified_delete_policy",
+      "statement": "CREATE POLICY \"unified_delete_policy\" ON public.employees FOR DELETE\nUSING (\n  is_active_user(auth.uid()) AND (\n    has_role(auth.uid(), 'admin'::app_role)\n    OR has_role(auth.uid(), 'hr'::app_role)\n    OR has_role(auth.uid(), 'operations'::app_role)\n    OR EXISTS (\n      SELECT 1 FROM public.user_permissions up\n      WHERE up.user_id = auth.uid()\n        AND up.permission_key = 'employees'\n        AND up.can_delete = true\n    )\n  )\n);",
+      "source": "20260709224000_fix_all_rls_definitively.sql"
+    }
+  ],
+  "triggers": [
+    {
+      "name": "trg_employees_updated_at",
+      "statement": "CREATE TRIGGER trg_employees_updated_at BEFORE UPDATE ON public.employees FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();",
+      "source": "20260226083236_a06ac86d-f40a-4105-8231-3099763861e3.sql"
+    },
+    {
+      "name": "trg_employee_sponsorship_alerts",
+      "statement": "CREATE TRIGGER trg_employee_sponsorship_alerts\n  AFTER UPDATE OF sponsorship_status ON public.employees\n  FOR EACH ROW\n  EXECUTE FUNCTION public.fn_handle_employee_sponsorship_alerts();",
+      "source": "20260323170000_platform_accounts_employee_id_and_alerts_trigger.sql"
+    },
+    {
+      "name": "trg_employees_set_audit_columns",
+      "statement": "CREATE TRIGGER trg_employees_set_audit_columns\n  BEFORE INSERT OR UPDATE ON public.employees\n  FOR EACH ROW EXECUTE FUNCTION public.set_audit_columns();",
+      "source": "20260326013000_supabase_single_backend_phase1_core_rls_audit_rpc.sql"
+    }
+  ],
+  "indexes": [
+    {
+      "name": "idx_employees_role_id",
+      "statement": "CREATE INDEX IF NOT EXISTS idx_employees_role_id ON public.employees(role_id);",
+      "source": "20260324193000_erd_foundation_roles_salary_structure.sql"
+    },
+    {
+      "name": "idx_employees_commercial_record",
+      "statement": "CREATE INDEX IF NOT EXISTS idx_employees_commercial_record\n  ON public.employees (commercial_record)\n  WHERE commercial_record IS NOT NULL;",
+      "source": "20260407110000_employee_commercial_records_and_iqama_docs.sql"
+    },
+    {
+      "name": "idx_employees_residency_expiry",
+      "statement": "CREATE INDEX IF NOT EXISTS idx_employees_residency_expiry\n  ON public.employees (residency_expiry)\n  WHERE residency_expiry IS NOT NULL;",
+      "source": "20260407110000_employee_commercial_records_and_iqama_docs.sql"
+    },
+    {
+      "name": "idx_employees_department_id",
+      "statement": "CREATE INDEX IF NOT EXISTS \"idx_employees_department_id\" ON public.\"employees\" (\"department_id\");",
+      "source": "20260606000009_index_foreign_keys.sql"
+    },
+    {
+      "name": "idx_employees_position_id",
+      "statement": "CREATE INDEX IF NOT EXISTS \"idx_employees_position_id\" ON public.\"employees\" (\"position_id\");",
+      "source": "20260606000009_index_foreign_keys.sql"
+    },
+    {
+      "name": "idx_employees_created_by",
+      "statement": "CREATE INDEX IF NOT EXISTS \"idx_employees_created_by\" ON public.\"employees\" (\"created_by\");",
+      "source": "20260606000009_index_foreign_keys.sql"
+    },
+    {
+      "name": "idx_employees_updated_by",
+      "statement": "CREATE INDEX IF NOT EXISTS \"idx_employees_updated_by\" ON public.\"employees\" (\"updated_by\");",
+      "source": "20260606000009_index_foreign_keys.sql"
+    },
+    {
+      "name": "idx_employees_name",
+      "statement": "CREATE INDEX IF NOT EXISTS idx_employees_name ON public.employees(name);",
+      "source": "20260628135000_add_performance_indexes.sql"
+    }
+  ],
+  "trigger_functions": [
+    {
+      "name": "update_updated_at_column",
+      "statement": "CREATE OR REPLACE FUNCTION update_updated_at_column()\nRETURNS TRIGGER AS $$\nBEGIN\n    NEW.updated_at = now();\n    RETURN NEW;\nEND;\n$$ language 'plpgsql';",
+      "source": "20260330120000_salary_slip_templates.sql"
+    },
+    {
+      "name": "fn_handle_employee_sponsorship_alerts",
+      "statement": "CREATE OR REPLACE FUNCTION public.fn_handle_employee_sponsorship_alerts()\nRETURNS TRIGGER AS $$\nDECLARE\n  status TEXT;\n  account_list TEXT;\n  vehicle_plate_list TEXT;\n  vehicle_count INT;\n  trade_name TEXT;\n  trade_cr TEXT;\n  msg TEXT;\n  accounts_json JSONB;\n  vehicles_json JSONB;\n  trade_json JSONB;\nBEGIN\n  status := NEW.sponsorship_status::TEXT;\n\n  IF (NEW.sponsorship_status IS DISTINCT FROM OLD.sponsorship_status)\n     AND (status IN ('absconded', 'terminated')) THEN\n\n    IF status = 'terminated' THEN\n      IF NOT EXISTS (\n        SELECT 1 FROM public.platform_accounts WHERE employee_id = NEW.id\n      ) THEN\n        RETURN NEW;\n      END IF;\n    END IF;\n\n    SELECT\n      STRING_AGG(format('%s: %s', a.name, pa.account_username), ', ' ORDER BY a.name),\n      COALESCE(JSONB_AGG(\n        JSONB_BUILD_OBJECT(\n          'app', a.name,\n          'username', pa.account_username,\n          'account_id_on_platform', pa.account_id_on_platform,\n          'iqama_number', pa.iqama_number\n        )\n      ), '[]'::jsonb)\n    INTO account_list, accounts_json\n    FROM public.platform_accounts pa\n    JOIN public.apps a ON a.id = pa.app_id\n    WHERE pa.employee_id = NEW.id;\n\n    SELECT\n      COUNT(*)::int,\n      STRING_AGG(v.plate_number, ', ' ORDER BY v.plate_number),\n      COALESCE(JSONB_AGG(\n        JSONB_BUILD_OBJECT('vehicle_id', v.id, 'plate_number', v.plate_number)\n      ), '[]'::jsonb)\n    INTO vehicle_count, vehicle_plate_list, vehicles_json\n    FROM public.vehicle_assignments va\n    JOIN public.vehicles v ON v.id = va.vehicle_id\n    WHERE va.employee_id = NEW.id\n      AND va.end_date IS NULL\n      AND va.returned_at IS NULL;\n\n    -- Use commercial_record name instead of the dropped company_id column\n    trade_name := NEW.commercial_record;\n    trade_cr := NULL;\n    trade_json := '{}'::jsonb;\n\n    IF NEW.commercial_record IS NOT NULL AND NEW.commercial_record <> '' THEN\n      SELECT\n        cr.name,\n        cr.registration_number,\n        JSONB_BUILD_OBJECT(\n          'name', cr.name,\n          'cr_number', cr.registration_number\n        )\n      INTO trade_name, trade_cr, trade_json\n      FROM public.commercial_records cr\n      WHERE cr.name = NEW.commercial_record\n      LIMIT 1;\n    END IF;\n\n    msg :=\n      format(\n        'الموظف: %s (الهوية: %s) | منصات: %s | مركبات: %s | سجل تجاري: %s',\n        COALESCE(NEW.name, '—'),\n        COALESCE(NEW.national_id, '—'),\n        COALESCE(account_list, '—'),\n        COALESCE(vehicle_plate_list, CASE WHEN vehicle_count IS NULL THEN '—' ELSE vehicle_count::TEXT || ' مركبة' END),\n        COALESCE(trade_name, '—')\n      );\n\n    INSERT INTO public.alerts (\n      type,\n      entity_id,\n      entity_type,\n      due_date,\n      message,\n      details\n    )\n    VALUES (\n      CASE WHEN status = 'absconded' THEN 'employee_absconded' ELSE 'employee_terminated' END,\n      NEW.id,\n      'employee',\n      CURRENT_DATE,\n      msg,\n      JSONB_BUILD_OBJECT(\n        'employee_id', NEW.id,\n        'employee_name', NEW.name,\n        'national_id', NEW.national_id,\n        'sponsorship_status', status,\n        'platform_accounts', accounts_json,\n        'vehicle_count', COALESCE(vehicle_count, 0),\n        'vehicle_plates', COALESCE(vehicle_plate_list, ''),\n        'vehicles', vehicles_json,\n        'trade_register', trade_json,\n        'trade_cr_number', trade_cr\n      )\n    );\n  END IF;\n\n  RETURN NEW;\nEND;\n$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = 'public';",
+      "source": "20260712051000_fix_alert_trigger_registration_number.sql"
+    },
+    {
+      "name": "set_audit_columns",
+      "statement": "CREATE OR REPLACE FUNCTION public.set_audit_columns()\nRETURNS trigger\nLANGUAGE plpgsql\nSECURITY DEFINER\nSET search_path = public /* NOSONAR */\nAS $$\nBEGIN\n  IF TG_OP = 'INSERT' THEN\n    IF NEW.created_by IS NULL THEN\n      NEW.created_by := auth.uid();\n    END IF;\n    IF NEW.updated_by IS NULL THEN\n      NEW.updated_by := auth.uid();\n    END IF;\n  ELSIF TG_OP = 'UPDATE' THEN\n    NEW.updated_by := auth.uid();\n  END IF;\n  RETURN NEW;\nEND;\n$$;",
+      "source": "20260326013000_supabase_single_backend_phase1_core_rls_audit_rpc.sql"
+    }
+  ],
+  "manual_review": [
+    {
+      "source": "20260325154500_unify_company_id_on_employees.sql",
+      "reason": "DDL خاص بالجدول داخل كتلة إجرائية؛ لم يتم افتراض نتيجة التنفيذ",
+      "statement": "DO $$\nBEGIN\n  IF NOT EXISTS (\n    SELECT 1\n    FROM pg_constraint\n    WHERE conname = 'employees_company_id_fkey'\n      AND conrelid = 'public.employees'::regclass\n  ) THEN\n    ALTER TABLE public.employees\n      ADD CONSTRAINT employees_company_id_fkey\n      FOREIGN KEY (company_id) REFERENCES public.trade_registers(id);\n  END IF;\nEND $$;"
+    }
+  ],
+  "rls_enabled": true,
+  "rls_source": "20260327130000_allow_attendance_viewers_to_read_employees.sql",
+  "create_table_source": "20260226083236_a06ac86d-f40a-4105-8231-3099763861e3.sql",
+  "history": {
+    "column_definitions": 43,
+    "column_drops": 4,
+    "policy_creates": 44,
+    "policy_drops": 89,
+    "trigger_creates": 7,
+    "trigger_drops": 12,
+    "index_creates": 10,
+    "index_drops": 2
+  }
+}

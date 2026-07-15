@@ -1,0 +1,117 @@
+# Consolidation report: `employees`
+
+- Status: **needs manual review**
+- Migrations scanned: 227
+- Files mentioning the table: 100
+- Draft: `supabase/migrations_consolidated_draft/employees.sql`
+- Columns: 40 final / 43 definitions historically / 4 drops
+- Policies: 4 active / 44 creates / 89 drops
+- Triggers: 3 active / 7 creates / 12 drops
+- Indexes: 8 active / 10 creates / 2 tracked drops
+
+## Manual review
+
+- `20260325154500_unify_company_id_on_employees.sql`: DDL خاص بالجدول داخل كتلة إجرائية؛ لم يتم افتراض نتيجة التنفيذ
+
+## Source migrations
+
+- `20260106000000_update_salary_engine_for_shifts.sql`
+- `20260226083236_a06ac86d-f40a-4105-8231-3099763861e3.sql`
+- `20260305073335_6a77e95f-f6cd-4721-bd47-d67009b898d8.sql`
+- `20260308074600_505a58f7-de3a-4e55-9d20-96bced1928fb.sql`
+- `20260308125350_32da242e-1c8b-4247-8e75-8057d5e57a62.sql`
+- `20260308160244_08e17ad0-0a55-4ec5-b5f2-a2dc4ea0e6b0.sql`
+- `20260308160641_33fe96e5-0f81-4488-8186-8436064285db.sql`
+- `20260309003853_b312456a-78bf-413c-be9d-7ebb91748221.sql`
+- `20260309004512_08955870-3030-4d1b-841a-781651a23ca5.sql`
+- `20260318000852_1d17194a-ce8c-4d75-840d-0226be68a413.sql`
+- `20260318010209_91b4f4a3-6035-43db-aa04-230b6ecf97b6.sql`
+- `20260318014832_8f62f143-4301-4c86-9608-b1b955c9e8b3.sql`
+- `20260318091031_ea72075a-49eb-4399-bdcb-7f2bb16bc19a.sql`
+- `20260320000001_vehicle_mileage_daily.sql`
+- `20260320000002_rls_comprehensive_fix.sql`
+- `20260320100000_restrict_pii_rls.sql`
+- `20260321000001_platform_accounts.sql`
+- `20260323170000_platform_accounts_employee_id_and_alerts_trigger.sql`
+- `20260324002310_e120f636-1ae5-460a-8e63-d591737abd62.sql`
+- `20260324120000_dashboard_alerts_realtime_publication.sql`
+- `20260324123500_signup_pii_rls_fix.sql`
+- `20260324150000_rls_payroll_attendance_employees_hardening.sql`
+- `20260324193000_erd_foundation_roles_salary_structure.sql`
+- `20260324200000_salary_engine_rpc.sql`
+- `20260324213000_seed_roles_permissions_matrix.sql`
+- `20260324220000_roles_upsert_and_permissions_bootstrap.sql`
+- `20260325120001_security_scan_signup_employees_rls.sql`
+- `20260325153000_employees_tenant_rls_hardening.sql`
+- `20260325154500_unify_company_id_on_employees.sql`
+- `20260325160000_drop_legacy_trade_register_id_on_employees.sql`
+- `20260325163000_tenant_rls_platform_accounts_and_employee_links.sql`
+- `20260325170000_tenant_rls_ops_finance_tables.sql`
+- `20260325173000_tenant_integrity_assertions_and_not_null.sql`
+- `20260325174500_add_company_id_to_operational_tables.sql`
+- `20260325181500_company_id_rollout_remaining_tables.sql`
+- `20260325190000_salary_engine_tenant_secure.sql`
+- `20260325193000_salary_preview_rpc.sql`
+- `20260325210500_employees_name_not_empty_check.sql`
+- `20260325233000_fix_employees_rls_company_id_null.sql`
+- `20260326001000_dashboard_overview_rpc.sql`
+- `20260326013000_supabase_single_backend_phase1_core_rls_audit_rpc.sql`
+- `20260326021000_phase_1_1_remove_company_id_single_org.sql`
+- `20260327092500_restore_single_org_salary_functions.sql`
+- `20260327101500_fix_dashboard_overview_city_enum_unknown.sql`
+- `20260327113000_fix_salary_employee_id_ambiguity.sql`
+- `20260327120000_finalize_remove_company_id_single_org.sql`
+- `20260327123500_fix_employees_visibility_after_company_id_removal.sql`
+- `20260327130000_allow_attendance_viewers_to_read_employees.sql`
+- `20260328100000_single_org_platform_accounts_triggers_and_rls.sql`
+- `20260328221000_fleet_maintenance_logs_and_parts.sql`
+- `20260329143000_supervisor_targets_and_assignments.sql`
+- `20260402010000_assign_platform_account_rpc.sql`
+- `20260403000000_add_commercial_record_to_employees.sql`
+- `20260403000001_update_salary_engine_for_shifts.sql`
+- `20260404010000_cleanup_employee_code_and_employee_cities.sql`
+- `20260405000000_add_shifts_and_hybrid_work_types.sql`
+- `20260406000000_fix_salary_preview_for_shifts.sql`
+- `20260407000000_concurrent_editing_protection.sql`
+- `20260407000001_salary_preview_platform_breakdown.sql`
+- `20260407110000_employee_commercial_records_and_iqama_docs.sql`
+- `20260408000000_align_salary_engine_with_sheet_and_admin_titles.sql`
+- `20260410000000_performance_engine_foundation.sql`
+- `20260410010000_performance_dashboard_rpcs.sql`
+- `20260410030000_fix_salary_engine_ambiguous_column.sql`
+- `20260410050000_fix_search_path_and_security_invoker.sql`
+- `20260411020000_fix_shift_threshold_for_attendance.sql`
+- `20260411030000_fix_preview_salary_shift_threshold.sql`
+- `20260411040000_fix_preview_salary_read_scheme.sql`
+- `20260413090000_fix_salary_preview_skip_unlinked_platforms.sql`
+- `20260413100000_fix_salary_rpc_flat_rate_and_scheme.sql`
+- `20260415100000_fix_calc_tier_with_scheme_id.sql`
+- `20260415200000_debug_and_fix_shift_salary.sql`
+- `20260415210000_shift_salary_fallback_full_month.sql`
+- `20260415220000_shift_salary_always_full_month.sql`
+- `20260416000000_apply_constants_pattern.sql`
+- `20260416000001_refactor_shift_salary_with_constants.sql`
+- `20260416000002_fix_security_definer_permissions.sql`
+- `20260503000000_leave_requests.sql`
+- `20260503000001_performance_reviews.sql`
+- `20260510000000_fix_employee_status_cast.sql`
+- `20260606000000_fix_ambiguous_column_references.sql`
+- `20260606000001_fix_advance_due_date_and_unused_vars.sql`
+- `20260606000002_fix_external_deductions_columns.sql`
+- `20260606000006_consolidate_rls_policies.sql`
+- `20260606000007_unified_rls_policies.sql`
+- `20260606000009_index_foreign_keys.sql`
+- `20260628000005_fix_preview_salary_for_month_to_use_app_salary.sql`
+- `20260628135000_add_performance_indexes.sql`
+- `20260629171000_restore_performance_dashboard_rpc_real.sql`
+- `20260702000001_employee_wallets.sql`
+- `20260705000001_fix_preview_salary_authz.sql`
+- `20260706100000_fix_salary_engine_insert_columns.sql`
+- `20260709220003_fix_employees_and_apps_cud_rls.sql`
+- `20260709220004_fix_operations_rls_fallback.sql`
+- `20260709223000_fix_employee_apps_assignment_rls.sql`
+- `20260709224000_fix_all_rls_definitively.sql`
+- `20260710195200_audit_all_application_tables.sql`
+- `20260712002000_backfill_user_permissions_source_of_truth.sql`
+- `20260712230000_reduce_audit_and_realtime_load.sql`
+- `20260714000000_system_integration_performance.sql`
