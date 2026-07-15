@@ -200,13 +200,13 @@ function EmployeeDetailedTableInner() {
                 return (
                   <th
                     key={col.key}
-                    className={`ta-th !px-1 select-none whitespace-nowrap text-start ${col.key === "seq" ? "w-10 !px-1 text-center" : ""}`}
+                    className={`ta-th !px-1 select-none whitespace-nowrap text-center ${col.key === "seq" ? "w-10 !px-1 text-center" : ""}`}
                   >
-                    <div className="relative flex min-w-0 items-center justify-start">
+                    <div className="relative flex min-w-0 items-center justify-center">
                       {col.sortable ? (
                         <button
                           type="button"
-                          className="flex w-full min-w-0 items-center justify-start gap-1.5 bg-transparent px-2 text-current cursor-pointer hover:opacity-80"
+                          className="flex w-full min-w-0 items-center justify-center gap-1.5 bg-transparent px-2 text-current cursor-pointer hover:opacity-80"
                           onClick={() => handleSort(col.key)}
                           title={`ترتيب حسب ${col.label}`}
                         >

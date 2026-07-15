@@ -579,7 +579,7 @@
   }
 
   .employees-table .ta-td {
-    @apply px-1.5 py-0 text-[13px] leading-4 font-normal;
+    @apply px-1.5 py-0 text-[13px] leading-4 font-normal text-center;
     color: var(--ds-on-surface);
   }
 
