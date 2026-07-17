@@ -365,7 +365,7 @@ export default function ProjectSettings() {
   };
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="w-full max-w-4xl mx-auto space-y-6">
       {/* Project Name */}
       <div className="bg-card border border-border/50 p-5 shadow-sm rounded-2xl">
         <ProjectSettingsSectionHeader icon={<Building2 size={14} />} title={t(isRTL, 'اسم المشروع', 'Project Name')} />
