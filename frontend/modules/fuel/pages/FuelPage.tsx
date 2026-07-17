@@ -23,7 +23,7 @@ const PAGE_TABS: { key: PageTab; labelKey: string }[] = [
 ];
 
 function FuelPageTabs({ pageTab, setPageTab }: Readonly<{ pageTab: PageTab; setPageTab: (v: PageTab) => void }>) {
-  const { t } = useTranslation();
+  const { t: translate } = useTranslation();
 
   return (
     <div className="flex flex-wrap gap-2 items-center">
@@ -34,7 +34,7 @@ function FuelPageTabs({ pageTab, setPageTab }: Readonly<{ pageTab: PageTab; setP
           onClick={() => setPageTab(t.key)}
           className={`px-4 py-1.5 rounded-lg text-sm font-semibold border transition-colors ${pageTab === t.key ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border hover:bg-muted/50'}`}
         >
-          {t(t.labelKey)}
+          {translate(t.labelKey)}
         </button>
       ))}
     </div>
