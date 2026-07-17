@@ -138,15 +138,16 @@ export async function exportDailyAppReportExcel(params: {
   employees: Employee[];
   data: DailyData;
   apps: App[];
+  appEmployeeIds: AppEmployeeIdsMap;
 }): Promise<void> {
   const XLSX = await loadXlsx();
-  const { year, month, startDay, endDay, appId, employees, data, apps } = params;
+  const { year, month, startDay, endDay, appId, employees, data, apps, appEmployeeIds } = params;
 
   const my = monthYear(year, month);
   const targets = await orderService.getMonthTargets(my);
   const appName = getDailyAppReportName(apps, appId);
   const results = buildDailyAppReportRows({
-    employees, apps, selectedAppId: appId, data, targets,
+    employees, apps, selectedAppId: appId, data, targets, employeeAppIdsByApp: appEmployeeIds,
     year, month, startDay, endDay,
   });
 
@@ -193,13 +194,14 @@ export async function printDailyAppReportTable(params: {
   employees: Employee[];
   data: DailyData;
   apps: App[];
+  appEmployeeIds: AppEmployeeIdsMap;
 }) {
-  const { year, month, startDay, endDay, appId, employees, data, apps } = params;
+  const { year, month, startDay, endDay, appId, employees, data, apps, appEmployeeIds } = params;
   const my = monthYear(year, month);
   const targets = await orderService.getMonthTargets(my);
   const appName = getDailyAppReportName(apps, appId);
   const results = buildDailyAppReportRows({
-    employees, apps, selectedAppId: appId, data, targets,
+    employees, apps, selectedAppId: appId, data, targets, employeeAppIdsByApp: appEmployeeIds,
     year, month, startDay, endDay,
   });
 

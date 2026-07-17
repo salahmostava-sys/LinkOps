@@ -27,6 +27,7 @@ type BuildDailyAppReportParams = {
   selectedAppId: string;
   data: DailyData;
   targets: DailyAppReportTarget[];
+  employeeAppIdsByApp: Record<string, ReadonlySet<string>>;
   year: number;
   month: number;
   startDay: number;
@@ -43,22 +44,50 @@ type BuildEmployeeReportRowParams = {
   appIds: string[];
   data: DailyData;
   dayNumbers: number[];
-  employeeTarget: number | null;
+  targets: DailyAppReportTarget[];
+  employeeAppIdsByApp: Record<string, ReadonlySet<string>>;
   elapsedDays: number;
 };
 
 const getSelectedAppIds = (apps: App[], selectedAppId: string) =>
   selectedAppId === ALL_APPS_REPORT_ID ? apps.map((app) => app.id) : [selectedAppId];
 
-const getCombinedEmployeeTarget = (targets: DailyAppReportTarget[], appIds: string[]) => {
-  const selectedTargets = targets.filter((target) => appIds.includes(target.app_id));
-  const configuredTargets = selectedTargets
-    .map((target) => target.employee_target_orders)
-    .filter((target): target is number => target != null);
-  return configuredTargets.length > 0
-    ? configuredTargets.reduce((sum, target) => sum + target, 0)
-    : null;
+type ResolveEmployeeTargetAppParams = {
+  employeeId: string;
+  appIds: string[];
+  data: DailyData;
+  dayNumbers: number[];
+  employeeAppIdsByApp: Record<string, ReadonlySet<string>>;
 };
+
+const getEmployeeAppOrders = (
+  employeeId: string,
+  appId: string,
+  data: DailyData,
+  dayNumbers: number[],
+) => dayNumbers.reduce((sum, day) => sum + (data[`${employeeId}::${appId}::${day}`] ?? 0), 0);
+
+const resolveEmployeeTargetApp = ({
+  employeeId,
+  appIds,
+  data,
+  dayNumbers,
+  employeeAppIdsByApp,
+}: ResolveEmployeeTargetAppParams) => {
+  if (appIds.length === 1) return appIds[0];
+
+  const assignedAppIds = appIds.filter((appId) => employeeAppIdsByApp[appId]?.has(employeeId));
+  const candidateAppIds = assignedAppIds.length > 0 ? assignedAppIds : appIds;
+  return candidateAppIds.reduce((bestAppId, appId) =>
+    getEmployeeAppOrders(employeeId, appId, data, dayNumbers)
+      > getEmployeeAppOrders(employeeId, bestAppId, data, dayNumbers)
+      ? appId
+      : bestAppId
+  );
+};
+
+const getEmployeeTarget = (targets: DailyAppReportTarget[], appId: string) =>
+  targets.find((target) => target.app_id === appId)?.employee_target_orders ?? null;
 
 const getElapsedDaysInRange = ({ year, month, startDay, endDay, today }: ReportPeriod) => {
   const reportMonth = year * 12 + month;
@@ -92,7 +121,8 @@ const buildEmployeeReportRow = ({
   appIds,
   data,
   dayNumbers,
-  employeeTarget,
+  targets,
+  employeeAppIdsByApp,
   elapsedDays,
 }: BuildEmployeeReportRowParams): DailyAppReportRow | null => {
   const dailyVals = dayNumbers.map((day) => appIds.reduce(
@@ -101,6 +131,15 @@ const buildEmployeeReportRow = ({
   ));
   const total = dailyVals.reduce((sum, orders) => sum + orders, 0);
   if (total === 0) return null;
+
+  const targetAppId = resolveEmployeeTargetApp({
+    employeeId: employee.id,
+    appIds,
+    data,
+    dayNumbers,
+    employeeAppIdsByApp,
+  });
+  const employeeTarget = getEmployeeTarget(targets, targetAppId);
 
   return {
     empId: employee.id,
@@ -119,6 +158,7 @@ export function buildDailyAppReportRows({
   selectedAppId,
   data,
   targets,
+  employeeAppIdsByApp,
   year,
   month,
   startDay,
@@ -128,12 +168,21 @@ export function buildDailyAppReportRows({
   if (!selectedAppId) return [];
 
   const appIds = getSelectedAppIds(apps, selectedAppId);
-  const employeeTarget = getCombinedEmployeeTarget(targets, appIds);
+  if (appIds.length === 0) return [];
+
   const dayNumbers = Array.from({ length: endDay - startDay + 1 }, (_, index) => startDay + index);
   const elapsedDays = getElapsedDaysInRange({ year, month, startDay, endDay, today });
 
   return employees
-    .map((employee) => buildEmployeeReportRow({ employee, appIds, data, dayNumbers, employeeTarget, elapsedDays }))
+    .map((employee) => buildEmployeeReportRow({
+      employee,
+      appIds,
+      data,
+      dayNumbers,
+      targets,
+      employeeAppIdsByApp,
+      elapsedDays,
+    }))
     .filter((row): row is DailyAppReportRow => row !== null)
     .sort((first, second) => second.total - first.total);
 }

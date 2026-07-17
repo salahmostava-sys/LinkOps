@@ -119,6 +119,7 @@ describe('spreadsheetFileOps', () => {
           employees,
           data,
           apps,
+          appEmployeeIds: { app1: new Set(['emp1', 'emp2']) },
         });
       });
 
@@ -212,6 +213,7 @@ describe('spreadsheetFileOps', () => {
           'emp2::app1::3': 2,
         },
         apps: [{ id: 'app1', name: 'App1', created_at: '', updated_at: '' }],
+        appEmployeeIds: { app1: new Set(['emp1', 'emp2']) },
       });
 
       expect(globalThis.open).toHaveBeenCalled();

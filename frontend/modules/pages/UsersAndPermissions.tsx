@@ -1,5 +1,6 @@
 import { BaseInput } from '@shared/components/ui/base-input';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation, type TFunction } from 'react-i18next';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Shield,
@@ -41,6 +42,7 @@ import { authService } from '@services/authService';
 import { userPermissionService } from '@services/userPermissionService';
 import { auditService } from '@services/auditService';
 import { useAuth } from '@app/providers/AuthContext';
+import { useLanguage } from '@app/providers/LanguageContext';
 import { authQueryUserId, useAuthQueryGate } from '@shared/hooks/useAuthQueryGate';
 import { usePermissions, DEFAULT_PERMISSIONS, type AppRole, type PagePermission } from '@shared/hooks/usePermissions';
 import { PERMISSION_PAGE_ENTRIES } from '@shared/constants/permissionPages';
@@ -68,12 +70,12 @@ const EMPTY_USER_ROWS: UserRow[] = [];
 
 const ROLES: AppRole[] = ['admin', 'hr', 'finance', 'operations', 'viewer'];
 
-const ROLE_LABELS_AR: Record<AppRole, string> = {
-  admin: 'مدير النظام',
-  hr: 'موارد بشرية',
-  finance: 'مالية',
-  operations: 'عمليات',
-  viewer: 'عرض فقط',
+const ROLE_LABEL_KEYS: Record<AppRole, string> = {
+  admin: 'admin',
+  hr: 'hr_role',
+  finance: 'finance_role',
+  operations: 'operations_role',
+  viewer: 'viewer',
 };
 
 const EMPTY_NEW_USER_FORM = {
@@ -85,10 +87,10 @@ const EMPTY_NEW_USER_FORM = {
 
 type PermissionField = keyof PagePermission;
 
-const PERMISSION_COLUMNS: { field: PermissionField; label: string }[] = [
-  { field: 'can_view', label: 'عرض' },
-  { field: 'can_edit', label: 'تعديل' },
-  { field: 'can_delete', label: 'حذف' },
+const PERMISSION_COLUMNS: { field: PermissionField; labelKey: string }[] = [
+  { field: 'can_view', labelKey: 'view' },
+  { field: 'can_edit', labelKey: 'edit' },
+  { field: 'can_delete', labelKey: 'delete' },
 ];
 
 function mergeMatrix(
@@ -127,11 +129,10 @@ function getDefaultPermissionUpserts(userId: string, role: AppRole) {
   );
 }
 
-function validateUserForm(name: string, email: string, password?: string): string | null {
-  if (!name) return 'الاسم مطلوب';
-  if (!email?.includes('@')) return 'البريد الإلكتروني غير صالح';
-  if (password !== undefined && password && password.length < 8) return 'يجب أن تكون كلمة المرور 8 أحرف على الأقل.';
-  if (password === '' && arguments.length === 3) return 'يجب أن تكون كلمة المرور 8 أحرف على الأقل.'; // For create
+function validateUserForm(t: TFunction, name: string, email: string, password?: string): string | null {
+  if (!name) return t('nameRequired');
+  if (!email?.includes('@')) return t('invalidEmail');
+  if (password !== undefined && password.length < 8) return t('passwordMinimum');
   return null;
 }
 
@@ -145,13 +146,14 @@ async function handleUserDeletion(params: {
   refetchUsersData: () => Promise<unknown>;
   toast: (props: { title: string; description?: string; variant?: 'default' | 'destructive' }) => void;
   permUserId: string | null;
+  t: TFunction;
 }) {
-  const { target, currentUserId, authService, setDeletingUserId, setPermUserId, setDeleteTarget, refetchUsersData, toast, permUserId } = params;
+  const { target, currentUserId, authService, setDeletingUserId, setPermUserId, setDeleteTarget, refetchUsersData, toast, permUserId, t } = params;
   if (!target) return;
   if (target.id === currentUserId) {
     toast({
-      title: 'غير مسموح',
-      description: 'لا يمكن حذف الحساب الحالي.',
+      title: t('notAllowed'),
+      description: t('cannotDeleteCurrentUser'),
       variant: 'destructive',
     });
     return;
@@ -160,16 +162,16 @@ async function handleUserDeletion(params: {
   setDeletingUserId(target.id);
   try {
     await authService.deleteManagedUser(target.id);
-    toast({ title: 'تم حذف المستخدم بنجاح' });
+    toast({ title: t('userDeleted') });
     if (permUserId === target.id) {
       setPermUserId(null);
     }
     setDeleteTarget(null);
     await refetchUsersData();
   } catch (err: unknown) {
-    const message = getErrorMessage(err, 'تعذر حذف المستخدم');
+    const message = getErrorMessage(err, t('userDeleteFailed'));
     toast({
-      title: 'فشل حذف المستخدم',
+      title: t('userDeleteFailed'),
       description: message,
       variant: 'destructive',
     });
@@ -199,6 +201,9 @@ function CreateUserDialog({
   resetNewUserForm: () => void;
   createUser: () => void;
 }>) {
+  const { t } = useTranslation();
+  const { isRTL } = useLanguage();
+
   return (
     <Dialog
       open={open}
@@ -207,49 +212,49 @@ function CreateUserDialog({
         if (!isOpen && !creatingUser) resetNewUserForm();
       }}
     >
-      <DialogContent className="sm:max-w-md" dir="rtl">
+      <DialogContent className="sm:max-w-md" dir={isRTL ? 'rtl' : 'ltr'}>
         <DialogHeader>
-          <DialogTitle>إضافة مستخدم جديد</DialogTitle>
+          <DialogTitle>{t('addUserTitle')}</DialogTitle>
           <DialogDescription>
-            سيتم إنشاء حساب جديد يمكنه تسجيل الدخول مباشرة، ثم يُسند له الدور الذي تختاره.
+            {t('addUserDescription')}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
-          <BaseInput label="الاسم" id="new-user-name"
+          <BaseInput label={t('userName')} id="new-user-name"
               value={newUserForm.name}
               onChange={(event) => updateNewUserField('name', event.target.value)}
-              placeholder="اسم المستخدم"
+              placeholder={t('userNamePlaceholder')}
               disabled={creatingUser} />
 
-          <BaseInput label="البريد الإلكتروني" id="new-user-email"
+          <BaseInput label={t('email')} id="new-user-email"
               type="email"
               value={newUserForm.email}
               onChange={(event) => updateNewUserField('email', event.target.value)}
               placeholder="user@example.com"
               disabled={creatingUser} />
 
-          <BaseInput label="كلمة المرور" id="new-user-password"
+          <BaseInput label={t('password')} id="new-user-password"
               type="password"
               value={newUserForm.password}
               onChange={(event) => updateNewUserField('password', event.target.value)}
-              placeholder="8 أحرف على الأقل"
+              placeholder={t('passwordMinimumPlaceholder')}
               disabled={creatingUser} />
 
           <div className="space-y-2">
-            <Label>الدور</Label>
+            <Label>{t('role')}</Label>
             <Select
               value={newUserForm.role}
               onValueChange={(value) => updateNewUserField('role', value as AppRole)}
               disabled={creatingUser}
             >
               <SelectTrigger>
-                <SelectValue placeholder="اختر الدور" />
+                <SelectValue placeholder={t('selectRole')} />
               </SelectTrigger>
               <SelectContent>
                 {ROLES.map((role) => (
                   <SelectItem key={role} value={role}>
-                    {ROLE_LABELS_AR[role]}
+                    {t(ROLE_LABEL_KEYS[role])}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -267,10 +272,10 @@ function CreateUserDialog({
             }}
             disabled={creatingUser}
           >
-            إلغاء
+            {t('cancel')}
           </Button>
           <Button type="button" onClick={() => { createUser(); }} disabled={creatingUser}>
-            {creatingUser ? 'جارٍ الإنشاء...' : 'إنشاء المستخدم'}
+            {creatingUser ? t('creatingUser') : t('createUser')}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -279,6 +284,8 @@ function CreateUserDialog({
 }
 
 const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsProps>) => {
+  const { t } = useTranslation();
+  const { lang, isRTL } = useLanguage();
   const { toast } = useToast();
   const { user, loading: authLoading } = useAuth();
   const queryClient = useQueryClient();
@@ -308,7 +315,7 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
 
       return ((profiles || []) as ProfileRow[]).map((p) => ({
         id: p.id,
-        name: p.name || 'بدون اسم',
+        name: p.name || '',
         email: p.email,
         isActive: p.is_active ?? true,
         role: roleMap[p.id] || 'viewer',
@@ -347,13 +354,13 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
 
   useEffect(() => {
     if (!usersError) return;
-    const message = getErrorMessage(usersError, 'تعذر تحميل بيانات المستخدمين والصلاحيات');
+    const message = getErrorMessage(usersError, t('usersPermissionsLoadError'));
     toast({
-      title: 'خطأ في تحميل المستخدمين',
+      title: t('usersLoadErrorTitle'),
       description: message,
       variant: 'destructive',
     });
-  }, [usersError, toast]);
+  }, [usersError, t, toast]);
 
   const selectedUser = useMemo(() => rows.find((r) => r.id === permUserId) ?? null, [rows, permUserId]);
 
@@ -373,12 +380,12 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
       const data = await userPermissionService.getUserPermissions(userId);
       setMatrix(mergeMatrix(role, (data || [])));
     } catch (err: unknown) {
-      const message = getErrorMessage(err, 'تعذر تحميل الصلاحيات');
-      toast({ title: 'خطأ', description: message, variant: 'destructive' });
+      const message = getErrorMessage(err, t('permissionsLoadError'));
+      toast({ title: t('errorLoading'), description: message, variant: 'destructive' });
     } finally {
       setMatrixLoading(false);
     }
-  }, [canView, toast]);
+  }, [canView, t, toast]);
 
   useEffect(() => {
     if (rows.length && !permUserId) {
@@ -400,14 +407,14 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
       await userPermissionService.upsertRole(userId, role);
 
       setRows((prev) => prev.map((r) => (r.id === userId ? { ...r, role } : r)));
-      toast({ title: 'تم تحديث الدور' });
+      toast({ title: t('roleUpdated') });
       if (userId === permUserId) {
         await loadMatrix(userId, role);
       }
     } catch (err: unknown) {
-      const message = getErrorMessage(err, 'حدث خطأ أثناء الحفظ');
+      const message = getErrorMessage(err, t('errorSaving'));
       toast({
-        title: 'فشل تحديث الدور',
+        title: t('roleUpdateFailed'),
         description: message,
         variant: 'destructive',
       });
@@ -436,12 +443,12 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
         record_id: selectedUser.id,
         meta: { target_user_role: selectedUser.role },
       });
-      toast({ title: 'تم حفظ الصلاحيات' });
+      toast({ title: t('permissionsSaved') });
       await queryClient.invalidateQueries({ queryKey: ['permissions', selectedUser.id] });
       await loadMatrix(selectedUser.id, selectedUser.role);
     } catch (err: unknown) {
-      const message = getErrorMessage(err, 'فشل الحفظ');
-      toast({ title: 'خطأ', description: message, variant: 'destructive' });
+      const message = getErrorMessage(err, t('permissionsSaveFailed'));
+      toast({ title: t('errorSaving'), description: message, variant: 'destructive' });
     } finally {
       setSavingMatrix(false);
     }
@@ -464,7 +471,7 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
     const email = newUserForm.email.trim().toLowerCase();
     const password = newUserForm.password;
 
-    const errorMsg = validateUserForm(name, email, password);
+    const errorMsg = validateUserForm(t, name, email, password);
     if (errorMsg) {
       toast({ title: errorMsg, variant: 'destructive' });
       return;
@@ -479,7 +486,7 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
         role: newUserForm.role,
       });
       await Promise.all(getDefaultPermissionUpserts(created.user_id, newUserForm.role));
-      toast({ title: 'تم إنشاء المستخدم بنجاح' });
+      toast({ title: t('userCreated') });
       setCreateUserOpen(false);
       resetNewUserForm();
       await refetchUsersData();
@@ -487,9 +494,9 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
         setPermUserId(created.user_id);
       }
     } catch (err: unknown) {
-      const message = getErrorMessage(err, 'تعذر إنشاء المستخدم');
+      const message = getErrorMessage(err, t('userCreateFailed'));
       toast({
-        title: 'فشل إنشاء المستخدم',
+        title: t('userCreateFailed'),
         description: message,
         variant: 'destructive',
       });
@@ -515,7 +522,7 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
     const email = editUserForm.email.trim().toLowerCase();
     const password = editUserForm.password;
 
-    const errorMsg = validateUserForm(name, email, password || undefined);
+    const errorMsg = validateUserForm(t, name, email, password || undefined);
     if (errorMsg) {
       toast({ title: errorMsg, variant: 'destructive' });
       return;
@@ -536,13 +543,13 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
         record_id: editTarget.id,
         meta: { name, email, role: editUserForm.role, is_active: editUserForm.isActive },
       });
-      toast({ title: 'تم التحديث بنجاح' });
+      toast({ title: t('userUpdated') });
       setEditTarget(null);
       await refetchUsersData();
     } catch (err: unknown) {
-      const message = getErrorMessage(err, 'تعذر تحديث المستخدم');
+      const message = getErrorMessage(err, t('userUpdateFailed'));
       toast({
-        title: 'خطأ أثناء التحديث',
+        title: t('userUpdateFailed'),
         description: message,
         variant: 'destructive',
       });
@@ -562,7 +569,8 @@ const UsersAndPermissions = ({ embedded = false }: Readonly<UsersAndPermissionsP
       setDeleteTarget,
       refetchUsersData,
       toast,
-      permUserId
+      permUserId,
+      t,
     });
   };
 

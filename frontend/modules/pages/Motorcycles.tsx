@@ -1,8 +1,8 @@
 import { formatStandardDateTime, formatCurrency } from '@shared/lib/formatters';
 
 import type React from 'react';
-import { Suspense, lazy, useEffect, useRef, useState, useCallback, type Dispatch, type SetStateAction } from 'react';
-import { Search, Plus, FolderOpen, Edit, Trash2, Bike, FileText, Car, Loader2 } from 'lucide-react';
+import { Suspense, lazy, useEffect, useMemo, useRef, useState, useCallback, type Dispatch, type SetStateAction } from 'react';
+import { Search, Plus, FolderOpen, Edit, Trash2, Bike, FileText, Car, Loader2, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Input } from '@shared/components/ui/input';
 import { Button } from '@shared/components/ui/button';
@@ -71,6 +71,99 @@ const vehicleStatusLabel = (status: VehicleStatus) => status === 'active' ? 'م�
 const typeLabels: Record<string, string> = { motorcycle: 'دباب', car: 'سيارة' };
 
 const ALL_STATUSES: VehicleStatus[] = ['active', 'maintenance', 'breakdown', 'rental', 'inactive', 'ended'];
+
+type VehicleColumnFilters = {
+  plate: string;
+  chip: 'all' | 'present' | 'absent';
+  rider: string;
+  status: 'all' | VehicleStatus;
+  brandModel: string;
+  year: string;
+  serialNumber: string;
+  chassisNumber: string;
+  insuranceExpiry: string;
+  registrationExpiry: string;
+  authorizationExpiry: string;
+  minimumMaintenanceCost: string;
+  rental: 'all' | 'with_rental' | 'without_rental';
+};
+
+const EMPTY_VEHICLE_COLUMN_FILTERS: VehicleColumnFilters = {
+  plate: '',
+  chip: 'all',
+  rider: '',
+  status: 'all',
+  brandModel: '',
+  year: '',
+  serialNumber: '',
+  chassisNumber: '',
+  insuranceExpiry: '',
+  registrationExpiry: '',
+  authorizationExpiry: '',
+  minimumMaintenanceCost: '',
+  rental: 'all',
+};
+
+const COLUMN_FILTER_CELL_CLASS = 'border-t border-border/40 bg-card p-1 align-top';
+const COLUMN_FILTER_INPUT_CLASS = 'h-8 min-w-24 px-2 text-xs';
+const COLUMN_FILTER_SELECT_CLASS = 'h-8 min-w-24 bg-background px-2 text-xs';
+
+const includesFilter = (value: unknown, filter: string) =>
+  !filter || String(value ?? '').toLocaleLowerCase().includes(filter.trim().toLocaleLowerCase());
+
+const matchesVehicleTextFilters = (
+  vehicle: VehicleReportRow,
+  filters: VehicleColumnFilters,
+) => [
+    [`${vehicle.plate_number} ${vehicle.plate_number_en ?? ''}`, filters.plate],
+    [vehicle.current_rider ?? 'بدون مندوب', filters.rider],
+    [`${vehicle.brand ?? ''} ${vehicle.model ?? ''}`, filters.brandModel],
+    [vehicle.year, filters.year],
+    [vehicle.serial_number, filters.serialNumber],
+    [vehicle.chassis_number, filters.chassisNumber],
+  ].every(([value, filter]) => includesFilter(value, String(filter)));
+
+const matchesVehicleDateFilters = (
+  vehicle: VehicleReportRow,
+  filters: VehicleColumnFilters,
+) => [
+    [vehicle.insurance_expiry, filters.insuranceExpiry],
+    [vehicle.registration_expiry, filters.registrationExpiry],
+    [vehicle.authorization_expiry, filters.authorizationExpiry],
+  ].every(([value, filter]) => !filter || String(value ?? '').startsWith(String(filter)));
+
+const matchesMinimumMaintenanceCost = (
+  vehicle: VehicleReportRow,
+  minimumCostFilter: string,
+) => {
+  if (!minimumCostFilter) return true;
+  return (vehicle.total_maintenance_cost ?? 0) >= Number(minimumCostFilter);
+};
+
+const matchesRentalFilter = (
+  vehicle: VehicleReportRow,
+  rentalFilter: VehicleColumnFilters['rental'],
+) => {
+  if (rentalFilter === 'all') return true;
+  const hasRentalData = vehicle.status === 'rental'
+    && Boolean(vehicle.rental_start_date || vehicle.rental_monthly_amount);
+  return (rentalFilter === 'with_rental') === hasRentalData;
+};
+
+const matchesVehicleColumnFilters = (
+  vehicle: VehicleReportRow,
+  filters: VehicleColumnFilters,
+) => {
+  const chipMatches = filters.chip === 'all'
+    || (filters.chip === 'present') === vehicle.has_fuel_chip;
+  const statusMatches = filters.status === 'all' || filters.status === vehicle.status;
+  return matchesVehicleTextFilters(vehicle, filters)
+    && chipMatches
+    && statusMatches
+    && matchesVehicleDateFilters(vehicle, filters)
+    && matchesMinimumMaintenanceCost(vehicle, filters.minimumMaintenanceCost)
+    && matchesRentalFilter(vehicle, filters.rental);
+};
 
 const displayCell = (value: string | number | null | undefined) => value || '—';
 
@@ -351,6 +444,7 @@ const Motorcycles = () => {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
+  const [columnFilters, setColumnFilters] = useState<VehicleColumnFilters>(EMPTY_VEHICLE_COLUMN_FILTERS);
   const [showForm, setShowForm] = useState(false);
   const [editVehicle, setEditVehicle] = useState<Vehicle | null>(null);
   const [fileIoHint, setFileIoHint] = useState<{ kind: 'ok' | 'err'; message: string } | null>(null);
@@ -399,13 +493,26 @@ const Motorcycles = () => {
     toast({ title: 'خطأ في التحميل', description: message, variant: 'destructive' });
   }, [vehiclesError, toast]);
 
-  const filtered = data.filter(v => {
-    const q = search.toLowerCase();
-    const matchSearch = !q || v.plate_number.toLowerCase().includes(q) || (v.brand ?? '').toLowerCase().includes(q) || (v.model ?? '').toLowerCase().includes(q);
-    const matchStatus = statusFilter === 'all' || v.status === statusFilter;
-    const matchType = typeFilter === 'all' || v.type === typeFilter;
-    return matchSearch && matchStatus && matchType;
-  });
+  const filtered = useMemo(() => data.filter((vehicle) => {
+    const query = search.toLocaleLowerCase();
+    const matchesSearch = !query
+      || vehicle.plate_number.toLocaleLowerCase().includes(query)
+      || (vehicle.brand ?? '').toLocaleLowerCase().includes(query)
+      || (vehicle.model ?? '').toLocaleLowerCase().includes(query);
+    const matchesStatus = statusFilter === 'all' || vehicle.status === statusFilter;
+    const matchesType = typeFilter === 'all' || vehicle.type === typeFilter;
+    return matchesSearch
+      && matchesStatus
+      && matchesType
+      && matchesVehicleColumnFilters(vehicle, columnFilters);
+  }), [columnFilters, data, search, statusFilter, typeFilter]);
+
+  const updateColumnFilter = (key: keyof VehicleColumnFilters, value: string) => {
+    setColumnFilters((current) => ({ ...current, [key]: value }));
+  };
+  const hasActiveColumnFilters = Object.values(columnFilters).some(
+    (value) => value !== '' && value !== 'all',
+  );
 
   // Summary stats
   const stats = {
@@ -665,6 +772,158 @@ const Motorcycles = () => {
                     <th className="ta-th">تكلفة الصيانة</th>
                     <th className="ta-th">الإيجار</th>
                     <th className="ta-th">الإجراءات</th>
+                  </tr>
+                  <tr>
+                    <th className={COLUMN_FILTER_CELL_CLASS}>
+                      <Input
+                        value={columnFilters.plate}
+                        onChange={(event) => updateColumnFilter('plate', event.target.value)}
+                        placeholder="فلتر اللوحة"
+                        aria-label="فلترة برقم اللوحة"
+                        className={COLUMN_FILTER_INPUT_CLASS}
+                      />
+                    </th>
+                    <th className={COLUMN_FILTER_CELL_CLASS}>
+                      <Select value={columnFilters.chip} onValueChange={(value) => updateColumnFilter('chip', value)}>
+                        <SelectTrigger className={COLUMN_FILTER_SELECT_CLASS} aria-label="فلترة حالة الشريحة">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">الكل</SelectItem>
+                          <SelectItem value="present">موجودة</SelectItem>
+                          <SelectItem value="absent">غير موجودة</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </th>
+                    <th className={COLUMN_FILTER_CELL_CLASS}>
+                      <Input
+                        value={columnFilters.rider}
+                        onChange={(event) => updateColumnFilter('rider', event.target.value)}
+                        placeholder="فلتر المندوب"
+                        aria-label="فلترة باسم المندوب"
+                        className={COLUMN_FILTER_INPUT_CLASS}
+                      />
+                    </th>
+                    <th className={COLUMN_FILTER_CELL_CLASS}>
+                      <Select value={columnFilters.status} onValueChange={(value) => updateColumnFilter('status', value)}>
+                        <SelectTrigger className={COLUMN_FILTER_SELECT_CLASS} aria-label="فلترة حالة الدباب">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">الكل</SelectItem>
+                          {ALL_STATUSES.map((status) => (
+                            <SelectItem key={status} value={status}>{statusLabels[status]}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </th>
+                    <th className={COLUMN_FILTER_CELL_CLASS}>
+                      <Input
+                        value={columnFilters.brandModel}
+                        onChange={(event) => updateColumnFilter('brandModel', event.target.value)}
+                        placeholder="الماركة / الموديل"
+                        aria-label="فلترة بالماركة أو الموديل"
+                        className={COLUMN_FILTER_INPUT_CLASS}
+                      />
+                    </th>
+                    <th className={COLUMN_FILTER_CELL_CLASS}>
+                      <Input
+                        value={columnFilters.year}
+                        onChange={(event) => updateColumnFilter('year', event.target.value)}
+                        placeholder="السنة"
+                        inputMode="numeric"
+                        aria-label="فلترة بسنة الصنع"
+                        className={COLUMN_FILTER_INPUT_CLASS}
+                      />
+                    </th>
+                    <th className={COLUMN_FILTER_CELL_CLASS}>
+                      <Input
+                        value={columnFilters.serialNumber}
+                        onChange={(event) => updateColumnFilter('serialNumber', event.target.value)}
+                        placeholder="الرقم التسلسلي"
+                        aria-label="فلترة بالرقم التسلسلي"
+                        className={COLUMN_FILTER_INPUT_CLASS}
+                        dir="ltr"
+                      />
+                    </th>
+                    <th className={COLUMN_FILTER_CELL_CLASS}>
+                      <Input
+                        value={columnFilters.chassisNumber}
+                        onChange={(event) => updateColumnFilter('chassisNumber', event.target.value)}
+                        placeholder="رقم الهيكل"
+                        aria-label="فلترة برقم الهيكل"
+                        className={COLUMN_FILTER_INPUT_CLASS}
+                        dir="ltr"
+                      />
+                    </th>
+                    <th className={COLUMN_FILTER_CELL_CLASS}>
+                      <Input
+                        type="date"
+                        value={columnFilters.insuranceExpiry}
+                        onChange={(event) => updateColumnFilter('insuranceExpiry', event.target.value)}
+                        aria-label="فلترة بتاريخ انتهاء التأمين"
+                        className={COLUMN_FILTER_INPUT_CLASS}
+                        dir="ltr"
+                      />
+                    </th>
+                    <th className={COLUMN_FILTER_CELL_CLASS}>
+                      <Input
+                        type="date"
+                        value={columnFilters.registrationExpiry}
+                        onChange={(event) => updateColumnFilter('registrationExpiry', event.target.value)}
+                        aria-label="فلترة بتاريخ انتهاء التسجيل"
+                        className={COLUMN_FILTER_INPUT_CLASS}
+                        dir="ltr"
+                      />
+                    </th>
+                    <th className={COLUMN_FILTER_CELL_CLASS}>
+                      <Input
+                        type="date"
+                        value={columnFilters.authorizationExpiry}
+                        onChange={(event) => updateColumnFilter('authorizationExpiry', event.target.value)}
+                        aria-label="فلترة بتاريخ انتهاء التفويض"
+                        className={COLUMN_FILTER_INPUT_CLASS}
+                        dir="ltr"
+                      />
+                    </th>
+                    <th className={COLUMN_FILTER_CELL_CLASS}>
+                      <Input
+                        type="number"
+                        min="0"
+                        value={columnFilters.minimumMaintenanceCost}
+                        onChange={(event) => updateColumnFilter('minimumMaintenanceCost', event.target.value)}
+                        placeholder="حد أدنى"
+                        aria-label="فلترة بالحد الأدنى لتكلفة الصيانة"
+                        className={COLUMN_FILTER_INPUT_CLASS}
+                        dir="ltr"
+                      />
+                    </th>
+                    <th className={COLUMN_FILTER_CELL_CLASS}>
+                      <Select value={columnFilters.rental} onValueChange={(value) => updateColumnFilter('rental', value)}>
+                        <SelectTrigger className={COLUMN_FILTER_SELECT_CLASS} aria-label="فلترة بيانات الإيجار">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">الكل</SelectItem>
+                          <SelectItem value="with_rental">إيجار</SelectItem>
+                          <SelectItem value="without_rental">بدون إيجار</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </th>
+                    <th className={COLUMN_FILTER_CELL_CLASS}>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="mx-auto h-8 w-8"
+                        onClick={() => setColumnFilters(EMPTY_VEHICLE_COLUMN_FILTERS)}
+                        disabled={!hasActiveColumnFilters}
+                        title="مسح فلاتر الأعمدة"
+                        aria-label="مسح فلاتر الأعمدة"
+                      >
+                        <X size={15} />
+                      </Button>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>

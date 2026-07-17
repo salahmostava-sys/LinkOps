@@ -63,7 +63,8 @@ export function useDailyAppReportTab() {
         year, month, startDay, endDay, appId: selectedApp,
         employees: sq.employees,
         data: sq.spreadsheetMonthData,
-        apps: sq.apps
+        apps: sq.apps,
+        appEmployeeIds: sq.appEmployeeIds,
       });
     } catch (e: unknown) {
       toast.error('حدث خطأ أثناء تصدير ملف الإكسل', { description: getErrorMessage(e) });
@@ -77,7 +78,8 @@ export function useDailyAppReportTab() {
         year, month, startDay, endDay, appId: selectedApp,
         employees: sq.employees,
         data: sq.spreadsheetMonthData,
-        apps: sq.apps
+        apps: sq.apps,
+        appEmployeeIds: sq.appEmployeeIds,
       });
     } catch (e: unknown) {
       toast.error('حدث خطأ أثناء التجهيز للطباعة', { description: getErrorMessage(e) });
@@ -107,12 +109,13 @@ export function useDailyAppReportTab() {
       selectedAppId: selectedApp,
       data: sq.spreadsheetMonthData,
       targets: targetsData ?? [],
+      employeeAppIdsByApp: sq.appEmployeeIds,
       year,
       month,
       startDay,
       endDay,
     });
-  }, [selectedApp, sq.loading, sq.employees, sq.apps, sq.spreadsheetMonthData, year, month, startDay, endDay, targetsData]);
+  }, [selectedApp, sq.loading, sq.employees, sq.apps, sq.appEmployeeIds, sq.spreadsheetMonthData, year, month, startDay, endDay, targetsData]);
 
   return {
     loading: sq.loading,
