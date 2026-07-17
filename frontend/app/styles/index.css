@@ -20,8 +20,8 @@
     /* ─── High-End Editorial Dashboard — Light Palette ─────────── */
 
     /* Page canvas */
-    --background: 0 0% 100%;          /* #ffffff app canvas */
-    --foreground: 222 75% 12%;        /* #061735 */
+    --background: 210 40% 98%;        /* Slate 50 app canvas */
+    --foreground: 222 47% 11%;        /* Slate 900 */
 
     /* Cards / popups — pure white */
     --card: 0 0% 100%;
@@ -128,11 +128,11 @@
   }
 
   .dark {
-    --background: 222 47% 9%;
+    --background: 222 47% 7%;
     --foreground: 213 20% 92%;
-    --card: 222 40% 12%;
+    --card: 222 40% 10%;
     --card-foreground: 213 20% 92%;
-    --popover: 222 40% 11%;
+    --popover: 222 40% 10%;
     --popover-foreground: 213 20% 92%;
     --primary: 218 70% 40%;
     --primary-foreground: 0 0% 100%;
@@ -242,11 +242,34 @@
     overflow-wrap: anywhere;
   }
 
+  h1, h2, h3, h4 {
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+  
+  .bg-noise {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 50;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  }
+
   /* Global table alignment: center all cells */
   table th,
   table td {
     text-align: center;
     vertical-align: middle;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Physical interactions */
+  button, [role="button"], .ds-btn, .ds-btn-primary, .tailcard, .metric-card, .stat-card {
+    transition: transform 150ms cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 150ms ease, background-color 150ms ease;
+  }
+  button:active:not(:disabled), [role="button"]:active:not(:disabled), .ds-btn:active:not(:disabled), .tailcard:active, .metric-card:active, .stat-card:active {
+    transform: translateY(1px) scale(0.98);
   }
 }
 
@@ -326,14 +349,14 @@
   .app-content-shell {
     width: 100%;
     background: var(--ds-surface);
-    padding: clamp(1rem, 1.35vw, 1.5rem);
+    padding: clamp(1.25rem, 2vw, 2.5rem);
     color: var(--ds-on-surface);
     font-size: var(--text-md);
   }
 
   @media (min-width: 1280px) {
     .app-content-shell {
-      padding: 1.5rem;
+      padding: 2.5rem;
     }
   }
 

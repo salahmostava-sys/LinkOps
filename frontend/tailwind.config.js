@@ -19,9 +19,9 @@ const config = {
     },
     extend: {
       fontFamily: {
-        sans: ['"Droid Arabic Kufi"', 'Tajawal', '"IBM Plex Sans Arabic"', 'sans-serif'],
-        arabic: ['"Droid Arabic Kufi"', 'Tajawal', '"IBM Plex Sans Arabic"', 'sans-serif'],
-        mono: ['"Droid Arabic Kufi"', 'Tajawal', '"IBM Plex Sans Arabic"', 'sans-serif'],
+        sans: ['"IBM Plex Sans Arabic"', 'Tajawal', 'sans-serif'],
+        arabic: ['"IBM Plex Sans Arabic"', 'Tajawal', 'sans-serif'],
+        mono: ['"IBM Plex Sans Arabic"', 'Tajawal', 'sans-serif'],
       },
       fontSize: {
         xs: ['0.75rem', { lineHeight: '1.35rem' }],
@@ -38,12 +38,12 @@ const config = {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
-          container: "#174ea6",
+          container: "#0284C7", // Cobalt Slate
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",
-          container: "#163b7a",
+          container: "#334155",
         },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
@@ -88,32 +88,30 @@ const config = {
           ring: "hsl(var(--sidebar-ring))",
           muted: "hsl(var(--sidebar-muted))",
         },
-        /* ── MD3 surface tokens ─────────────────────────────────── */
         surface: {
-          DEFAULT: "#ffffff",
-          lowest: "#ffffff",
-          low: "#fafbfc",
-          container: "#f4f6fa",
-          high: "#eef2f7",
+          DEFAULT: "var(--ds-surface)",
+          lowest: "var(--ds-surface-lowest)",
+          low: "var(--ds-surface-low)",
+          container: "var(--ds-surface-container)",
+          high: "var(--ds-surface-high)",
         },
         "on-surface": {
-          DEFAULT: "#1a1c1d",
-          variant: "#485166",
+          DEFAULT: "var(--ds-on-surface)",
+          variant: "var(--ds-on-surface-variant)",
         },
-        "outline-variant": "#dce2eb",
-        /* ── Brand palette ────────────────────────────────────────── */
+        "outline-variant": "var(--ds-outline-variant)",
         brand: {
-          25:  '#f4f8fe',
-          50:  '#edf4fd',
-          100: '#d8e7fa',
-          200: '#b4cff3',
-          300: '#83ade8',
-          400: '#4d83d4',
-          500: '#1f54ad',
-          600: '#174ea6',
-          700: '#123f88',
-          800: '#0b276b',
-          900: '#061735',
+          25:  '#f0f9ff',
+          50:  '#e0f2fe',
+          100: '#bae6fd',
+          200: '#7dd3fc',
+          300: '#38bdf8',
+          400: '#0ea5e9',
+          500: '#0284c7', // Cobalt Slate
+          600: '#0369a1',
+          700: '#075985',
+          800: '#0c4a6e',
+          900: '#082f49',
         },
       },
       borderRadius: {
@@ -125,11 +123,11 @@ const config = {
         "4xl": "1.5rem",
       },
       boxShadow: {
-        'card':       '0px 8px 28px rgba(20, 31, 52, 0.045)',
-        'card-hover': '0px 14px 42px rgba(20, 31, 52, 0.075)',
-        'brand':      '0 4px 16px 0 rgba(31, 84, 173, 0.18)',
-        'brand-sm':   '0 2px 8px 0 rgba(31, 84, 173, 0.14)',
-        'sidebar':    '4px 0 24px 0 rgba(31, 84, 173, 0.08)',
+        'card':       '0px 8px 28px rgba(15, 23, 42, 0.04)',
+        'card-hover': '0px 14px 42px rgba(15, 23, 42, 0.08)',
+        'brand':      '0 4px 16px 0 rgba(2, 132, 199, 0.18)',
+        'brand-sm':   '0 2px 8px 0 rgba(2, 132, 199, 0.14)',
+        'sidebar':    '4px 0 24px 0 rgba(15, 23, 42, 0.04)',
       },
       keyframes: {
         "accordion-down": {
@@ -153,43 +151,26 @@ const config = {
           to: { opacity: "1", transform: "translateY(0)" },
         },
         "scale-in": {
-          from: { opacity: "0", transform: "scale(0.94)" },
+          from: { opacity: "0", transform: "scale(0.96)" },
           to: { opacity: "1", transform: "scale(1)" },
         },
         "page-enter": {
           from: { opacity: "0", transform: "translateY(10px)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
-        "float-slow": {
-          "0%, 100%": { transform: "translateY(0px) rotate(0deg)" },
-          "33%": { transform: "translateY(-18px) rotate(3deg)" },
-          "66%": { transform: "translateY(-8px) rotate(-2deg)" },
-        },
-        "float-medium": {
-          "0%, 100%": { transform: "translateY(0px) rotate(0deg)" },
-          "50%": { transform: "translateY(-12px) rotate(-4deg)" },
-        },
-        "pulse-ring": {
-          "0%": { transform: "scale(1)", opacity: "0.4" },
-          "100%": { transform: "scale(1.5)", opacity: "0" },
-        },
-        "shimmer": {
-          "0%": { backgroundPosition: "-200% 0" },
-          "100%": { backgroundPosition: "200% 0" },
-        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "fade-in": "fade-in 0.35s ease-out",
-        "slide-in": "slide-in 0.3s ease-out",
-        "slide-up": "slide-up 0.4s cubic-bezier(0.22,1,0.36,1) both",
-        "scale-in": "scale-in 0.3s cubic-bezier(0.22,1,0.36,1) both",
-        "page-enter": "page-enter 0.28s cubic-bezier(0.22,1,0.36,1) both",
-        "float-slow": "float-slow 7s ease-in-out infinite",
-        "float-medium": "float-medium 5s ease-in-out infinite",
-        "pulse-ring": "pulse-ring 1.5s cubic-bezier(0.22,1,0.36,1) infinite",
-        "shimmer": "shimmer 2.5s linear infinite",
+        "fade-in": "fade-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
+        "slide-in": "slide-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
+        "slide-up": "slide-up 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
+        "scale-in": "scale-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
+        "page-enter": "page-enter 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards",
+      },
+      transitionTimingFunction: {
+        spring: "cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+        smooth: "cubic-bezier(0.4, 0, 0.2, 1)",
       },
     },
   },

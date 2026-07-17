@@ -107,10 +107,11 @@ const AppLayoutInner = ({ children }: Readonly<AppLayoutProps>) => { // NOSONAR:
 
   return (
     <div
-      className="min-h-screen"
+      className="min-h-screen relative"
       dir={isRTL ? 'rtl' : 'ltr'}
       style={{ background: 'var(--ds-surface)', '--app-sidebar-width': sidebarWidth } as CSSProperties}
     >
+      <div className="bg-noise" />
       <ErrorBoundary>
         <AppSidebar />
       </ErrorBoundary>
