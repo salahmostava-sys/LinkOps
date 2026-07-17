@@ -30,6 +30,12 @@ import {
   getDailyAppReportName,
 } from '@modules/orders/utils/dailyAppReportModel';
 
+function formatTargetExpectation(expected: boolean | null, projectedTotal: number | null): string {
+  if (expected === null) return '—';
+  const label = expected ? 'متوقع' : 'غير متوقع';
+  return `${label} (${projectedTotal})`;
+}
+
 function summarizeMessages(messages: string[], limit = 3): string {
   if (messages.length === 0) return '';
   const preview = messages.slice(0, limit).join('، ');
@@ -161,9 +167,7 @@ export async function exportDailyAppReportExcel(params: {
 
   results.forEach((row) => {
     const achievement = row.achievementPercentage === null ? '—' : `${row.achievementPercentage.toFixed(1)}%`;
-    const expected = row.expectedToReachTarget === null
-      ? '—'
-      : `${row.expectedToReachTarget ? 'متوقع' : 'غير متوقع'} (${row.projectedTotal})`;
+    const expected = formatTargetExpectation(row.expectedToReachTarget, row.projectedTotal);
     rows.push([
       row.empName,
       row.total,
@@ -260,9 +264,7 @@ export async function printDailyAppReportTable(params: {
   const tbody = doc.createElement('tbody');
   results.forEach((row) => {
     const achievement = row.achievementPercentage === null ? '—' : `${row.achievementPercentage.toFixed(1)}%`;
-    const expected = row.expectedToReachTarget === null
-      ? '—'
-      : `${row.expectedToReachTarget ? 'متوقع' : 'غير متوقع'} (${row.projectedTotal})`;
+    const expected = formatTargetExpectation(row.expectedToReachTarget, row.projectedTotal);
     const tr = doc.createElement('tr');
     tr.innerHTML = `
       <td>${escapeHtml(row.empName)}</td>

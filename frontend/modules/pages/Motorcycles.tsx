@@ -108,20 +108,22 @@ const COLUMN_FILTER_CELL_CLASS = 'border-t border-border/40 bg-card p-1 align-to
 const COLUMN_FILTER_INPUT_CLASS = 'h-8 min-w-24 px-2 text-xs';
 const COLUMN_FILTER_SELECT_CLASS = 'h-8 min-w-24 bg-background px-2 text-xs';
 
-const includesFilter = (value: unknown, filter: string) =>
+type FilterableVehicleValue = string | number | null | undefined;
+
+const includesFilter = (value: FilterableVehicleValue, filter: string) =>
   !filter || String(value ?? '').toLocaleLowerCase().includes(filter.trim().toLocaleLowerCase());
 
 const matchesVehicleTextFilters = (
   vehicle: VehicleReportRow,
   filters: VehicleColumnFilters,
-) => [
+) => ([
     [`${vehicle.plate_number} ${vehicle.plate_number_en ?? ''}`, filters.plate],
     [vehicle.current_rider ?? 'بدون مندوب', filters.rider],
     [`${vehicle.brand ?? ''} ${vehicle.model ?? ''}`, filters.brandModel],
     [vehicle.year, filters.year],
     [vehicle.serial_number, filters.serialNumber],
     [vehicle.chassis_number, filters.chassisNumber],
-  ].every(([value, filter]) => includesFilter(value, String(filter)));
+  ] satisfies Array<[FilterableVehicleValue, string]>).every(([value, filter]) => includesFilter(value, filter));
 
 const matchesVehicleDateFilters = (
   vehicle: VehicleReportRow,

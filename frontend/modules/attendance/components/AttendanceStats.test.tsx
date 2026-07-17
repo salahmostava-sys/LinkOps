@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import AttendanceStats from './AttendanceStats';
 import attendanceService from '@services/attendanceService';
@@ -25,7 +25,7 @@ describe('AttendanceStats', () => {
 
     render(<AttendanceStats selectedMonth={2} selectedYear={2026} />);
 
-    await waitFor(() => expect(screen.getByText('لا توجد بيانات حضور لهذا الشهر')).toBeInTheDocument());
+    expect(await screen.findByText('لا توجد بيانات حضور لهذا الشهر')).toBeInTheDocument();
     expect(screen.getByText('4 مندوب نشط')).toBeInTheDocument();
   });
 
@@ -39,7 +39,7 @@ describe('AttendanceStats', () => {
 
     render(<AttendanceStats selectedMonth={2} selectedYear={2026} />);
 
-    await waitFor(() => expect(screen.getByText('ملخص الحضور الشهري')).toBeInTheDocument());
+    expect(await screen.findByText('ملخص الحضور الشهري')).toBeInTheDocument();
     expect(screen.getByText('حاضر')).toBeInTheDocument();
     expect(screen.getByText('غائب')).toBeInTheDocument();
     expect(screen.getByText('متأخر')).toBeInTheDocument();

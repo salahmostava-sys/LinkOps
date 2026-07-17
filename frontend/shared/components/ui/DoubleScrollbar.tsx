@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, ReactNode } from 'react';
 
-export function DoubleScrollbar({ children, className = '' }: { children: ReactNode; className?: string }) {
+export function DoubleScrollbar({ children, className = '' }: Readonly<{ children: ReactNode; className?: string }>) {
   const topScrollRef = useRef<HTMLDivElement>(null);
   const bottomScrollRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);

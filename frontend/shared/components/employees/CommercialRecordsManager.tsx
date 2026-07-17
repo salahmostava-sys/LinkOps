@@ -284,14 +284,16 @@ export function CommercialRecordsManager({
               </div>
             </div>
 
-            {isLoading ? (
+            {isLoading && (
               <div className="flex items-center justify-center gap-2 py-12 text-sm text-muted-foreground">
                 <Loader2 size={16} className="animate-spin" />
                 جاري تحميل السجلات التجارية...
               </div>
-            ) : managedRecords.length === 0 ? (
+            )}
+            {!isLoading && managedRecords.length === 0 && (
               <div className="py-12 text-center text-sm text-muted-foreground">لا توجد سجلات مُدارة بعد.</div>
-            ) : (
+            )}
+            {!isLoading && managedRecords.length > 0 && (
               <div className="max-h-[430px] overflow-auto">
                 <table className="w-full min-w-[980px] text-sm">
                   <thead className="sticky top-0 z-10 bg-muted/95 text-xs text-muted-foreground">
@@ -353,7 +355,20 @@ export function CommercialRecordsManager({
                                 </>
                               ) : (
                                 <>
-                                  <Button type="button" size="icon" variant="outline" className="h-8 w-8" onClick={() => { if (record.id) setEditingId(record.id); setEditingForm(toCommercialRecordForm(record)); }} disabled={!canMutate || !record.id} title="تعديل" aria-label={`تعديل ${record.name}`}>
+                                  <Button
+                                    type="button"
+                                    size="icon"
+                                    variant="outline"
+                                    className="h-8 w-8"
+                                    onClick={() => {
+                                      if (!record.id) return;
+                                      setEditingId(record.id);
+                                      setEditingForm(toCommercialRecordForm(record));
+                                    }}
+                                    disabled={!canMutate || !record.id}
+                                    title="تعديل"
+                                    aria-label={`تعديل ${record.name}`}
+                                  >
                                     <Edit size={14} />
                                   </Button>
                                   <Button type="button" size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => { if (record.id) handleDelete(record.id, record.name).catch(() => {}); }} disabled={!canMutate || !record.id} title="حذف" aria-label={`حذف ${record.name}`}>

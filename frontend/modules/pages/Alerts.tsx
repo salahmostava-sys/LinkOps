@@ -74,6 +74,12 @@ const typeIcons: Record<string, string> = {
   vehicle_rental: '🚙',
 };
 
+function getAlertTypeFilterLabel(type: string): string {
+  if (type === 'all') return 'كل الأنواع';
+  if (type === 'expired_residency_cost') return 'تكلفة الإقامات المنتهية';
+  return `${typeIcons[type] || '🔔'} ${alertTypeLabels[type] || type}`;
+}
+
 const workflowLabels = {
   open: 'مفتوح',
   in_progress: 'قيد التنفيذ',
@@ -498,10 +504,7 @@ const Alerts = () => {
         </div>
         <div className="flex gap-2 flex-wrap">
           {typeOptions.map(t => {
-            let label = t;
-            if (t === 'all') label = 'كل الأنواع';
-            else if (t === 'expired_residency_cost') label = 'تكلفة الإقامات المنتهية';
-            else label = `${typeIcons[t] || '🔔'} ${alertTypeLabels[t] || t}`;
+            const label = getAlertTypeFilterLabel(t);
             return (
               <button type="button" key={t} onClick={() => setTypeFilter(t)}
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${typeFilter === t ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-accent'}`}>

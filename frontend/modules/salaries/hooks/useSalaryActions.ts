@@ -61,6 +61,89 @@ export interface UseSalaryActionsParams {
   setDetailRow: React.Dispatch<React.SetStateAction<SalaryRow | null>>;
 }
 
+type TieredScheme = SchemeData & {
+  salary_scheme_tiers: NonNullable<SchemeData['salary_scheme_tiers']>;
+};
+
+const getGroupedPlatforms = (
+  row: SalaryRow,
+  newOrders: Record<string, number>,
+  platformSchemes: Record<string, SchemeData | null>,
+  schemeId: string,
+) => Object.keys(newOrders).filter(
+  (name) => platformSchemes[name]?.id === schemeId
+    && (row.platformMetrics[name]?.workType ?? 'orders') === 'orders',
+);
+
+const getGroupedOrders = (platforms: string[], newOrders: Record<string, number>) =>
+  Object.fromEntries(platforms.map((name) => [name, newOrders[name] ?? 0]));
+
+type GroupedMetricsParams = {
+  row: SalaryRow;
+  platforms: string[];
+  schemeId: string;
+  totalOrders: number;
+  groupedOrders: Record<string, number>;
+  allocations: Record<string, number>;
+};
+
+const buildGroupedMetrics = ({
+  row,
+  platforms,
+  schemeId,
+  totalOrders,
+  groupedOrders,
+  allocations,
+}: GroupedMetricsParams) => {
+  const metrics = { ...row.platformMetrics };
+  for (const name of platforms) {
+    const current = row.platformMetrics[name];
+    metrics[name] = {
+      appName: name,
+      schemeId,
+      schemeTotalOrders: totalOrders,
+      workType: current?.workType || 'orders',
+      calculationMethod: current?.calculationMethod ?? null,
+      ordersCount: groupedOrders[name],
+      shiftDays: current?.shiftDays || 0,
+      salary: allocations[name],
+    };
+  }
+  return metrics;
+};
+
+const applyGroupedSchemeUpdate = (
+  row: SalaryRow,
+  newOrders: Record<string, number>,
+  platformSchemes: Record<string, SchemeData | null>,
+  scheme: TieredScheme,
+): SalaryRow => {
+  const platforms = getGroupedPlatforms(row, newOrders, platformSchemes, scheme.id);
+  const groupedOrders = getGroupedOrders(platforms, newOrders);
+  const totalOrders = Object.values(groupedOrders).reduce((sum, orders) => sum + orders, 0);
+  const groupedSalary = salaryService.calculateTierSalary(
+    totalOrders,
+    scheme.salary_scheme_tiers,
+    scheme.target_orders,
+    scheme.target_bonus,
+  );
+  const allocations = allocateSalaryByPlatformOrders(groupedSalary, groupedOrders);
+  return {
+    ...row,
+    platformOrders: newOrders,
+    platformSalaries: { ...row.platformSalaries, ...allocations },
+    platformMetrics: buildGroupedMetrics({
+      row,
+      platforms,
+      schemeId: scheme.id,
+      totalOrders,
+      groupedOrders,
+      allocations,
+    }),
+    isDirty: true,
+  };
+};
+
 // ─── Hook ────────────────────────────────────────────────────────────────────
 
 export function useSalaryActions(params: UseSalaryActionsParams) {
@@ -143,44 +226,7 @@ export function useSalaryActions(params: UseSalaryActionsParams) {
         const platformSchemes = empPlatformSchemeRef.current?.[r.employeeId] ?? {};
         const scheme = platformSchemes[platform];
         if (scheme?.id && scheme.salary_scheme_tiers?.length) {
-          const groupedPlatforms = Object.keys(newOrders).filter(
-            (name) => platformSchemes[name]?.id === scheme.id
-              && (r.platformMetrics[name]?.workType ?? 'orders') === 'orders',
-          );
-          const groupedOrders = Object.fromEntries(
-            groupedPlatforms.map((name) => [name, newOrders[name] ?? 0]),
-          );
-          const groupedTotalOrders = Object.values(groupedOrders)
-            .reduce((sum, orders) => sum + orders, 0);
-          const groupedSalary = salaryService.calculateTierSalary(
-            groupedTotalOrders,
-            scheme.salary_scheme_tiers,
-            scheme.target_orders,
-            scheme.target_bonus,
-          );
-          const allocations = allocateSalaryByPlatformOrders(groupedSalary, groupedOrders);
-          const newSalaries = { ...r.platformSalaries, ...allocations };
-          const newMetrics = { ...r.platformMetrics };
-          groupedPlatforms.forEach((name) => {
-            const metric = r.platformMetrics[name];
-            newMetrics[name] = {
-              appName: name,
-              schemeId: scheme.id,
-              schemeTotalOrders: groupedTotalOrders,
-              workType: metric?.workType || 'orders',
-              calculationMethod: metric?.calculationMethod ?? null,
-              ordersCount: groupedOrders[name],
-              shiftDays: metric?.shiftDays || 0,
-              salary: allocations[name],
-            };
-          });
-          return {
-            ...r,
-            platformOrders: newOrders,
-            platformSalaries: newSalaries,
-            platformMetrics: newMetrics,
-            isDirty: true,
-          };
+          return applyGroupedSchemeUpdate(r, newOrders, platformSchemes, scheme);
         }
         // FIX #3: read from refs to avoid stale closure
         const appId = appIdByNameRef.current[platform];

@@ -16,24 +16,27 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType>({} as LanguageContextType);
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const [lang, setLanguageState] = useState<AppLanguage>(getInitialLanguage);
+  const [language, setLanguage] = useState<AppLanguage>(getInitialLanguage);
 
-  const isRTL = lang === 'ar';
+  const isRTL = language === 'ar';
   const setLang = useCallback((nextLanguage: AppLanguage) => {
-    setLanguageState(nextLanguage);
+    setLanguage(nextLanguage);
     persistLanguage(nextLanguage);
   }, []);
 
   useEffect(() => {
     document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
-    document.documentElement.lang = lang;
+    document.documentElement.lang = language;
     document.documentElement.style.fontFamily = isRTL
       ? "'Tajawal', 'IBM Plex Sans Arabic', sans-serif"
       : "Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif";
-    void i18n.changeLanguage(lang);
-  }, [lang, isRTL]);
+    void i18n.changeLanguage(language);
+  }, [language, isRTL]);
 
-  const value = useMemo<LanguageContextType>(() => ({ lang, isRTL, setLang }), [lang, isRTL, setLang]);
+  const value = useMemo<LanguageContextType>(
+    () => ({ lang: language, isRTL, setLang }),
+    [language, isRTL, setLang],
+  );
 
   return (
     <DirectionProvider dir={isRTL ? 'rtl' : 'ltr'}>

@@ -103,6 +103,17 @@ const getElapsedDaysInRange = ({ year, month, startDay, endDay, today }: ReportP
   return Math.max(0, Math.min(endDay, today.getDate()) - startDay + 1);
 };
 
+const getProjectedTotal = (
+  total: number,
+  employeeTarget: number,
+  elapsedDays: number,
+  rangeDays: number,
+) => {
+  if (total >= employeeTarget) return total;
+  if (elapsedDays === 0) return null;
+  return Math.round((total / elapsedDays) * rangeDays);
+};
+
 const getTargetProgress = (
   total: number,
   employeeTarget: number | null,
@@ -115,9 +126,7 @@ const getTargetProgress = (
 
   const remaining = Math.max(employeeTarget - total, 0);
   const achievementPercentage = (total / employeeTarget) * 100;
-  const projectedTotal = total >= employeeTarget
-    ? total
-    : elapsedDays > 0 ? Math.round((total / elapsedDays) * rangeDays) : null;
+  const projectedTotal = getProjectedTotal(total, employeeTarget, elapsedDays, rangeDays);
   const expectedToReachTarget = projectedTotal === null ? null : projectedTotal >= employeeTarget;
   return { remaining, achievementPercentage, projectedTotal, expectedToReachTarget };
 };

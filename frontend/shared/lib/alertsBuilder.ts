@@ -266,6 +266,12 @@ const pushIfDue = (out: Alert[], alert: Alert | null, threshold: string) => {
 /** عدد الأيام قبل تاريخ استحقاق الإيجار لإظهار التنبيه */
 const RENTAL_ALERT_LEAD_DAYS = 5;
 
+const getRentalSeverity = (daysLeft: number): Alert["severity"] => {
+  if (daysLeft <= 1) return "urgent";
+  if (daysLeft <= 3) return "warning";
+  return "info";
+};
+
 const pushVehicleRentalAlerts = (
   out: Alert[],
   vehicles: VehicleRentalAlertRow[] | null | undefined,
@@ -292,7 +298,7 @@ const pushVehicleRentalAlerts = (
       entityName: `إيجار مركبة ${v.plate_number}${amountStr}`,
       dueDate: dueDateStr,
       daysLeft,
-      severity: daysLeft <= 1 ? "urgent" : daysLeft <= 3 ? "warning" : "info",
+      severity: getRentalSeverity(daysLeft),
       resolved: false,
       estimatedCost: v.rental_monthly_amount,
     });

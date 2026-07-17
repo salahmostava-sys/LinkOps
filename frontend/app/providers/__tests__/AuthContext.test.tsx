@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, act, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { AuthProvider, useAuth } from '../AuthContext';
 import { authService } from '@services/authService';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -134,9 +134,7 @@ describe('AuthContext', () => {
       expect(screen.queryByTestId('loading')).not.toBeInTheDocument();
     });
 
-    await act(async () => {
-      fireEvent.click(screen.getByTestId('btn-signout'));
-    });
+    fireEvent.click(screen.getByTestId('btn-signout'));
 
     expect(authService.signOut).toHaveBeenCalled();
   });
