@@ -9,6 +9,8 @@ import { Label } from '@shared/components/ui/label';
 import { Textarea } from '@shared/components/ui/textarea';
 import { toast } from '@shared/components/ui/sonner';
 import walletService from '@services/walletService';
+import { useTranslation } from 'react-i18next';
+import { useLanguage } from '@app/providers/LanguageContext';
 
 interface Props {
   open: boolean;
@@ -19,18 +21,22 @@ interface Props {
 }
 
 const WalletTransactionModal = ({ open, onOpenChange, employee, type, onSuccess }: Props) => {
+  const { t } = useTranslation();
+  const { isRTL } = useLanguage();
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [notes, setNotes] = useState('');
 
   const isCollection = type === 'collection';
-  const title = isCollection ? `تسجيل استلام كاش - ${employee.name}` : `تسجيل شحن المحفظة - ${employee.name}`;
-  const btnLabel = isCollection ? 'تسجيل الكاش' : 'تأكيد الشحن';
+  const title = isCollection
+    ? t('walletRecordCashTitle', { name: employee.name })
+    : t('walletTopUpTitle', { name: employee.name });
+  const btnLabel = isCollection ? t('walletRecordCashAction') : t('walletConfirmTopUp');
 
   const mutation = useMutation({
     mutationFn: async () => {
       const numAmount = Number.parseFloat(amount);
-      if (Number.isNaN(numAmount) || numAmount <= 0) throw new Error('المبلغ غير صحيح');
+      if (Number.isNaN(numAmount) || numAmount <= 0) throw new Error(t('walletInvalidAmount'));
       
       await walletService.addTransaction({
         employee_id: employee.id,
@@ -41,46 +47,46 @@ const WalletTransactionModal = ({ open, onOpenChange, employee, type, onSuccess 
       });
     },
     onSuccess: () => {
-      toast.success('تم تسجيل الحركة بنجاح');
+      toast.success(t('walletTransactionSaved'));
       setAmount('');
       setNotes('');
       setDate(format(new Date(), 'yyyy-MM-dd'));
       onSuccess();
     },
     onError: (err: unknown) => {
-      toast.error(err instanceof Error ? err.message : 'حدث خطأ أثناء الحفظ');
+      toast.error(err instanceof Error ? err.message : t('walletSaveError'));
     }
   });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[400px]" dir="rtl">
+      <DialogContent className="sm:max-w-[400px]" dir={isRTL ? 'rtl' : 'ltr'}>
         <DialogHeader>
           <DialogTitle className="text-start">{title}</DialogTitle>
         </DialogHeader>
         
         <div className="grid gap-4 py-4">
-          <BaseInput label="المبلغ (ريال)" id="amount"
+          <BaseInput label={t('walletAmountLabel')} id="amount"
               type="number"
               min="1"
               step="any"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              placeholder="مثال: 150.5"
+              placeholder={t('walletAmountPlaceholder')}
               autoFocus />
 
-          <BaseInput label="التاريخ" id="date"
+          <BaseInput label={t('walletDateLabel')} id="date"
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)} />
 
           <div className="space-y-2">
-            <Label htmlFor="notes">ملاحظات (اختياري)</Label>
+            <Label htmlFor="notes">{t('walletNotesOptional')}</Label>
             <Textarea
               id="notes"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="أي تفاصيل إضافية..."
+              placeholder={t('walletNotesPlaceholder')}
               rows={3}
             />
           </div>
@@ -101,7 +107,7 @@ const WalletTransactionModal = ({ open, onOpenChange, employee, type, onSuccess 
             onClick={() => onOpenChange(false)}
             disabled={mutation.isPending}
           >
-            إلغاء
+            {t('cancel')}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -5,6 +5,7 @@ import { ArrowUpRight, ArrowDownRight, History, Search } from 'lucide-react';
 import { Button } from '@shared/components/ui/button';
 import { Input } from '@shared/components/ui/input';
 import { useLanguage } from '@app/providers/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import { useAuthQueryGate } from '@shared/hooks/useAuthQueryGate';
 import walletService from '@services/walletService';
 import { QueryErrorRetry } from '@shared/components/QueryErrorRetry';
@@ -21,6 +22,7 @@ type EmployeeWalletBalance = {
 
 const WalletPage = () => {
   const { isRTL } = useLanguage();
+  const { t } = useTranslation();
   const { enabled } = useAuthQueryGate();
   const [transactionModalOpen, setTransactionModalOpen] = useState(false);
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
@@ -55,22 +57,22 @@ const WalletPage = () => {
   const columns: TableColumn<EmployeeWalletBalance>[] = [
     {
       key: 'employee_name',
-      title: 'المندوب',
+      title: t('walletRider'),
       className: 'font-medium text-start',
     },
     {
       key: 'balance',
-      title: 'الرصيد بالعهدة (كاش)',
+      title: t('walletCashBalance'),
       className: 'text-start',
       render: (item) => (
         <span className={`font-bold ${item.balance > 0 ? 'text-orange-600 dark:text-orange-400' : 'text-green-600 dark:text-green-400'}`}>
-          {item.balance.toLocaleString()} ريال
+          {t('walletBalanceCurrency', { amount: item.balance.toLocaleString('en-US') })}
         </span>
       ),
     },
     {
       key: 'actions',
-      title: 'إجراءات',
+      title: t('walletActions'),
       className: 'text-end',
       render: (item) => (
         <div className="flex items-center justify-end gap-2">
@@ -81,7 +83,7 @@ const WalletPage = () => {
             onClick={() => handleOpenTransaction({ id: item.employee_id, name: item.employee_name }, 'collection')}
           >
             <ArrowUpRight className="w-3.5 h-3.5" />
-            تسجيل كاش
+            {t('walletRecordCash')}
           </Button>
           <Button 
             variant="outline" 
@@ -91,15 +93,15 @@ const WalletPage = () => {
             disabled={item.balance <= 0}
           >
             <ArrowDownRight className="w-3.5 h-3.5" />
-            شحن المحفظة
+            {t('walletTopUp')}
           </Button>
           <Button
             variant="ghost"
             size="icon"
             className="h-8 w-8 text-muted-foreground"
             onClick={() => handleOpenHistory({ id: item.employee_id, name: item.employee_name })}
-            title="سجل الحركات"
-            aria-label="سجل الحركات"
+            title={t('walletHistory')}
+            aria-label={t('walletHistory')}
           >
             <History className="w-4 h-4" />
           </Button>
@@ -114,7 +116,7 @@ const WalletPage = () => {
         <div className="relative flex-1">
           <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="بحث بالاسم..."
+            placeholder={t('walletSearchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pr-10"
@@ -123,13 +125,13 @@ const WalletPage = () => {
       </div>
       
       {walletError ? (
-        <QueryErrorRetry error={walletError} onRetry={() => refetch()} title="تعذر تحميل أرصدة المحفظة" />
+        <QueryErrorRetry error={walletError} onRetry={() => refetch()} title={t('walletLoadError')} />
       ) : (
         <BaseTable 
           data={displayedBalances}
           columns={columns}
           isLoading={isLoading}
-          emptyMessage="لا يوجد أرصدة حالية للمناديب."
+          emptyMessage={t('walletEmpty')}
           className="bg-card shadow-sm border-border"
         />
       )}
