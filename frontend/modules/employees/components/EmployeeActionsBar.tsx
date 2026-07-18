@@ -54,11 +54,11 @@ export function EmployeeActionsBar({
     floatingUploadBody = (
       <>
         <div className="text-xs text-muted-foreground">
-          تمت معالجة الأسماء: <span className="font-semibold text-foreground">{uploadLiveStats.processedNames}</span> / {uploadLiveStats.totalNames}
+          {t('processedNames')} <span className="font-semibold text-foreground">{uploadLiveStats.processedNames}</span> / {uploadLiveStats.totalNames}
         </div>
         {uploadLiveStats.currentName && (
           <div className="text-xs text-muted-foreground truncate">
-            الآن: <span className="text-foreground font-medium">{uploadLiveStats.currentName}</span>
+            {t('processingNow')} <span className="text-foreground font-medium">{uploadLiveStats.currentName}</span>
           </div>
         )}
         <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
@@ -71,15 +71,15 @@ export function EmployeeActionsBar({
     floatingUploadBody = (
       <div className="space-y-2 text-xs">
         <div className="grid grid-cols-3 gap-1">
-          <div className="rounded bg-muted/40 px-2 py-1 text-center">المعالجة: {uploadReport.totalProcessed}</div>
-          <div className="rounded bg-emerald-50 text-emerald-700 px-2 py-1 text-center">نجاح: {uploadReport.successfulRows}</div>
-          <div className="rounded bg-rose-50 text-rose-700 px-2 py-1 text-center">فشل: {uploadReport.failedRows}</div>
+          <div className="rounded bg-muted/40 px-2 py-1 text-center">{t('processedCount', { count: uploadReport.totalProcessed })}</div>
+          <div className="rounded bg-emerald-50 text-emerald-700 px-2 py-1 text-center">{t('successCount', { count: uploadReport.successfulRows })}</div>
+          <div className="rounded bg-rose-50 text-rose-700 px-2 py-1 text-center">{t('failureCount', { count: uploadReport.failedRows })}</div>
         </div>
         {uploadReport.errors.length > 0 && (
           <div className="max-h-36 overflow-y-auto rounded border border-rose-200 bg-rose-50/40 p-2 space-y-1">
             {uploadReport.errors.map((error) => (
               <div key={error.rowIndex} className="text-rose-700">
-                السطر {error.rowIndex}: {error.issue}
+                {t('rowIssue', { row: error.rowIndex, issue: error.issue })}
               </div>
             ))}
           </div>
@@ -149,7 +149,7 @@ export function EmployeeActionsBar({
                       });
                     }}
                   >
-                    {col.label}
+                    {t(col.labelKey)}
                   </DropdownMenuCheckboxItem>
                 ))}
               </DropdownMenuContent>
@@ -173,7 +173,7 @@ export function EmployeeActionsBar({
       {(isUploading || uploadReport) && (
         <div className="fixed bottom-4 start-4 z-50 w-[min(92vw,420px)] border border-border/70 bg-card shadow-2xl p-3 space-y-2 rounded-2xl">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-semibold text-foreground">حالة رفع القالب</p>
+            <p className="text-sm font-semibold text-foreground">{t('templateUploadStatus')}</p>
             {uploadReport && (
               <Button
                 type="button"
@@ -182,7 +182,7 @@ export function EmployeeActionsBar({
                 className="h-7 px-2"
                 onClick={() => setUploadReport(null)}
               >
-                إغلاق
+                {t('close')}
               </Button>
             )}
           </div>
@@ -193,14 +193,15 @@ export function EmployeeActionsBar({
       {/* Active filters summary */}
       {hasActiveFilters && (
         <div className="flex flex-wrap gap-1.5 items-center">
-          <span className="text-xs text-muted-foreground flex items-center gap-1"><Filter size={12} /> الفلاتر النشطة:</span>
+          <span className="text-xs text-muted-foreground flex items-center gap-1"><Filter size={12} /> {t('activeFilters')}</span>
           {Object.entries(colFilters).map(([key, val]) => {
-            const colLabel = ALL_COLUMNS.find(c => c.key === key)?.label || key;
+            const column = ALL_COLUMNS.find(c => c.key === key);
+            const colLabel = column ? t(column.labelKey) : key;
             const kafalaLabels: Record<string, string> = {
-              sponsored: 'على الكفالة',
-              not_sponsored: 'ليس على الكفالة',
-              absconded: 'هروب',
-              terminated: 'انتهاء الخدمة',
+              sponsored: t('sponsored'),
+              not_sponsored: t('notSponsored'),
+              absconded: t('absconded'),
+              terminated: t('terminated'),
             };
             let displayVal: string;
             if (key === 'city') {
@@ -213,19 +214,19 @@ export function EmployeeActionsBar({
             return (
               <span key={key} className="inline-flex items-center gap-1 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
                 {colLabel}: {displayVal}
-                <button type="button" aria-label="إزالة التصفية" onClick={() => setColFilter(key, '')} className="hover:text-destructive"><X size={10} /></button>
+                <button type="button" aria-label={t('removeFilter')} onClick={() => setColFilter(key, '')} className="hover:text-destructive"><X size={10} /></button>
               </span>
             );
           })}
           <Button variant="ghost" size="sm" className="h-6 text-xs" onClick={() => setColFilters({})}>
-            مسح الكل
+            {t('clearAll')}
           </Button>
         </div>
       )}
 
       {/* Result count */}
       <div className="flex items-center justify-between">
-        <span className="text-xs text-muted-foreground">{filteredCount} نتيجة من أصل {totalCount}</span>
+        <span className="text-xs text-muted-foreground">{t('resultsOfTotal', { filtered: filteredCount, total: totalCount })}</span>
       </div>
     </>
   );

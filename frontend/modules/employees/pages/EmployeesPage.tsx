@@ -14,6 +14,7 @@ import { useToast } from '@shared/hooks/use-toast';
 import { todayISO, normalizeArabicDigits } from '@shared/lib/formatters';
 import { useSystemSettings } from '@app/providers/SystemSettingsContext';
 import { useLanguage } from '@app/providers/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import { usePermissions } from '@shared/hooks/usePermissions';
 import { usePagePresence } from '@shared/hooks/usePagePresence';
 import { PresenceAvatars } from '@shared/components/PresenceAvatars';
@@ -54,6 +55,7 @@ const InlineLoader = ({ minHeightClassName = 'min-h-[260px]' }: Readonly<{ minHe
 // eslint-disable-next-line sonarjs/cognitive-complexity
 const Employees = () => {
   const { isRTL } = useLanguage();
+  const { t } = useTranslation();
   useAuthQueryGate();
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -145,9 +147,9 @@ const Employees = () => {
     const message =
       employeesError instanceof Error
         ? employeesError.message
-        : 'حدث خطأ غير متوقع أثناء تحميل الموظفين';
-    toast({ title: 'خطأ في تحميل البيانات', description: message, variant: 'destructive' });
-  }, [employeesError, toast]);
+        : t('employeesUnexpectedLoadError');
+    toast({ title: t('employeesDataLoadError'), description: message, variant: 'destructive' });
+  }, [employeesError, t, toast]);
 
   useEffect(() => {
     let hiddenAt: number | null = null;
@@ -282,13 +284,13 @@ const Employees = () => {
     return (
       <div className="space-y-4" dir={isRTL ? 'rtl' : 'ltr'}>
       <div>
-        <nav className="page-breadcrumb"><span>الرئيسية</span><span className="page-breadcrumb-sep">/</span><span>الموظفون</span></nav>
+        <nav className="page-breadcrumb"><span>{t('home')}</span><span className="page-breadcrumb-sep">/</span><span>{t('employees')}</span></nav>
       </div>
         <QueryErrorRetry
           error={employeesError}
           onRetry={() => { refetchEmployees(); }}
-          title="تعذر تحميل بيانات الموظفين"
-          hint="تحقق من الاتصال وصلاحياتك ثم أعد المحاولة."
+          title={t('employeesLoadError')}
+          hint={t('employeesLoadHint')}
         />
       </div>
     );
@@ -296,11 +298,11 @@ const Employees = () => {
 
   return (
     <div className="space-y-4" dir={isRTL ? 'rtl' : 'ltr'}>
-      <nav className="page-breadcrumb"><span>الرئيسية</span><span className="page-breadcrumb-sep">/</span><span>الموظفون</span></nav>
+      <nav className="page-breadcrumb"><span>{t('home')}</span><span className="page-breadcrumb-sep">/</span><span>{t('employees')}</span></nav>
       {/* Real-time presence — who else is on this page */}
       {presence.onlineUsers.length > 0 && (
         <div className="flex items-center justify-end gap-2">
-          <span className="text-[10px] text-muted-foreground">متصل الآن:</span>
+          <span className="text-[10px] text-muted-foreground">{t('connectedNow')}</span>
           <PresenceAvatars users={presence.onlineUsers} isAdmin={role === 'admin'} />
         </div>
       )}
@@ -317,7 +319,7 @@ const Employees = () => {
           }`}
         >
           <Table2 size={15} />
-          جدول الموظفين
+          {t('employeeTable')}
         </button>
         <button
           type="button"
@@ -329,7 +331,7 @@ const Employees = () => {
           }`}
         >
           <BarChart2 size={15} />
-          مؤشرات الأداء
+          {t('performanceIndicators')}
         </button>
       </div>
 
@@ -417,21 +419,20 @@ const Employees = () => {
       <AlertDialog open={!!deleteEmployee} onOpenChange={open => !open && setDeleteEmployee(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>تأكيد الحذف</AlertDialogTitle>
+            <AlertDialogTitle>{t('confirmDelete')}</AlertDialogTitle>
             <AlertDialogDescription>
-              هل أنت متأكد من حذف الموظف <span className="font-semibold text-foreground">{deleteEmployee?.name}</span>؟
-              {' '}لا يمكن التراجع عن هذا الإجراء.
+              {t('deleteEmployeeNamedConfirm', { name: deleteEmployee?.name ?? '' })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               disabled={deleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {deleting ? <Loader2 size={14} className="animate-spin me-1" /> : null}
-              حذف
+              {t('delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -442,20 +443,19 @@ const Employees = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <CalendarDays size={16} className="text-destructive" />
-              تحديد تاريخ — {statusDateDialog?.label}
+              {t('selectStatusDate', { status: statusDateDialog?.label ?? '' })}
             </DialogTitle>
             <DialogDescription className="sr-only">
-              أدخل تاريخ {statusDateDialog?.label} للمندوب {statusDateDialog?.emp.name}
+              {t('enterStatusDateForRider', { status: statusDateDialog?.label ?? '', name: statusDateDialog?.emp.name ?? '' })}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <p className="text-sm text-muted-foreground">
-              أدخل تاريخ <strong>{statusDateDialog?.label}</strong> للمندوب{' '}
-              <strong className="text-foreground">{statusDateDialog?.emp.name}</strong>
+              {t('enterStatusDateForRider', { status: statusDateDialog?.label ?? '', name: statusDateDialog?.emp.name ?? '' })}
             </p>
             <div>
               <Label className="mb-1.5 block">
-                {statusDateDialog?.newStatus === 'absconded' ? 'تاريخ الهروب' : 'تاريخ انتهاء الخدمة'}
+                {statusDateDialog?.newStatus === 'absconded' ? t('abscondedDate') : t('terminationDate')}
               </Label>
               <Input
                 type="date"
@@ -466,14 +466,14 @@ const Employees = () => {
             </div>
           </div>
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setStatusDateDialog(null)}>إلغاء</Button>
+            <Button variant="outline" onClick={() => setStatusDateDialog(null)}>{t('cancel')}</Button>
             <Button
               variant="destructive"
               onClick={handleSaveStatusWithDate}
               disabled={!statusDate || statusDateSaving}
             >
               {statusDateSaving && <Loader2 size={14} className="animate-spin me-1" />}
-              حفظ
+              {t('save')}
             </Button>
           </DialogFooter>
         </DialogContent>

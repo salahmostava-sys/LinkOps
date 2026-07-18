@@ -32,6 +32,7 @@ import { EmployeeTableProvider, useEmployeeTable, type EmployeeTableContextValue
 
 
 import { DoubleScrollbar } from "@shared/components/ui/DoubleScrollbar";
+import { useTranslation } from "react-i18next";
 
 type EmployeeDetailedTableProps = EmployeeTableContextValue;
 
@@ -61,6 +62,7 @@ const EMPLOYEE_COLUMN_WIDTHS: Partial<Record<ColKey, string>> = {
 };
 
 function EmployeeDetailedTableInner() {
+  const { t } = useTranslation();
   const {
     activeCols,
     colFilters,
@@ -184,6 +186,7 @@ function EmployeeDetailedTableInner() {
               {activeCols.map((col) => {
                 const isFilterable = !["seq", "actions"].includes(col.key);
                 const isActive = !!colFilters[col.key];
+                const columnLabel = t(col.labelKey);
 
                 const filterContent = isFilterable
                   ? buildColumnFilter({
@@ -194,6 +197,7 @@ function EmployeeDetailedTableInner() {
                       commercialRecordNames,
                       uniqueVals,
                       setColFilter,
+                      t,
                     })
                   : null;
 
@@ -208,9 +212,9 @@ function EmployeeDetailedTableInner() {
                           type="button"
                           className="flex w-full min-w-0 items-center justify-center gap-1.5 bg-transparent px-2 text-current cursor-pointer hover:opacity-80"
                           onClick={() => handleSort(col.key)}
-                          title={`ترتيب حسب ${col.label}`}
+                          title={t('sortBy', { label: columnLabel })}
                         >
-                          <span className="truncate">{col.label}</span>
+                          <span className="truncate">{columnLabel}</span>
                           <span className="flex-shrink-0 flex items-center justify-center">
                             {sortField === col.key && (
                               <SortIcon
@@ -222,13 +226,13 @@ function EmployeeDetailedTableInner() {
                           </span>
                         </button>
                       ) : (
-                        <span className="px-2">{col.label}</span>
+                        <span className="px-2">{columnLabel}</span>
                       )}
                       {isFilterable && filterContent && (
                         <span className="absolute end-0 flex items-center justify-center">
                           <ColFilterPopover
                             colKey={col.key}
-                            label={col.label}
+                            label={columnLabel}
                             active={isActive}
                             onClear={() => setColFilter(col.key, "")}
                           >
