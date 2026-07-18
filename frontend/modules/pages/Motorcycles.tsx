@@ -622,7 +622,7 @@ const Motorcycles = () => {
   }, [permissions.can_edit, refetchVehicles, toast, updatingVehicleId]);
 
   return (
-    <div className="space-y-4" dir="rtl">
+    <div className="ds-page vehicles-page space-y-4" dir="rtl">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
@@ -756,8 +756,8 @@ const Motorcycles = () => {
             );
           }
           return (
-            <div className="overflow-x-auto rounded-2xl border border-border/60 bg-card shadow-sm">
-              <table className="w-full min-w-[1600px] text-sm">
+            <div className="overflow-x-auto bg-card">
+              <table className="vehicles-table w-full min-w-[1520px] text-sm">
                 <thead className="bg-muted/70">
                   <tr className="border-b border-border/60">
                     <th className="ta-th">رقم اللوحة</th>

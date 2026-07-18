@@ -16,6 +16,10 @@
     --text-lg: 1.0625rem;
     --text-xl: 1.25rem;
     --text-line: 1.7;
+    --control-height: 2.375rem;
+    --table-header-height: 2.375rem;
+    --table-row-height: 2.5rem;
+    --page-gutter: clamp(1rem, 1.5vw, 1.75rem);
 
     /* ─── High-End Editorial Dashboard — Light Palette ─────────── */
 
@@ -235,6 +239,11 @@
     min-width: 0;
   }
 
+  :is(button, a, input, select, textarea, [role='button'], [role='combobox']):focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
   h1,
   h2,
   h3,
@@ -243,7 +252,7 @@
   }
 
   h1, h2, h3, h4 {
-    letter-spacing: -0.02em;
+    letter-spacing: 0;
     text-wrap: balance;
   }
   
@@ -285,7 +294,7 @@
     width: 100%;
     background: var(--ds-surface-lowest);
     border: 1px solid var(--ds-outline-variant);
-    border-radius: 0.875rem;
+    border-radius: var(--radius-sm);
     box-shadow: var(--shadow-card);
   }
 
@@ -308,15 +317,15 @@
     align-items: center;
     gap: 0.625rem;
     width: 100%;
-    padding: 0.75rem;
+    padding: 0.625rem;
     background: var(--ds-surface-low);
     border: 1px solid var(--ds-outline-variant);
-    border-radius: 0.875rem;
+    border-radius: var(--radius-sm);
   }
 
   .ds-control {
-    min-height: 2.5rem;
-    border-radius: 0.75rem;
+    min-height: var(--control-height);
+    border-radius: var(--radius-sm);
     border: 1px solid var(--ds-outline-variant);
     background: var(--ds-surface-lowest);
   }
@@ -326,7 +335,7 @@
     overflow-x: auto;
     background: var(--ds-surface-lowest);
     border: 1px solid var(--ds-outline-variant);
-    border-radius: 0.875rem;
+    border-radius: var(--radius-sm);
     box-shadow: var(--shadow-card);
     -webkit-overflow-scrolling: touch;
   }
@@ -349,14 +358,14 @@
   .app-content-shell {
     width: 100%;
     background: var(--ds-surface);
-    padding: clamp(1.25rem, 2vw, 2.5rem);
+    padding: var(--page-gutter);
     color: var(--ds-on-surface);
     font-size: var(--text-md);
   }
 
   @media (min-width: 1280px) {
     .app-content-shell {
-      padding: 2.5rem;
+      padding: var(--page-gutter);
     }
   }
 
@@ -380,7 +389,7 @@
   .app-content-shell button:not([role='checkbox']),
   .app-content-shell .ds-btn,
   .app-content-shell .ds-btn-primary {
-    min-height: 2.25rem;
+    min-height: var(--control-height);
     max-width: 100%;
   }
 
@@ -413,8 +422,8 @@
   .app-content-shell select,
   .app-content-shell textarea,
   .app-content-shell [role='combobox'] {
-    min-height: 2.5rem;
-    border-radius: 0.75rem;
+    min-height: var(--control-height);
+    border-radius: var(--radius-sm);
     background: var(--ds-field-bg);
     border-color: var(--ds-field-border);
   }
@@ -443,13 +452,14 @@
 
   .app-content-shell th,
   .app-content-shell td {
-    height: 2.75rem;
-    padding-top: 0.625rem;
-    padding-bottom: 0.625rem;
-    line-height: 1.45;
+    height: var(--table-row-height);
+    padding-top: 0.4375rem;
+    padding-bottom: 0.4375rem;
+    line-height: 1.35;
   }
 
   .app-content-shell th {
+    height: var(--table-header-height);
     font-size: 0.75rem;
     font-weight: 700;
   }
@@ -520,7 +530,8 @@
   /* ─── Table style ─────────────────────────────────────────────── */
   .ta-table-wrap {
     overflow: hidden;
-    border-radius: var(--radius-lg);
+    border: 1px solid var(--ds-outline-variant);
+    border-radius: var(--radius-sm);
     background: var(--ds-surface-lowest);
     box-shadow: var(--shadow-card);
   }
@@ -530,7 +541,7 @@
   }
 
   .ta-th {
-    @apply px-2 py-2 text-xs font-semibold uppercase tracking-wide whitespace-nowrap text-center;
+    @apply px-2 py-1.5 text-xs font-bold normal-case tracking-normal whitespace-nowrap text-center;
     background: var(--ds-table-header-bg) !important;
     color: var(--ds-table-header-text) !important;
   }
@@ -572,7 +583,7 @@
   }
 
   .ta-th-center {
-    @apply px-2 py-2 text-xs font-semibold uppercase tracking-wide whitespace-nowrap text-center;
+    @apply px-2 py-1.5 text-xs font-bold normal-case tracking-normal whitespace-nowrap text-center;
     background: var(--ds-table-header-bg) !important;
     color: var(--ds-table-header-text) !important;
   }
@@ -655,7 +666,7 @@
   .employees-table tbody tr {
     min-height: 28px;
     border-bottom: 1px solid var(--ds-surface-container);
-    transition: background 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+    transition: background 140ms ease, box-shadow 140ms ease;
   }
 
   .employees-table tbody tr:last-child {
@@ -666,7 +677,6 @@
     position: relative;
     background: color-mix(in srgb, var(--ds-surface-low) 82%, white);
     box-shadow: inset 0 0 0 9999px rgba(31, 84, 173, 0.035), 0 6px 18px rgba(15, 23, 42, 0.10);
-    transform: translateY(-1px);
   }
 
   .employees-table .ta-td > * {
@@ -708,7 +718,8 @@
   .data-table-wrapper {
     width: 100%;
     overflow-x: auto;
-    border-radius: var(--radius-lg);
+    border: 1px solid var(--ds-outline-variant);
+    border-radius: var(--radius-sm);
     background: var(--ds-surface-lowest);
     box-shadow: var(--shadow-card);
     -webkit-overflow-scrolling: touch;
@@ -723,26 +734,81 @@
   }
 
   .data-table thead th {
-    @apply px-4 py-2.5 text-xs font-semibold whitespace-nowrap text-center;
+    @apply px-3 py-1.5 text-xs font-bold whitespace-nowrap text-center;
     background: var(--ds-table-header-bg) !important;
     color: var(--ds-table-header-text) !important;
   }
 
   .data-table tbody tr {
     border-bottom: 1px solid var(--ds-surface-container);
-    transition: background 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+    transition: background 140ms ease, box-shadow 140ms ease;
   }
 
   .data-table tbody tr:hover {
     background: var(--ds-surface-low);
     box-shadow: inset 0 0 0 9999px rgba(31, 84, 173, 0.035), 0 4px 14px rgba(15, 23, 42, 0.08);
-    transform: translateY(-1px);
   }
   .data-table tbody tr:last-child { border-bottom: none; }
 
   .data-table tbody td {
-    @apply px-4 py-2 text-sm text-center;
+    @apply px-3 py-1.5 text-sm text-center;
     color: var(--ds-on-surface);
+  }
+
+  .salary-table-surface {
+    border-radius: var(--radius-sm);
+  }
+
+  .vehicles-page .vehicles-table {
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .vehicles-page .vehicles-table :is(th, td) {
+    padding-inline: 0.5rem;
+  }
+
+  .vehicles-page .vehicles-table tbody tr {
+    border-bottom: 1px solid var(--ds-surface-container);
+    transition: background-color 140ms ease, box-shadow 140ms ease;
+  }
+
+  .vehicles-page .vehicles-table tbody tr:hover {
+    background: var(--ds-surface-low);
+    box-shadow: inset 0 0 0 9999px rgba(31, 84, 173, 0.025);
+  }
+
+  .vehicles-page .vehicles-table thead :is(input, [role='combobox']) {
+    min-height: 2rem;
+    height: 2rem;
+    border-radius: 0.375rem;
+  }
+
+  .alerts-page .stat-card {
+    border-radius: var(--radius-sm);
+    padding: 0.875rem 1rem;
+  }
+
+  .alerts-page .stat-card:active {
+    transform: none;
+  }
+
+  @media (max-width: 767px) {
+    :root {
+      --page-gutter: 0.75rem;
+    }
+
+    .app-content-shell {
+      overflow-x: hidden;
+    }
+
+    .ds-toolbar {
+      align-items: stretch;
+    }
+
+    .ds-toolbar > * {
+      max-width: 100%;
+    }
   }
 
   /* ─── Page header ─────────────────────────────────────────────── */

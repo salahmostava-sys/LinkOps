@@ -406,7 +406,7 @@ const Alerts = () => {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="ds-page alerts-page space-y-4">
       <div className="page-header">
         <nav className="page-breadcrumb">
           <span>الرئيسية</span>

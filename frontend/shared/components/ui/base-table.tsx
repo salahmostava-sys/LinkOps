@@ -27,7 +27,7 @@ export function BaseTable<T>({
 }: Readonly<BaseTableProps<T>>) {
   if (isLoading) {
     return (
-      <div className="w-full min-h-[200px] flex flex-col items-center justify-center border rounded-xl bg-card text-muted-foreground gap-3 animate-pulse">
+      <div className="ds-section flex min-h-48 w-full flex-col items-center justify-center gap-3 text-muted-foreground animate-pulse">
         <Loader2 className="w-8 h-8 animate-spin text-primary/50" />
         <p className="text-sm">جاري جلب البيانات...</p>
       </div>
@@ -36,7 +36,7 @@ export function BaseTable<T>({
 
   if (!data || data.length === 0) {
     return (
-      <div className="w-full min-h-[200px] flex flex-col items-center justify-center border rounded-xl bg-card text-muted-foreground p-8 text-center gap-3">
+      <div className="ds-section flex min-h-48 w-full flex-col items-center justify-center gap-3 p-8 text-center text-muted-foreground">
         <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
           <Inbox className="w-6 h-6 opacity-60" />
         </div>
@@ -46,12 +46,12 @@ export function BaseTable<T>({
   }
 
   return (
-    <div className={`w-full overflow-x-auto border rounded-xl bg-card ${className}`}>
-      <table className="w-full text-sm text-right">
-        <thead className="bg-[var(--ds-table-header-bg)] text-[var(--ds-table-header-text)]">
+    <div className={`data-table-wrapper ${className}`}>
+      <table className="data-table">
+        <thead>
           <tr>
             {columns.map((col, idx) => (
-              <th key={String(col.key) + idx} className={`p-4 font-bold min-w-[120px] whitespace-normal text-center align-middle ${col.className || ''}`}>
+              <th key={String(col.key) + idx} className={`min-w-28 whitespace-normal ${col.className || ''}`}>
                 {col.title}
               </th>
             ))}
@@ -61,7 +61,7 @@ export function BaseTable<T>({
           {data.map((row, rowIndex) => (
             <tr key={rowKey ? rowKey(row, rowIndex) : String(((row as Record<string, unknown>).id as string | number | undefined) ?? rowIndex)} className="hover:bg-muted/30 transition-colors">
               {columns.map((col, colIndex) => (
-                <td key={String(col.key) + colIndex} className={`p-4 align-middle ${col.className || ''}`}>
+                <td key={String(col.key) + colIndex} className={col.className || ''}>
                   {col.render ? col.render(row, rowIndex) : String((row as Record<keyof T, unknown>)[col.key as keyof T] ?? '')}
                 </td>
               ))}

@@ -459,7 +459,7 @@ export const SalaryTable = memo(function SalaryTable(props: Readonly<SalaryTable
   }
 
   return (
-    <div className="shadow-card bg-card overflow-hidden rounded-2xl">
+    <div className="salary-table-surface overflow-hidden border border-border bg-card shadow-card">
       {/* Scroll container — useVirtualizer reads its scrollTop */}
       {/* contain:layout paint — isolates repaints without breaking sticky positioning */}
       <div ref={scrollContainerRef} className="overflow-auto custom-scrollbar" style={{ maxHeight: '75vh', contain: 'layout paint' }}>
