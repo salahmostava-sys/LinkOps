@@ -2,7 +2,7 @@ import { BaseInput } from '@shared/components/ui/base-input';
 import { formatStandardDateTime } from '@shared/lib/formatters';
 
 import { useMemo, useState } from 'react';
-import { Edit, Trash2, Search, Package, AlertTriangle, ShoppingCart, FileText, Paperclip } from 'lucide-react';
+import { Edit, Trash2, Search, Package, AlertTriangle, ShoppingCart, FileText, Paperclip, X } from 'lucide-react';
 import { Button } from '@shared/components/ui/button';
 import { Input } from '@shared/components/ui/input';
 import { Label } from '@shared/components/ui/label';
@@ -33,6 +33,7 @@ import type { SparePart } from '@services/maintenanceService';
 import { storageService } from '@services/storageService';
 import { getErrorMessage } from '@services/serviceError';
 import { InvoiceUploadModal } from '@modules/maintenance/components/InvoiceUploadModal';
+import { isStringValue, usePersistentState } from '@shared/hooks/usePersistentState';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -263,9 +264,9 @@ export function SparePartsTab() {
   const q = useSpareParts();
   const rows = useMemo(() => q.data ?? [], [q.data]);
 
-  const [search, setSearch] = useState('');
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
+  const [search, setSearch] = usePersistentState('table:spare-parts:search:v1', '', isStringValue);
+  const [dateFrom, setDateFrom] = usePersistentState('table:spare-parts:date-from:v1', '', isStringValue);
+  const [dateTo, setDateTo] = usePersistentState('table:spare-parts:date-to:v1', '', isStringValue);
   const [modalOpen, setModalOpen] = useState(false);
   const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
   const [editing, setEditing] = useState<SparePart | null>(null);
@@ -304,6 +305,12 @@ export function SparePartsTab() {
     }
     return result;
   }, [rows, search, dateFrom, dateTo]);
+  const hasActiveFilters = Boolean(search.trim() || dateFrom || dateTo);
+  const resetFilters = () => {
+    setSearch('');
+    setDateFrom('');
+    setDateTo('');
+  };
 
   const summary = useMemo(() => {
     const low = rows.filter(p => Number(p.stock_quantity) < Number(p.min_stock_alert ?? 5) && Number(p.stock_quantity) > 0).length;
@@ -392,6 +399,14 @@ export function SparePartsTab() {
             onChange={e => setDateFrom(e.target.value)}
             className="w-32 min-w-[120px]"
           />
+          {hasActiveFilters && (
+            <Button type="button" variant="ghost" size="sm" className="gap-1.5 shrink-0" onClick={resetFilters}>
+              <X size={14} /> مسح
+            </Button>
+          )}
+          <span className="text-xs font-medium text-foreground whitespace-nowrap">
+            {filtered.length.toLocaleString('en-US')} من {rows.length.toLocaleString('en-US')}
+          </span>
           <Input
             type="date"
             value={dateTo}
@@ -415,8 +430,13 @@ export function SparePartsTab() {
       {filtered.length === 0 ? (
         <div className="text-center py-16 text-muted-foreground">
           <Package size={40} className="mx-auto mb-3 opacity-30" />
-          <p className="font-semibold">{search ? 'لا توجد نتائج' : 'المخزون فارغ'}</p>
-          {!search && permissions.can_edit && (
+          <p className="font-semibold">{hasActiveFilters ? 'لا توجد نتائج مطابقة' : 'المخزون فارغ'}</p>
+          {hasActiveFilters && (
+            <Button type="button" variant="outline" size="sm" className="mt-2" onClick={resetFilters}>
+              مسح الفلاتر
+            </Button>
+          )}
+          {!hasActiveFilters && permissions.can_edit && (
             <p className="text-sm mt-1">اضغط "تسجيل شراء قطعة" لإضافة أول قطعة</p>
           )}
         </div>

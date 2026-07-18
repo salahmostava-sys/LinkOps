@@ -44,3 +44,7 @@ export function isStringRecord(value: unknown): value is Record<string, string> 
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
   return Object.values(value).every((entry) => typeof entry === 'string');
 }
+
+export function isStringValue(value: unknown): value is string {
+  return typeof value === 'string';
+}

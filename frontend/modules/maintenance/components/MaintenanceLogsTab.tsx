@@ -1,7 +1,7 @@
 import { formatCurrency } from '@shared/lib/formatters';
 
 import { useState, useMemo } from 'react';
-import { Plus, Trash2, Search, Wrench, Calendar, Car, Banknote, Edit2 } from 'lucide-react';
+import { Plus, Trash2, Search, Wrench, Calendar, Car, Banknote, Edit2, X } from 'lucide-react';
 import { Button } from '@shared/components/ui/button';
 import { Input } from '@shared/components/ui/input';
 import {
@@ -25,6 +25,7 @@ import type { MaintenanceLogWithDetails } from '@services/maintenanceService';
 import { AddMaintenanceModal } from '@modules/maintenance/components/AddMaintenanceModal';
 import { useQuery } from '@tanstack/react-query';
 import { useAuthQueryGate, authQueryUserId } from '@shared/hooks/useAuthQueryGate';
+import { isStringValue, usePersistentState } from '@shared/hooks/usePersistentState';
 
 const TYPE_COLORS: Record<string, string> = {
   'غيار زيت':    'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300',
@@ -138,9 +139,9 @@ export function MaintenanceLogsTab() {
     staleTime: 60_000,
   });
 
-  const [search, setSearch] = useState('');
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
+  const [search, setSearch] = usePersistentState('list:maintenance-logs:search:v1', '', isStringValue);
+  const [dateFrom, setDateFrom] = usePersistentState('list:maintenance-logs:date-from:v1', '', isStringValue);
+  const [dateTo, setDateTo] = usePersistentState('list:maintenance-logs:date-to:v1', '', isStringValue);
   const [addOpen, setAddOpen] = useState(false);
   const [editingLog, setEditingLog] = useState<MaintenanceLogWithDetails | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<MaintenanceLogWithDetails | null>(null);
@@ -169,6 +170,12 @@ export function MaintenanceLogsTab() {
     }
     return result;
   }, [logs, search, dateFrom, dateTo]);
+  const hasActiveFilters = Boolean(search.trim() || dateFrom || dateTo);
+  const resetFilters = () => {
+    setSearch('');
+    setDateFrom('');
+    setDateTo('');
+  };
 
   const totalCost = useMemo(() =>
     logs.reduce((s, l) => s + Number(l.total_cost ?? 0), 0), [logs]
@@ -259,6 +266,14 @@ export function MaintenanceLogsTab() {
             onChange={e => setDateTo(e.target.value)}
             className="w-32"
           />
+          {hasActiveFilters && (
+            <Button type="button" variant="ghost" size="sm" className="gap-1.5 shrink-0" onClick={resetFilters}>
+              <X size={14} /> مسح
+            </Button>
+          )}
+          <span className="text-xs font-medium text-foreground whitespace-nowrap">
+            {filtered.length.toLocaleString('en-US')} من {logs.length.toLocaleString('en-US')}
+          </span>
           {permissions.can_edit && (
             <Button onClick={() => setAddOpen(true)} className="gap-1.5 shrink-0">
               <Plus size={16} /> إضافة صيانة
@@ -271,8 +286,13 @@ export function MaintenanceLogsTab() {
       {filtered.length === 0 ? (
         <div className="text-center py-16 text-muted-foreground">
           <Wrench size={40} className="mx-auto mb-3 opacity-30" />
-          <p className="font-semibold">{search ? 'لا توجد نتائج' : 'لا توجد سجلات صيانة'}</p>
-          {!search && permissions.can_edit && (
+          <p className="font-semibold">{hasActiveFilters ? 'لا توجد نتائج مطابقة' : 'لا توجد سجلات صيانة'}</p>
+          {hasActiveFilters && (
+            <Button type="button" variant="outline" size="sm" className="mt-2" onClick={resetFilters}>
+              مسح الفلاتر
+            </Button>
+          )}
+          {!hasActiveFilters && permissions.can_edit && (
             <p className="text-sm mt-1">اضغط "إضافة صيانة" لتسجيل أول عملية</p>
           )}
         </div>

@@ -1,6 +1,6 @@
 import type React from 'react';
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
-import { Loader2, Save, Clock, Download, Upload, Printer } from 'lucide-react';
+import { Loader2, Save, Clock, Download, Upload, Printer, X } from 'lucide-react';
 import { toast } from '@shared/components/ui/sonner';
 import { Button } from '@shared/components/ui/button';
 import { Input } from '@shared/components/ui/input';
@@ -10,6 +10,7 @@ import { isShiftCapableApp } from '@shared/lib/workType';
 import { monthLabel } from '@modules/orders/utils/dateMonth';
 import type { App, Employee } from '@modules/orders/types';
 import { getErrorMessage } from '@services/serviceError';
+import { isStringValue, usePersistentState } from '@shared/hooks/usePersistentState';
 
 function getShiftDayHeaderClass(isToday: boolean, isWeekend: boolean): string {
   if (isToday) return 'bg-primary/20 text-primary font-bold';
@@ -238,7 +239,7 @@ export function ShiftsTab({
 
   const [grid, setGrid] = useState<ShiftGrid>(() => buildGridFromShifts(shifts));
   const [saving, setSaving] = useState(false);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = usePersistentState('grid:shifts:search:v1', '', isStringValue);
   const [editingCell, setEditingCell] = useState<string | null>(null);
 
   useEffect(() => {
@@ -440,8 +441,13 @@ export function ShiftsTab({
             className="h-8 w-48 text-xs"
           />
           <span className="text-xs text-muted-foreground">
-            {filteredEmployees.length} موظف
+            {filteredEmployees.length.toLocaleString('en-US')} من {allShiftEmployees.length.toLocaleString('en-US')} موظف
           </span>
+          {search && (
+            <Button type="button" variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setSearch('')} aria-label="مسح البحث">
+              <X size={14} />
+            </Button>
+          )}
         </div>
 
         <div className="flex items-center gap-1.5">
@@ -512,7 +518,14 @@ export function ShiftsTab({
               {filteredEmployees.length === 0 ? (
                 <tr>
                   <td colSpan={days + 3} className="ta-td text-muted-foreground">
-                    لا يوجد موظفين دوام
+                    <div className="flex flex-col items-center gap-2 py-6">
+                      <span>{search ? 'لا توجد نتائج مطابقة' : 'لا يوجد موظفين دوام'}</span>
+                      {search && (
+                        <Button type="button" variant="outline" size="sm" onClick={() => setSearch('')}>
+                          مسح البحث
+                        </Button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ) : (

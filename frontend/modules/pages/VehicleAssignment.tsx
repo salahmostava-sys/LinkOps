@@ -1,7 +1,6 @@
 import { formatStandardDateTime } from '@shared/lib/formatters';
 
 import { useState, useEffect, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import { Search, Plus, RotateCcw, ClipboardList, CheckCircle, Clock, FolderOpen, AlertCircle, Trash2 } from 'lucide-react';
 import { Input } from '@shared/components/ui/input';
 import { Button } from '@shared/components/ui/button';
@@ -18,6 +17,7 @@ import { useVehicleAssignmentData } from '@shared/hooks/useVehicleAssignmentData
 import { logError } from '@shared/lib/logger';
 import { printHtmlTable } from '@shared/lib/printTable';
 import { getErrorMessage } from '@services/serviceError';
+import { useUrlParamState } from '@shared/hooks/useUrlParamState';
 
 type Vehicle = {
   id: string;
@@ -43,6 +43,11 @@ type Assignment = {
   vehicles?: { plate_number: string; type: string } | null;
   employees?: { name: string } | null;
 };
+
+type AssignmentStatusFilter = 'all' | 'active' | 'returned';
+
+const isAssignmentStatusFilter = (value: string): value is AssignmentStatusFilter =>
+  value === 'all' || value === 'active' || value === 'returned';
 
 const calcDuration = (start: string | null, end: string | null) => {
   if (!start) return '—';
@@ -327,11 +332,9 @@ const VehicleAssignment = () => {
     error: assignmentError,
     refetch: refetchAssignmentData,
   } = useVehicleAssignmentData();
-  const [searchParams] = useSearchParams();
-  const [search, setSearch] = useState(searchParams.get('search') || '');
-  const [showActive, setShowActive] = useState<'all' | 'active' | 'returned'>('all');
-  const isShowActiveKey = (v: string): v is 'all' | 'active' | 'returned' =>
-    v === 'all' || v === 'active' || v === 'returned';
+  const [search, setSearch] = useUrlParamState('search');
+  const [statusParam, setStatusParam] = useUrlParamState('status', 'all');
+  const showActive: AssignmentStatusFilter = isAssignmentStatusFilter(statusParam) ? statusParam : 'all';
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [returnAssignment, setReturnAssignment] = useState<Assignment | null>(null);
   const [deleteAssignmentTarget, setDeleteAssignmentTarget] = useState<Assignment | null>(null);
@@ -383,6 +386,11 @@ const VehicleAssignment = () => {
     const matchStatus = showActive === 'all' || (showActive === 'active' && !isReturned) || (showActive === 'returned' && isReturned);
     return matchSearch && matchStatus;
   });
+  const hasActiveFilters = Boolean(search.trim() || showActive !== 'all');
+  const resetFilters = () => {
+    setSearch('');
+    setStatusParam('all');
+  };
 
   const handlePrint = () => {
     const table = tableRef.current;
@@ -508,14 +516,21 @@ const VehicleAssignment = () => {
           ].map(opt => (
             <button type="button"
               key={opt.key}
-              onClick={() => { if (isShowActiveKey(opt.key)) setShowActive(opt.key); }}
+              onClick={() => setStatusParam(opt.key)}
               className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${showActive === opt.key ? 'bg-card shadow text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
             >
               {opt.label}
             </button>
           ))}
         </div>
-        <span className="text-xs text-muted-foreground ms-auto">{filtered.length} سجل</span>
+        {hasActiveFilters && (
+          <Button type="button" variant="ghost" size="sm" className="gap-1.5" onClick={resetFilters}>
+            <RotateCcw size={14} /> مسح الفلاتر
+          </Button>
+        )}
+        <span className="text-xs font-medium text-foreground ms-auto">
+          {filtered.length.toLocaleString('en-US')} من {assignments.length.toLocaleString('en-US')} سجل
+        </span>
       </div>
 
       {/* Table */}
@@ -544,7 +559,14 @@ const VehicleAssignment = () => {
                       <td colSpan={7} className="ta-td">
                         <div className="flex flex-col items-center gap-2 text-muted-foreground">
                           <ClipboardList size={40} className="opacity-30" />
-                          <p className="font-medium">لا توجد سجلات</p>
+                          <p className="font-medium">
+                            {hasActiveFilters ? 'لا توجد نتائج مطابقة' : 'لا توجد سجلات'}
+                          </p>
+                          {hasActiveFilters && (
+                            <Button type="button" variant="outline" size="sm" onClick={resetFilters}>
+                              مسح الفلاتر
+                            </Button>
+                          )}
                         </div>
                       </td>
                     </tr>
