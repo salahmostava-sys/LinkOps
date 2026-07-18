@@ -1,7 +1,7 @@
 import { formatCurrency, formatStandardDateTime } from '@shared/lib/formatters';
 
-import { useState } from 'react';
-import { Bell, Search, CheckCircle, Clock, ClipboardCopy, Download, ExternalLink, UserRoundCog } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Bell, Search, CheckCircle, Clock, ClipboardCopy, Download, ExternalLink, UserRoundCog, X } from 'lucide-react';
 import { Input } from '@shared/components/ui/input';
 import { Button } from '@shared/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@shared/components/ui/dialog';
@@ -24,6 +24,7 @@ import { useAuth } from '@app/providers/AuthContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { usePermissions } from '@shared/hooks/usePermissions';
+import { usePersistentState } from '@shared/hooks/usePersistentState';
 import {
   AlertWorkflowDialog,
   type AlertWorkflowForm,
@@ -130,12 +131,21 @@ function workflowSummaryLine(alert: Alert): string {
   return `- ${alertTypeLabels[alert.type] || alert.type}: ${alert.entityName} | ${details}`;
 }
 
+const ALERT_TYPE_FILTERS = ['all', 'expired_residency_cost', 'vehicle_rental', 'residency', 'insurance', 'authorization', 'probation', 'platform_account'];
+const ALERT_SEVERITY_FILTERS = ['all', 'urgent', 'warning', 'info'];
+const ALERT_WORKFLOW_FILTERS = ['all', 'open', 'in_progress', 'snoozed'];
+const isFilterOption = (options: string[]) =>
+  (value: unknown): value is string => typeof value === 'string' && options.includes(value);
+const isAlertTypeFilter = isFilterOption(ALERT_TYPE_FILTERS);
+const isAlertSeverityFilter = isFilterOption(ALERT_SEVERITY_FILTERS);
+const isAlertWorkflowFilter = isFilterOption(ALERT_WORKFLOW_FILTERS);
+
 const Alerts = () => {
-  const [typeFilter, setTypeFilter] = useState('all');
-  const [severityFilter, setSeverityFilter] = useState('all');
-  const [workflowFilter, setWorkflowFilter] = useState('all');
-  const [crFilter, setCrFilter] = useState('all');
-  const [search, setSearch] = useState('');
+  const [typeFilter, setTypeFilter] = usePersistentState('list:alerts:type:v1', 'all', isAlertTypeFilter);
+  const [severityFilter, setSeverityFilter] = usePersistentState('list:alerts:severity:v1', 'all', isAlertSeverityFilter);
+  const [workflowFilter, setWorkflowFilter] = usePersistentState('list:alerts:workflow:v1', 'all', isAlertWorkflowFilter);
+  const [crFilter, setCrFilter] = usePersistentState('list:alerts:commercial-record:v1', 'all', (value): value is string => typeof value === 'string');
+  const [search, setSearch] = usePersistentState('list:alerts:search:v1', '', (value): value is string => typeof value === 'string');
   const [resolveDialog, setResolveDialog] = useState<Alert | null>(null);
   const [deferDialog, setDeferDialog] = useState<Alert | null>(null);
   const [deferDays, setDeferDays] = useState('7');
@@ -156,14 +166,20 @@ const Alerts = () => {
     staleTime: 5 * 60_000,
   });
 
-  const localAlerts: Alert[] = alertsQuery.data ?? [];
+  const localAlerts = useMemo<Alert[]>(() => alertsQuery.data ?? [], [alertsQuery.data]);
 
   // ── Derived state ─────────────────────────────────────────────────────────
-  const commercialRecords = [...new Set(
+  const commercialRecords = useMemo(() => [...new Set(
     localAlerts
       .map(a => { const m = /سجل: (.+?)(?:$| —)/.exec(a.entityName); return m?.[1] ?? null; })
       .filter(Boolean) as string[]
-  )].sort((a, b) => a.localeCompare(b));
+  )].sort((a, b) => a.localeCompare(b)), [localAlerts]);
+
+  useEffect(() => {
+    if (alertsQuery.data && crFilter !== 'all' && !commercialRecords.includes(crFilter)) {
+      setCrFilter('all');
+    }
+  }, [alertsQuery.data, commercialRecords, crFilter, setCrFilter]);
 
   const filtered = localAlerts.filter(a => {
     const matchType =
@@ -178,6 +194,21 @@ const Alerts = () => {
   });
 
   const resolved = localAlerts.filter(a => a.resolved);
+  const activeAlertsCount = localAlerts.length - resolved.length;
+  const hasActiveFilters = Boolean(
+    search.trim()
+      || typeFilter !== 'all'
+      || severityFilter !== 'all'
+      || workflowFilter !== 'all'
+      || crFilter !== 'all',
+  );
+  const resetFilters = () => {
+    setSearch('');
+    setTypeFilter('all');
+    setSeverityFilter('all');
+    setWorkflowFilter('all');
+    setCrFilter('all');
+  };
 
   const urgentCount = filtered.filter(a => a.severity === 'urgent').length;
   const warningCount = filtered.filter(a => a.severity === 'warning').length;
@@ -328,7 +359,7 @@ const Alerts = () => {
     XLSX.writeFile(wb, 'template_alerts.xlsx');
   };
 
-  const typeOptions = ['all', 'expired_residency_cost', 'vehicle_rental', 'residency', 'insurance', 'authorization', 'probation', 'platform_account'];
+  const typeOptions = ALERT_TYPE_FILTERS;
 
   let alertsContent = null;
   if (alertsQuery.isLoading) {
@@ -341,8 +372,17 @@ const Alerts = () => {
     alertsContent = (
       <div className="bg-card border border-border/50 p-12 text-center rounded-2xl">
         <CheckCircle size={40} className="mx-auto text-success mb-3" />
-        <p className="text-muted-foreground">لا توجد تنبيهات مفعّلة</p>
-        <p className="text-xs text-muted-foreground mt-1">جميع المستندات سارية المفعول ✅.</p>
+        <p className="text-muted-foreground">
+          {hasActiveFilters ? 'لا توجد نتائج مطابقة' : 'لا توجد تنبيهات مفعّلة'}
+        </p>
+        <p className="text-xs text-muted-foreground mt-1">
+          {hasActiveFilters ? 'غيّر الفلاتر أو امسحها لعرض التنبيهات' : 'جميع المستندات سارية المفعول ✅.'}
+        </p>
+        {hasActiveFilters && (
+          <Button type="button" variant="outline" size="sm" className="mt-3" onClick={resetFilters}>
+            مسح الفلاتر
+          </Button>
+        )}
       </div>
     );
   } else {
@@ -546,6 +586,16 @@ const Alerts = () => {
             ))}
           </div>
         )}
+        <div className="flex items-center justify-between gap-3 border-t border-border/40 pt-2">
+          <span className="text-xs font-medium text-foreground">
+            {filtered.length.toLocaleString('en-US')} من {activeAlertsCount.toLocaleString('en-US')} تنبيه نشط
+          </span>
+          {hasActiveFilters && (
+            <Button type="button" variant="ghost" size="sm" className="gap-1.5" onClick={resetFilters}>
+              <X size={14} /> مسح الفلاتر
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="space-y-3">

@@ -12,6 +12,7 @@ import { Input } from '@shared/components/ui/input';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@shared/components/ui/alert-dialog';
 import { useToast } from '@shared/hooks/use-toast';
 import { usePermissions } from '@shared/hooks/usePermissions';
+import { usePersistentState } from '@shared/hooks/usePersistentState';
 import { differenceInDays, parseISO } from 'date-fns';
 import { employeeTierService } from '@services/employeeTierService';
 import { isEmployeeExcluded } from '@shared/lib/employeeVisibility';
@@ -170,6 +171,12 @@ function mergeTierImportFailures(
 ═══════════════════════════════════════════════════════════════ */
 
 
+const TIER_SEARCH_STORAGE_KEY = 'table:employee-tiers:search:v1';
+const TIER_STATUS_STORAGE_KEY = 'table:employee-tiers:status:v1';
+
+const isTierStatusFilter = (value: unknown): value is string =>
+  value === 'all' || value === STATUS_DELIVERED || value === STATUS_NOT_DELIVERED;
+
 const EmployeeTiers = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -216,8 +223,16 @@ const EmployeeTiers = () => {
     retry: defaultQueryRetry,
     staleTime: 60_000,
   });
-  const [search, setSearch]     = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [search, setSearch] = usePersistentState(
+    TIER_SEARCH_STORAGE_KEY,
+    '',
+    (value): value is string => typeof value === 'string',
+  );
+  const [statusFilter, setStatusFilter] = usePersistentState(
+    TIER_STATUS_STORAGE_KEY,
+    'all',
+    isTierStatusFilter,
+  );
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDir, setSortDir]   = useState<SortDir>(null);
 
@@ -440,6 +455,11 @@ const EmployeeTiers = () => {
     }
     return list;
   }, [tiers, search, statusFilter, sortField, sortDir, empMap]);
+  const hasActiveFilters = Boolean(search.trim() || statusFilter !== 'all');
+  const resetFilters = () => {
+    setSearch('');
+    setStatusFilter('all');
+  };
 
   const buildTierSpreadsheetRows = () => filtered.map((tier) => {
     const platformLabel = apps
@@ -664,7 +684,14 @@ const EmployeeTiers = () => {
           hideImport={!perms.can_edit}
           className="ms-auto shrink-0"
         />
-        <span className="text-xs text-muted-foreground">السجلات: {filtered.length}</span>
+        {hasActiveFilters && (
+          <Button type="button" variant="ghost" size="sm" className="gap-1.5" onClick={resetFilters}>
+            <X size={14} /> مسح الفلاتر
+          </Button>
+        )}
+        <span className="text-xs font-medium text-foreground">
+          {filtered.length.toLocaleString('en-US')} من {tiers.length.toLocaleString('en-US')} سجل
+        </span>
       </div>
 
       {/* Table — يملأ المساحة المتبقية من ارتفاع الصفحة */}
@@ -769,7 +796,14 @@ const EmployeeTiers = () => {
                     <td colSpan={7} className="p-0 align-middle">
                       <div className="min-h-[min(48vh,26rem)] flex flex-col items-center justify-center gap-2 py-16 text-center text-muted-foreground">
                         <Layers size={32} className="opacity-20" />
-                        <p className="text-sm">لا توجد شرائح — أضف شريحة جديدة</p>
+                        <p className="text-sm">
+                          {hasActiveFilters ? 'لا توجد نتائج مطابقة' : 'لا توجد شرائح — أضف شريحة جديدة'}
+                        </p>
+                        {hasActiveFilters && (
+                          <Button type="button" variant="outline" size="sm" onClick={resetFilters}>
+                            مسح الفلاتر
+                          </Button>
+                        )}
                       </div>
                     </td>
                   </tr>
