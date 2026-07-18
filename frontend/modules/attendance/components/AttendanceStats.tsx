@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import attendanceService from '@services/attendanceService';
 import { logError } from '@shared/lib/logger';
 import { Skeleton } from '@shared/components/ui/skeleton';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   selectedMonth: number;
@@ -19,6 +20,7 @@ const COLORS = {
 };
 
 const AttendanceStats = ({ selectedMonth, selectedYear }: Readonly<Props>) => {
+  const { t } = useTranslation();
   const [totals, setTotals] = useState({
     present: 0,
     absent: 0,
@@ -31,11 +33,11 @@ const AttendanceStats = ({ selectedMonth, selectedYear }: Readonly<Props>) => {
   const [hasNoRecords, setHasNoRecords] = useState(false);
 
   const labels = {
-    present: 'حاضر',
-    absent: 'غائب',
-    leave: 'إجازة',
-    sick: 'مريض',
-    late: 'متأخر',
+    present: t('present'),
+    absent: t('absent'),
+    leave: t('leave'),
+    sick: t('sick'),
+    late: t('late'),
   };
 
   useEffect(() => {
@@ -92,21 +94,21 @@ const AttendanceStats = ({ selectedMonth, selectedYear }: Readonly<Props>) => {
       <div className="border border-border/50 bg-card p-4 rounded-2xl">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
           <div className="space-y-1 min-w-0">
-            <h2 className="text-base font-semibold text-foreground leading-tight">ملخص الحضور الشهري</h2>
+            <h2 className="text-base font-semibold text-foreground leading-tight">{t('monthlyAttendanceSummary')}</h2>
             <p className="text-xs text-muted-foreground">
-              توزيع السجلات حسب الحالة لهذا الشهر
+              {t('attendanceSummaryDescription')}
             </p>
           </div>
           {totalEmployees > 0 && (
             <span className="inline-flex items-center shrink-0 rounded-full border border-border/60 bg-muted/40 px-3 py-1.5 text-xs font-medium text-foreground">
-              {totalEmployees} مندوب نشط
+              {t('activeRidersCount', { count: totalEmployees })}
             </span>
           )}
         </div>
 
         {hasNoRecords && (
           <p className="mt-3 text-sm text-muted-foreground border-t border-border/40 pt-3">
-            لا توجد بيانات حضور لهذا الشهر
+            {t('noAttendanceThisMonth')}
           </p>
         )}
       </div>

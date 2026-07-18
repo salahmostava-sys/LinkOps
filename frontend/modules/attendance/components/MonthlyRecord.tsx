@@ -15,6 +15,7 @@ import { Textarea } from "@shared/components/ui/textarea";
 import { Button } from "@shared/components/ui/button";
 import { cn } from "@shared/lib/utils";
 import { buildAttendanceGridData } from "../lib/attendanceDomain";
+import { useTranslation } from 'react-i18next';
 
 export type AttendanceStatus = 'present' | 'absent' | 'leave' | 'sick' | 'late' | 'none';
 
@@ -37,13 +38,13 @@ interface MonthlyRecordProps {
   selectedYear: number;
 }
 
-const STATUS_MAP: Record<AttendanceStatus, { color: string; label: string; char: string }> = {
-  present: { color: 'text-green-700 bg-green-100/50', label: 'حضور', char: 'ح' },
-  absent: { color: 'text-destructive bg-destructive/10', label: 'غياب', char: 'غ' },
-  leave: { color: 'text-yellow-700 bg-yellow-100/50', label: 'إجازة', char: 'ج' },
-  sick: { color: 'text-purple-700 bg-purple-100/50', label: 'مريض', char: 'م' },
-  late: { color: 'text-orange-700 bg-orange-100/50', label: 'متأخر', char: 'ت' },
-  none: { color: 'text-muted-foreground bg-transparent', label: 'غير محدد', char: '-' }
+const STATUS_MAP: Record<AttendanceStatus, { color: string; labelKey: string; arChar: string; enChar: string }> = {
+  present: { color: 'text-green-700 bg-green-100/50', labelKey: 'present', arChar: 'ح', enChar: 'P' },
+  absent: { color: 'text-destructive bg-destructive/10', labelKey: 'absent', arChar: 'غ', enChar: 'A' },
+  leave: { color: 'text-yellow-700 bg-yellow-100/50', labelKey: 'leave', arChar: 'ج', enChar: 'L' },
+  sick: { color: 'text-purple-700 bg-purple-100/50', labelKey: 'sick', arChar: 'م', enChar: 'S' },
+  late: { color: 'text-orange-700 bg-orange-100/50', labelKey: 'late', arChar: 'ت', enChar: 'T' },
+  none: { color: 'text-muted-foreground bg-transparent', labelKey: 'unspecified', arChar: '-', enChar: '-' }
 };
 
 const CellEditorDialog = ({ 
@@ -63,6 +64,8 @@ const CellEditorDialog = ({
   onSave: (data: Partial<CellData>) => void,
   isSaving: boolean
 }) => {
+  const { t } = useTranslation();
+  const { isRTL } = useLanguage();
   const [status, setStatus] = useState<AttendanceStatus>(initialData?.status && initialData.status !== 'none' ? initialData.status : 'present');
   const [note, setNote] = useState(initialData?.note || '');
   const [checkIn, setCheckIn] = useState(initialData?.check_in || '');
@@ -70,47 +73,47 @@ const CellEditorDialog = ({
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]" dir="rtl">
+      <DialogContent className="sm:max-w-[425px]" dir={isRTL ? 'rtl' : 'ltr'}>
         <DialogHeader>
           <DialogTitle className="text-start leading-relaxed text-foreground">
-            تعديل الحضور - {employeeName}
+            {t('editAttendanceFor', { name: employeeName })}
             <div className="text-sm font-normal text-muted-foreground mt-1" dir="ltr">{dateStr}</div>
           </DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="space-y-2">
-            <Label>الحالة</Label>
+            <Label>{t('status')}</Label>
             <Select value={status} onValueChange={(v) => setStatus(v as AttendanceStatus)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="present">✅ حضور</SelectItem>
-                <SelectItem value="absent">❌ غياب</SelectItem>
-                <SelectItem value="leave">🏝️ إجازة</SelectItem>
-                <SelectItem value="sick">🤒 مريض</SelectItem>
-                <SelectItem value="late">⏳ متأخر</SelectItem>
-                <SelectItem value="none">➖ غير محدد</SelectItem>
+                <SelectItem value="present">{t('present')}</SelectItem>
+                <SelectItem value="absent">{t('absent')}</SelectItem>
+                <SelectItem value="leave">{t('leave')}</SelectItem>
+                <SelectItem value="sick">{t('sick')}</SelectItem>
+                <SelectItem value="late">{t('late')}</SelectItem>
+                <SelectItem value="none">{t('unspecified')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>وقت الحضور</Label>
+              <Label>{t('checkInTime')}</Label>
               <Input type="time" value={checkIn} onChange={e => setCheckIn(e.target.value)} />
             </div>
-            <BaseInput label="وقت الانصراف" type="time" value={checkOut} onChange={e => setCheckOut(e.target.value)} />
+            <BaseInput label={t('checkOutTime')} type="time" value={checkOut} onChange={e => setCheckOut(e.target.value)} />
           </div>
           <div className="space-y-2">
-            <Label>ملاحظات</Label>
-            <Textarea value={note} onChange={e => setNote(e.target.value)} placeholder="أضف ملاحظة (اختياري)..." />
+            <Label>{t('notes')}</Label>
+            <Textarea value={note} onChange={e => setNote(e.target.value)} placeholder={t('optionalNotePlaceholder')} />
           </div>
         </div>
         <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSaving}>إلغاء</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSaving}>{t('cancel')}</Button>
           <Button onClick={() => onSave({ status, note, check_in: checkIn, check_out: checkOut })} disabled={isSaving}>
             {isSaving ? <Loader2 className="w-4 h-4 animate-spin ms-2" /> : null}
-            حفظ السجل
+            {t('saveRecord')}
           </Button>
         </div>
       </DialogContent>
@@ -119,7 +122,8 @@ const CellEditorDialog = ({
 };
 
 const MonthlyRecord = ({ selectedMonth, selectedYear }: Readonly<MonthlyRecordProps>) => {
-  const { isRTL } = useLanguage();
+  const { isRTL, lang } = useLanguage();
+  const { t } = useTranslation();
   const { enabled, userId } = useAuthQueryGate();
   const uid = authQueryUserId(userId);
   const queryClient = useQueryClient();
@@ -180,12 +184,12 @@ const MonthlyRecord = ({ selectedMonth, selectedYear }: Readonly<MonthlyRecordPr
       }
     },
     onSuccess: () => {
-      toast.success("تم الحفظ بنجاح", { style: { background: "var(--ds-surface-container)", color: "var(--ds-on-surface)" } });
+      toast.success(t('attendanceSaved'), { style: { background: "var(--ds-surface-container)", color: "var(--ds-on-surface)" } });
       queryClient.invalidateQueries({ queryKey });
       setEditingCell(null);
     },
     onError: () => {
-      toast.error("حدث خطأ أثناء الحفظ", { style: { background: "var(--destructive)", color: "white" } });
+      toast.error(t('attendanceSaveFailed'), { style: { background: "var(--destructive)", color: "white" } });
     }
   });
 
@@ -219,7 +223,7 @@ const MonthlyRecord = ({ selectedMonth, selectedYear }: Readonly<MonthlyRecordPr
   if (gridData.length === 0) {
     return (
       <div className="flex items-center justify-center p-12 text-muted-foreground bg-card rounded-xl border border-border">
-        لا توجد بيانات لهذا الشهر
+        {t('noDataForMonth')}
       </div>
     );
   }
@@ -228,20 +232,20 @@ const MonthlyRecord = ({ selectedMonth, selectedYear }: Readonly<MonthlyRecordPr
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+          <Search className="absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
           <Input
-            placeholder="ابحث باسم الموظف..."
+            placeholder={t('searchByEmployeeName')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pr-9"
+            className="ps-9"
           />
         </div>
         <Select value={selectedAppId} onValueChange={setSelectedAppId}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="تصفية بالتطبيق" />
+            <SelectValue placeholder={t('filterByApplication')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">كل التطبيقات</SelectItem>
+            <SelectItem value="all">{t('allApplications')}</SelectItem>
             {(data?.apps || []).map((app: { id: string; name: string }) => (
               <SelectItem key={app.id} value={app.id}>{app.name}</SelectItem>
             ))}
@@ -254,32 +258,32 @@ const MonthlyRecord = ({ selectedMonth, selectedYear }: Readonly<MonthlyRecordPr
           <table className="w-full text-[13px] border-collapse" dir={isRTL ? "rtl" : "ltr"}>
             <thead>
               <tr>
-                <th className="sticky right-0 z-20 bg-muted/90 p-3 min-w-[160px] text-start border-b border-l border-border backdrop-blur shadow-[1px_0_0_hsl(var(--border))] text-foreground">
-                  الموظف
+                <th className="sticky start-0 z-20 bg-muted/90 p-3 min-w-[160px] text-start border-b border-e border-border backdrop-blur shadow-[1px_0_0_hsl(var(--border))] text-foreground">
+                  {t('employeeName')}
                 </th>
                 {daysArray.map(d => (
                   <th key={d} className="p-2 min-w-[36px] text-center border-b border-l border-border bg-muted/40 font-semibold text-muted-foreground">
                     {d}
                   </th>
                 ))}
-                <th className="p-3 min-w-[45px] text-center border-b border-border bg-green-500/10 text-green-700 dark:text-green-400 font-bold" title="حضور">ح</th>
-                <th className="p-3 min-w-[45px] text-center border-b border-border bg-destructive/10 text-destructive font-bold" title="غياب">غ</th>
-                <th className="p-3 min-w-[45px] text-center border-b border-border bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 font-bold" title="إجازة">ج</th>
-                <th className="p-3 min-w-[45px] text-center border-b border-border bg-purple-500/10 text-purple-700 dark:text-purple-400 font-bold" title="مريض">م</th>
-                <th className="p-3 min-w-[45px] text-center border-b border-border bg-orange-500/10 text-orange-700 dark:text-orange-400 font-bold" title="متأخر">ت</th>
+                {(['present', 'absent', 'leave', 'sick', 'late'] as const).map((status) => (
+                  <th key={status} className={cn('p-3 min-w-[45px] text-center border-b border-border font-bold', STATUS_MAP[status].color)} title={t(STATUS_MAP[status].labelKey)}>
+                    {lang === 'ar' ? STATUS_MAP[status].arChar : STATUS_MAP[status].enChar}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
               {filteredGridData.length === 0 ? (
                 <tr>
                   <td colSpan={daysArray.length + 6} className="p-8 text-center text-muted-foreground">
-                    لا يوجد موظفين مطابقين للبحث
+                    {t('noMatchingEmployees')}
                   </td>
                 </tr>
               ) : (
                 filteredGridData.map(row => (
                   <tr key={row.id} className="hover:bg-muted/30 transition-colors">
-                    <td className="sticky right-0 z-10 bg-card p-3 text-start border-b border-l border-border font-medium shadow-[1px_0_0_hsl(var(--border))] text-foreground">
+                    <td className="sticky start-0 z-10 bg-card p-3 text-start border-b border-e border-border font-medium shadow-[1px_0_0_hsl(var(--border))] text-foreground">
                       <div className="truncate w-full max-w-[140px]" title={row.name}>{row.name}</div>
                     </td>
                     {daysArray.map(d => {
@@ -296,14 +300,14 @@ const MonthlyRecord = ({ selectedMonth, selectedYear }: Readonly<MonthlyRecordPr
                               "w-full h-[40px] flex items-center justify-center transition-colors relative hover:bg-muted/80 focus:outline-none",
                               config.color
                             )}
-                            title={`${row.name} - يوم ${d} - ${config.label}`}
+                            title={t('dayWithStatus', { name: row.name, day: d, status: t(config.labelKey) })}
                           >
                             <span className={cn("font-bold text-xs", status === 'none' && "text-muted-foreground/30")}>
-                              {config.char}
+                              {lang === 'ar' ? config.arChar : config.enChar}
                             </span>
                             
                             {hasNote && (
-                              <div className="absolute top-0.5 right-0.5 text-primary">
+                              <div className="absolute top-0.5 start-0.5 text-primary">
                                 <FileText size={10} className="opacity-80" />
                               </div>
                             )}

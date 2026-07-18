@@ -239,23 +239,23 @@ export function useEmployeeActions(params: {
     try {
       out = (await employeeService.exportEmployees({ filters: { branch, search, status } })) as typeof out;
     } catch (e: unknown) {
-      const message = getErrorMessage(e, 'تعذر التصدير');
-      toast({ title: 'خطأ', description: message, variant: 'destructive' });
+      const message = getErrorMessage(e, t('exportFailed'));
+      toast({ title: t('error'), description: message, variant: 'destructive' });
       return;
     }
 
     const rows = out.map((e, i) => ({
       '#': i + 1,
-      'الاسم': e.name ?? '',
-      'رقم الهوية': e.national_id ?? '',
-      'رقم الهاتف': e.phone ?? '',
-      'المدن': getEmployeeCities(e).map((city) => cityLabel(city, city)).join('، '),
-      'الحالة': e.status ?? '',
-      'حالة الكفالة': e.sponsorship_status ?? '',
-      'حالة الرخصة': e.license_status ?? '',
-      'انتهاء الإقامة': e.residency_expiry ?? '',
-      'تاريخ الانضمام': e.join_date ?? '',
-      'المسمى الوظيفي': e.job_title ?? '',
+      [t('employeeName')]: e.name ?? '',
+      [t('nationalId')]: e.national_id ?? '',
+      [t('phone')]: e.phone ?? '',
+      [t('cities')]: getEmployeeCities(e).map((city) => city === 'makkah' || city === 'jeddah' ? t(city) : cityLabel(city, city)).join(', '),
+      [t('employeeStatus')]: e.status ?? '',
+      [t('sponsorshipStatus')]: e.sponsorship_status ?? '',
+      [t('licenseStatus')]: e.license_status ?? '',
+      [t('residencyExpiry')]: e.residency_expiry ?? '',
+      [t('joinDate')]: e.join_date ?? '',
+      [t('jobTitle')]: e.job_title ?? '',
     }));
     const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.utils.book_new();
@@ -268,7 +268,7 @@ export function useEmployeeActions(params: {
       record_id: null,
       meta: { total: out.length, branch: branch ?? null, status: status ?? null, search: search ?? null },
     });
-      toast({ title: 'تم التصدير', description: `تمت معالجة ${out.length} صف` });
+      toast({ title: t('exportCompleted'), description: t('rowsProcessed', { count: out.length }) });
   };
 
   const handleTemplate = async () => {
@@ -277,7 +277,7 @@ export function useEmployeeActions(params: {
     const aoaRows = rows.map((row) => EMPLOYEE_IMPORT_COLUMNS.map((column) => row[column.key]));
     const ws = XLSX.utils.aoa_to_sheet([Array.from(EMPLOYEE_TEMPLATE_AR_HEADERS), ...aoaRows]);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'القالب');
+    XLSX.utils.book_append_sheet(wb, ws, t('template'));
     XLSX.writeFile(wb, 'import_template.xlsx');
   };
 
@@ -285,8 +285,8 @@ export function useEmployeeActions(params: {
     const table = tableRef.current;
     if (!table) return;
     printHtmlTable(table, {
-      title: 'بيانات الموظفين',
-      subtitle: `المجموع: ${filtered.length} موظف — ${formatStandardDateTime()}`,
+      title: t('employeeDataSheet'),
+      subtitle: t('printEmployeeTotal', { count: filtered.length, date: formatStandardDateTime() }),
     });
   };
 
@@ -294,11 +294,11 @@ export function useEmployeeActions(params: {
     setActionLoading(true);
     try {
       await handleExport();
-      toast({ title: `تم التصدير`, description: `عُالج ${filtered.length} صفاً` });
+      toast({ title: t('exportCompleted'), description: t('rowsProcessed', { count: filtered.length }) });
     } catch (e: unknown) {
       toast({
-        title: 'تعذر التصدير',
-        description: getErrorMessage(e, 'صيغة الملف أو البيانات غير صالحة'),
+        title: t('exportFailed'),
+        description: getErrorMessage(e, t('invalidFileOrData')),
         variant: 'destructive',
       });
     } finally {
@@ -310,11 +310,11 @@ export function useEmployeeActions(params: {
     setActionLoading(true);
     try {
       await handleTemplate();
-      toast({ title: 'تم التنزيل', description: 'تم تنزيل قالب الاستيراد' });
+      toast({ title: t('downloadCompleted'), description: t('importTemplateDownloaded') });
     } catch (e: unknown) {
       toast({
-        title: 'تعذر التنزيل',
-        description: getErrorMessage(e, 'فشل إنشاء ملف القالب'),
+        title: t('downloadFailed'),
+        description: getErrorMessage(e, t('templateCreationFailed')),
         variant: 'destructive',
       });
     } finally {
@@ -334,8 +334,8 @@ export function useEmployeeActions(params: {
   const runImportFile = async (file: File) => {
     if (!permissions.can_edit) {
       toast({
-        title: 'غير مسموح',
-        description: 'لا تملك صلاحية استيراد بيانات الموظفين',
+        title: t('notAllowed'),
+        description: t('employeeImportDenied'),
         variant: 'destructive',
       });
       return;
@@ -357,8 +357,8 @@ export function useEmployeeActions(params: {
       if (report.totalProcessed === 0) {
         const firstIssue = report.errors[0]?.issue;
         toast({
-          title: 'تعذر المعالجة',
-          description: firstIssue || 'الملف لا يحتوي على بيانات صالحة',
+          title: t('processingFailed'),
+          description: firstIssue || t('noValidFileData'),
           variant: 'destructive',
         });
         setIsUploading(false);
@@ -378,18 +378,18 @@ export function useEmployeeActions(params: {
       });
       const hasFailures = report.failedRows > 0;
       if (report.successfulRows === 0) {
-        const topIssues = report.errors.slice(0, 3).map((error) => `سطر ${error.rowIndex}: ${error.issue}`);
+        const topIssues = report.errors.slice(0, 3).map((error) => t('rowIssue', { row: error.rowIndex, issue: error.issue }));
         toast({
-          title: 'فشل الاستيراد',
-          description: topIssues.join(' • ') || 'تعذر استيراد أي سطر من الملف',
+          title: t('importFailed'),
+          description: topIssues.join(' • ') || t('noRowsImported'),
           variant: 'destructive',
         });
       } else {
         toast({
-          title: hasFailures ? 'اكتملت المعالجة مع أخطاء' : 'اكتملت المعالجة بنجاح',
+          title: hasFailures ? t('processingCompletedWithErrors') : t('processingCompletedSuccessfully'),
           description: hasFailures
-            ? `تمت معالجة ${report.totalProcessed} سطر، نجح ${report.successfulRows} وفشل ${report.failedRows}`
-            : `تمت معالجة ${report.totalProcessed} سطر بنجاح`,
+            ? t('processingSummaryWithFailures', { total: report.totalProcessed, success: report.successfulRows, failed: report.failedRows })
+            : t('processingSummarySuccess', { total: report.totalProcessed }),
           variant: hasFailures ? 'destructive' : undefined,
         });
       }
@@ -401,8 +401,8 @@ export function useEmployeeActions(params: {
       }, 900);
     } catch (e: unknown) {
       toast({
-        title: 'تعذر معالجة الملف',
-        description: getErrorMessage(e, 'حدث خطأ أثناء معالجة الملف'),
+        title: t('fileProcessingFailed'),
+        description: getErrorMessage(e, t('fileProcessingError')),
         variant: 'destructive',
       });
       if (uploadIntervalRef.current) {

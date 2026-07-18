@@ -1,7 +1,7 @@
 import type React from 'react';
 import { useRef, useState } from 'react';
 import { Button } from '@shared/components/ui/button';
-import { CalendarDays, FolderOpen, Loader2 } from 'lucide-react';
+import { CalendarDays, Download, FileSpreadsheet, FolderOpen, Loader2, Printer, Upload } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@shared/components/ui/dropdown-menu';
 import MonthlyRecord from '@modules/attendance/components/MonthlyRecord';
 import { useLanguage } from '@app/providers/LanguageContext';
@@ -12,11 +12,6 @@ import attendanceService from '@services/attendanceService';
 import { useToast } from '@shared/hooks/use-toast';
 import { useAuthQueryGate } from '@shared/hooks/useAuthQueryGate';
 import { useTemporalContext } from '@app/providers/TemporalContext';
-
-const MONTHS_AR = [
-  'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
-  'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر',
-];
 
 type AttendanceTemplateEmployee = { id: string; name: string };
 type AttendanceTemplateRecord = {
@@ -47,7 +42,7 @@ function buildAttendanceTemplateRows(
 
 const Attendance = () => {
   useAuthQueryGate();
-  const { isRTL } = useLanguage();
+  const { isRTL, lang } = useLanguage();
   const { t } = useTranslation();
   const { selectedMonth: globalMonth } = useTemporalContext();
   const importRef = useRef<HTMLInputElement>(null);
@@ -59,6 +54,10 @@ const Attendance = () => {
   const [yearStr, monthStr] = globalMonth.split('-');
   const selectedYear = yearStr;
   const selectedMonth = String(Number(monthStr) - 1); // 0-indexed for existing components
+  const monthLabel = new Intl.DateTimeFormat(lang === 'ar' ? 'ar-SA-u-nu-latn' : 'en-US', {
+    month: 'long',
+  }).format(new Date(Number(selectedYear), Number(selectedMonth), 1));
+  const attendanceHeaders = [t('employeeName'), t('attendanceDateHeader'), t('attendanceStatusHeader'), t('notes')];
 
   const loadAttendanceTemplateRows = async (): Promise<Array<Array<string>>> => {
     const year = Number(selectedYear);
@@ -77,28 +76,26 @@ const Attendance = () => {
 
   const handleExportAttendance = async () => {
     try {
-      toast({ title: 'جاري التحميل...' });
+      toast({ title: t('downloading') });
       const month = Number(selectedMonth);
       const rows = await loadAttendanceTemplateRows();
       const XLSX = await loadXlsx();
-      const headers = ['اسم الموظف', 'التاريخ (YYYY-MM-DD)', 'الحالة (present/absent/leave/sick/late)', 'ملاحظات'];
-      const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+      const ws = XLSX.utils.aoa_to_sheet([attendanceHeaders, ...rows]);
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'الحضور');
+      XLSX.utils.book_append_sheet(wb, ws, t('attendance'));
       XLSX.writeFile(wb, `attendance_${selectedYear}-${String(month + 1).padStart(2, '0')}.xlsx`);
-      toast({ title: 'تم التصدير بنجاح' });
+      toast({ title: t('exportSuccess') });
     } catch {
-      toast({ title: 'فشل التصدير', description: 'تعذر تحميل بيانات الحضور', variant: 'destructive' });
+      toast({ title: t('exportFailed'), description: t('attendanceExportLoadFailed'), variant: 'destructive' });
     }
   };
 
   const handleAttendanceTemplate = async () => {
     const XLSX = await loadXlsx();
-    const headers = ['اسم الموظف', 'التاريخ (YYYY-MM-DD)', 'الحالة (present/absent/leave/sick/late)', 'ملاحظات'];
     const rows = await loadAttendanceTemplateRows();
-    const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+    const ws = XLSX.utils.aoa_to_sheet([attendanceHeaders, ...rows]);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'قالب');
+    XLSX.utils.book_append_sheet(wb, ws, t('template'));
     XLSX.writeFile(wb, 'template_attendance.xlsx');
   };
 
@@ -116,7 +113,7 @@ const Attendance = () => {
 
       const rows = json.slice(1).filter((row: string[]) => row[0] && row[1]);
       if (rows.length === 0) {
-        toast({ title: 'الملف فارغ', description: 'لا توجد بيانات بعد صف العناوين', variant: 'destructive' });
+        toast({ title: t('emptyFile'), description: t('noDataAfterHeader'), variant: 'destructive' });
         return;
       }
 
@@ -163,22 +160,25 @@ const Attendance = () => {
       }
 
       const uniqueUnmatched = [...new Set(unmatchedNames)];
-      let description = `${imported} سجل ناجح، ${failed} فاشل`;
+      const summary = t('attendanceImportSummary', { success: imported, failed });
+      let description = summary;
       if (uniqueUnmatched.length > 0) {
         const hiddenCount = uniqueUnmatched.length - 5;
-        const moreLabel = hiddenCount > 0 ? ` و${hiddenCount} آخرين` : '';
-        description = `${imported} سجل ناجح، ${failed} فاشل — أسماء غير موجودة: ${uniqueUnmatched
-          .slice(0, 5)
-          .join('، ')}${moreLabel}`;
+        const more = hiddenCount > 0 ? t('moreNames', { count: hiddenCount }) : '';
+        description = t('unmatchedEmployeeNames', {
+          summary,
+          names: uniqueUnmatched.slice(0, 5).join(', '),
+          more,
+        });
       }
 
       toast({
-        title: 'تم الاستيراد',
+        title: t('importCompleted'),
         description,
         variant: failed > 0 ? 'destructive' : 'default',
       });
     } catch {
-      toast({ title: 'فشل الاستيراد', description: 'تعذر قراءة الملف', variant: 'destructive' });
+      toast({ title: t('importFailed'), description: t('fileReadFailed'), variant: 'destructive' });
     } finally {
       setImporting(false);
       e.target.value = '';
@@ -188,10 +188,10 @@ const Attendance = () => {
   const handlePrintTable = () => {
     const table = monthlyTableRef.current?.querySelector('table');
     if (!table) {
-      toast({ title: 'لا يوجد جدول للطباعة' });
+      toast({ title: t('noTableToPrint') });
       return;
     }
-    printHtmlTable(table, { title: 'سجل الحضور الشهري' });
+    printHtmlTable(table, { title: t('monthlyAttendanceRecord') });
   };
 
   return (
@@ -199,7 +199,7 @@ const Attendance = () => {
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
           <nav className="page-breadcrumb">
-            <span>الرئيسية</span>
+            <span>{t('home')}</span>
             <span className="page-breadcrumb-sep">/</span>
             <span>{t('attendance')}</span>
           </nav>
@@ -209,7 +209,7 @@ const Attendance = () => {
         <div className="flex flex-wrap items-center gap-2">
           <div className="inline-flex items-center rounded-xl bg-muted/40 p-1 px-3 border border-border/50 text-[11px] font-bold text-muted-foreground ms-1">
             <CalendarDays size={13} className="me-1.5 text-primary/70" />
-            <span>فترة: {MONTHS_AR[Number(selectedMonth)]} {selectedYear}</span>
+            <span>{t('periodLabel', { month: monthLabel, year: selectedYear })}</span>
           </div>
 
 
@@ -219,21 +219,21 @@ const Attendance = () => {
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="gap-1.5 h-8">
                 <FolderOpen size={14} />
-                ملفات
+                {t('files')}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={handleExportAttendance}>
-                📊 تصدير Excel (ملخص شهري)
+                <Download size={14} /> {t('exportMonthlySummary')}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={handleAttendanceTemplate}>
-                📋 تحميل قالب الاستيراد
+                <FileSpreadsheet size={14} /> {t('downloadTemplate')}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => importRef.current?.click()} disabled={importing}>
-                {importing ? <Loader2 size={14} className="animate-spin ml-1" /> : '⬆️'} استيراد Excel
+                {importing ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />} {t('importExcel')}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handlePrintTable}>🖨️ طباعة الجدول</DropdownMenuItem>
+              <DropdownMenuItem onClick={handlePrintTable}><Printer size={14} /> {t('printTable')}</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
