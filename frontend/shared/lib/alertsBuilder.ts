@@ -4,12 +4,12 @@ import {
   differenceInCalendarDays,
   differenceInCalendarMonths,
   differenceInCalendarYears,
-  differenceInDays,
   format,
-  isAfter,
+  isBefore,
+  isValid,
   parseISO,
+  startOfDay,
 } from "date-fns";
-import { fmtNum } from "@shared/lib/utils";
 import { getNextMonthlyRentalDueDate } from "@shared/lib/vehicleRental";
 
 const ISO_DATE_FORMAT = "yyyy-MM-dd";
@@ -35,6 +35,9 @@ export interface Alert {
   snoozedUntil?: string | null;
   residencyRenewalCost?: number | null;
   residencyRenewalCostPeriod?: "monthly" | "yearly" | null;
+  commercialRecordName?: string | null;
+  renewalDurationLabel?: string | null;
+  description?: string | null;
 }
 
 export type EmployeeAlertRow = {
@@ -128,17 +131,25 @@ type ResidencyRenewalQuote = {
 
 const getRequiredMonthlyRenewalMonths = (expiryDate: Date, today: Date) => {
   const elapsedCalendarMonths = Math.max(0, differenceInCalendarMonths(today, expiryDate));
-  const monthsUntilValid = isAfter(addMonths(expiryDate, elapsedCalendarMonths), today)
-    ? elapsedCalendarMonths
-    : elapsedCalendarMonths + 1;
+  const renewalBoundary = addMonths(expiryDate, elapsedCalendarMonths);
+  const monthsUntilValid = isBefore(renewalBoundary, startOfDay(today))
+    ? elapsedCalendarMonths + 1
+    : Math.max(1, elapsedCalendarMonths);
   return Math.max(3, Math.ceil(monthsUntilValid / 3) * 3);
 };
 
 const getRequiredYearlyRenewals = (expiryDate: Date, today: Date) => {
   const elapsedCalendarYears = Math.max(0, differenceInCalendarYears(today, expiryDate));
-  return isAfter(addYears(expiryDate, elapsedCalendarYears), today)
-    ? Math.max(1, elapsedCalendarYears)
-    : elapsedCalendarYears + 1;
+  const renewalBoundary = addYears(expiryDate, elapsedCalendarYears);
+  return isBefore(renewalBoundary, startOfDay(today))
+    ? elapsedCalendarYears + 1
+    : Math.max(1, elapsedCalendarYears);
+};
+
+const getDaysLeft = (dateValue: string, today: Date): number | null => {
+  const date = parseISO(dateValue);
+  if (!isValid(date)) return null;
+  return differenceInCalendarDays(date, startOfDay(today));
 };
 
 const getYearDurationLabel = (years: number) => {
@@ -154,7 +165,7 @@ const getResidencyRenewalCost = (
 ): ResidencyRenewalQuote => {
   const record = renewalCostByRecord.get(commercialRecordKey(emp.commercial_record));
   const rawCost = record?.residency_renewal_monthly_cost ?? null;
-  if (rawCost === null || !emp.residency_expiry) {
+  if (rawCost === null || !Number.isFinite(rawCost) || rawCost < 0 || !emp.residency_expiry) {
     return { cost: null, period: null, durationLabel: null };
   }
 
@@ -198,24 +209,14 @@ const shouldSkipEmployeeExpiryAlerts = (emp: EmployeeAlertRow) => {
   return Boolean(emp.sponsorship_status && invalidStatuses.includes(emp.sponsorship_status.toLowerCase()));
 };
 
-const getEmployeeAlertLabel = (emp: EmployeeAlertRow) =>
-  emp.commercial_record?.trim()
-    ? `${emp.name} • السجل: ${emp.commercial_record.trim()}`
-    : emp.name;
-
-const getResidencyRenewalLabel = (renewal: ReturnType<typeof getResidencyRenewalCost>) => {
-  if (renewal.cost === null) return "";
-  return ` — تكلفة التجديد: ${fmtNum(renewal.cost)} ر.س (${renewal.durationLabel})`;
-};
-
 const buildResidencyAlert = (
   emp: EmployeeAlertRow,
-  employeeLabel: string,
   today: Date,
   renewalCostByRecord: Map<string, CommercialRecordRenewalCostRow>
 ): Alert | null => {
   if (!emp.residency_expiry) return null;
-  const daysLeft = differenceInDays(parseISO(emp.residency_expiry), today);
+  const daysLeft = getDaysLeft(emp.residency_expiry, today);
+  if (daysLeft === null) return null;
   const renewal = getResidencyRenewalCost(emp, renewalCostByRecord, today);
   return {
     id: `res-${emp.id}`,
@@ -223,37 +224,50 @@ const buildResidencyAlert = (
     entityId: emp.id,
     entityType: "employee",
     type: "residency",
-    entityName: `${employeeLabel}${getResidencyRenewalLabel(renewal)}`,
+    entityName: emp.name,
     dueDate: emp.residency_expiry,
     daysLeft,
     severity: getStandardSeverity(daysLeft),
     resolved: false,
     residencyRenewalCost: renewal.cost,
     residencyRenewalCostPeriod: renewal.period,
+    commercialRecordName: emp.commercial_record?.trim() || null,
+    renewalDurationLabel: renewal.durationLabel,
   };
 };
 
-const buildEmployeeDateAlert = (
-  id: string,
-  type: string,
-  entityName: string,
-  dueDate: string | null | undefined,
-  today: Date,
-  severityForDays: (daysLeft: number) => Alert["severity"]
-): Alert | null => {
+type EmployeeDateAlertInput = {
+  id: string;
+  type: string;
+  employee: EmployeeAlertRow;
+  dueDate: string | null | undefined;
+  today: Date;
+  severityForDays: (daysLeft: number) => Alert["severity"];
+};
+
+const buildEmployeeDateAlert = ({
+  id,
+  type,
+  employee,
+  dueDate,
+  today,
+  severityForDays,
+}: EmployeeDateAlertInput): Alert | null => {
   if (!dueDate) return null;
-  const daysLeft = differenceInDays(parseISO(dueDate), today);
+  const daysLeft = getDaysLeft(dueDate, today);
+  if (daysLeft === null) return null;
   return {
     id,
     sourceKey: id,
     entityId: id.slice(id.indexOf("-") + 1),
     entityType: "employee",
     type,
-    entityName,
+    entityName: employee.name,
     dueDate,
     daysLeft,
     severity: severityForDays(daysLeft),
     resolved: false,
+    commercialRecordName: employee.commercial_record?.trim() || null,
   };
 };
 
@@ -286,16 +300,14 @@ const pushVehicleRentalAlerts = (
     const daysLeft = differenceInCalendarDays(dueDate, today);
     // إظهار التنبيه فقط متى كان الاستحقاق خلال نافذة RENTAL_ALERT_LEAD_DAYS
     if (daysLeft > RENTAL_ALERT_LEAD_DAYS) continue;
-    const amountStr = v.rental_monthly_amount != null
-      ? ` — المبلغ: ${fmtNum(v.rental_monthly_amount)} ر.س`
-      : "";
     out.push({
       id: `rental-${v.id}`,
       sourceKey: `rental-${v.id}`,
       entityId: v.id,
       entityType: "vehicle",
       type: "vehicle_rental",
-      entityName: `إيجار مركبة ${v.plate_number}${amountStr}`,
+      entityName: `مركبة ${v.plate_number}`,
+      description: "استحقاق الإيجار الشهري",
       dueDate: dueDateStr,
       daysLeft,
       severity: getRentalSeverity(daysLeft),
@@ -314,11 +326,10 @@ const pushEmployeeExpiryAlerts = (
 ) => {
   if (shouldSkipEmployeeExpiryAlerts(emp)) return;
 
-  const employeeLabel = getEmployeeAlertLabel(emp);
-  pushIfDue(generatedAlerts, buildResidencyAlert(emp, employeeLabel, today, renewalCostByRecord), threshold);
-  pushIfDue(generatedAlerts, buildEmployeeDateAlert(`prob-${emp.id}`, "probation", employeeLabel, emp.probation_end_date, today, getProbationSeverity), threshold);
-  pushIfDue(generatedAlerts, buildEmployeeDateAlert(`hi-${emp.id}`, "health_insurance", employeeLabel, emp.health_insurance_expiry, today, getStandardSeverity), threshold);
-  pushIfDue(generatedAlerts, buildEmployeeDateAlert(`lic-${emp.id}`, "driving_license", employeeLabel, emp.license_expiry, today, getStandardSeverity), threshold);
+  pushIfDue(generatedAlerts, buildResidencyAlert(emp, today, renewalCostByRecord), threshold);
+  pushIfDue(generatedAlerts, buildEmployeeDateAlert({ id: `prob-${emp.id}`, type: "probation", employee: emp, dueDate: emp.probation_end_date, today, severityForDays: getProbationSeverity }), threshold);
+  pushIfDue(generatedAlerts, buildEmployeeDateAlert({ id: `hi-${emp.id}`, type: "health_insurance", employee: emp, dueDate: emp.health_insurance_expiry, today, severityForDays: getStandardSeverity }), threshold);
+  pushIfDue(generatedAlerts, buildEmployeeDateAlert({ id: `lic-${emp.id}`, type: "driving_license", employee: emp, dueDate: emp.license_expiry, today, severityForDays: getStandardSeverity }), threshold);
 };
 
 const vehicleTypeLabelAr = (type: string | null | undefined): string => {
@@ -355,7 +366,8 @@ const pushAbscondedSummaryAlerts = (
       entityId: emp.id,
       entityType: "employee",
       type: "employee_absconded",
-      entityName: `${emp.name} — حالة هروب. العهدة: ${custody}. ${platforms}.`,
+      entityName: emp.name,
+      description: `حالة هروب. العهدة: ${custody}. ${platforms}.`,
       dueDate,
       daysLeft: 0,
       severity: "urgent",
@@ -373,7 +385,8 @@ const pushVehicleExpiryAlerts = (
   if (!vehicles?.length) return;
   for (const v of vehicles) {
     if (v.insurance_expiry && v.insurance_expiry <= threshold) {
-      const days = differenceInDays(parseISO(v.insurance_expiry), today);
+      const days = getDaysLeft(v.insurance_expiry, today);
+      if (days === null) continue;
       out.push({
         id: `ins-${v.id}`,
         sourceKey: `ins-${v.id}`,
@@ -388,7 +401,8 @@ const pushVehicleExpiryAlerts = (
       });
     }
     if (v.authorization_expiry && v.authorization_expiry <= threshold) {
-      const days = differenceInDays(parseISO(v.authorization_expiry), today);
+      const days = getDaysLeft(v.authorization_expiry, today);
+      if (days === null) continue;
       out.push({
         id: `auth-${v.id}`,
         sourceKey: `auth-${v.id}`,
@@ -408,7 +422,8 @@ const pushVehicleExpiryAlerts = (
 const pushPlatformAccountAlerts = (out: Alert[], rows: PlatformAccountAlertRow[], today: Date) => {
   for (const acc of rows) {
     if (!acc.iqama_expiry_date) continue;
-    const days = differenceInDays(parseISO(acc.iqama_expiry_date), today);
+    const days = getDaysLeft(acc.iqama_expiry_date, today);
+    if (days === null) continue;
     const appName = acc.apps?.name ?? "منصة";
     const expiryFormatted = format(parseISO(acc.iqama_expiry_date), "dd/MM/yyyy");
     out.push({
@@ -417,7 +432,8 @@ const pushPlatformAccountAlerts = (out: Alert[], rows: PlatformAccountAlertRow[]
       entityId: acc.id,
       entityType: "platform_account",
       type: "platform_account",
-      entityName: `إقامة الحساب ${acc.account_username} على منصة ${appName} ستنتهي في ${expiryFormatted}، قد يتوقف الحساب.`,
+      entityName: `${acc.account_username} — ${appName}`,
+      description: `تنتهي إقامة الحساب في ${expiryFormatted} وقد يتوقف الحساب.`,
       dueDate: acc.iqama_expiry_date,
       daysLeft: days,
       severity: getStandardSeverity(days),
@@ -428,8 +444,8 @@ const pushPlatformAccountAlerts = (out: Alert[], rows: PlatformAccountAlertRow[]
 
 const pushPersistedDbAlerts = (out: Alert[], rows: PersistedAlertRow[], today: Date) => {
   for (const a of rows) {
-    const dueDate = a.snoozed_until ?? a.due_date ?? format(today, ISO_DATE_FORMAT);
-    const daysLeft = differenceInDays(parseISO(dueDate), today);
+    const dueDate = a.due_date ?? format(today, ISO_DATE_FORMAT);
+    const daysLeft = getDaysLeft(dueDate, today) ?? 0;
     const details = a.details ?? {};
     const detailsEmployeeName = typeof details.employee_name === "string" ? details.employee_name : null;
     const entityName = detailsEmployeeName ?? a.message ?? "—";
@@ -449,13 +465,18 @@ const pushPersistedDbAlerts = (out: Alert[], rows: PersistedAlertRow[], today: D
       resolved: workflowStatus === "resolved" || !!a.is_resolved,
     };
 
-    if (generatedAlert) {
-      Object.assign(generatedAlert, workflowFields, { dueDate, daysLeft });
+    const isLegacySnooze = workflowStatus === "snoozed" && a.snoozed_until === a.due_date;
+    const isSameOccurrence = !a.due_date || a.due_date === generatedAlert?.dueDate || isLegacySnooze;
+
+    if (generatedAlert && isSameOccurrence) {
+      Object.assign(generatedAlert, workflowFields, {
+        estimatedCost: a.estimated_cost ?? generatedAlert.estimatedCost ?? null,
+      });
       continue;
     }
 
     out.push({
-      id: a.source_key ?? a.id,
+      id: generatedAlert ? a.id : (a.source_key ?? a.id),
       sourceKey: a.source_key ?? undefined,
       entityId: a.entity_id ?? null,
       entityType: a.entity_type ?? null,

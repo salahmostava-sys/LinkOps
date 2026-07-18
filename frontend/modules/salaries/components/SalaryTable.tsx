@@ -79,7 +79,6 @@ interface SalaryTableProps {
   editingCell: { rowId: string; platform: string } | null;
   setEditingCell: React.Dispatch<React.SetStateAction<{ rowId: string; platform: string } | null>>;
   setPayslipRow: React.Dispatch<React.SetStateAction<SalaryRow | null>>;
-  persistEmployeeCity: (row: SalaryRow, nextCity: 'makkah' | 'jeddah') => void;
   persistEmployeePaymentMethod: (row: SalaryRow, next: 'bank' | 'cash') => void;
   employeeFieldSaving: string | null;
   openEmployeeDetail: (row: SalaryRow) => void;
@@ -109,7 +108,6 @@ const SalaryRowCells = memo(function SalaryRowCells({
   markAsPaid,
   markingPaid,
   setPayslipRow,
-  persistEmployeeCity,
   persistEmployeePaymentMethod,
   employeeFieldSaving,
   openEmployeeDetail,
@@ -133,7 +131,6 @@ const SalaryRowCells = memo(function SalaryRowCells({
   markAsPaid: SalaryTableProps['markAsPaid'];
   markingPaid: SalaryTableProps['markingPaid'];
   setPayslipRow: SalaryTableProps['setPayslipRow'];
-  persistEmployeeCity: SalaryTableProps['persistEmployeeCity'];
   persistEmployeePaymentMethod: SalaryTableProps['persistEmployeePaymentMethod'];
   employeeFieldSaving: SalaryTableProps['employeeFieldSaving'];
   openEmployeeDetail: SalaryTableProps['openEmployeeDetail'];
@@ -230,24 +227,6 @@ const SalaryRowCells = memo(function SalaryRowCells({
         <EditableCell value={r.transfer} onChange={v => updateRow(r.id, { transfer: Math.max(0, Math.min(v, Math.max(0, c.netSalary))) })} />
       </td>
       <td className={`${tdClass} border-l border-border/20`}>{c.remaining.toLocaleString('en-US')}</td>
-      <td className={`${tdClass} text-center align-middle`}>
-        <Select
-          value={r.cityKey ?? '_none'}
-          onValueChange={(v) => { if (v !== '_none') { persistEmployeeCity(r, v as 'makkah' | 'jeddah'); } }}
-          disabled={employeeFieldSaving === `${r.employeeId}:city`}
-        >
-          <SelectTrigger className="salary-table-select h-8 w-[88px] text-xs font-semibold mx-auto" dir="rtl">
-            {employeeFieldSaving === `${r.employeeId}:city`
-              ? <span className="flex w-full justify-center"><Loader2 className="h-4 w-4 animate-spin" /></span>
-              : <SelectValue placeholder="الفرع" />}
-          </SelectTrigger>
-          <SelectContent dir="rtl">
-            <SelectItem value="_none" className="text-muted-foreground">—</SelectItem>
-            <SelectItem value="makkah">مكة</SelectItem>
-            <SelectItem value="jeddah">جدة</SelectItem>
-          </SelectContent>
-        </Select>
-      </td>
       <td className={`${tdClass} border-l border-border/40 text-center align-middle`}>
         <Select
           value={r.paymentMethod}
@@ -298,7 +277,7 @@ export const SalaryTable = memo(function SalaryTable(props: Readonly<SalaryTable
     appCustomColumns, empPlatformScheme, sortField, sortDir, handleSort,
     updateRow, updatePlatformOrders, approveRow, unapproveRow, approvingRowId,
     markAsPaid, markingPaid, editingCell, setEditingCell, setPayslipRow,
-    persistEmployeeCity, persistEmployeePaymentMethod, employeeFieldSaving,
+    persistEmployeePaymentMethod, employeeFieldSaving,
     openEmployeeDetail,
   } = props;
 
@@ -323,7 +302,6 @@ export const SalaryTable = memo(function SalaryTable(props: Readonly<SalaryTable
   const updateRowRef = useRef(updateRow); updateRowRef.current = updateRow;
   const updatePlatformOrdersRef = useRef(updatePlatformOrders); updatePlatformOrdersRef.current = updatePlatformOrders;
   const openEmployeeDetailRef = useRef(openEmployeeDetail); openEmployeeDetailRef.current = openEmployeeDetail;
-  const persistCityRef = useRef(persistEmployeeCity); persistCityRef.current = persistEmployeeCity;
   const persistPaymentRef = useRef(persistEmployeePaymentMethod); persistPaymentRef.current = persistEmployeePaymentMethod;
   const approveRowRef = useRef(approveRow); approveRowRef.current = approveRow;
   const unapproveRowRef = useRef(unapproveRow); unapproveRowRef.current = unapproveRow;
@@ -334,7 +312,6 @@ export const SalaryTable = memo(function SalaryTable(props: Readonly<SalaryTable
   const stableUpdateRow = useCallback((...args: Parameters<typeof updateRow>) => updateRowRef.current(...args), []);
   const stableUpdatePlatformOrders = useCallback((...args: Parameters<typeof updatePlatformOrders>) => updatePlatformOrdersRef.current(...args), []);
   const stableOpenEmployeeDetail = useCallback((...args: Parameters<typeof openEmployeeDetail>) => openEmployeeDetailRef.current(...args), []);
-  const stablePersistCity = useCallback((...args: Parameters<typeof persistEmployeeCity>) => persistCityRef.current(...args), []);
   const stablePersistPayment = useCallback((...args: Parameters<typeof persistEmployeePaymentMethod>) => persistPaymentRef.current(...args), []);
   const stableApproveRow = useCallback((...args: Parameters<typeof approveRow>) => approveRowRef.current(...args), []);
   const stableUnapproveRow = useCallback((...args: Parameters<typeof unapproveRow>) => unapproveRowRef.current(...args), []);
@@ -481,7 +458,7 @@ export const SalaryTable = memo(function SalaryTable(props: Readonly<SalaryTable
               <th colSpan={dedColCount} className="ta-th border-b border-border/40 border-l">🔻 المستقطعات</th>
               <th colSpan={1} className="ta-th border-b border-border/40 border-l">المستحق</th>
               <th colSpan={2} className="ta-th border-b border-border/40 border-l">معلومات الصرف</th>
-              <th colSpan={2} className="ta-th border-b border-border/40 border-l">الفرع وطريقة الصرف</th>
+              <th colSpan={1} className="ta-th border-b border-border/40 border-l">طريقة الصرف</th>
               <th colSpan={1} className="ta-th border-b border-border/40 border-l">الإجراءات</th>
             </tr>
             <tr style={{ backgroundColor: 'hsl(var(--card))' }}>
@@ -563,9 +540,6 @@ export const SalaryTable = memo(function SalaryTable(props: Readonly<SalaryTable
               <th className={`${thBase} border-l border-border/40 cursor-pointer select-none hover:brightness-95`} onClick={() => handleSort('remaining')}>
                 المتبقي <SalarySortIcon field="remaining" sortField={sortField} sortDir={sortDir} />
               </th>
-              <th className={`${thBase} cursor-pointer hover:text-foreground select-none`} onClick={() => handleSort('city')}>
-                الفرع <SalarySortIcon field="city" sortField={sortField} sortDir={sortDir} />
-              </th>
               <th className={`${thBase} border-l border-border/40 cursor-pointer hover:text-foreground select-none`} onClick={() => handleSort('paymentMethod')}>
                 طريقة الصرف <SalarySortIcon field="paymentMethod" sortField={sortField} sortDir={sortDir} />
               </th>
@@ -615,7 +589,6 @@ export const SalaryTable = memo(function SalaryTable(props: Readonly<SalaryTable
                     markAsPaid={stableMarkAsPaid}
                     markingPaid={markingPaid}
                     setPayslipRow={stableSetPayslipRow}
-                    persistEmployeeCity={stablePersistCity}
                     persistEmployeePaymentMethod={stablePersistPayment}
                     employeeFieldSaving={employeeFieldSaving}
                     openEmployeeDetail={stableOpenEmployeeDetail}

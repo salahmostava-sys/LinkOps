@@ -1,16 +1,30 @@
-import { formatCurrency, formatStandardDateTime } from '@shared/lib/formatters';
+import { formatStandardDateTime } from '@shared/lib/formatters';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Bell, Search, CheckCircle, Clock, ClipboardCopy, Download, ExternalLink, UserRoundCog, X } from 'lucide-react';
+import {
+  Bell,
+  CalendarClock,
+  CheckCircle,
+  CircleDollarSign,
+  ClipboardCopy,
+  Clock,
+  Download,
+  ExternalLink,
+  Search,
+  UserRoundCog,
+  UserRoundX,
+  X,
+} from 'lucide-react';
 import { Input } from '@shared/components/ui/input';
 import { Button } from '@shared/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@shared/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@shared/components/ui/dropdown-menu';
 import { Textarea } from '@shared/components/ui/textarea';
 import { Label } from '@shared/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/components/ui/select';
 import { useToast } from '@shared/hooks/use-toast';
 import { escapeHtml } from '@shared/lib/security';
-import { format } from 'date-fns';
+import { addDays, format } from 'date-fns';
 import { QueryErrorRetry } from '@shared/components/QueryErrorRetry';
 import { loadXlsx } from '@modules/orders/utils/xlsx';
 import { useAlerts } from '@shared/hooks/useAlerts';
@@ -67,7 +81,8 @@ export const alertTypeLabels: Record<string, string> = {
 };
 
 const severityStyles: Record<string, string> = { urgent: 'badge-urgent', warning: 'badge-warning', info: 'badge-info' };
-const severityLabels: Record<string, string> = { urgent: '🔴 عاجل', warning: '🟡 تحذير', info: '🔵 معلومات' };
+const severityLabels: Record<string, string> = { urgent: 'عاجل', warning: 'تحذير', info: 'معلومات' };
+const ALERT_SEVERITY_ORDER: Record<string, number> = { urgent: 0, warning: 1, info: 2 };
 
 const typeIcons: Record<string, string> = {
   residency: '🪪', insurance: '🛡️', authorization: '📋', probation: '⏳',
@@ -78,7 +93,8 @@ const typeIcons: Record<string, string> = {
 function getAlertTypeFilterLabel(type: string): string {
   if (type === 'all') return 'كل الأنواع';
   if (type === 'expired_residency_cost') return 'تكلفة الإقامات المنتهية';
-  return `${typeIcons[type] || '🔔'} ${alertTypeLabels[type] || type}`;
+  if (type === 'missing_residency_cost') return 'إقامات بتكلفة غير محددة';
+  return alertTypeLabels[type] || type;
 }
 
 const workflowLabels = {
@@ -116,6 +132,39 @@ function getAlertCost(alert: Alert): number | null {
   return alert.residencyRenewalCost ?? alert.estimatedCost ?? null;
 }
 
+function formatAlertCost(cost: number): string {
+  return `${cost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ر.س`;
+}
+
+function getAlertDueLabel(daysLeft: number): string {
+  if (daysLeft < 0) return `منتهي منذ ${Math.abs(daysLeft).toLocaleString('en-US')} يوم`;
+  if (daysLeft === 0) return 'مستحق اليوم';
+  if (daysLeft === 1) return 'متبقي يوم واحد';
+  return `متبقي ${daysLeft.toLocaleString('en-US')} يوم`;
+}
+
+function formatAlertDate(dateValue: string): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateValue);
+  return match ? `${match[3]}/${match[2]}/${match[1]}` : dateValue;
+}
+
+function matchesAlertSearch(alert: Alert, search: string): boolean {
+  const query = search.trim().toLocaleLowerCase();
+  if (!query) return true;
+  return [
+    alert.entityName,
+    alert.description,
+    alert.commercialRecordName,
+    alertTypeLabels[alert.type],
+    alert.dueDate,
+  ].some((value) => value?.toLocaleLowerCase().includes(query));
+}
+
+function compareAlerts(a: Alert, b: Alert): number {
+  const severityDifference = (ALERT_SEVERITY_ORDER[a.severity] ?? 3) - (ALERT_SEVERITY_ORDER[b.severity] ?? 3);
+  return severityDifference || a.daysLeft - b.daysLeft || a.entityName.localeCompare(b.entityName, 'ar');
+}
+
 function canOpenAlertEntity(alert: Alert): boolean {
   return Boolean(alert.entityId && (alert.entityType === 'employee' || alert.entityType === 'vehicle'));
 }
@@ -125,25 +174,41 @@ function workflowSummaryLine(alert: Alert): string {
   const details = [
     workflowLabels[getWorkflowStatus(alert)],
     `المسؤول: ${alert.assignedName || 'غير مسند'}`,
-    cost === null ? null : `التكلفة: ${formatCurrency(cost)}`,
+    cost === null ? null : `التكلفة: ${formatAlertCost(cost)}`,
     alert.resolutionNote || null,
   ].filter(Boolean).join(' | ');
   return `- ${alertTypeLabels[alert.type] || alert.type}: ${alert.entityName} | ${details}`;
 }
 
-const ALERT_TYPE_FILTERS = ['all', 'expired_residency_cost', 'vehicle_rental', 'residency', 'insurance', 'authorization', 'probation', 'platform_account'];
+const ALERT_TYPE_FILTERS = [
+  'all',
+  'expired_residency_cost',
+  'missing_residency_cost',
+  'residency',
+  'health_insurance',
+  'driving_license',
+  'probation',
+  'insurance',
+  'authorization',
+  'vehicle_rental',
+  'platform_account',
+  'employee_absconded',
+];
 const ALERT_SEVERITY_FILTERS = ['all', 'urgent', 'warning', 'info'];
 const ALERT_WORKFLOW_FILTERS = ['all', 'open', 'in_progress', 'snoozed'];
+const ALERT_ATTENTION_FILTERS = ['all', 'overdue', 'due_7_days', 'unassigned'];
 const isFilterOption = (options: string[]) =>
   (value: unknown): value is string => typeof value === 'string' && options.includes(value);
 const isAlertTypeFilter = isFilterOption(ALERT_TYPE_FILTERS);
 const isAlertSeverityFilter = isFilterOption(ALERT_SEVERITY_FILTERS);
 const isAlertWorkflowFilter = isFilterOption(ALERT_WORKFLOW_FILTERS);
+const isAlertAttentionFilter = isFilterOption(ALERT_ATTENTION_FILTERS);
 
 const Alerts = () => {
   const [typeFilter, setTypeFilter] = usePersistentState('list:alerts:type:v1', 'all', isAlertTypeFilter);
   const [severityFilter, setSeverityFilter] = usePersistentState('list:alerts:severity:v1', 'all', isAlertSeverityFilter);
   const [workflowFilter, setWorkflowFilter] = usePersistentState('list:alerts:workflow:v1', 'all', isAlertWorkflowFilter);
+  const [attentionFilter, setAttentionFilter] = usePersistentState('list:alerts:attention:v1', 'all', isAlertAttentionFilter);
   const [crFilter, setCrFilter] = usePersistentState('list:alerts:commercial-record:v1', 'all', (value): value is string => typeof value === 'string');
   const [search, setSearch] = usePersistentState('list:alerts:search:v1', '', (value): value is string => typeof value === 'string');
   const [resolveDialog, setResolveDialog] = useState<Alert | null>(null);
@@ -169,11 +234,13 @@ const Alerts = () => {
   const localAlerts = useMemo<Alert[]>(() => alertsQuery.data ?? [], [alertsQuery.data]);
 
   // ── Derived state ─────────────────────────────────────────────────────────
+  const activeAlerts = useMemo(() => localAlerts.filter((alert) => !alert.resolved), [localAlerts]);
+  const resolved = useMemo(() => localAlerts.filter((alert) => alert.resolved), [localAlerts]);
   const commercialRecords = useMemo(() => [...new Set(
-    localAlerts
-      .map(a => { const m = /سجل: (.+?)(?:$| —)/.exec(a.entityName); return m?.[1] ?? null; })
-      .filter(Boolean) as string[]
-  )].sort((a, b) => a.localeCompare(b)), [localAlerts]);
+    activeAlerts
+      .map((alert) => alert.commercialRecordName)
+      .filter((record): record is string => Boolean(record))
+  )].sort((a, b) => a.localeCompare(b, 'ar')), [activeAlerts]);
 
   useEffect(() => {
     if (alertsQuery.data && crFilter !== 'all' && !commercialRecords.includes(crFilter)) {
@@ -181,25 +248,31 @@ const Alerts = () => {
     }
   }, [alertsQuery.data, commercialRecords, crFilter, setCrFilter]);
 
-  const filtered = localAlerts.filter(a => {
+  const filtered = activeAlerts.filter(a => {
     const matchType =
       typeFilter === 'all' ||
       a.type === typeFilter ||
-      (typeFilter === 'expired_residency_cost' && a.type === 'residency' && a.daysLeft < 0 && (a.residencyRenewalCost ?? 0) > 0);
+      (typeFilter === 'expired_residency_cost' && a.type === 'residency' && a.daysLeft < 0 && (a.residencyRenewalCost ?? 0) > 0) ||
+      (typeFilter === 'missing_residency_cost' && a.type === 'residency' && a.residencyRenewalCost === null);
     const matchSeverity = severityFilter === 'all' || a.severity === severityFilter;
     const matchWorkflow = workflowFilter === 'all' || getWorkflowStatus(a) === workflowFilter;
-    const matchSearch = a.entityName.includes(search);
-    const matchCr = crFilter === 'all' || a.entityName.includes(`سجل: ${crFilter}`);
-    return matchType && matchSeverity && matchWorkflow && matchSearch && matchCr && !a.resolved;
+    const matchAttention =
+      attentionFilter === 'all'
+      || (attentionFilter === 'overdue' && a.daysLeft < 0)
+      || (attentionFilter === 'due_7_days' && a.daysLeft >= 0 && a.daysLeft <= 7)
+      || (attentionFilter === 'unassigned' && !a.assignedTo);
+    const matchCr = crFilter === 'all' || a.commercialRecordName === crFilter;
+    return matchType && matchSeverity && matchWorkflow && matchAttention && matchesAlertSearch(a, search) && matchCr;
   });
 
-  const resolved = localAlerts.filter(a => a.resolved);
-  const activeAlertsCount = localAlerts.length - resolved.length;
+  const visibleAlerts = [...filtered].sort(compareAlerts);
+  const activeAlertsCount = activeAlerts.length;
   const hasActiveFilters = Boolean(
     search.trim()
       || typeFilter !== 'all'
       || severityFilter !== 'all'
       || workflowFilter !== 'all'
+      || attentionFilter !== 'all'
       || crFilter !== 'all',
   );
   const resetFilters = () => {
@@ -207,12 +280,19 @@ const Alerts = () => {
     setTypeFilter('all');
     setSeverityFilter('all');
     setWorkflowFilter('all');
+    setAttentionFilter('all');
     setCrFilter('all');
   };
 
-  const urgentCount = filtered.filter(a => a.severity === 'urgent').length;
-  const warningCount = filtered.filter(a => a.severity === 'warning').length;
-  const infoCount = filtered.filter(a => a.severity === 'info').length;
+  const overdueCount = activeAlerts.filter((alert) => alert.daysLeft < 0).length;
+  const dueWithinWeekCount = activeAlerts.filter((alert) => alert.daysLeft >= 0 && alert.daysLeft <= 7).length;
+  const unassignedCount = activeAlerts.filter((alert) => !alert.assignedTo).length;
+  const expiredResidencyCost = activeAlerts
+    .filter((alert) => alert.type === 'residency' && alert.daysLeft < 0)
+    .reduce((total, alert) => total + (alert.residencyRenewalCost ?? 0), 0);
+  const missingResidencyCostCount = activeAlerts
+    .filter((alert) => alert.type === 'residency' && alert.residencyRenewalCost === null)
+    .length;
 
   // ── Handlers ──────────────────────────────────────────────────────────────
   const handleResolve = async () => {
@@ -237,10 +317,12 @@ const Alerts = () => {
 
   const handleDefer = async () => {
     if (!deferDialog) return;
-    const days = Number.parseInt(deferDays) || 7;
-    const newDate = new Date(deferDialog.dueDate);
-    newDate.setDate(newDate.getDate() + days);
-    const dueDate = format(newDate, 'yyyy-MM-dd');
+    const days = Number.parseInt(deferDays, 10);
+    if (!Number.isInteger(days) || days < 1 || days > 365) {
+      toast({ title: 'مدة التأجيل غير صحيحة', description: 'أدخل عدداً من 1 إلى 365 يوماً.', variant: 'destructive' });
+      return;
+    }
+    const dueDate = format(addDays(new Date(), days), 'yyyy-MM-dd');
 
     try {
       await alertsService.saveWorkflow(getWorkflowTarget(deferDialog), {
@@ -291,11 +373,10 @@ const Alerts = () => {
   };
 
   const handlePrint = () => {
-    const severityLabels2: Record<string, string> = { urgent: 'عاجل', warning: 'تحذير', info: 'معلومات' };
-    const rows = filtered.map(a => `<tr><td>${escapeHtml(alertTypeLabels[a.type] || a.type)}</td><td>${escapeHtml(a.entityName)}</td><td>${escapeHtml(a.dueDate || '—')}</td><td style="text-align:center">${escapeHtml(String(a.daysLeft ?? '—'))}</td><td style="text-align:center;font-weight:700;color:${severityColor(a.severity)}">${escapeHtml(severityLabels2[a.severity] || a.severity)}</td></tr>`).join('');
+    const rows = visibleAlerts.map(a => `<tr><td>${escapeHtml(alertTypeLabels[a.type] || a.type)}</td><td>${escapeHtml(a.entityName)}</td><td>${escapeHtml(a.commercialRecordName || '—')}</td><td>${escapeHtml(formatAlertDate(a.dueDate))}</td><td style="text-align:center">${escapeHtml(String(a.daysLeft ?? '—'))}</td><td style="text-align:center;font-weight:700;color:${severityColor(a.severity)}">${escapeHtml(severityLabels[a.severity] || a.severity)}</td></tr>`).join('');
     const printWindow = globalThis.open('', '_blank');
     if (!printWindow) return;
-    const htmlContent = `<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8"/><title>تقرير التنبيهات</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:"Droid Arabic Kufi","Tajawal",Arial,sans-serif;font-size:11px;direction:rtl;color:#061735;background:#fff}h2{text-align:center;margin-bottom:8px;font-size:15px}p.sub{text-align:center;color:#061735;font-size:11px;margin-bottom:12px}table{width:100%;border-collapse:collapse}th{background:#1f54ad;color:#fff;padding:6px 8px;text-align:right;font-size:10px}td{padding:5px 8px;border-bottom:1px solid #e0e0e0;text-align:right}tr:nth-child(even) td{background:#f9f9f9}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body><h2>تقرير التنبيهات التلقائية</h2><p class="sub">المجموع: ${filtered.length} تنبيه — ${formatStandardDateTime()}</p><table><thead><tr><th>النوع</th><th>الكيان</th><th>تاريخ الاستحقاق</th><th>المتبقي (يوم)</th><th>الأولوية</th></tr></thead><tbody>${rows}</tbody></table></body></html>`;
+    const htmlContent = `<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8"/><title>تقرير التنبيهات</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:"Droid Arabic Kufi","Tajawal",Arial,sans-serif;font-size:11px;direction:rtl;color:#061735;background:#fff}h2{text-align:center;margin-bottom:8px;font-size:15px}p.sub{text-align:center;color:#061735;font-size:11px;margin-bottom:12px}table{width:100%;border-collapse:collapse}th{background:#1f54ad;color:#fff;padding:6px 8px;text-align:right;font-size:10px}td{padding:5px 8px;border-bottom:1px solid #e0e0e0;text-align:right}tr:nth-child(even) td{background:#f9f9f9}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body><h2>تقرير التنبيهات التلقائية</h2><p class="sub">المجموع: ${visibleAlerts.length} تنبيه — ${formatStandardDateTime(new Date())}</p><table><thead><tr><th>النوع</th><th>الكيان</th><th>السجل التجاري</th><th>تاريخ الاستحقاق</th><th>المتبقي (يوم)</th><th>الأولوية</th></tr></thead><tbody>${rows}</tbody></table></body></html>`;
     printWindow.document.body.innerHTML = htmlContent;
     printWindow.focus();
     // Use setTimeout to ensure content is loaded before printing
@@ -306,21 +387,18 @@ const Alerts = () => {
 
   const handleExport = async () => {
     const XLSX = await loadXlsx();
-    const severityOrder: Record<string, number> = { urgent: 0, warning: 1, info: 2 };
-    const rows = [...localAlerts]
-      .filter(a => !a.resolved)
-      .sort((a, b) => (severityOrder[a.severity] ?? 3) - (severityOrder[b.severity] ?? 3))
-      .map(a => ({
+    const rows = visibleAlerts.map(a => ({
         'الأولوية': severityLabels[a.severity] || a.severity,
         'النوع': alertTypeLabels[a.type] || a.type,
         'الكيان': a.entityName,
+        'السجل التجاري': a.commercialRecordName ?? '',
         'تاريخ الاستحقاق': a.dueDate,
         'المتبقي (يوم)': a.daysLeft,
         'حالة المتابعة': workflowLabels[getWorkflowStatus(a)],
         'المسؤول': a.assignedName || 'غير مسند',
         'التكلفة المتوقعة': getAlertCost(a) ?? '',
         'ملاحظة المتابعة': a.resolutionNote ?? '',
-      }));
+    }));
     const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'التنبيهات');
@@ -342,17 +420,15 @@ const Alerts = () => {
 
   const handleDownloadTemplate = async () => {
     const XLSX = await loadXlsx();
-    const severityOrder: Record<string, number> = { urgent: 0, warning: 1, info: 2 };
-    const rows = [...filtered]
-      .sort((a, b) => (severityOrder[a.severity] ?? 3) - (severityOrder[b.severity] ?? 3))
-      .map((alert) => [
+    const rows = visibleAlerts.map((alert) => [
         alertTypeLabels[alert.type] || alert.type,
         alert.entityName,
+        alert.commercialRecordName ?? '',
         alert.dueDate,
         alert.daysLeft,
         severityLabels[alert.severity] || alert.severity,
-      ]);
-    const headers = ['النوع', 'الكيان', 'تاريخ الاستحقاق', 'المتبقي (يوم)', 'الأولوية'];
+    ]);
+    const headers = ['النوع', 'الكيان', 'السجل التجاري', 'تاريخ الاستحقاق', 'المتبقي (يوم)', 'الأولوية'];
     const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'قالب');
@@ -364,19 +440,21 @@ const Alerts = () => {
   let alertsContent = null;
   if (alertsQuery.isLoading) {
     alertsContent = (
-      <div className="bg-card border border-border/50 p-12 text-center rounded-2xl">
-        <p className="text-muted-foreground">جارٍ تحميل التنبيهات...</p>
+      <div className="space-y-2" aria-label="جارٍ تحميل التنبيهات">
+        {[1, 2, 3].map((row) => (
+          <div key={row} className="h-28 animate-pulse rounded-lg border border-border/50 bg-muted/40" />
+        ))}
       </div>
     );
   } else if (filtered.length === 0) {
     alertsContent = (
-      <div className="bg-card border border-border/50 p-12 text-center rounded-2xl">
+      <div className="bg-card border border-border/50 p-12 text-center rounded-lg">
         <CheckCircle size={40} className="mx-auto text-success mb-3" />
-        <p className="text-muted-foreground">
+        <p className="font-semibold text-foreground">
           {hasActiveFilters ? 'لا توجد نتائج مطابقة' : 'لا توجد تنبيهات مفعّلة'}
         </p>
-        <p className="text-xs text-muted-foreground mt-1">
-          {hasActiveFilters ? 'غيّر الفلاتر أو امسحها لعرض التنبيهات' : 'جميع المستندات سارية المفعول ✅.'}
+        <p className="text-sm text-muted-foreground mt-1">
+          {hasActiveFilters ? 'غيّر الفلاتر أو امسحها لعرض التنبيهات.' : 'لا توجد استحقاقات تحتاج متابعة حالياً.'}
         </p>
         {hasActiveFilters && (
           <Button type="button" variant="outline" size="sm" className="mt-3" onClick={resetFilters}>
@@ -386,61 +464,93 @@ const Alerts = () => {
       </div>
     );
   } else {
-    alertsContent = [...filtered].sort((a, b) => {
-      const order: Record<string, number> = { urgent: 0, warning: 1, info: 2 };
-      return (order[a.severity] ?? 3) - (order[b.severity] ?? 3);
-    }).map(a => {
+    alertsContent = visibleAlerts.map(a => {
       const workflowStatus = getWorkflowStatus(a);
       const alertCost = getAlertCost(a);
       return (
-      <div key={a.id} className={`bg-card rounded-lg border shadow-card p-4 flex flex-col gap-4 transition-shadow hover:shadow-card-hover sm:flex-row sm:items-center ${severityBorderClass(a.severity)}`}>
-        <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-xl flex-shrink-0 ${severityBgClass(a.severity)}`}>
-          {typeIcons[a.type] || '🔔'}
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <p className="text-sm font-semibold text-foreground">{alertTypeLabels[a.type] || a.type}</p>
-            <span className="text-muted-foreground text-xs">—</span>
-            <p className="text-sm text-foreground">{a.entityName}</p>
-            <span className={severityStyles[a.severity]}>{severityLabels[a.severity]}</span>
-            <span className={`rounded-md px-2 py-0.5 text-xs font-semibold ${workflowStyles[workflowStatus]}`}>
-              {workflowLabels[workflowStatus]}
-            </span>
+      <article key={a.id} className={`bg-card rounded-lg border shadow-card p-4 transition-shadow hover:shadow-card-hover ${severityBorderClass(a.severity)}`}>
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
+          <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg flex-shrink-0 ${severityBgClass(a.severity)}`} aria-hidden="true">
+            {typeIcons[a.type] || '🔔'}
           </div>
-          <p className="text-xs text-muted-foreground mt-1">
-            تاريخ الاستحقاق: <span className="font-medium">{a.dueDate}</span>
-            <span className={`mr-3 font-bold ${daysLeftClass(a.daysLeft)}`}>
-              {a.daysLeft < 0 ? `منتهي منذ ${Math.abs(a.daysLeft)} يوم` : `متبقي ${a.daysLeft} يوم`}
-            </span>
-          </p>
-          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-            <span>المسؤول: <strong className="text-foreground">{a.assignedName || 'غير مسند'}</strong></span>
-            {alertCost !== null && (
-              <span>التكلفة: <strong className="text-foreground">{formatCurrency(alertCost)}</strong></span>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-semibold text-muted-foreground">{alertTypeLabels[a.type] || a.type}</span>
+              <span className={severityStyles[a.severity]}>{severityLabels[a.severity]}</span>
+              <span className={`rounded-md px-2 py-0.5 text-xs font-semibold ${workflowStyles[workflowStatus]}`}>
+                {workflowLabels[workflowStatus]}
+              </span>
+            </div>
+            <h2 className="mt-1 text-base font-bold text-foreground">{a.entityName}</h2>
+            {a.description && <p className="mt-1 text-sm text-foreground">{a.description}</p>}
+
+            <dl className="mt-3 grid grid-cols-2 gap-x-6 gap-y-2 text-xs sm:grid-cols-3 xl:grid-cols-6">
+              <div>
+                <dt className="text-muted-foreground">تاريخ الاستحقاق</dt>
+                <dd className="mt-0.5 font-semibold tabular-nums text-foreground">{formatAlertDate(a.dueDate)}</dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground">الحالة الزمنية</dt>
+                <dd className={`mt-0.5 font-bold tabular-nums ${daysLeftClass(a.daysLeft)}`}>{getAlertDueLabel(a.daysLeft)}</dd>
+              </div>
+              {a.commercialRecordName && (
+                <div>
+                  <dt className="text-muted-foreground">السجل التجاري</dt>
+                  <dd className="mt-0.5 font-semibold text-foreground">{a.commercialRecordName}</dd>
+                </div>
+              )}
+              {a.renewalDurationLabel && (
+                <div>
+                  <dt className="text-muted-foreground">مدة التجديد المطلوبة</dt>
+                  <dd className="mt-0.5 font-semibold text-foreground">{a.renewalDurationLabel}</dd>
+                </div>
+              )}
+              {alertCost !== null && (
+                <div>
+                  <dt className="text-muted-foreground">التكلفة المتوقعة</dt>
+                  <dd className="mt-0.5 font-bold tabular-nums text-foreground">{formatAlertCost(alertCost)}</dd>
+                </div>
+              )}
+              {a.type === 'residency' && alertCost === null && (
+                <div>
+                  <dt className="text-muted-foreground">التكلفة المتوقعة</dt>
+                  <dd className="mt-0.5 font-bold text-warning">غير محددة في السجل التجاري</dd>
+                </div>
+              )}
+              <div>
+                <dt className="text-muted-foreground">المسؤول</dt>
+                <dd className="mt-0.5 font-semibold text-foreground">{a.assignedName || 'غير مسند'}</dd>
+              </div>
+              {a.snoozedUntil && (
+                <div>
+                  <dt className="text-muted-foreground">مؤجل حتى</dt>
+                  <dd className="mt-0.5 font-semibold tabular-nums text-foreground">{formatAlertDate(a.snoozedUntil)}</dd>
+                </div>
+              )}
+            </dl>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 lg:flex-shrink-0">
+            {canOpenAlertEntity(a) && (
+              <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => openAlertEntity(a)} title="فتح السجل المرتبط" aria-label="فتح السجل المرتبط">
+                <ExternalLink size={14} />
+              </Button>
+            )}
+            {permissions.can_edit && (
+              <>
+                <Button size="sm" variant="outline" className="gap-1 text-xs h-8" onClick={() => setWorkflowDialog(a)}>
+                  <UserRoundCog size={12} /> إدارة
+                </Button>
+                <Button size="sm" variant="outline" className="gap-1 text-xs h-8" onClick={() => setDeferDialog(a)}>
+                  <Clock size={12} /> تأجيل
+                </Button>
+                <Button size="sm" className="gap-1 text-xs h-8 bg-success hover:bg-success/90" onClick={() => setResolveDialog(a)}>
+                  <CheckCircle size={12} /> حسم
+                </Button>
+              </>
             )}
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2 sm:flex-shrink-0">
-          {canOpenAlertEntity(a) && (
-            <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => openAlertEntity(a)} title="فتح السجل المرتبط">
-              <ExternalLink size={14} />
-            </Button>
-          )}
-          {permissions.can_edit && (
-            <>
-              <Button size="sm" variant="outline" className="gap-1 text-xs h-8" onClick={() => setWorkflowDialog(a)}>
-                <UserRoundCog size={12} /> إدارة
-              </Button>
-              <Button size="sm" variant="outline" className="gap-1 text-xs h-8" onClick={() => setDeferDialog(a)}>
-                <Clock size={12} /> تأجيل
-              </Button>
-              <Button size="sm" className="gap-1 text-xs h-8 bg-success hover:bg-success/90" onClick={() => setResolveDialog(a)}>
-                <CheckCircle size={12} /> حسم
-              </Button>
-            </>
-          )}
-        </div>
-      </div>
+      </article>
       );
     });
   }
@@ -457,7 +567,9 @@ const Alerts = () => {
           <div>
             <h1 className="page-title flex items-center gap-2"><Bell size={20} /> التنبيهات التلقائية</h1>
             <p className="page-subtitle">
-              {alertsQuery.isLoading ? 'جارٍ التحميل...' : `${filtered.length} تنبيه نشط — ${urgentCount} عاجل`}
+              {alertsQuery.isLoading
+                ? 'جارٍ التحميل...'
+                : `${activeAlertsCount.toLocaleString('en-US')} تنبيه نشط — ${overdueCount.toLocaleString('en-US')} متأخر`}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -495,97 +607,120 @@ const Alerts = () => {
         />
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+      <section className="grid grid-cols-2 gap-3 lg:grid-cols-5" aria-label="ملخص التنبيهات">
         <button type="button"
-          className="stat-card text-start w-full border-r-4 border-r-destructive cursor-pointer hover:shadow-card-hover transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 rounded-2xl"
-          onClick={() => setSeverityFilter(severityFilter === 'urgent' ? 'all' : 'urgent')}
+          className="stat-card text-start w-full border-r-4 border-r-primary cursor-pointer hover:shadow-card-hover transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+          onClick={() => setAttentionFilter('all')}
+          aria-pressed={attentionFilter === 'all'}
         >
-          <p className="text-sm text-muted-foreground">عاجل</p>
-          <p className="text-3xl font-bold text-destructive mt-1">{urgentCount}</p>
-          <p className="text-xs text-muted-foreground mt-1">يتطلب تدخل فوري</p>
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-sm font-semibold text-foreground">التنبيهات النشطة</p>
+            <Bell size={17} className="text-primary" />
+          </div>
+          <p className="mt-2 text-2xl font-bold tabular-nums text-foreground">{activeAlertsCount.toLocaleString('en-US')}</p>
+          <p className="mt-1 text-xs text-muted-foreground">كل الاستحقاقات المفتوحة</p>
         </button>
         <button type="button"
-          className="stat-card text-start w-full border-r-4 border-r-warning cursor-pointer hover:shadow-card-hover transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 rounded-2xl"
-          onClick={() => setSeverityFilter(severityFilter === 'warning' ? 'all' : 'warning')}
+          className="stat-card text-start w-full border-r-4 border-r-destructive cursor-pointer hover:shadow-card-hover transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+          onClick={() => setAttentionFilter(attentionFilter === 'overdue' ? 'all' : 'overdue')}
+          aria-pressed={attentionFilter === 'overdue'}
         >
-          <p className="text-sm text-muted-foreground">تحذير</p>
-          <p className="text-3xl font-bold text-warning mt-1">{warningCount}</p>
-          <p className="text-xs text-muted-foreground mt-1">خلال 30-60 يوم</p>
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-sm font-semibold text-foreground">متأخرة</p>
+            <CalendarClock size={17} className="text-destructive" />
+          </div>
+          <p className="mt-2 text-2xl font-bold tabular-nums text-destructive">{overdueCount.toLocaleString('en-US')}</p>
+          <p className="mt-1 text-xs text-muted-foreground">تجاوزت تاريخ الاستحقاق</p>
         </button>
         <button type="button"
-          className="stat-card text-start w-full border-r-4 border-r-info cursor-pointer hover:shadow-card-hover transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 rounded-2xl"
-          onClick={() => setSeverityFilter(severityFilter === 'info' ? 'all' : 'info')}
+          className="stat-card text-start w-full border-r-4 border-r-warning cursor-pointer hover:shadow-card-hover transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+          onClick={() => setAttentionFilter(attentionFilter === 'due_7_days' ? 'all' : 'due_7_days')}
+          aria-pressed={attentionFilter === 'due_7_days'}
         >
-          <p className="text-sm text-muted-foreground">معلومات</p>
-          <p className="text-3xl font-bold text-info mt-1">{infoCount}</p>
-          <p className="text-xs text-muted-foreground mt-1">للعلم</p>
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-sm font-semibold text-foreground">خلال 7 أيام</p>
+            <Clock size={17} className="text-warning" />
+          </div>
+          <p className="mt-2 text-2xl font-bold tabular-nums text-warning">{dueWithinWeekCount.toLocaleString('en-US')}</p>
+          <p className="mt-1 text-xs text-muted-foreground">تشمل المستحق اليوم</p>
         </button>
-        <div className="stat-card border-r-4 border-r-success rounded-2xl">
-          <p className="text-sm text-muted-foreground">تم حسمها</p>
-          <p className="text-3xl font-bold text-success mt-1">{resolved.length}</p>
-          <p className="text-xs text-muted-foreground mt-1">تنبيهات محسومة</p>
-        </div>
-      </div>
+        <button type="button"
+          className="stat-card text-start w-full border-r-4 border-r-muted-foreground cursor-pointer hover:shadow-card-hover transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+          onClick={() => setAttentionFilter(attentionFilter === 'unassigned' ? 'all' : 'unassigned')}
+          aria-pressed={attentionFilter === 'unassigned'}
+        >
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-sm font-semibold text-foreground">غير مسندة</p>
+            <UserRoundX size={17} className="text-muted-foreground" />
+          </div>
+          <p className="mt-2 text-2xl font-bold tabular-nums text-foreground">{unassignedCount.toLocaleString('en-US')}</p>
+          <p className="mt-1 text-xs text-muted-foreground">تحتاج تحديد مسؤول</p>
+        </button>
+        <button type="button"
+          className="stat-card col-span-2 text-start w-full border-r-4 border-r-success cursor-pointer hover:shadow-card-hover transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 lg:col-span-1"
+          onClick={() => setTypeFilter(typeFilter === 'expired_residency_cost' ? 'all' : 'expired_residency_cost')}
+          aria-pressed={typeFilter === 'expired_residency_cost'}
+        >
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-sm font-semibold text-foreground">تكلفة الإقامات المنتهية</p>
+            <CircleDollarSign size={17} className="text-success" />
+          </div>
+          <p className="mt-2 text-xl font-bold tabular-nums text-success">{formatAlertCost(expiredResidencyCost)}</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            حسب السجل والدورية · {missingResidencyCostCount.toLocaleString('en-US')} بدون تكلفة محددة
+          </p>
+        </button>
+      </section>
 
-      <div className="bg-card border border-border/50 p-3 space-y-2 rounded-2xl">
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className="relative flex-1 max-w-sm">
+      <section className="bg-card border border-border/50 p-3 space-y-3 rounded-lg" aria-label="فلاتر التنبيهات">
+        <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-7">
+          <div className="relative sm:col-span-2 xl:col-span-2">
             <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="بحث بالاسم..." className="pr-9" value={search} onChange={e => setSearch(e.target.value)} />
+            <Input placeholder="بحث بالاسم أو السجل أو التاريخ..." className="pr-9" value={search} onChange={e => setSearch(e.target.value)} />
           </div>
-          <div className="flex gap-2 flex-wrap">
-            {[{ v: 'all', l: 'الكل' }, { v: 'urgent', l: '🔴 عاجل' }, { v: 'warning', l: '🟡 تحذير' }, { v: 'info', l: '🔵 معلومات' }].map(s => (
-              <button type="button" key={s.v} onClick={() => setSeverityFilter(s.v)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${severityFilter === s.v ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-accent'}`}>
-                {s.l}
-              </button>
-            ))}
-          </div>
+          <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <SelectTrigger aria-label="نوع التنبيه"><SelectValue placeholder="نوع التنبيه" /></SelectTrigger>
+            <SelectContent>
+              {typeOptions.map((type) => <SelectItem key={type} value={type}>{getAlertTypeFilterLabel(type)}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Select value={severityFilter} onValueChange={setSeverityFilter}>
+            <SelectTrigger aria-label="الأولوية"><SelectValue placeholder="الأولوية" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">كل الأولويات</SelectItem>
+              <SelectItem value="urgent">عاجل</SelectItem>
+              <SelectItem value="warning">تحذير</SelectItem>
+              <SelectItem value="info">معلومات</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={workflowFilter} onValueChange={setWorkflowFilter}>
+            <SelectTrigger aria-label="حالة المتابعة"><SelectValue placeholder="حالة المتابعة" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">كل حالات المتابعة</SelectItem>
+              <SelectItem value="open">مفتوح</SelectItem>
+              <SelectItem value="in_progress">قيد التنفيذ</SelectItem>
+              <SelectItem value="snoozed">مؤجل</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={attentionFilter} onValueChange={setAttentionFilter}>
+            <SelectTrigger aria-label="حالة الاستحقاق"><SelectValue placeholder="حالة الاستحقاق" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">كل الاستحقاقات</SelectItem>
+              <SelectItem value="overdue">متأخرة</SelectItem>
+              <SelectItem value="due_7_days">خلال 7 أيام</SelectItem>
+              <SelectItem value="unassigned">غير مسندة</SelectItem>
+            </SelectContent>
+          </Select>
+          {commercialRecords.length > 0 && (
+            <Select value={crFilter} onValueChange={setCrFilter}>
+              <SelectTrigger aria-label="السجل التجاري"><SelectValue placeholder="السجل التجاري" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">كل السجلات التجارية</SelectItem>
+                {commercialRecords.map((record) => <SelectItem key={record} value={record}>{record}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          )}
         </div>
-        <div className="flex gap-2 flex-wrap">
-          {typeOptions.map(t => {
-            const label = getAlertTypeFilterLabel(t);
-            return (
-              <button type="button" key={t} onClick={() => setTypeFilter(t)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${typeFilter === t ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-accent'}`}>
-                {label}
-              </button>
-            );
-          })}
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-semibold text-muted-foreground">حالة المتابعة:</span>
-          {[
-            { value: 'all', label: 'كل الحالات' },
-            { value: 'open', label: 'مفتوح' },
-            { value: 'in_progress', label: 'قيد التنفيذ' },
-            { value: 'snoozed', label: 'مؤجل' },
-          ].map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              onClick={() => setWorkflowFilter(option.value)}
-              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${workflowFilter === option.value ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-accent'}`}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
-        {commercialRecords.length > 0 && (
-          <div className="flex gap-2 flex-wrap items-center">
-            <span className="text-xs text-muted-foreground font-semibold">السجل التجاري:</span>
-            <button type="button" onClick={() => setCrFilter('all')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${crFilter === 'all' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-accent'}`}>
-              الكل
-            </button>
-            {commercialRecords.map(cr => (
-              <button type="button" key={cr} onClick={() => setCrFilter(cr)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${crFilter === cr ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-accent'}`}>
-                📋 {cr}
-              </button>
-            ))}
-          </div>
-        )}
         <div className="flex items-center justify-between gap-3 border-t border-border/40 pt-2">
           <span className="text-xs font-medium text-foreground">
             {filtered.length.toLocaleString('en-US')} من {activeAlertsCount.toLocaleString('en-US')} تنبيه نشط
@@ -596,27 +731,34 @@ const Alerts = () => {
             </Button>
           )}
         </div>
-      </div>
+      </section>
 
       <div className="space-y-3">
         {alertsContent}
       </div>
 
       {resolved.length > 0 && (
-        <div>
-          <h3 className="text-sm font-semibold text-muted-foreground mb-3">✅ التنبيهات المحسومة ({resolved.length})</h3>
-          <div className="space-y-2">
-            {resolved.map(a => (
-              <div key={a.id} className="bg-muted/30 rounded-xl border border-border/30 p-3 flex items-center gap-3 opacity-60">
-                <span className="text-lg">{typeIcons[a.type] || '🔔'}</span>
-                <div className="flex-1">
-                  <p className="text-sm text-muted-foreground">{alertTypeLabels[a.type] || a.type} — {a.entityName}</p>
+        <details className="rounded-lg border border-border/50 bg-card">
+          <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-3 text-sm font-semibold text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50">
+            <CheckCircle size={16} className="text-success" />
+            التنبيهات المحسومة
+            <span className="tabular-nums text-muted-foreground">({resolved.length.toLocaleString('en-US')})</span>
+          </summary>
+          <div className="max-h-96 divide-y divide-border/40 overflow-y-auto border-t border-border/40">
+            {[...resolved].sort(compareAlerts).map((alert) => (
+              <div key={alert.id} className="flex items-center gap-3 px-4 py-3">
+                <span className="text-base" aria-hidden="true">{typeIcons[alert.type] || '🔔'}</span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-foreground">{alert.entityName}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {alertTypeLabels[alert.type] || alert.type} · {formatAlertDate(alert.dueDate)}
+                  </p>
                 </div>
-                <CheckCircle size={16} className="text-success" />
+                <span className="text-xs font-semibold text-success">محسوم</span>
               </div>
             ))}
           </div>
-        </div>
+        </details>
       )}
 
       <Dialog open={!!resolveDialog} onOpenChange={(open) => !open && setResolveDialog(null)}>

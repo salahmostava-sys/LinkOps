@@ -65,7 +65,6 @@ export const MonthSummaryTab = React.memo(() => {
             employeesCount={m.employees.length}
             data={m.data}
             dayArr={m.dayArr}
-            days={m.days}
             empTotal={m.empTotal}
             appGrandTotal={m.appGrandTotal}
             grandTotal={m.grandTotal}

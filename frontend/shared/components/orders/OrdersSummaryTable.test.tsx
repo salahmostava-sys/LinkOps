@@ -28,7 +28,6 @@ describe('OrdersSummaryTable', () => {
         employeesCount={1}
         data={{ 'emp-1::app-1::1': 12 }}
         dayArr={[1]}
-        days={30}
         empTotal={() => 12}
         appGrandTotal={() => 12}
         grandTotal={12}
@@ -56,7 +55,6 @@ describe('OrdersSummaryTable', () => {
         employeesCount={0}
         data={{}}
         dayArr={[1]}
-        days={30}
         empTotal={() => 0}
         appGrandTotal={() => 0}
         grandTotal={0}
@@ -68,5 +66,40 @@ describe('OrdersSummaryTable', () => {
     );
 
     expect(container.querySelectorAll('.animate-pulse').length).toBeGreaterThan(0);
+  });
+
+  it('calculates the daily average from days with orders and counts a multi-platform day once', () => {
+    render(
+      <OrdersSummaryTable
+        loading={false}
+        apps={[
+          { id: 'app-1', name: 'Keeta' },
+          { id: 'app-2', name: 'HungerStation' },
+        ]}
+        appColorsList={[]}
+        sortedEmployees={[{ id: 'emp-1', name: 'Ahmed Ali' }]}
+        employeesCount={1}
+        data={{
+          'emp-1::app-1::1': 10,
+          'emp-1::app-2::1': 5,
+          'emp-1::app-1::2': 0,
+          'emp-1::app-2::3': 15,
+        }}
+        dayArr={[1, 2, 3]}
+        empTotal={() => 30}
+        appGrandTotal={(appId) => appId === 'app-1' ? 10 : 20}
+        grandTotal={30}
+        shortName={(value) => value}
+        sortField="name"
+        sortDir="asc"
+        onSort={vi.fn()}
+      />
+    );
+
+    const averageHeader = screen.getByText('متوسط يومي');
+    const averageColumnIndex = (averageHeader.closest('th')?.cellIndex ?? 1) + 1;
+    const employeeRow = screen.getByText('Ahmed Ali').closest('tr');
+    expect(employeeRow?.querySelector(`td:nth-child(${averageColumnIndex})`)).toHaveTextContent('15');
+    expect(employeeRow).toHaveTextContent('متوسط');
   });
 });

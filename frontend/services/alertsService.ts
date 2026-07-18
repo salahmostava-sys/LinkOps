@@ -218,7 +218,7 @@ export const alertsService = {
       assigned_to: workflow.assignedTo,
       estimated_cost: workflow.estimatedCost,
       resolution_note: workflow.resolutionNote,
-      due_date: workflow.dueDate,
+      due_date: target.dueDate,
       snoozed_until: workflow.status === "snoozed" ? workflow.dueDate : null,
       is_resolved: isResolved,
       resolved_by: isResolved ? workflow.actorId : null,

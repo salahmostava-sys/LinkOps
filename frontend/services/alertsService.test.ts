@@ -103,4 +103,40 @@ describe('alertsService', () => {
       );
     });
   });
+
+  it('keeps the original due date when snoozing a workflow', async () => {
+    const upsertMock = vi.fn().mockReturnValue({
+      select: () => ({
+        maybeSingle: () => Promise.resolve({ data: { id: 'workflow-1' }, error: null }),
+      }),
+    });
+    fromMock.mockReturnValueOnce({ upsert: upsertMock } as ReturnType<typeof createQueryBuilder>);
+
+    await alertsService.saveWorkflow(
+      {
+        sourceKey: 'res-employee-1',
+        type: 'residency',
+        entityId: 'employee-1',
+        entityType: 'employee',
+        message: 'إقامة موظف',
+        dueDate: '2026-07-10',
+      },
+      {
+        status: 'snoozed',
+        assignedTo: null,
+        estimatedCost: 2_400,
+        resolutionNote: null,
+        dueDate: '2026-07-25',
+        actorId: 'user-1',
+      },
+    );
+
+    expect(upsertMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        due_date: '2026-07-10',
+        snoozed_until: '2026-07-25',
+      }),
+      { onConflict: 'source_key' },
+    );
+  });
 });

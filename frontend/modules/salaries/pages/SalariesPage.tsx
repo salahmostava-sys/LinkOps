@@ -425,7 +425,6 @@ const Salaries = () => {
           editingCell={editingCell}
           setEditingCell={setEditingCell}
           setPayslipRow={setPayslipRow}
-          persistEmployeeCity={actions.persistEmployeeCity}
           persistEmployeePaymentMethod={actions.persistEmployeePaymentMethod}
           employeeFieldSaving={employeeFieldSaving}
           openEmployeeDetail={actions.openEmployeeDetail}
