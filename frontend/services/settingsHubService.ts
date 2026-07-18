@@ -21,6 +21,14 @@ const EXPORT_TABLE_ALLOWLIST = new Set([
   'system_settings',
 ]);
 
+function getSafeAvatarPublicUrl(path: string, operation: string) {
+  const safePath = sanitizeStoragePath(path);
+  if (!safePath) {
+    throw toServiceError(new Error('Invalid storage path'), operation);
+  }
+  return supabase.storage.from('avatars').getPublicUrl(safePath);
+}
+
 /** Max rows per settings backup export (paginated). */
 const EXPORT_MAX_ROWS = 10_000;
 const EXPORT_PAGE_SIZE = 1_000;
@@ -192,7 +200,7 @@ export const settingsHubService = {
     if (!data) throw toServiceError(new Error('Upload returned no data'), 'settingsHubService.uploadAvatar');
     return data;
   },
-  getAvatarPublicUrl: (path: string) => supabase.storage.from('avatars').getPublicUrl(path),
+  getAvatarPublicUrl: (path: string) => getSafeAvatarPublicUrl(path, 'settingsHubService.getAvatarPublicUrl.path'),
   updateProfileByUserId: async (userId: string, payload: Record<string, unknown>) => {
     const { error } = await supabase.from('profiles').update(payload as never).eq('id', userId);
     if (error) throw toServiceError(error, 'settingsHubService.updateProfileByUserId');
@@ -226,7 +234,7 @@ export const settingsHubService = {
     if (!data) throw toServiceError(new Error('Upload returned no data'), 'settingsHubService.uploadCompanyLogo');
     return data;
   },
-  getCompanyLogoPublicUrl: (path: string) => supabase.storage.from('avatars').getPublicUrl(path),
+  getCompanyLogoPublicUrl: (path: string) => getSafeAvatarPublicUrl(path, 'settingsHubService.getCompanyLogoPublicUrl.path'),
   getSystemSettings: async () => {
     const { data, error } = await supabase
       .from('system_settings')

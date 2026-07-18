@@ -98,6 +98,13 @@ export type EmployeeSummary = {
   latestDisbursementDate: string;
 };
 
+export type AdvanceSortField =
+  | 'employeeName'
+  | 'nationalId'
+  | 'totalDebt'
+  | 'totalPaid'
+  | 'remaining';
+
 export const calcPaid = (installments: Installment[]) =>
   installments.filter(i => i.status === 'deducted').reduce((s, i) => s + i.amount, 0);
 export const calcPending = (installments: Installment[]) =>

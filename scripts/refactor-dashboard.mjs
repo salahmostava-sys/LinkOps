@@ -1,6 +1,9 @@
 import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const filePath = String.raw`d:\MuhimmatAltawseel\frontend\modules\ai-dashboard\components\AIDashboard.tsx`;
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const filePath = path.join(repoRoot, 'frontend', 'modules', 'ai-dashboard', 'components', 'AIDashboard.tsx');
 let content = fs.readFileSync(filePath, 'utf-8');
 
 // 1. Move helpers out

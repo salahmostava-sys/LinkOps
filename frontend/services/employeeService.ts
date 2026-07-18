@@ -251,8 +251,10 @@ export const employeeService = {
 
     const filePath = employee[docType];
     if (filePath) {
-      // Remove from avatars bucket
-      await supabase.storage.from('avatars').remove([filePath]);
+      const safePath = sanitizeStoragePath(filePath);
+      if (safePath) {
+        await supabase.storage.from('avatars').remove([safePath]);
+      }
     }
 
     // Nullify in the database

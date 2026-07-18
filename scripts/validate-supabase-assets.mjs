@@ -3,7 +3,9 @@
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
-import { pathToFileURL } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+
+const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 function assert(condition, message) {
   if (!condition) {
@@ -11,8 +13,17 @@ function assert(condition, message) {
   }
 }
 
-function readText(repoRoot, relativePath) {
-  const absolutePath = path.join(repoRoot, relativePath);
+function resolveRepoPath(relativePath) {
+  const absolutePath = path.resolve(REPO_ROOT, relativePath);
+  assert(
+    absolutePath === REPO_ROOT || absolutePath.startsWith(`${REPO_ROOT}${path.sep}`),
+    `Path escapes repository root: ${relativePath}`,
+  );
+  return absolutePath;
+}
+
+function readText(relativePath) {
+  const absolutePath = resolveRepoPath(relativePath);
   assert(existsSync(absolutePath), `Missing required Supabase asset: ${relativePath}`);
   const content = readFileSync(absolutePath, 'utf8');
   assert(content.trim().length > 0, `Supabase asset is empty: ${relativePath}`);
@@ -28,12 +39,12 @@ function assertMigrationToken(migrationFiles, token) {
   assert(matches.length > 0, `Missing Supabase migration containing token: ${token}`);
 }
 
-export function validateSupabaseAssets(repoRoot = process.cwd()) {
-  const configText = readText(repoRoot, 'supabase/config.toml');
+export function validateSupabaseAssets() {
+  const configText = readText('supabase/config.toml');
   assertContains('supabase/config.toml', configText, 'project_id');
 
 
-  const tenantRlsText = readText(repoRoot, 'supabase/oneoff/tenant_rls_smoke_tests.sql');
+  const tenantRlsText = readText('supabase/oneoff/tenant_rls_smoke_tests.sql');
   for (const snippet of [
     'SECTION A',
     'SECTION B',
@@ -48,7 +59,7 @@ export function validateSupabaseAssets(repoRoot = process.cwd()) {
     assertContains('supabase/oneoff/tenant_rls_smoke_tests.sql', tenantRlsText, snippet);
   }
 
-  const phaseValidationText = readText(repoRoot, 'supabase/oneoff/phase_1_5_validation_checks.sql');
+  const phaseValidationText = readText('supabase/oneoff/phase_1_5_validation_checks.sql');
   for (const snippet of [
     'MISSING_RLS',
     'has_permission',
@@ -59,7 +70,7 @@ export function validateSupabaseAssets(repoRoot = process.cwd()) {
     assertContains('supabase/oneoff/phase_1_5_validation_checks.sql', phaseValidationText, snippet);
   }
 
-  const maintenanceText = readText(repoRoot, 'supabase/oneoff/maintenance_system_tests.sql');
+  const maintenanceText = readText('supabase/oneoff/maintenance_system_tests.sql');
   for (const snippet of [
     'spare_parts',
     'maintenance_logs',
@@ -71,7 +82,7 @@ export function validateSupabaseAssets(repoRoot = process.cwd()) {
     assertContains('supabase/oneoff/maintenance_system_tests.sql', maintenanceText, snippet);
   }
 
-  const migrationsDir = path.join(repoRoot, 'supabase', 'migrations');
+  const migrationsDir = resolveRepoPath('supabase/migrations');
   assert(existsSync(migrationsDir), 'Missing Supabase migrations directory');
 
   const migrationFiles = readdirSync(migrationsDir)

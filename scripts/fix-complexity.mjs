@@ -1,6 +1,9 @@
 import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const file = String.raw`d:\MuhimmatAltawseel\frontend\modules\ai-dashboard\components\AIDashboard.tsx`;
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const file = path.join(repoRoot, 'frontend', 'modules', 'ai-dashboard', 'components', 'AIDashboard.tsx');
 let content = fs.readFileSync(file, 'utf8');
 
 // The line we want to add eslint-disable to is the AIDashboard export

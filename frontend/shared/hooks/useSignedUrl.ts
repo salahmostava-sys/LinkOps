@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { logError } from '@shared/lib/logger';
-import { storageService } from '@services/storageService';
+import { storageService, type StorageBucket } from '@services/storageService';
 
 export const extractStoragePath = (value: string | null | undefined): string | null => {
   if (!value) return null;
@@ -14,7 +14,7 @@ export const extractStoragePath = (value: string | null | undefined): string | n
   return rest.slice(firstSlash + 1);
 };
 
-export const useSignedUrl = (bucket: string, path: string | null | undefined) => {
+export const useSignedUrl = (bucket: StorageBucket, path: string | null | undefined) => {
   const query = useQuery({
     queryKey: ['storage', 'signed-url', bucket, path ?? '__none__'] as const,
     enabled: Boolean(path),

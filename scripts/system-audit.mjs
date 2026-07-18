@@ -4,6 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
+import { fileURLToPath } from 'node:url';
 import { validateSupabaseAssets } from './validate-supabase-assets.mjs';
 
 const args = new Set(process.argv.slice(2));
@@ -14,7 +15,7 @@ const skipSupabase = args.has('--skip-supabase');
 const strictFrontend = args.has('--strict-frontend');
 const runSupabaseSql = args.has('--run-supabase-sql');
 
-const repoRoot = process.cwd();
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 function logStep(name) {
   process.stdout.write(`\n==> ${name}\n`);
@@ -114,7 +115,7 @@ if (!skipBackend) {
 
 if (!skipSupabase) {
   logStep('Supabase audit files');
-  const validation = validateSupabaseAssets(repoRoot);
+  const validation = validateSupabaseAssets();
   process.stdout.write(
     `Validated ${validation.auditFiles} audit SQL files, ${validation.functionFiles} edge functions, and ${validation.migrations} migrations.\n`,
   );

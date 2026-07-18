@@ -24,7 +24,6 @@ import {
 import { ImportFactory } from '@modules/orders/utils/import/importFactory';
 import { loadXlsx } from '@modules/orders/utils/xlsx';
 import { matchEmployeeNames, type UnmatchedEmployeeName } from '@shared/lib/nameMatching';
-import { escapeHtml } from '@shared/lib/security';
 import {
   buildDailyAppReportRows,
   getDailyAppReportName,
@@ -34,6 +33,19 @@ function formatTargetExpectation(expected: boolean | null, projectedTotal: numbe
   if (expected === null) return '—';
   const label = expected ? 'متوقع' : 'غير متوقع';
   return `${label} (${projectedTotal})`;
+}
+
+function appendReportCell(
+  doc: Document,
+  row: HTMLTableRowElement,
+  value: string | number,
+  options?: { dir?: 'ltr' | 'rtl'; textAlign?: 'left' | 'right' | 'center' },
+) {
+  const cell = doc.createElement('td');
+  cell.textContent = String(value);
+  if (options?.dir) cell.dir = options.dir;
+  if (options?.textAlign) cell.style.textAlign = options.textAlign;
+  row.appendChild(cell);
 }
 
 function summarizeMessages(messages: string[], limit = 3): string {
@@ -248,17 +260,21 @@ export async function printDailyAppReportTable(params: {
 
   const table = doc.createElement('table');
   const thead = doc.createElement('thead');
-  thead.innerHTML = `
-    <tr>
-      <th>اسم المندوب</th>
-      <th>إجمالي الطلبات</th>
-      <th>تارجت المندوب</th>
-      <th>نسبة الإنجاز</th>
-      <th>المتبقي</th>
-      <th>متوقع تحقيق التارجت</th>
-      <th>التوصيات</th>
-    </tr>
-  `;
+  const headerRow = doc.createElement('tr');
+  [
+    'اسم المندوب',
+    'إجمالي الطلبات',
+    'تارجت المندوب',
+    'نسبة الإنجاز',
+    'المتبقي',
+    'متوقع تحقيق التارجت',
+    'التوصيات',
+  ].forEach((label) => {
+    const header = doc.createElement('th');
+    header.textContent = label;
+    headerRow.appendChild(header);
+  });
+  thead.appendChild(headerRow);
   table.appendChild(thead);
 
   const tbody = doc.createElement('tbody');
@@ -266,15 +282,13 @@ export async function printDailyAppReportTable(params: {
     const achievement = row.achievementPercentage === null ? '—' : `${row.achievementPercentage.toFixed(1)}%`;
     const expected = formatTargetExpectation(row.expectedToReachTarget, row.projectedTotal);
     const tr = doc.createElement('tr');
-    tr.innerHTML = `
-      <td>${escapeHtml(row.empName)}</td>
-      <td>${row.total}</td>
-      <td>${row.employeeTarget ?? 'بدون هدف'}</td>
-      <td>${achievement}</td>
-      <td dir="ltr" style="text-align: right;">${row.remaining ?? '—'}</td>
-      <td>${expected}</td>
-      <td></td>
-    `;
+    appendReportCell(doc, tr, row.empName);
+    appendReportCell(doc, tr, row.total);
+    appendReportCell(doc, tr, row.employeeTarget ?? 'بدون هدف');
+    appendReportCell(doc, tr, achievement);
+    appendReportCell(doc, tr, row.remaining ?? '—', { dir: 'ltr', textAlign: 'right' });
+    appendReportCell(doc, tr, expected);
+    appendReportCell(doc, tr, '');
     tbody.appendChild(tr);
   });
   table.appendChild(tbody);

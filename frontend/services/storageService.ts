@@ -2,6 +2,22 @@ import { supabase } from '@services/supabase/client';
 import { sanitizeStoragePath } from '@shared/lib/storagePath';
 import { toServiceError } from '@services/serviceError';
 
+const STORAGE_BUCKETS = [
+  'advance-attachments',
+  'employee-documents',
+  'invoice-attachments',
+  'vehicle-documents',
+] as const;
+
+export type StorageBucket = (typeof STORAGE_BUCKETS)[number];
+
+function assertStorageBucket(bucket: StorageBucket): StorageBucket {
+  if (!STORAGE_BUCKETS.includes(bucket)) {
+    throw toServiceError(new Error('Invalid storage bucket'), 'storageService.assertStorageBucket');
+  }
+  return bucket;
+}
+
 export const storageService = {
   sanitizePathOrThrow: (path: string) => {
     const safePath = sanitizeStoragePath(path);
@@ -17,9 +33,10 @@ export const storageService = {
     return safePath;
   },
 
-  createSignedUrl: async (bucket: string, path: string, expiresInSeconds = 300) => {
+  createSignedUrl: async (bucket: StorageBucket, path: string, expiresInSeconds = 300) => {
+    const safeBucket = assertStorageBucket(bucket);
     const safePath = storageService.sanitizePathOrThrow(path);
-    const { data, error } = await supabase.storage.from(bucket).createSignedUrl(safePath, expiresInSeconds);
+    const { data, error } = await supabase.storage.from(safeBucket).createSignedUrl(safePath, expiresInSeconds);
 
     if (error) {
       throw toServiceError(error, 'storageService.createSignedUrl');
@@ -28,9 +45,10 @@ export const storageService = {
     return data.signedUrl;
   },
 
-  createSignedDownloadUrl: async (bucket: string, path: string, expiresInSeconds = 300) => {
+  createSignedDownloadUrl: async (bucket: StorageBucket, path: string, expiresInSeconds = 300) => {
+    const safeBucket = assertStorageBucket(bucket);
     const safePath = storageService.sanitizePathOrThrow(path);
-    const { data, error } = await supabase.storage.from(bucket).createSignedUrl(safePath, expiresInSeconds, { download: true });
+    const { data, error } = await supabase.storage.from(safeBucket).createSignedUrl(safePath, expiresInSeconds, { download: true });
 
     if (error) {
       throw toServiceError(error, 'storageService.createSignedDownloadUrl');
@@ -39,9 +57,10 @@ export const storageService = {
     return data.signedUrl;
   },
 
-  uploadFile: async (bucket: string, path: string, file: File, options?: { upsert?: boolean }) => {
+  uploadFile: async (bucket: StorageBucket, path: string, file: File, options?: { upsert?: boolean }) => {
+    const safeBucket = assertStorageBucket(bucket);
     const safePath = storageService.sanitizePathOrThrow(path);
-    const { data, error } = await supabase.storage.from(bucket).upload(safePath, file, {
+    const { data, error } = await supabase.storage.from(safeBucket).upload(safePath, file, {
       cacheControl: '3600',
       upsert: options?.upsert ?? false,
     });

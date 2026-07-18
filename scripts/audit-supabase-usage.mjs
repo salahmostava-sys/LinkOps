@@ -1,7 +1,8 @@
 import { readFile, readdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const ROOT = process.cwd();
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const TYPES_FILE = path.join(ROOT, 'frontend', 'services', 'supabase', 'types.ts');
 const MIGRATIONS_DIR = path.join(ROOT, 'supabase', 'migrations');
 const REPORT_FILE = path.join(ROOT, 'docs', 'SUPABASE_USAGE_CLASSIFICATION.md');

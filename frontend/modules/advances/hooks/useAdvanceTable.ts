@@ -9,7 +9,7 @@ import { logError } from '@shared/lib/logger';
 import { printHtmlTable } from '@shared/lib/printTable';
 import { ADVANCE_IO_COLUMNS } from '@shared/constants/excelSchemas';
 import { advanceService } from '@services/advanceService';
-import type { Advance, EmployeeSummary } from '@modules/advances/types/advance.types';
+import type { Advance, AdvanceSortField, EmployeeSummary } from '@modules/advances/types/advance.types';
 import { calcPaid, calcPending } from '@modules/advances/types/advance.types';
 
 import { loadXlsx } from '@modules/orders/utils/xlsx';
@@ -75,10 +75,10 @@ export function useAdvanceTable({
   const { toast } = useToast();
   const importRef = useRef<HTMLInputElement>(null);
   const tableRef = useRef<HTMLTableElement>(null);
-  const [sortField, setSortField] = useState<string | null>(null);
+  const [sortField, setSortField] = useState<AdvanceSortField | null>(null);
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
 
-  const handleSort = (field: string) => {
+  const handleSort = (field: AdvanceSortField) => {
     if (sortField === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
     else { setSortField(field); setSortDir('asc'); }
   };
@@ -141,8 +141,8 @@ export function useAdvanceTable({
     });
     if (sortField) {
       result = [...result].sort((a, b) => {
-        const aVal = (a as Record<string, unknown>)[sortField];
-        const bVal = (b as Record<string, unknown>)[sortField];
+        const aVal = a[sortField];
+        const bVal = b[sortField];
         let cmp: number;
         if (typeof aVal === 'string' && typeof bVal === 'string') cmp = aVal.localeCompare(bVal);
         else cmp = ((aVal as number) ?? 0) - ((bVal as number) ?? 0);

@@ -190,6 +190,11 @@ describe('settingsHubService', () => {
       const res = settingsHubService.getAvatarPublicUrl('avatar.png');
       expect(res.data.publicUrl).toBe('http://test');
     });
+
+    it('rejects traversal paths', () => {
+      expect(() => settingsHubService.getAvatarPublicUrl('../avatar.png')).toThrow();
+      expect(getPublicUrlMock).not.toHaveBeenCalled();
+    });
   });
 
   describe('updatePassword', () => {
@@ -221,6 +226,11 @@ describe('settingsHubService', () => {
       getPublicUrlMock.mockReturnValueOnce({ data: { publicUrl: 'http://logo' } });
       const res = settingsHubService.getCompanyLogoPublicUrl('logo.png');
       expect(res.data.publicUrl).toBe('http://logo');
+    });
+
+    it('rejects absolute paths', () => {
+      expect(() => settingsHubService.getCompanyLogoPublicUrl('/logo.png')).toThrow();
+      expect(getPublicUrlMock).not.toHaveBeenCalled();
     });
   });
 

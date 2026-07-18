@@ -3,10 +3,10 @@ import { Edit, Trash2 } from 'lucide-react';
 import { Input } from '@shared/components/ui/input';
 import { Button } from '@shared/components/ui/button';
 import type { FilterState } from '@shared/hooks/useAdvancedFilter';
-import type { Advance, EmployeeSummary } from '@modules/advances/types/advance.types';
+import type { Advance, AdvanceSortField, EmployeeSummary } from '@modules/advances/types/advance.types';
 import { Skeleton } from '@shared/components/ui/skeleton';
 
-const SortIcon = ({ field, sortField, sortDir }: Readonly<{ field: string; sortField: string | null; sortDir: 'asc' | 'desc' }>) => {
+const SortIcon = ({ field, sortField, sortDir }: Readonly<{ field: AdvanceSortField; sortField: AdvanceSortField | null; sortDir: 'asc' | 'desc' }>) => {
   if (sortField !== field) return <span className="inline-block w-2.5 ms-0.5" aria-hidden />;
   return <span className="text-[10px] ms-0.5">{sortDir === 'asc' ? '↑' : '↓'}</span>;
 };
@@ -16,9 +16,9 @@ export interface AdvanceTableProps {
   filtered: EmployeeSummary[];
   grandTotals: { count: number; totalDebt: number; totalPaid: number; remaining: number };
   permissions: { can_edit: boolean };
-  sortField: string | null;
+  sortField: AdvanceSortField | null;
   sortDir: 'asc' | 'desc';
-  handleSort: (field: string) => void;
+  handleSort: (field: AdvanceSortField) => void;
   tableRef: RefObject<HTMLTableElement | null>;
   filters: FilterState;
   setFilter: (key: string, values: string[]) => void;

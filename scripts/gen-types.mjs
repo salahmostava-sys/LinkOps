@@ -3,7 +3,7 @@
  * Generate Supabase TypeScript types.
  * Reads SUPABASE_PROJECT_ID from environment (or .env in repo root).
  */
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { existsSync, readFileSync } from 'node:fs';
@@ -31,11 +31,19 @@ if (!projectId) {
 }
 
 const outputPath = resolve(repoRoot, 'frontend/services/supabase/types.ts');
-const cmd = `npx supabase gen types typescript --project-id ${projectId} -s public`;
+if (!/^[a-z0-9-]+$/i.test(projectId)) {
+  console.error('ERROR: SUPABASE_PROJECT_ID has an invalid format.');
+  process.exit(1);
+}
 
 console.log(`Generating types for project: ${projectId}`);
 try {
-  const output = execSync(cmd, { cwd: repoRoot, encoding: 'utf-8' });
+  const npxCommand = process.platform === 'win32' ? 'npx.cmd' : 'npx';
+  const output = execFileSync(
+    npxCommand,
+    ['supabase', 'gen', 'types', 'typescript', '--project-id', projectId, '-s', 'public'],
+    { cwd: repoRoot, encoding: 'utf-8' },
+  );
   const { writeFileSync } = await import('node:fs');
   writeFileSync(outputPath, output, 'utf-8');
   console.log(`Types written to: ${outputPath}`);
