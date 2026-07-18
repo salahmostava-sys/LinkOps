@@ -61,6 +61,30 @@ const EMPLOYEE_COLUMN_WIDTHS: Partial<Record<ColKey, string>> = {
   actions: "72px",
 };
 
+const emptyCell = (
+  <span className="text-muted-foreground/40">{EMPTY_DATA_PLACEHOLDER}</span>
+);
+const cellText = (value?: string | null) => value || EMPTY_DATA_PLACEHOLDER;
+const buildTextOptions = (values: string[], currentValue?: string | null) =>
+  Array.from(new Set([...values, currentValue || ""].filter(Boolean))).map(
+    (value) => ({ value, label: value }),
+  );
+const formatDateCell = (value?: string | null) =>
+  value ? format(parseISO(value), "yyyy/MM/dd") : EMPTY_DATA_PLACEHOLDER;
+const getDateInputValue = (value?: string | null) =>
+  value?.slice(0, 10) || "";
+const renderTextValue = (
+  value?: string | null,
+  options?: Readonly<{ dir?: "rtl" | "ltr" | "auto"; className?: string }>,
+) => (
+  <span
+    className={`text-xs text-muted-foreground whitespace-nowrap ${options?.className || ""}`}
+    dir={options?.dir}
+  >
+    {cellText(value)}
+  </span>
+);
+
 function EmployeeDetailedTableInner() {
   const { t } = useTranslation();
   const {
@@ -96,35 +120,14 @@ function EmployeeDetailedTableInner() {
   } = useEmployeeTable();
   const { data: availableApps = [] } = useActiveApps();
   const { recordNames: commercialRecordNames = [] } = useCommercialRecords();
-  const emptyCell = (
-    <span className="text-muted-foreground/40">{EMPTY_DATA_PLACEHOLDER}</span>
-  );
-  const cellText = (value?: string | null) => value || EMPTY_DATA_PLACEHOLDER;
+
   const cityOptions = useMemo(
     () =>
       Array.from(new Set([...DEFAULT_EMPLOYEE_CITY_OPTIONS, ...uniqueVals.city]))
         .map((value) => ({ value, label: cityLabel(value, value) })),
     [uniqueVals.city],
   );
-  const buildTextOptions = (values: string[], currentValue?: string | null) =>
-    Array.from(new Set([...values, currentValue || ""].filter(Boolean))).map(
-      (value) => ({ value, label: value }),
-    );
-  const formatDateCell = (value?: string | null) =>
-    value ? format(parseISO(value), "yyyy/MM/dd") : EMPTY_DATA_PLACEHOLDER;
-  const getDateInputValue = (value?: string | null) =>
-    value?.slice(0, 10) || "";
-  const renderTextValue = (
-    value?: string | null,
-    options?: Readonly<{ dir?: "rtl" | "ltr" | "auto"; className?: string }>,
-  ) => (
-    <span
-      className={`text-xs text-muted-foreground whitespace-nowrap ${options?.className || ""}`}
-      dir={options?.dir}
-    >
-      {cellText(value)}
-    </span>
-  );
+
   const renderEditableTextCell = (
     employeeId: string,
     field: string,

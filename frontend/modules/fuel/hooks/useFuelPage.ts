@@ -449,6 +449,6 @@ export function useFuelPage() { // NOSONAR: page data layer with many independen
     monthOrdersMap,
     dailyOrderRows,
     error: fuelBaseError || monthlyError || dailyError,
-    refetch: async () => { await refetchMonthly(); await refetchDaily(); },
+    refetch: async () => { await Promise.all([refetchMonthly(), refetchDaily()]); },
   };
 }
