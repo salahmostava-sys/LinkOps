@@ -1,9 +1,6 @@
 import type React from 'react';
-import { useState } from 'react';
-import { ChevronDown, ChevronUp, ChevronsUpDown, X, ChevronDown as FilterIcon } from 'lucide-react';
-import { Popover, PopoverContent, PopoverTrigger } from '@shared/components/ui/popover';
+import { ChevronDown, ChevronUp, ChevronsUpDown } from 'lucide-react';
 import { Skeleton } from '@shared/components/ui/skeleton';
-import { Input } from '@shared/components/ui/input';
 import { useSignedUrl, extractStoragePath } from '@shared/hooks/useSignedUrl';
 import { getEmployeeCities } from '@modules/employees/model/employeeUtils';
 import { cityLabel } from '@modules/employees/model/employeeCity';
@@ -96,50 +93,6 @@ export const SortIcon = ({
   return <ChevronDown size={11} className="inline ms-1 text-current" />;
 };
 
-export interface ColFilterPopoverProps {
-  colKey: string;
-  label: string;
-  active: boolean;
-  children: React.ReactNode;
-  onClear: () => void;
-}
-
-export const ColFilterPopover = ({ label, active, children, onClear }: Readonly<ColFilterPopoverProps>) => {
-  const [open, setOpen] = useState(false);
-  const { t } = useTranslation();
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button type="button"
-          className={`inline-flex items-center gap-0.5 rounded transition-colors text-current ${active ? 'opacity-100' : 'opacity-45 hover:opacity-80'}`}
-          title={t('filterBy', { label })}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <FilterIcon size={10} />
-          {active && <span className="w-1.5 h-1.5 rounded-full bg-current" />}
-        </button>
-      </PopoverTrigger>
-      <PopoverContent className="w-56 p-3 space-y-2 max-h-80 overflow-y-auto" align="start" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-foreground">{label}</span>
-          {active && (
-            <button type="button"
-              onClick={() => {
-                onClear();
-                setOpen(false);
-              }}
-              className="text-xs text-destructive hover:underline flex items-center gap-1"
-            >
-              <X size={10} /> {t('clear')}
-            </button>
-          )}
-        </div>
-        {children}
-      </PopoverContent>
-    </Popover>
-  );
-};
-
 export const SkeletonRow = ({ cols }: { cols: number }) => (
   <tr className="border-b border-border/30">
     {Array.from({ length: cols }, (_, i) => (
@@ -149,25 +102,5 @@ export const SkeletonRow = ({ cols }: { cols: number }) => (
     ))}
   </tr>
 );
-
-export const TextFilterInput = ({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-}) => {
-  const { t } = useTranslation();
-  return (
-    <Input
-      className="h-7 text-xs px-2"
-      placeholder={t('searchShort')}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      onClick={(e) => e.stopPropagation()}
-      autoFocus
-    />
-  );
-};
 
 

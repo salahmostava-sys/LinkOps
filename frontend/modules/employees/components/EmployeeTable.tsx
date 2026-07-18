@@ -3,9 +3,9 @@ import { parseISO, format } from "date-fns";
 import { Users } from "lucide-react";
 import {
   SortIcon,
-  ColFilterPopover,
   SkeletonRow,
 } from "@modules/employees/components/EmployeesViewParts";
+import { ColumnFilterPopover } from "@shared/components/table/ColumnFilterPopover";
 import {
   cityLabel,
   DEFAULT_EMPLOYEE_CITY_OPTIONS,
@@ -230,14 +230,13 @@ function EmployeeDetailedTableInner() {
                       )}
                       {isFilterable && filterContent && (
                         <span className="absolute end-0 flex items-center justify-center">
-                          <ColFilterPopover
-                            colKey={col.key}
+                          <ColumnFilterPopover
                             label={columnLabel}
                             active={isActive}
                             onClear={() => setColFilter(col.key, "")}
                           >
                             {filterContent}
-                          </ColFilterPopover>
+                          </ColumnFilterPopover>
                         </span>
                       )}
                     </div>

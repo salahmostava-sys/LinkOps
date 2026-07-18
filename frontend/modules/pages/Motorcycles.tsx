@@ -23,6 +23,7 @@ import type { Vehicle, VehicleStatus } from '@modules/pages/motorcycles.shared';
 import type { VehicleReportRow } from '@services/vehicleReportService';
 import { getErrorMessage } from '@services/serviceError';
 import { getNextMonthlyRentalDueDate } from '@shared/lib/vehicleRental';
+import { ColumnFilterPopover, ColumnTextFilter } from '@shared/components/table/ColumnFilterPopover';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 import { loadXlsx } from '@modules/orders/utils/xlsx';
@@ -125,9 +126,108 @@ const isVehicleColumnFilters = (value: unknown): value is VehicleColumnFilters =
   return ['all', 'with_rental', 'without_rental'].includes(value.rental);
 };
 
+const VEHICLE_TABLE_COLUMNS: Array<{
+  key: keyof VehicleColumnFilters;
+  label: string;
+  className?: string;
+}> = [
+  { key: 'plate', label: 'رقم اللوحة' },
+  { key: 'chip', label: 'حالة الشريحة', className: 'w-32' },
+  { key: 'rider', label: 'المندوب' },
+  { key: 'status', label: 'حالة الدباب', className: 'w-28' },
+  { key: 'brandModel', label: 'الماركة والموديل' },
+  { key: 'year', label: 'سنة الصنع' },
+  { key: 'serialNumber', label: 'الرقم التسلسلي' },
+  { key: 'chassisNumber', label: 'رقم الهيكل' },
+  { key: 'insuranceExpiry', label: 'التأمين' },
+  { key: 'registrationExpiry', label: 'التسجيل (الاستمارة)' },
+  { key: 'authorizationExpiry', label: 'التفويض' },
+  { key: 'minimumMaintenanceCost', label: 'تكلفة الصيانة' },
+  { key: 'rental', label: 'الإيجار' },
+];
+
+const VEHICLE_DATE_FILTER_KEYS = new Set<keyof VehicleColumnFilters>([
+  'insuranceExpiry',
+  'registrationExpiry',
+  'authorizationExpiry',
+]);
+
+const VEHICLE_SELECT_FILTER_OPTIONS: Partial<Record<keyof VehicleColumnFilters, Array<{ value: string; label: string }>>> = {
+  chip: [
+    { value: 'all', label: 'الكل' },
+    { value: 'present', label: 'موجودة' },
+    { value: 'absent', label: 'غير موجودة' },
+  ],
+  status: [
+    { value: 'all', label: 'الكل' },
+    ...ALL_STATUSES.map((status) => ({ value: status, label: statusLabels[status] })),
+  ],
+  rental: [
+    { value: 'all', label: 'الكل' },
+    { value: 'with_rental', label: 'إيجار' },
+    { value: 'without_rental', label: 'بدون إيجار' },
+  ],
+};
+
+const isActiveVehicleColumnFilter = (value: string) => value !== '' && value !== 'all';
 const COLUMN_FILTER_CELL_CLASS = 'border-t border-border/40 bg-card p-1 align-top';
 const COLUMN_FILTER_INPUT_CLASS = 'h-8 min-w-24 px-2 text-xs';
 const COLUMN_FILTER_SELECT_CLASS = 'h-8 min-w-24 bg-background px-2 text-xs';
+
+function VehicleDateColumnFilter({
+  value,
+  onChange,
+}: Readonly<{ value: string; onChange: (value: string) => void }>) {
+  const [from = '', to = ''] = value.includes('..') ? value.split('..') : [value, ''];
+  const updateRange = (nextFrom: string, nextTo: string) => {
+    if (!nextFrom && !nextTo) onChange('');
+    else if (nextTo) onChange(`${nextFrom}..${nextTo}`);
+    else onChange(nextFrom);
+  };
+
+  return (
+    <fieldset className="space-y-1.5" aria-label="نطاق التاريخ">
+      <div className="flex items-center gap-1">
+        <span className="w-6 text-[10px] text-muted-foreground">من</span>
+        <Input type="date" className="h-7 flex-1 px-1.5 text-xs" value={from} onChange={(event) => updateRange(event.target.value, to)} dir="ltr" />
+      </div>
+      <div className="flex items-center gap-1">
+        <span className="w-6 text-[10px] text-muted-foreground">إلى</span>
+        <Input type="date" className="h-7 flex-1 px-1.5 text-xs" value={to} onChange={(event) => updateRange(from, event.target.value)} dir="ltr" />
+      </div>
+    </fieldset>
+  );
+}
+
+function VehicleColumnFilterControl({
+  filterKey,
+  filters,
+  onChange,
+}: Readonly<{
+  filterKey: keyof VehicleColumnFilters;
+  filters: VehicleColumnFilters;
+  onChange: (key: keyof VehicleColumnFilters, value: string) => void;
+}>) {
+  const value = filters[filterKey];
+  const selectOptions = VEHICLE_SELECT_FILTER_OPTIONS[filterKey];
+  if (selectOptions) {
+    return (
+      <Select value={value} onValueChange={(nextValue) => onChange(filterKey, nextValue)}>
+        <SelectTrigger className="h-7 w-full text-xs"><SelectValue /></SelectTrigger>
+        <SelectContent>
+          {selectOptions.map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}
+        </SelectContent>
+      </Select>
+    );
+  }
+  if (VEHICLE_DATE_FILTER_KEYS.has(filterKey)) {
+    return <VehicleDateColumnFilter value={value} onChange={(nextValue) => onChange(filterKey, nextValue)} />;
+  }
+  if (filterKey === 'minimumMaintenanceCost') {
+    return <Input type="number" min="0" value={value} onChange={(event) => onChange(filterKey, event.target.value)} placeholder="الحد الأدنى" className="h-7 text-xs" dir="ltr" autoFocus />;
+  }
+  return <ColumnTextFilter value={value} onChange={(nextValue) => onChange(filterKey, nextValue)} />;
+}
 
 type FilterableVehicleValue = string | number | null | undefined;
 
@@ -153,7 +253,14 @@ const matchesVehicleDateFilters = (
     [vehicle.insurance_expiry, filters.insuranceExpiry],
     [vehicle.registration_expiry, filters.registrationExpiry],
     [vehicle.authorization_expiry, filters.authorizationExpiry],
-  ].every(([value, filter]) => !filter || String(value ?? '').startsWith(String(filter)));
+  ].every(([value, filter]) => {
+    if (!filter) return true;
+    const date = String(value ?? '').slice(0, 10);
+    if (!date) return false;
+    if (!filter.includes('..')) return date === filter;
+    const [from, to] = filter.split('..');
+    return (!from || date >= from) && (!to || date <= to);
+  });
 
 const matchesMinimumMaintenanceCost = (
   vehicle: VehicleReportRow,
@@ -823,22 +930,32 @@ const Motorcycles = () => {
               <table className="vehicles-table w-full min-w-[1520px] text-sm">
                 <thead className="bg-muted/70">
                   <tr className="border-b border-border/60">
-                    <th className="ta-th">رقم اللوحة</th>
-                    <th className="ta-th w-32">حالة الشريحة</th>
-                    <th className="ta-th">المندوب</th>
-                    <th className="ta-th w-28">حالة الدباب</th>
-                    <th className="ta-th">الماركة والموديل</th>
-                    <th className="ta-th">سنة الصنع</th>
-                    <th className="ta-th">الرقم التسلسلي</th>
-                    <th className="ta-th">رقم الهيكل</th>
-                    <th className="ta-th">التأمين</th>
-                    <th className="ta-th">التسجيل (الاستمارة)</th>
-                    <th className="ta-th">التفويض</th>
-                    <th className="ta-th">تكلفة الصيانة</th>
-                    <th className="ta-th">الإيجار</th>
-                    <th className="ta-th">الإجراءات</th>
+                    {VEHICLE_TABLE_COLUMNS.map((column) => {
+                      const filterValue = columnFilters[column.key];
+                      return (
+                        <th key={column.key} className={`ta-th text-center ${column.className ?? ''}`}>
+                          <div className="relative flex min-w-0 items-center justify-center px-3">
+                            <span className="truncate">{column.label}</span>
+                            <span className="absolute end-0 flex items-center justify-center">
+                              <ColumnFilterPopover
+                                label={column.label}
+                                active={isActiveVehicleColumnFilter(filterValue)}
+                                onClear={() => updateColumnFilter(column.key, column.key === 'chip' || column.key === 'status' || column.key === 'rental' ? 'all' : '')}
+                              >
+                                <VehicleColumnFilterControl
+                                  filterKey={column.key}
+                                  filters={columnFilters}
+                                  onChange={updateColumnFilter}
+                                />
+                              </ColumnFilterPopover>
+                            </span>
+                          </div>
+                        </th>
+                      );
+                    })}
+                    <th className="ta-th text-center">الإجراءات</th>
                   </tr>
-                  <tr>
+                  <tr className="hidden" aria-hidden="true">
                     <th className={COLUMN_FILTER_CELL_CLASS}>
                       <Input
                         value={columnFilters.plate}
@@ -998,7 +1115,7 @@ const Motorcycles = () => {
                     return (
                       <tr key={v.id} className="h-12 border-b border-border/40 transition-colors last:border-b-0 hover:bg-muted/30">
                         <td className="ta-td">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center justify-center gap-2">
                             <div
                               className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
                                 v.type === 'motorcycle'
@@ -1114,7 +1231,7 @@ const Motorcycles = () => {
                           )}
                         </td>
                         <td className="ta-td">
-                          <div className="flex items-center gap-1">
+                          <div className="flex items-center justify-center gap-1">
                             <button
                               type="button"
                               onClick={() => setDetailsVehicle(v)}

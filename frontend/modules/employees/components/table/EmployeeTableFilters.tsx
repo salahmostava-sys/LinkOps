@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "@shared/components/ui/select";
 import { normalizeArabicDigits } from "@shared/lib/formatters";
-import { TextFilterInput } from "@modules/employees/components/EmployeesViewParts";
+import { ColumnTextFilter } from "@shared/components/table/ColumnFilterPopover";
 import { type ColumnDef } from "@modules/employees/types/employee.types";
 import type { TFunction } from "i18next";
 
@@ -194,5 +194,5 @@ export function buildColumnFilter(ctx: FilterContext): React.ReactNode {
   if (col.key === "nationality") return buildSelectFilter("nationality", t('all'), uniqueVals.nationality.map((n) => ({ value: n, label: n })), ctx);
   if (col.key === "job_title") return buildSelectFilter("job_title", t('all'), uniqueVals.job_title.map((j) => ({ value: j, label: j })), ctx);
   if (col.key === "commercial_record") return buildSelectFilter("commercial_record", t('all'), commercialRecordNames.map((cr) => ({ value: cr, label: cr })), ctx);
-  return <TextFilterInput value={ctx.colFilters[col.key] || ""} onChange={(v) => ctx.setColFilter(col.key, v)} />;
+  return <ColumnTextFilter value={ctx.colFilters[col.key] || ""} onChange={(v) => ctx.setColFilter(col.key, v)} />;
 }

@@ -808,6 +808,11 @@
     padding-inline: 0.5rem;
   }
 
+  .vehicles-page .vehicles-table tbody .ta-td {
+    text-align: center;
+    vertical-align: middle;
+  }
+
   .vehicles-page .vehicles-table tbody tr {
     border-bottom: 1px solid var(--ds-surface-container);
     transition: background-color 140ms ease, box-shadow 140ms ease;
