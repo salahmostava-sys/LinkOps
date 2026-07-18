@@ -19,6 +19,7 @@ import { authQueryUserId, useAuthQueryGate } from '@shared/hooks/useAuthQueryGat
 import { defaultQueryRetry } from '@shared/lib/query';
 import { logError } from '@shared/lib/logger';
 import { usePermissions } from '@shared/hooks/usePermissions';
+import { isStringValue, usePersistentState } from '@shared/hooks/usePersistentState';
 
 interface AuditLog {
   id: string;
@@ -121,6 +122,12 @@ const tableLabels: Record<string, { ar: string; en: string }> = {
   pricing_rules:          { ar: 'قواعد التسعير', en: 'Pricing Rules' },
   locked_months:          { ar: 'الشهور المقفلة', en: 'Locked Months' },
 };
+
+const isAuditActionFilter = (value: unknown): value is string =>
+  value === 'all' || value === 'INSERT' || value === 'UPDATE' || value === 'DELETE';
+
+const isAuditTableFilter = (value: unknown): value is string =>
+  typeof value === 'string' && (value === 'all' || value in tableLabels);
 
 /** Arabic labels for common DB field names */
 const FIELD_LABELS: Record<string, string> = {
@@ -293,10 +300,10 @@ export default function ActivityLogContent() {
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(0);
-  const [search, setSearch] = useState('');
-  const [filterAction, setFilterAction] = useState('all');
-  const [filterTable, setFilterTable] = useState('all');
-  const [filterUserId, setFilterUserId] = useState('all');
+  const [search, setSearch] = usePersistentState('table:activity-log:search:v1', '', isStringValue);
+  const [filterAction, setFilterAction] = usePersistentState('table:activity-log:action:v1', 'all', isAuditActionFilter);
+  const [filterTable, setFilterTable] = usePersistentState('table:activity-log:table:v1', 'all', isAuditTableFilter);
+  const [filterUserId, setFilterUserId] = usePersistentState('table:activity-log:user:v1', 'all', isStringValue);
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -306,7 +313,7 @@ export default function ActivityLogContent() {
   }, [search]);
 
   // Fetch distinct users who appear in audit logs (for the user filter dropdown)
-  const { data: auditUsers = [] } = useQuery<UserProfile[]>({
+  const { data: auditUsers = [], isSuccess: auditUsersLoaded } = useQuery<UserProfile[]>({
     queryKey: ['audit-log-users', uid],
     enabled,
     queryFn: async () => {
@@ -315,6 +322,12 @@ export default function ActivityLogContent() {
     },
     staleTime: 60_000,
   });
+
+  useEffect(() => {
+    if (auditUsersLoaded && filterUserId !== 'all' && !auditUsers.some((user) => user.id === filterUserId)) {
+      setFilterUserId('all');
+    }
+  }, [auditUsers, auditUsersLoaded, filterUserId, setFilterUserId]);
 
   const {
     data: logsData,
@@ -393,7 +406,18 @@ export default function ActivityLogContent() {
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
   const getActionLabel = (action: string) => actionLabels[action]?.ar || action;
   const getTableLabel  = (table: string)  => tableLabels[table]?.ar  || table;
-  const activeFilters  = [filterAction !== 'all', filterTable !== 'all', filterUserId !== 'all'].filter(Boolean).length;
+  const activeFilters = [
+    Boolean(search.trim()),
+    filterAction !== 'all',
+    filterTable !== 'all',
+    filterUserId !== 'all',
+  ].filter(Boolean).length;
+  const resetFilters = () => {
+    setSearch('');
+    setFilterAction('all');
+    setFilterTable('all');
+    setFilterUserId('all');
+  };
 
   return (
     <div className="space-y-5" dir={isRTL ? 'rtl' : 'ltr'}>
@@ -411,7 +435,9 @@ export default function ActivityLogContent() {
             سجل النشاطات
           </h2>
           <p className="text-xs text-muted-foreground" >
-            {`${totalCount.toLocaleString('en-US')} سجل محفوظ`}
+            {activeFilters > 0
+              ? `${totalCount.toLocaleString('en-US')} نتيجة مطابقة`
+              : `${totalCount.toLocaleString('en-US')} سجل محفوظ`}
           </p>
         </div>
         <div className="flex items-center gap-2 ms-auto">
@@ -490,7 +516,7 @@ export default function ActivityLogContent() {
         {/* Clear filters */}
         {activeFilters > 0 && (
           <button type="button"
-            onClick={() => { setFilterAction('all'); setFilterTable('all'); setFilterUserId('all'); }}
+            onClick={resetFilters}
             className="flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive transition-colors"
           >
             <X size={12} /> مسح
@@ -535,7 +561,14 @@ export default function ActivityLogContent() {
                 <tr>
                   <td colSpan={5} className="ta-td p-12">
                     <Activity size={32} className="mx-auto mb-3 opacity-20 text-muted-foreground"  />
-                    <p className="text-sm text-muted-foreground" >لا توجد سجلات</p>
+                    <p className="text-sm text-muted-foreground">
+                      {activeFilters > 0 ? 'لا توجد نتائج مطابقة' : 'لا توجد سجلات'}
+                    </p>
+                    {activeFilters > 0 && (
+                      <Button type="button" variant="outline" size="sm" className="mt-3" onClick={resetFilters}>
+                        مسح الفلاتر
+                      </Button>
+                    )}
                   </td>
                 </tr>
               )}

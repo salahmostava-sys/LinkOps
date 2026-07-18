@@ -10,6 +10,7 @@ import { QueryErrorRetry } from '@shared/components/QueryErrorRetry';
 import { useMaintenanceLogs } from '@modules/maintenance/hooks/useMaintenanceData';
 import type { MaintenanceLogWithDetails } from '@services/maintenanceService';
 import { loadXlsx } from '@modules/orders/utils/xlsx';
+import { isStringValue, usePersistentState } from '@shared/hooks/usePersistentState';
 
 
 const TYPE_COLORS: Record<string, string> = {
@@ -275,9 +276,9 @@ function VehicleGroupCard({ group }: Readonly<VehicleGroupCardProps>) {
 
 export function VehicleReportsTab() {
   const logsQ = useMaintenanceLogs();
-  const [search, setSearch] = useState('');
-  const [fromDate, setFromDate] = useState('');
-  const [toDate, setToDate] = useState('');
+  const [search, setSearch] = usePersistentState('report:vehicles:search:v1', '', isStringValue);
+  const [fromDate, setFromDate] = usePersistentState('report:vehicles:date-from:v1', '', isStringValue);
+  const [toDate, setToDate] = usePersistentState('report:vehicles:date-to:v1', '', isStringValue);
   const [selectedIds, setSelectedIds] = useState<Set<string> | null>(null);
 
   const logs = useMemo(() => logsQ.data ?? [], [logsQ.data]);
@@ -345,6 +346,18 @@ export function VehicleReportsTab() {
       return (g.plate_number || '').toLowerCase().includes(t) || (g.type || '').toLowerCase().includes(t);
     });
   }, [vehicleGroups, search, activeSelection]);
+  const hasActiveFilters = Boolean(
+    search.trim()
+      || fromDate
+      || toDate
+      || activeSelection.size !== vehicleGroups.length,
+  );
+  const resetFilters = () => {
+    setSearch('');
+    setFromDate('');
+    setToDate('');
+    setSelectedIds(null);
+  };
 
   const exportToExcel = async () => {
     try {
@@ -576,6 +589,11 @@ export function VehicleReportsTab() {
           </div>
           <h3 className="text-sm font-semibold mb-1">لا توجد بيانات</h3>
           <p className="text-xs text-muted-foreground">لم يتم العثور على مركبات مطابقة.</p>
+          {hasActiveFilters && (
+            <Button type="button" variant="outline" size="sm" className="mt-3" onClick={resetFilters}>
+              مسح الفلاتر
+            </Button>
+          )}
         </div>
       );
     }
@@ -637,6 +655,15 @@ export function VehicleReportsTab() {
             className="pr-9 h-10 rounded-xl bg-card border-border/60"
           />
         </div>
+
+        {hasActiveFilters && (
+          <Button type="button" variant="ghost" size="sm" className="h-10 gap-1.5 shrink-0" onClick={resetFilters}>
+            <X size={14} /> مسح
+          </Button>
+        )}
+        <span className="text-xs font-medium text-foreground whitespace-nowrap">
+          {filteredGroups.length.toLocaleString('en-US')} من {vehicleGroups.length.toLocaleString('en-US')}
+        </span>
 
         <div className="flex gap-2 flex-wrap xl:flex-nowrap xl:ms-auto">
           <DropdownMenu>

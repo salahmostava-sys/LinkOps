@@ -4,12 +4,14 @@
  */
 
 import { useState, useMemo } from 'react';
-import { Search, ArrowUp, ArrowDown } from 'lucide-react';
+import { Search, ArrowUp, ArrowDown, X } from 'lucide-react';
 import {
   type RiderPerformanceProfile,
   type PerformanceTier,
 } from '@modules/dashboard/lib/performanceEngine';
 import { ScoreRing } from './PerformanceScoreBadge';
+import { Button } from '@shared/components/ui/button';
+import { isStringValue, usePersistentState } from '@shared/hooks/usePersistentState';
 
 interface PerformanceDetailedTableProps {
   riders: RiderPerformanceProfile[];
@@ -19,6 +21,9 @@ interface PerformanceDetailedTableProps {
 type SortKey = 'rank' | 'employeeName' | 'totalOrders' | 'avgOrdersPerDay' | 'performanceScore' | 'growthPct' | 'consistencyRatio';
 type SortDir = 'asc' | 'desc';
 type TierFilter = PerformanceTier | 'all';
+
+const isTierFilter = (value: unknown): value is TierFilter =>
+  value === 'all' || value === 'excellent' || value === 'good' || value === 'average' || value === 'weak';
 
 function ConsistencyBar({ ratio }: Readonly<{ ratio: number }>) {
   const pct = Math.min(100, Math.round(ratio * 100));
@@ -73,8 +78,8 @@ export function PerformanceDetailedTable({
   riders,
   onRiderClick,
 }: Readonly<PerformanceDetailedTableProps>) {
-  const [search, setSearch] = useState('');
-  const [tierFilter, setTierFilter] = useState<TierFilter>('all');
+  const [search, setSearch] = usePersistentState('table:performance:search:v1', '', isStringValue);
+  const [tierFilter, setTierFilter] = usePersistentState<TierFilter>('table:performance:tier:v1', 'all', isTierFilter);
   const [sortKey, setSortKey] = useState<SortKey>('rank');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
 
@@ -102,6 +107,11 @@ export function PerformanceDetailedTable({
   const handleSort = (key: SortKey) => {
     if (sortKey === key) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
     else { setSortKey(key); setSortDir(key === 'employeeName' ? 'asc' : 'desc'); }
+  };
+  const hasActiveFilters = Boolean(search.trim() || tierFilter !== 'all');
+  const resetFilters = () => {
+    setSearch('');
+    setTierFilter('all');
   };
 
   const tiers: { value: TierFilter; label: string }[] = [
@@ -152,6 +162,11 @@ export function PerformanceDetailedTable({
               </button>
             ))}
           </div>
+          {hasActiveFilters && (
+            <Button type="button" variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={resetFilters} aria-label="مسح الفلاتر">
+              <X size={14} />
+            </Button>
+          )}
         </div>
       </div>
 
@@ -187,7 +202,12 @@ export function PerformanceDetailedTable({
             {filtered.length === 0 ? (
               <tr>
                 <td colSpan={7} className="ta-td text-muted-foreground">
-                  لا توجد نتائج
+                  <div className="flex flex-col items-center gap-2 py-6">
+                    <span>لا توجد نتائج مطابقة</span>
+                    <Button type="button" variant="outline" size="sm" onClick={resetFilters}>
+                      مسح الفلاتر
+                    </Button>
+                  </div>
                 </td>
               </tr>
             ) : (
