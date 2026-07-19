@@ -92,12 +92,12 @@ export function PlatformAppsEditor({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <button type="button" className="mx-auto flex w-full items-center justify-center gap-1 whitespace-nowrap transition-opacity hover:opacity-80">
+        <button type="button" className="mx-auto flex w-full items-center justify-center gap-1 flex-wrap transition-opacity hover:opacity-80">
           {currentApps.length > 0 ? (
             currentApps.map(app => (
               <span
                 key={app.id}
-                className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium"
+                className="inline-flex items-center px-1.5 py-[1px] rounded text-[9px] font-medium leading-tight"
                 style={{
                   backgroundColor: app.brand_color || '#1f54ad',
                   color: getContrastTextColor(app.brand_color || '#1f54ad')
@@ -141,14 +141,14 @@ export function PlatformAppsEditor({
               availableApps.map(app => (
                 <label
                   key={app.id}
-                  className="flex items-center gap-2 p-2 rounded hover:bg-muted/50 cursor-pointer transition-colors"
+                  className="flex items-center gap-2 p-1.5 rounded hover:bg-muted/50 cursor-pointer transition-colors"
                 >
                   <Checkbox
                     checked={selectedAppIds.has(app.id)}
                     onCheckedChange={() => handleToggleApp(app.id)}
                   />
                   <span
-                    className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium"
+                    className="inline-flex items-center px-1.5 py-0 rounded text-[10px] font-medium"
                     style={{
                       backgroundColor: app.brand_color || '#1f54ad',
                       color: getContrastTextColor(app.brand_color || '#1f54ad')

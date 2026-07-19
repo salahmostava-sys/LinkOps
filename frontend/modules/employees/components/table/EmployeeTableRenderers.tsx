@@ -118,10 +118,10 @@ function renderPlatformAppsCell(ctx: CellContext): React.ReactNode {
       {permissions.can_edit ? (
         <PlatformAppsEditor employeeId={emp.id} employeeName={emp.name} currentApps={emp.platform_apps || []} availableApps={availableApps} onSuccess={refetchEmployees} />
       ) : (
-        <div className="flex items-center justify-center gap-1 whitespace-nowrap">
+        <div className="flex items-center justify-center gap-1 flex-wrap">
           {emp.platform_apps?.length
             ? emp.platform_apps.map((app) => (
-                <span key={app.id} className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium"
+                <span key={app.id} className="inline-flex items-center px-1.5 py-[1px] rounded text-[9px] font-medium leading-tight"
                   style={{ backgroundColor: app.brand_color || "#1f54ad", color: getContrastTextColor(app.brand_color || "#1f54ad") }}
                 >
                   {app.name}
