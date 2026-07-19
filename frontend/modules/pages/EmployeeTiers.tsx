@@ -702,15 +702,15 @@ const EmployeeTiers = () => {
           </div>
         ) : (
           <div className="flex-1 min-h-0 overflow-x-auto w-full">
-            <table className="data-table w-full min-w-[980px] table-fixed text-sm">
+            <table className="data-table mx-auto w-full max-w-[1050px] min-w-[980px] table-fixed text-sm">
               <colgroup>
-                <col className="w-[6%]" />
-                <col className="w-[13%]" />
-                <col className="w-[20%]" />
-                <col className="w-[14%]" />
-                <col className="w-[12%]" />
-                <col className="w-[25%]" />
-                <col className="w-[10%]" />
+                <col className="w-[60px]" />
+                <col className="w-[150px]" />
+                <col className="w-[280px]" />
+                <col className="w-[120px]" />
+                <col className="w-[120px]" />
+                <col className="w-[220px]" />
+                <col className="w-[100px]" />
               </colgroup>
               <thead className="bg-muted/50">
                 <tr>
