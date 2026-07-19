@@ -400,6 +400,8 @@ const MonthlyRecord = ({ selectedMonth, selectedYear }: Readonly<MonthlyRecordPr
           open={isBulkDialogOpen}
           onOpenChange={setIsBulkDialogOpen}
           employees={filteredGridData}
+          apps={data?.apps || []}
+          employeeApps={data?.employeeApps || []}
           isSaving={bulkMutation.isPending}
           onSave={({ employeeIds, date, status, check_in, check_out, note }) => {
             bulkMutation.mutate(

@@ -2,13 +2,13 @@ import type React from 'react';
 import { useState, useMemo } from 'react';
 import { useLanguage } from '@app/providers/LanguageContext';
 import { useTranslation } from 'react-i18next';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@shared/components/ui/dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@shared/components/ui/sheet';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/components/ui/select';
 import { Input } from '@shared/components/ui/input';
 import { Label } from '@shared/components/ui/label';
 import { Textarea } from '@shared/components/ui/textarea';
 import { Button } from '@shared/components/ui/button';
-import { Loader2, Search } from 'lucide-react';
+import { Loader2, Search, Filter } from 'lucide-react';
 import { Checkbox } from '@shared/components/ui/checkbox';
 import type { AttendanceStatus, Employee } from './MonthlyRecord';
 import { todayISO } from '@shared/lib/formatters';
@@ -17,6 +17,8 @@ interface BulkAttendanceDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   employees: Employee[];
+  apps: { id: string; name: string }[];
+  employeeApps: { employee_id: string; app_id: string }[];
   isSaving: boolean;
   onSave: (data: {
     employeeIds: string[];
@@ -32,6 +34,8 @@ export function BulkAttendanceDialog({
   open,
   onOpenChange,
   employees,
+  apps,
+  employeeApps,
   isSaving,
   onSave,
 }: Readonly<BulkAttendanceDialogProps>) {
@@ -45,13 +49,23 @@ export function BulkAttendanceDialog({
   const [checkOut, setCheckOut] = useState('');
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [filterAppId, setFilterAppId] = useState<string>('all');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const filteredEmployees = useMemo(() => {
-    if (!searchQuery) return employees;
-    const q = searchQuery.toLowerCase();
-    return employees.filter((e) => e.name.toLowerCase().includes(q));
-  }, [employees, searchQuery]);
+    let result = employees;
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter((e) => e.name.toLowerCase().includes(q));
+    }
+    if (filterAppId !== 'all') {
+      const empIdsWithApp = new Set(
+        employeeApps.filter((ea) => ea.app_id === filterAppId).map((ea) => ea.employee_id)
+      );
+      result = result.filter((e) => empIdsWithApp.has(e.id));
+    }
+    return result;
+  }, [employees, searchQuery, filterAppId, employeeApps]);
 
   const allSelected = filteredEmployees.length > 0 && filteredEmployees.every((e) => selectedIds.has(e.id));
   const someSelected = filteredEmployees.some((e) => selectedIds.has(e.id));
@@ -86,104 +100,130 @@ export function BulkAttendanceDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] flex flex-col max-h-[90vh]" dir={isRTL ? 'rtl' : 'ltr'}>
-        <DialogHeader>
-          <DialogTitle className="text-start">{t('bulkAttendance') || 'تسجيل حضور جماعي'}</DialogTitle>
-          <DialogDescription className="text-start">
-            {t('bulkAttendanceDesc') || 'تسجيل حالة الحضور لعدد من المناديب في يوم واحد.'}
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-2 flex-shrink-0">
-          <div className="space-y-2">
-            <Label>{t('date')}</Label>
-            <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-          </div>
-          <div className="space-y-2">
-            <Label>{t('status')}</Label>
-            <Select value={status} onValueChange={(v) => setStatus(v as AttendanceStatus)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="present">{t('present')}</SelectItem>
-                <SelectItem value="absent">{t('absent')}</SelectItem>
-                <SelectItem value="leave">{t('leave')}</SelectItem>
-                <SelectItem value="sick">{t('sick')}</SelectItem>
-                <SelectItem value="late">{t('late')}</SelectItem>
-                <SelectItem value="none">{t('unspecified')}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label>{t('checkInTime')}</Label>
-            <Input type="time" value={checkIn} onChange={(e) => setCheckIn(e.target.value)} />
-          </div>
-          <div className="space-y-2">
-            <Label>{t('checkOutTime')}</Label>
-            <Input type="time" value={checkOut} onChange={(e) => setCheckOut(e.target.value)} />
-          </div>
-          <div className="sm:col-span-2 space-y-2">
-            <Label>{t('notes')}</Label>
-            <Textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder={t('optionalNotePlaceholder')}
-              rows={2}
-            />
-          </div>
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="left" className="sm:max-w-md w-full flex flex-col p-0" dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className="p-6 pb-4 border-b">
+          <SheetHeader>
+            <SheetTitle className="text-start">{t('bulkAttendance') || 'تسجيل حضور جماعي'}</SheetTitle>
+            <SheetDescription className="text-start">
+              {t('bulkAttendanceDesc') || 'تسجيل حالة الحضور لعدد من المناديب في يوم واحد.'}
+            </SheetDescription>
+          </SheetHeader>
         </div>
 
-        <div className="flex-1 min-h-[200px] flex flex-col overflow-hidden border border-border rounded-md mt-2">
-          <div className="p-2 border-b border-border bg-muted/30">
-            <div className="relative">
-              <Search className="absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input
-                placeholder={t('searchByEmployeeName')}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="ps-9 h-8 text-sm"
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>{t('date')}</Label>
+                <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>{t('status')}</Label>
+                <Select value={status} onValueChange={(v) => setStatus(v as AttendanceStatus)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="present">{t('present')}</SelectItem>
+                    <SelectItem value="absent">{t('absent')}</SelectItem>
+                    <SelectItem value="leave">{t('leave')}</SelectItem>
+                    <SelectItem value="sick">{t('sick')}</SelectItem>
+                    <SelectItem value="late">{t('late')}</SelectItem>
+                    <SelectItem value="none">{t('unspecified')}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>{t('checkInTime')}</Label>
+                <Input type="time" value={checkIn} onChange={(e) => setCheckIn(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>{t('checkOutTime')}</Label>
+                <Input type="time" value={checkOut} onChange={(e) => setCheckOut(e.target.value)} />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>{t('notes')}</Label>
+              <Textarea
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder={t('optionalNotePlaceholder')}
+                rows={2}
               />
             </div>
           </div>
-          <div className="p-2 border-b border-border bg-muted/10 flex items-center justify-between">
-            <label className="flex items-center gap-2 cursor-pointer select-none text-sm font-medium">
-              <Checkbox
-                checked={allSelected}
-                ref={(ref) => {
-                  if (ref) {
-                    ref.indeterminate = !allSelected && someSelected;
-                  }
-                }}
-                onCheckedChange={toggleAll}
-              />
-              <span>{t('selectAll')} ({filteredEmployees.length})</span>
-            </label>
-            <span className="text-xs text-muted-foreground">
-              {t('selectedCount', { count: selectedIds.size }) || `محدد: ${selectedIds.size}`}
-            </span>
-          </div>
-          <div className="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar">
-            {filteredEmployees.length === 0 ? (
-              <div className="p-4 text-center text-sm text-muted-foreground">
-                {t('noMatchingEmployees')}
+
+          <div className="flex flex-col flex-1 min-h-[400px] border border-border rounded-md">
+            <div className="p-3 border-b border-border bg-muted/30 space-y-3">
+              <div className="relative">
+                <Search className="absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Input
+                  placeholder={t('searchByEmployeeName')}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="ps-9 h-9 text-sm"
+                />
               </div>
-            ) : (
-              filteredEmployees.map((emp) => (
-                <label
-                  key={emp.id}
-                  className="flex items-center gap-3 p-2 hover:bg-muted/50 rounded cursor-pointer transition-colors"
-                >
-                  <Checkbox checked={selectedIds.has(emp.id)} onCheckedChange={() => toggleOne(emp.id)} />
-                  <span className="text-sm">{emp.name}</span>
-                </label>
-              ))
-            )}
+              <div className="flex items-center gap-2">
+                <Filter className="w-4 h-4 text-muted-foreground" />
+                <Select value={filterAppId} onValueChange={setFilterAppId}>
+                  <SelectTrigger className="h-8 text-sm">
+                    <SelectValue placeholder={t('filterByApp') || 'تصفية حسب التطبيق'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t('allApps') || 'جميع التطبيقات'}</SelectItem>
+                    {apps.map((app) => (
+                      <SelectItem key={app.id} value={app.id}>{app.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="p-2 border-b border-border bg-muted/10 flex items-center justify-between">
+              <label className="flex items-center gap-2 cursor-pointer select-none text-sm font-medium">
+                <Checkbox
+                  checked={allSelected}
+                  ref={(ref) => {
+                    if (ref) {
+                      ref.indeterminate = !allSelected && someSelected;
+                    }
+                  }}
+                  onCheckedChange={toggleAll}
+                />
+                <span>{t('selectAll')} ({filteredEmployees.length})</span>
+              </label>
+              <span className="text-xs text-muted-foreground">
+                {t('selectedCount', { count: selectedIds.size }) || `محدد: ${selectedIds.size}`}
+              </span>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar">
+              {filteredEmployees.length === 0 ? (
+                <div className="p-4 text-center text-sm text-muted-foreground">
+                  {t('noMatchingEmployees')}
+                </div>
+              ) : (
+                filteredEmployees.map((emp) => (
+                  <label
+                    key={emp.id}
+                    className="flex items-center gap-3 p-2 hover:bg-muted/50 rounded cursor-pointer transition-colors"
+                  >
+                    <Checkbox checked={selectedIds.has(emp.id)} onCheckedChange={() => toggleOne(emp.id)} />
+                    <span className="text-sm">{emp.name}</span>
+                  </label>
+                ))
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="flex justify-end gap-2 pt-4 flex-shrink-0">
+        <div className="p-6 border-t bg-background mt-auto flex justify-end gap-2">
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSaving}>
             {t('cancel')}
           </Button>
@@ -192,7 +232,7 @@ export function BulkAttendanceDialog({
             {t('saveRecord')}
           </Button>
         </div>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 }
