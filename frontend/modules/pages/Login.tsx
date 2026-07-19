@@ -1,4 +1,4 @@
-import { useState, useEffect, type Dispatch, type FormEvent, type SetStateAction, useMemo } from 'react';
+import { useState, useEffect, useLayoutEffect, type Dispatch, type FormEvent, type SetStateAction, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@app/providers/AuthContext';
 import { ThemeToggle } from '@shared/components/ThemeToggle';
@@ -149,8 +149,11 @@ function useLoginLogic() {
   const [capsLock, setCapsLock] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setMounted(true);
+  }, []);
+
+  useEffect(() => {
     fetchSettingsSafely(setSettings);
   }, []);
 

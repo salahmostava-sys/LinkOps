@@ -12,7 +12,7 @@ const PublicLayout = ({ children }: Readonly<PublicLayoutProps>) => {
     <AuthLayout>
       <Suspense
         fallback={
-          <Loading minHeightClassName="min-h-[300px]" className="bg-background" resetKey="public" />
+          <Loading minHeightClassName="min-h-screen" className="bg-background" resetKey="public" />
         }
       >
         {children}
