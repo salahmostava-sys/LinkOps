@@ -24,7 +24,7 @@ import {
   EMPLOYEE_INTL_PHONE_DIGITS,
   EMPLOYEE_NATIONAL_ID_DIGITS,
 } from '@modules/employees/model/employeeFieldValidation';
-import { getSaudiBankName, isValidIBAN, formatIBAN } from '@shared/lib/banks';
+import { getSaudiBankName, isValidIBAN } from '@shared/lib/banks';
 import {
   AddEmployeeModalProps as Props,
   STEPS,

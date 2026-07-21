@@ -23,7 +23,7 @@ import {
   InlineSelectEditor,
 } from "@modules/employees/components/EmployeeInlineEditors";
 import { PlatformAppsEditor } from "@modules/employees/components/PlatformAppsEditor";
-import { getSaudiBankName, formatIBAN } from "@shared/lib/banks";
+import { getSaudiBankName } from "@shared/lib/banks";
 import {
   dayColorByThreshold,
   probationColor,

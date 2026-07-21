@@ -68,7 +68,7 @@ export function isValidIBAN(iban: string | null | undefined): boolean {
   
   try {
     return BigInt(numericString) % 97n === 1n;
-  } catch (e) {
+  } catch {
     return false;
   }
 }
