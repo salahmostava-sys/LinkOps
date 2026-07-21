@@ -103,6 +103,7 @@ export interface PerformanceDashboardResponse {
     avgOrdersPerRider: number;
   }>;
   rankings: {
+    allPerformers: PerformanceRankingEntry[];
     topPerformers: PerformanceRankingEntry[];
     lowPerformers: PerformanceRankingEntry[];
     mostImproved: PerformanceRankingEntry[];
@@ -252,6 +253,7 @@ function mapRpcToDashboardResponse(raw: any): PerformanceDashboardResponse {
   const sorted = [...leaderboard].sort(
     (a, b) => Number(b.totalOrders ?? b.total_orders ?? 0) - Number(a.totalOrders ?? a.total_orders ?? 0),
   );
+  const allPerformers = sorted.map((entry, index) => mapEntry(entry, index));
   const topPerformers = sorted.slice(0, 20).map((entry, index) => mapEntry(entry, index));
   const lowPerformers = [...sorted].reverse().slice(0, 20).map((entry, index) => mapEntry(entry, index));
   const mostImproved = [...leaderboard]
@@ -323,7 +325,7 @@ function mapRpcToDashboardResponse(raw: any): PerformanceDashboardResponse {
     summary: {
       totalOrders: Number(s.totalOrders ?? s.total_orders ?? 0),
       activeRiders: Number(s.activeRiders ?? s.active_riders ?? 0),
-      activeEmployees: Number(s.totalRiders ?? s.total_riders ?? s.activeRiders ?? 0),
+      activeEmployees: Number(s.totalEmployees ?? s.total_employees ?? s.totalRiders ?? s.total_riders ?? s.activeRiders ?? 0),
       avgOrdersPerRider: Number(s.avgOrdersPerRider ?? s.avg_orders_per_rider ?? 0),
       topPerformerToday: topRiderToday
         ? {
@@ -399,6 +401,7 @@ function mapRpcToDashboardResponse(raw: any): PerformanceDashboardResponse {
         }))
       : [],
     rankings: {
+      allPerformers,
       topPerformers,
       lowPerformers,
       mostImproved,
@@ -433,7 +436,7 @@ function buildEmptyDashboardResponse(): PerformanceDashboardResponse {
     ordersByCity: [],
     dailyTrend: [],
     monthlyTrend: [],
-    rankings: { topPerformers: [], lowPerformers: [], mostImproved: [], mostDeclined: [] },
+    rankings: { allPerformers: [], topPerformers: [], lowPerformers: [], mostImproved: [], mostDeclined: [] },
     alerts: [],
   };
 }

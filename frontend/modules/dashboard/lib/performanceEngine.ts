@@ -65,6 +65,7 @@ export interface FleetPerformanceSummary {
   totalOrders: number;
   totalOrdersDelta: ComparisonResult;
   activeRiders: number;
+  activeEmployees: number;
   avgOrdersPerRider: number;
   avgOrdersPerActiveDay: number;
   projectedOrders: number | null;
@@ -366,18 +367,7 @@ export function buildFleetSummary(
   const { summary, comparison, distribution, rankings } = dashboard;
 
   // Build profiles for all performers
-  const allEntries = [
-    ...rankings.topPerformers,
-    ...rankings.lowPerformers,
-  ];
-  // Deduplicate by employeeId
-  const seen = new Set<string>();
-  const uniqueEntries = allEntries.filter((e) => {
-    if (seen.has(e.employeeId)) return false;
-    seen.add(e.employeeId);
-    return true;
-  });
-
+  const uniqueEntries = rankings.allPerformers;
   const profiles = buildRiderProfiles(uniqueEntries);
   const avgScore =
     profiles.length > 0
@@ -410,6 +400,7 @@ export function buildFleetSummary(
       comparison.month.previousOrders,
     ),
     activeRiders: summary.activeRiders,
+    activeEmployees: summary.activeEmployees,
     avgOrdersPerRider: summary.avgOrdersPerRider,
     avgOrdersPerActiveDay,
     projectedOrders,
