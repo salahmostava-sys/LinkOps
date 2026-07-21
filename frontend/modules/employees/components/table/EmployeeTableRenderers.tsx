@@ -215,9 +215,10 @@ function renderExpiryDateCell(key: string, field: string, ctx: CellContext): Rea
           <div className="flex flex-col items-center gap-0.5">
             <span className={`text-xs ${color}`}>{formatDateCell(expiry)}</span>
             {days !== null && (() => {
-                const expiryKey = days < 0
-                  ? (key === 'health_insurance_expiry' ? 'expiredDaysAgoMasculine' : 'expiredDaysAgo')
-                  : 'remainingDays';
+                let expiryKey = 'remainingDays';
+                if (days < 0) {
+                  expiryKey = key === 'health_insurance_expiry' ? 'expiredDaysAgoMasculine' : 'expiredDaysAgo';
+                }
                 return (
                   <span className={`text-[10px] ${color}`}>
                     {t(expiryKey, { count: Math.abs(days) })}

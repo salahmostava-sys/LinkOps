@@ -206,9 +206,10 @@ function EmployeeDetailedTableInner() {
                     })
                   : null;
 
-                const ariaSort = sortField === col.key
-                  ? (sortDir === 'asc' ? 'ascending' : 'descending')
-                  : 'none';
+                let ariaSort: 'ascending' | 'descending' | 'none' = 'none';
+                if (sortField === col.key) {
+                  ariaSort = sortDir === 'asc' ? 'ascending' : 'descending';
+                }
 
                 return (
                   <th
