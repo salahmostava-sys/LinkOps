@@ -34,15 +34,18 @@ export const AppCard = ({
 }: Readonly<AppCardProps>) => {
   const isActiveInMonth = app.is_active_this_month;
   const { t } = useTranslation();
-  const workTypeLabel = app.work_type === 'shift'
-    ? t('workTypeShift')
-    : app.work_type === 'hybrid'
-      ? t('workTypeHybrid')
-      : t('workTypeOrders');
+  let workTypeLabel: string;
+  if (app.work_type === 'shift') {
+    workTypeLabel = t('workTypeShift');
+  } else if (app.work_type === 'hybrid') {
+    workTypeLabel = t('workTypeHybrid');
+  } else {
+    workTypeLabel = t('workTypeOrders');
+  }
 
   return (
-    <div
-      role="button"
+    <button
+      type="button"
       onClick={() => isActiveInMonth && onSelect(app)}
       onKeyDown={(event) => {
         if (isActiveInMonth && (event.key === 'Enter' || event.key === ' ')) {
@@ -164,7 +167,7 @@ export const AppCard = ({
           </div>
         )}
       </div>
-    </div>
+    </button>
   );
 };
 

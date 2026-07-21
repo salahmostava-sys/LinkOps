@@ -93,7 +93,7 @@ export function isValidIBAN(iban: string | null | undefined): boolean {
   // Saudi IBAN is exactly 24 chars. We can generalize if needed, but for now focus on SA.
   // Actually, standard IBAN validation handles any country if length is correct.
   // Let's just check if it matches basic alphanumeric format.
-  if (!/^[A-Z]{2}[0-9]{2}[A-Z0-9]{4,30}$/.test(cleanIban)) return false;
+  if (!/^[A-Z]{2}\d{2}[A-Z\d]{4,30}$/.test(cleanIban)) return false;
   
   // For SA specifically, it must be 24 chars
   if (cleanIban.startsWith('SA') && cleanIban.length !== 24) return false;
@@ -103,7 +103,7 @@ export function isValidIBAN(iban: string | null | undefined): boolean {
   
   // Convert letters to numbers (A=10, B=11, ... Z=35)
   const numericString = rearranged.replace(/[A-Z]/g, (match) => {
-    return (match.charCodeAt(0) - 55).toString();
+    return ((match.codePointAt(0) ?? 0) - 55).toString();
   });
   
   try {

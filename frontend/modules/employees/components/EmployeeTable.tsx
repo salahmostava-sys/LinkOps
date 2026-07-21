@@ -206,10 +206,14 @@ function EmployeeDetailedTableInner() {
                     })
                   : null;
 
+                const ariaSort = sortField === col.key
+                  ? (sortDir === 'asc' ? 'ascending' : 'descending')
+                  : 'none';
+
                 return (
                   <th
                     key={col.key}
-                    aria-sort={sortField === col.key ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'}
+                    aria-sort={ariaSort}
                     className={`ta-th !px-1 select-none whitespace-nowrap text-center ${col.key === "seq" ? "w-10 !px-1 text-center" : ""}`}
                   >
                     <div className="relative flex min-w-0 items-center justify-center">

@@ -104,16 +104,27 @@ async function fetchRememberedEmailSafely(
   }
 }
 
-async function performLoginAction(
-  email: string,
-  password: string,
-  rememberMe: boolean,
-  signIn: (e: string, p: string) => Promise<{ error: { message: string } | null }>,
-  setLoading: (l: boolean) => void,
-  setLoginError: (err: string) => void,
-  navigate: (path: string, opts?: { replace?: boolean }) => void,
-  t: TFunction,
-) {
+interface LoginActionParams {
+  email: string;
+  password: string;
+  rememberMe: boolean;
+  signIn: (e: string, p: string) => Promise<{ error: { message: string } | null }>;
+  setLoading: (l: boolean) => void;
+  setLoginError: (err: string) => void;
+  navigate: (path: string, opts?: { replace?: boolean }) => void;
+  t: TFunction;
+}
+
+async function performLoginAction({
+  email,
+  password,
+  rememberMe,
+  signIn,
+  setLoading,
+  setLoginError,
+  navigate,
+  t,
+}: LoginActionParams) {
   setLoading(true);
   let error: { message: string } | null;
   try {
@@ -167,7 +178,7 @@ function useLoginLogic() {
     e.preventDefault();
     setLoginError('');
     if (!email || !password) return;
-    await performLoginAction(email, password, rememberMe, signIn, setLoading, setLoginError, navigate, t);
+    await performLoginAction({ email, password, rememberMe, signIn, setLoading, setLoginError, navigate, t });
   };
 
   return {

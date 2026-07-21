@@ -165,21 +165,9 @@ const MonthlyRecord = ({ selectedMonth, selectedYear }: Readonly<MonthlyRecordPr
   const [selectedAppId, setSelectedAppId] = useState<string>('all');
 
   const bulkMutation = useMutation({
-    mutationFn: async (payloads: Array<{
-      employee_id: string;
-      date: string;
-      status: 'present' | 'absent' | 'leave' | 'sick' | 'late' | 'none';
-      check_in: string | null;
-      check_out: string | null;
-      note: string | null;
-    }>) => {
-      const validPayloads = payloads.filter(p => p.status !== 'none') as Array<{
-        employee_id: string;
-        date: string;
-        status: 'present' | 'absent' | 'leave' | 'sick' | 'late';
-        check_in: string | null;
-        check_out: string | null;
-        note: string | null;
+    mutationFn: async (payloads: Array<CellData>) => {
+      const validPayloads = payloads.filter(p => p.status !== 'none') as Array<Omit<CellData, 'status'> & {
+        status: Exclude<AttendanceStatus, 'none'>;
       }>;
       const deletePayloads = payloads.filter(p => p.status === 'none');
       
