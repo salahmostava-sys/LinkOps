@@ -107,6 +107,7 @@ export function EmployeeActionsBar({
               <Search size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
               <input
                 type="text"
+                aria-label={t('searchEmployee')}
                 placeholder={t('searchEmployee')}
                 value={colFilters.name ?? ''}
                 onChange={e => setColFilter('name', e.target.value)}
@@ -214,7 +215,7 @@ export function EmployeeActionsBar({
             return (
               <span key={key} className="inline-flex items-center gap-1 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
                 {colLabel}: {displayVal}
-                <button type="button" aria-label={t('removeFilter')} onClick={() => setColFilter(key, '')} className="hover:text-destructive"><X size={10} /></button>
+                <button type="button" aria-label={`${t('removeFilter')}: ${colLabel}`} onClick={() => setColFilter(key, '')} className="hover:bg-destructive/10 hover:text-destructive inline-flex h-11 w-11 items-center justify-center rounded-md sm:h-8 sm:w-8 transition-colors"><X size={12} /></button>
               </span>
             );
           })}

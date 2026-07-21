@@ -143,6 +143,7 @@ function EmployeeDetailedTableInner() {
     if (!permissions.can_edit) return display;
     return (
       <InlineInputEditor
+        ariaLabel={`${t('edit')} ${options?.placeholder || field}`}
         value={value || ""}
         inputType={options?.inputType || "text"}
         dir={options?.dir || "auto"}
@@ -166,6 +167,7 @@ function EmployeeDetailedTableInner() {
     if (!permissions.can_edit) return displayNode;
     return (
       <InlineInputEditor
+        ariaLabel={`${t('edit')} ${field}`}
         value={getDateInputValue(value)}
         inputType="date"
         dir="ltr"
@@ -207,13 +209,14 @@ function EmployeeDetailedTableInner() {
                 return (
                   <th
                     key={col.key}
+                    aria-sort={sortField === col.key ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'}
                     className={`ta-th !px-1 select-none whitespace-nowrap text-center ${col.key === "seq" ? "w-10 !px-1 text-center" : ""}`}
                   >
                     <div className="relative flex min-w-0 items-center justify-center">
                       {col.sortable ? (
                         <button
                           type="button"
-                          className="flex w-full min-w-0 items-center justify-center gap-1.5 bg-transparent px-2 text-current cursor-pointer hover:opacity-80"
+                          className="flex w-full min-w-0 items-center justify-center gap-1.5 bg-transparent px-2 text-current cursor-pointer hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded"
                           onClick={() => handleSort(col.key)}
                           title={t('sortBy', { label: columnLabel })}
                         >

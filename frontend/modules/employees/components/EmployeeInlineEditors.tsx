@@ -133,6 +133,7 @@ export type InlineInputEditorProps = Readonly<{
   inputType?: 'text' | 'email' | 'date';
   dir?: 'rtl' | 'ltr' | 'auto';
   placeholder?: string;
+  ariaLabel?: string;
 }>;
 
 export function InlineInputEditor({
@@ -142,6 +143,7 @@ export function InlineInputEditor({
   inputType = 'text',
   dir = 'auto',
   placeholder = '',
+  ariaLabel,
 }: Readonly<InlineInputEditorProps>) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -169,6 +171,7 @@ export function InlineInputEditor({
       <div className="space-y-3">
         <Input
           type={inputType}
+          aria-label={ariaLabel}
           value={draft}
           dir={dir}
           placeholder={placeholder}

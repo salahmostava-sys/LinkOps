@@ -92,7 +92,7 @@ export function PlatformAppsEditor({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <button type="button" className="mx-auto flex w-full items-center justify-center gap-1 flex-wrap transition-opacity hover:opacity-80">
+        <button type="button" aria-label={t('manageEmployeeApps')} aria-haspopup="dialog" aria-expanded={open} className="mx-auto flex w-full items-center justify-center gap-1 flex-wrap transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded">
           {currentApps.length > 0 ? (
             currentApps.map(app => (
               <span

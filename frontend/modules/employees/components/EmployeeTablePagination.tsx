@@ -32,7 +32,7 @@ export function EmployeeTablePagination({ page, setPage, pageSize, setPageSize, 
           value={String(pageSize)}
           onValueChange={(v) => { setPageSize(Number(v)); setPage(1); }}
         >
-          <SelectTrigger className="h-7 w-20 text-xs"><SelectValue /></SelectTrigger>
+          <SelectTrigger aria-label={t('rowsPerPage')} className="h-7 w-20 text-xs"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="25">25</SelectItem>
             <SelectItem value="50">50</SelectItem>
@@ -47,11 +47,11 @@ export function EmployeeTablePagination({ page, setPage, pageSize, setPageSize, 
           {t('paginationRange', { from: rangeStart, to: rangeEnd, total: filteredCount })}
         </span>
         <div className="flex items-center gap-1">
-          <Button aria-label={t('firstPage')} variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => setPage(1)} disabled={page === 1}>{isRTL ? '»' : '«'}</Button>
-          <Button aria-label={t('previousPage')} variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => setPage(p => p - 1)} disabled={page === 1}><PreviousIcon size={12} /></Button>
+          <Button aria-label={t('firstPage')} variant="outline" size="sm" className="h-11 w-11 sm:h-9 sm:w-9 p-0" onClick={() => setPage(1)} disabled={page === 1}>{isRTL ? '»' : '«'}</Button>
+          <Button aria-label={t('previousPage')} variant="outline" size="sm" className="h-11 w-11 sm:h-9 sm:w-9 p-0" onClick={() => setPage(p => p - 1)} disabled={page === 1}><PreviousIcon size={12} /></Button>
           <span className="text-xs text-muted-foreground px-2 min-w-[70px] text-center">{t('pageOfPages', { page, total: totalPages })}</span>
-          <Button aria-label={t('nextPageLabel')} variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => setPage(p => p + 1)} disabled={page >= totalPages}><NextIcon size={12} /></Button>
-          <Button aria-label={t('lastPage')} variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => setPage(totalPages)} disabled={page >= totalPages}>{isRTL ? '«' : '»'}</Button>
+          <Button aria-label={t('nextPageLabel')} variant="outline" size="sm" className="h-11 w-11 sm:h-9 sm:w-9 p-0" onClick={() => setPage(p => p + 1)} disabled={page >= totalPages}><NextIcon size={12} /></Button>
+          <Button aria-label={t('lastPage')} variant="outline" size="sm" className="h-11 w-11 sm:h-9 sm:w-9 p-0" onClick={() => setPage(totalPages)} disabled={page >= totalPages}>{isRTL ? '«' : '»'}</Button>
         </div>
       </div>
     </div>
