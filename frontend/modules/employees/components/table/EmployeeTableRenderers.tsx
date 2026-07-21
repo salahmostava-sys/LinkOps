@@ -23,6 +23,7 @@ import {
   InlineSelectEditor,
 } from "@modules/employees/components/EmployeeInlineEditors";
 import { PlatformAppsEditor } from "@modules/employees/components/PlatformAppsEditor";
+import { getSaudiBankName } from "@shared/lib/banks";
 import {
   dayColorByThreshold,
   probationColor,
@@ -385,7 +386,21 @@ export function renderEmployeeCell(ctx: CellContext): React.ReactNode {
     case "health_insurance_expiry":
     case "license_expiry":
       return renderEmployeeDatesCell(ctx);
-    case "bank_account_number": return <td key="bank_account_number" className="ta-td employee-ltr-cell !px-1" dir="ltr">{renderTextValue(emp.bank_account_number, { dir: "ltr", className: "employee-ltr-value tabular-nums" })}</td>;
+    case "bank_account_number": {
+      const bankName = getSaudiBankName(emp.bank_account_number);
+      return (
+        <td key="bank_account_number" className="ta-td employee-ltr-cell !px-1" dir="ltr">
+          <div className="flex flex-col items-center justify-center text-center">
+            {renderTextValue(emp.bank_account_number, { dir: "ltr", className: "employee-ltr-value tabular-nums" })}
+            {bankName && (
+              <span className="text-[10px] text-primary bg-primary/10 px-1.5 py-0.5 rounded-sm mt-0.5 whitespace-nowrap">
+                🏦 {bankName}
+              </span>
+            )}
+          </div>
+        </td>
+      );
+    }
     case "actions": return renderActionsCell(ctx);
     default: return <td key={(col as { key: string }).key} className="ta-td !px-1">{EMPTY_DATA_PLACEHOLDER}</td>;
   }
