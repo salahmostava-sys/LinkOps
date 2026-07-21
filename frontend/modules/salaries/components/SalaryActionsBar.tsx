@@ -30,6 +30,8 @@ interface SalaryActionsBarProps {
   openTemplateEditor: () => void;
 }
 
+import { loadXlsx, loadJsPdf } from '@modules/salaries/lib/salaryPdfLoaders';
+
 export function SalaryActionsBar(props: Readonly<SalaryActionsBarProps>) {
   const {
     search,
@@ -98,7 +100,17 @@ export function SalaryActionsBar(props: Readonly<SalaryActionsBarProps>) {
         )}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button size="sm" variant="outline" className="gap-1.5 h-9"><FolderOpen size={14} /> ملفات</Button>
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="gap-1.5 h-9"
+              onMouseEnter={() => {
+                loadXlsx();
+                loadJsPdf();
+              }}
+            >
+              <FolderOpen size={14} /> ملفات
+            </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={runExportExcel} disabled={salaryActionLoading}>
