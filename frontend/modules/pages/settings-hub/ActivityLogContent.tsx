@@ -307,6 +307,13 @@ export default function ActivityLogContent() {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
+  // Wrappers: reset page to 0 when any filter changes (avoids double re-render from useEffect)
+  const handleSetFilterAction = (v: string) => { setFilterAction(v); setPage(0); setExpandedId(null); };
+  const handleSetFilterTable  = (v: string) => { setFilterTable(v); setPage(0); setExpandedId(null); };
+  const handleSetFilterUserId = (v: string) => { setFilterUserId(v); setPage(0); setExpandedId(null); };
+  const handleSetSearch       = (v: string) => { setSearch(v); setPage(0); };
+  const handleSetPage         = (n: number) => { setPage(n); setExpandedId(null); };
+
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search), 400);
     return () => clearTimeout(timer);
@@ -376,8 +383,7 @@ export default function ActivityLogContent() {
     setTotalCount(logsData?.total || 0);
   }, [logsData]);
 
-  useEffect(() => { setPage(0); }, [filterAction, filterTable, filterUserId, debouncedSearch]);
-  useEffect(() => { setExpandedId(null); }, [page]);
+
 
   const referenceLabels = logsData?.referenceLabels ?? {};
 
@@ -467,7 +473,7 @@ export default function ActivityLogContent() {
           <Search size={13} className={`absolute top-1/2 -translate-y-1/2 text-muted-foreground ${isRTL ? 'right-3' : 'left-3'}`} />
           <Input
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={e => handleSetSearch(e.target.value)}
             placeholder="بحث في الجداول أو معرف السجل..."
             className={`h-8 text-sm ${isRTL ? 'pr-8' : 'pl-8'}`}
           />
@@ -475,7 +481,7 @@ export default function ActivityLogContent() {
 
         {/* User filter */}
         {auditUsers.length > 0 && (
-          <Select value={filterUserId} onValueChange={setFilterUserId}>
+          <Select value={filterUserId} onValueChange={handleSetFilterUserId}>
             <SelectTrigger className="h-8 text-xs w-44">
               <User size={11} className="me-1 text-muted-foreground flex-shrink-0" />
               <SelectValue placeholder="كل المستخدمين" />
@@ -492,7 +498,7 @@ export default function ActivityLogContent() {
         )}
 
         {/* Action filter */}
-        <Select value={filterAction} onValueChange={setFilterAction}>
+        <Select value={filterAction} onValueChange={handleSetFilterAction}>
           <SelectTrigger className="h-8 text-xs w-32"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">كل العمليات</SelectItem>
@@ -503,7 +509,7 @@ export default function ActivityLogContent() {
         </Select>
 
         {/* Table filter */}
-        <Select value={filterTable} onValueChange={setFilterTable}>
+        <Select value={filterTable} onValueChange={handleSetFilterTable}>
           <SelectTrigger className="h-8 text-xs w-44"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">كل الوحدات</SelectItem>
@@ -802,7 +808,7 @@ export default function ActivityLogContent() {
             </p>
             <div className="flex items-center gap-1">
               <button type="button"
-                onClick={() => setPage(p => Math.max(0, p - 1))}
+                onClick={() => handleSetPage(Math.max(0, page - 1))}
                 disabled={page === 0}
                 className="h-7 w-7 flex items-center justify-center rounded-lg border border-border disabled:opacity-40 hover:bg-muted transition-colors"
               >
@@ -812,7 +818,7 @@ export default function ActivityLogContent() {
                 {page + 1} / {totalPages}
               </span>
               <button type="button"
-                onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+                onClick={() => handleSetPage(Math.min(totalPages - 1, page + 1))}
                 disabled={page >= totalPages - 1}
                 className="h-7 w-7 flex items-center justify-center rounded-lg border border-border disabled:opacity-40 hover:bg-muted transition-colors"
               >

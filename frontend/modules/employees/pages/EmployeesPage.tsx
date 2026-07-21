@@ -183,7 +183,7 @@ const Employees = () => {
     return () => document.removeEventListener('visibilitychange', onVis);
   }, [refetchEmployees]);
 
-  useEffect(() => { setPage(1); }, [colFilters, sortField, sortDir]);
+
 
   useEffect(() => {
     return () => {
@@ -227,6 +227,10 @@ const Employees = () => {
     statusDateDialog, statusDate, setStatusDateSaving, setStatusDateDialog,
     tableRef, colFilters, setColFilters,
   });
+
+  // Wrappers: reset page when sort/filter changes (avoids double re-render from useEffect)
+  const handleSortWithPageReset: typeof handleSort = (...args) => { handleSort(...args); setPage(1); };
+  const setColFilterWithPageReset: typeof setColFilter = (...args) => { setColFilter(...args); setPage(1); };
 
   const activeCols = useMemo(
     () => ALL_COLUMNS.filter(c => visibleCols.has(c.key)),
@@ -378,7 +382,7 @@ const Employees = () => {
         uploadLiveStats={uploadLiveStats}
         hasActiveFilters={hasActiveFilters}
         colFilters={colFilters}
-        setColFilter={setColFilter}
+        setColFilter={setColFilterWithPageReset}
         setColFilters={setColFilters}
         filteredCount={filtered.length}
         totalCount={data.length}
@@ -389,7 +393,7 @@ const Employees = () => {
         colFilters={colFilters}
         sortField={sortField}
         sortDir={sortDir}
-        handleSort={handleSort}
+        handleSort={handleSortWithPageReset}
         paginated={paginated}
         filteredCount={filtered.length}
         loading={isTableLoading}
@@ -408,7 +412,7 @@ const Employees = () => {
         setStatusDate={setStatusDate}
         permissions={permissions}
         uniqueVals={uniqueVals}
-        setColFilter={setColFilter}
+        setColFilter={setColFilterWithPageReset}
         tableRef={tableRef}
         refetchEmployees={refetchEmployees}
         presenceActiveRows={presence.activeRows}
