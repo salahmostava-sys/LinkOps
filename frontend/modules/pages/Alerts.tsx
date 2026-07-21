@@ -609,7 +609,7 @@ const Alerts = () => {
 
       <section className="grid grid-cols-2 gap-3 lg:grid-cols-5" aria-label="ملخص التنبيهات">
         <button type="button"
-          className="stat-card text-start w-full border-r-4 border-r-primary cursor-pointer hover:shadow-card-hover transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+          className="stat-card text-start w-full cursor-pointer hover:shadow-card-hover transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
           onClick={() => setAttentionFilter('all')}
           aria-pressed={attentionFilter === 'all'}
         >
@@ -621,7 +621,7 @@ const Alerts = () => {
           <p className="mt-1 text-xs text-muted-foreground">كل الاستحقاقات المفتوحة</p>
         </button>
         <button type="button"
-          className="stat-card text-start w-full border-r-4 border-r-destructive cursor-pointer hover:shadow-card-hover transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+          className="stat-card text-start w-full cursor-pointer hover:shadow-card-hover transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
           onClick={() => setAttentionFilter(attentionFilter === 'overdue' ? 'all' : 'overdue')}
           aria-pressed={attentionFilter === 'overdue'}
         >
@@ -633,7 +633,7 @@ const Alerts = () => {
           <p className="mt-1 text-xs text-muted-foreground">تجاوزت تاريخ الاستحقاق</p>
         </button>
         <button type="button"
-          className="stat-card text-start w-full border-r-4 border-r-warning cursor-pointer hover:shadow-card-hover transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+          className="stat-card text-start w-full cursor-pointer hover:shadow-card-hover transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
           onClick={() => setAttentionFilter(attentionFilter === 'due_7_days' ? 'all' : 'due_7_days')}
           aria-pressed={attentionFilter === 'due_7_days'}
         >
@@ -645,7 +645,7 @@ const Alerts = () => {
           <p className="mt-1 text-xs text-muted-foreground">تشمل المستحق اليوم</p>
         </button>
         <button type="button"
-          className="stat-card text-start w-full border-r-4 border-r-muted-foreground cursor-pointer hover:shadow-card-hover transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+          className="stat-card text-start w-full cursor-pointer hover:shadow-card-hover transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
           onClick={() => setAttentionFilter(attentionFilter === 'unassigned' ? 'all' : 'unassigned')}
           aria-pressed={attentionFilter === 'unassigned'}
         >
@@ -657,7 +657,7 @@ const Alerts = () => {
           <p className="mt-1 text-xs text-muted-foreground">تحتاج تحديد مسؤول</p>
         </button>
         <button type="button"
-          className="stat-card col-span-2 text-start w-full border-r-4 border-r-success cursor-pointer hover:shadow-card-hover transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 lg:col-span-1"
+          className="stat-card col-span-2 text-start w-full cursor-pointer hover:shadow-card-hover transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 lg:col-span-1"
           onClick={() => setTypeFilter(typeFilter === 'expired_residency_cost' ? 'all' : 'expired_residency_cost')}
           aria-pressed={typeFilter === 'expired_residency_cost'}
         >

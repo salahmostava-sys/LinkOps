@@ -1,4 +1,4 @@
-﻿import { useMemo } from 'react';
+import { useMemo } from 'react';
 import { Wallet, TrendingUp, Users, Building2, Package, Clock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -88,7 +88,7 @@ export function SalarySummaryCards(props: Readonly<SalarySummaryCardsProps>) {
 
   return (
     <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(auto-fit, minmax(160px, 1fr))` }}>
-      <div className="bg-card border-t-4 border-primary p-4 shadow-card rounded-2xl">
+      <div className="bg-card p-4 shadow-card rounded-2xl">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <p className="text-xs text-muted-foreground leading-tight">إجمالي الرواتب</p>
@@ -104,7 +104,7 @@ export function SalarySummaryCards(props: Readonly<SalarySummaryCardsProps>) {
       {platforms.map(p => {
         const pc = platformColors[p];
         return (
-          <div key={p} className="bg-card p-4 shadow-card border-t-4 rounded-2xl" style={{ borderTopColor: pc?.header || 'hsl(var(--primary))' }}>
+          <div key={p} className="bg-card p-4 shadow-card rounded-2xl">
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
                 <p className="text-xs text-muted-foreground leading-tight truncate">{p}</p>
@@ -119,7 +119,7 @@ export function SalarySummaryCards(props: Readonly<SalarySummaryCardsProps>) {
         );
       })}
 
-      <div className="bg-card border-t-4 border-muted-foreground/30 p-4 shadow-card rounded-2xl">
+      <div className="bg-card p-4 shadow-card rounded-2xl">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <p className="text-xs text-muted-foreground leading-tight">الرواتب الإدارية</p>

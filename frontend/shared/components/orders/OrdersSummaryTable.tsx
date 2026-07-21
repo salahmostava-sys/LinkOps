@@ -9,12 +9,12 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@share
 type PerfLevel = { label: string; color: string; bg: string };
 
 function getPerformanceLevel(dailyAvg: number): PerfLevel {
-  if (dailyAvg >= 35) return { label: 'ممتاز', color: 'text-success', bg: 'bg-success/10' };
-  if (dailyAvg >= 25) return { label: 'جيد جداً', color: 'text-primary', bg: 'bg-primary/10' };
-  if (dailyAvg >= 18) return { label: 'جيد', color: 'text-info', bg: 'bg-info/10' };
-  if (dailyAvg >= 10) return { label: 'متوسط', color: 'text-warning', bg: 'bg-warning/10' };
-  if (dailyAvg >= 1) return { label: 'ضعيف', color: 'text-destructive', bg: 'bg-destructive/10' };
-  return { label: '—', color: 'text-muted-foreground', bg: '' };
+  if (dailyAvg >= 35) return { label: 'ممتاز', color: 'text-emerald-700 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-950/50' };
+  if (dailyAvg >= 25) return { label: 'جيد جداً', color: 'text-brand-700 dark:text-brand-400', bg: 'bg-brand-50 dark:bg-brand-900/30' };
+  if (dailyAvg >= 18) return { label: 'جيد', color: 'text-sky-700 dark:text-sky-400', bg: 'bg-sky-50 dark:bg-sky-950/50' };
+  if (dailyAvg >= 10) return { label: 'متوسط', color: 'text-amber-700 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-950/50' };
+  if (dailyAvg >= 1) return { label: 'ضعيف', color: 'text-rose-700 dark:text-rose-400', bg: 'bg-rose-50 dark:bg-rose-950/50' };
+  return { label: '—', color: 'text-muted-foreground', bg: 'bg-muted/30' };
 }
 
 type Employee = { id: string; name: string };
@@ -65,8 +65,8 @@ export const OrdersSummaryTable = ({
     <table className="dense-grid-table w-full">
       <thead>
         <tr className="border-b-2 border-border bg-muted/40">
-          <th className="ta-th p-3 w-10 text-center align-middle">#</th>
-          <th className="ta-th p-3 text-foreground text-center align-middle min-w-[110px] cursor-pointer" onClick={() => onSort('name')}>
+          <th className="ta-th p-3 w-10 text-right align-middle">#</th>
+          <th className="ta-th p-3 text-foreground text-right align-middle min-w-[110px] cursor-pointer" onClick={() => onSort('name')}>
             المندوب <SortIcon active={sortField === 'name'} dir={sortDir} />
           </th>
           {apps.map((app) => {
@@ -76,7 +76,7 @@ export const OrdersSummaryTable = ({
               <th
                 key={app.id}
                 onClick={() => onSort(appField)}
-                className="text-center p-3 font-semibold min-w-[90px] border-l border-border/50 cursor-pointer"
+                className="text-right p-3 font-semibold min-w-[90px] border-l border-border/50 cursor-pointer"
               >
                 <div className="flex items-center justify-center gap-1.5">
                   <ColorBadge label={app.name} bg={c.solid} fg={c.solidText} />
@@ -85,11 +85,11 @@ export const OrdersSummaryTable = ({
               </th>
             );
           })}
-          <th className="ta-th p-3 text-primary text-center align-middle min-w-[80px] border-l border-border cursor-pointer" onClick={() => onSort('total')}>
+          <th className="ta-th p-3 text-primary text-right align-middle min-w-[80px] border-l border-border cursor-pointer" onClick={() => onSort('total')}>
             الإجمالي <SortIcon active={sortField === 'total'} dir={sortDir} />
           </th>
-          <th className="ta-th p-3 min-w-[90px] text-center align-middle">متوسط يومي</th>
-          <th className="ta-th p-3 min-w-[90px] text-center align-middle">
+          <th className="ta-th p-3 min-w-[90px] text-right align-middle">متوسط يومي</th>
+          <th className="ta-th p-3 min-w-[90px] text-right align-middle">
             <span className="inline-flex items-center justify-center gap-1">
               المستوى
               <TooltipProvider delayDuration={150}>
@@ -115,7 +115,7 @@ export const OrdersSummaryTable = ({
               <tr key={row.id} className="border-b border-border/30">
                 {Array.from({ length: apps.length + 5 }, (_, j) => ({ id: `skeleton-cell-${row.id}-${j}` }))
                   .map((cell) => (
-                    <td key={cell.id} className="p-3 text-center align-middle">
+                    <td key={cell.id} className="p-3 text-right align-middle">
                       <Skeleton  className="h-4 bg-muted rounded" />
                     </td>
                   ))}
@@ -131,9 +131,9 @@ export const OrdersSummaryTable = ({
           const displayedAverage = Math.round(dailyAverage * 10) / 10;
           return (
             <tr key={emp.id} className={`border-b border-border/30 hover:bg-muted/20 ${idx % 2 === 1 ? 'bg-muted/5' : ''}`}>
-              <td className="ta-td p-3 text-muted-foreground text-center align-middle font-medium">{idx + 1}</td>
-              <td className="p-3 text-center align-middle">
-                <div className="flex items-center justify-center gap-2">
+              <td className="ta-td p-3 text-muted-foreground text-right align-middle font-medium">{idx + 1}</td>
+              <td className="p-3 text-right align-middle">
+                <div className="flex items-center justify-start gap-2">
                   <span className="font-medium text-foreground whitespace-nowrap" title={emp.name}>
                     {shortName(emp.name)}
                   </span>
@@ -142,14 +142,14 @@ export const OrdersSummaryTable = ({
               {apps.map((app) => {
                 const appTotal = dayArr.reduce((s, d) => s + (data[`${emp.id}::${app.id}::${d}`] ?? 0), 0);
                 return (
-                  <td key={app.id} className="ta-td p-3 font-semibold text-center align-middle border-l border-border/30 text-foreground">
-                    {appTotal > 0 ? appTotal : <span className="text-muted-foreground/30">—</span>}
+                  <td key={app.id} className="ta-td p-3 font-semibold text-right align-middle border-l border-border/30 text-foreground">
+                    {appTotal > 0 ? appTotal : <span className="text-muted-foreground">—</span>}
                   </td>
                 );
               })}
-              <td className="ta-td p-3 font-bold text-center align-middle text-foreground border-l border-border">{Math.max(total, 0)}</td>
-              <td className="ta-td p-3 text-center align-middle text-foreground">{displayedAverage}</td>
-              <td className="ta-td p-3 text-center align-middle">
+              <td className="ta-td p-3 font-bold text-right align-middle text-foreground border-l border-border">{Math.max(total, 0)}</td>
+              <td className="ta-td p-3 text-right align-middle text-foreground">{displayedAverage}</td>
+              <td className="ta-td p-3 text-right align-middle">
                 {(() => {
                   const level = getPerformanceLevel(dailyAverage);
                   return level.bg ? (
@@ -157,7 +157,7 @@ export const OrdersSummaryTable = ({
                       {level.label}
                     </span>
                   ) : (
-                    <span className="text-muted-foreground/30">—</span>
+                    <span className="text-muted-foreground">—</span>
                   );
                 })()}
               </td>
@@ -168,18 +168,18 @@ export const OrdersSummaryTable = ({
       {!loading && employeesCount > 0 && (
         <tfoot>
           <tr className="bg-muted/40 font-semibold border-t-2 border-border">
-            <td colSpan={2} className="p-3 text-center align-middle">
+            <td colSpan={2} className="p-3 text-right align-middle">
               <span className="text-sm font-bold text-foreground">الإجمالي</span>
             </td>
             {apps.map((app) => {
               const total = appGrandTotal(app.id);
               return (
-                <td key={app.id} className="ta-td p-3 font-bold text-center align-middle border-l border-border/40 text-foreground">
+                <td key={app.id} className="ta-td p-3 font-bold text-right align-middle border-l border-border/40 text-foreground">
                   {total > 0 ? total : '—'}
                 </td>
               );
             })}
-            <td className="ta-td p-3 font-bold text-center align-middle text-foreground border-l border-border">{grandTotal}</td>
+            <td className="ta-td p-3 font-bold text-right align-middle text-foreground border-l border-border">{grandTotal}</td>
             <td />
             <td />
           </tr>

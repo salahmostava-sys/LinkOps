@@ -251,7 +251,7 @@ export function RiderProfilePerformanceCard({ data }: Readonly<RiderProfilePerfo
             <h3 className="text-base font-bold text-foreground">تحليل ذكي</h3>
             <span className="text-xs font-bold text-violet-700 bg-violet-50 px-2 py-0.5 rounded-md dark:bg-violet-950/45 dark:text-violet-300">AI</span>
           </div>
-          <div className="rounded-xl bg-gradient-to-br from-violet-50 to-purple-50/50 border border-violet-100 px-4 py-3 mb-4 dark:from-violet-950/45 dark:to-purple-950/25 dark:border-violet-700/60">
+          <div className="rounded-xl bg-violet-50 border border-violet-100 px-4 py-3 mb-4 dark:bg-violet-950/45 dark:border-violet-700/60">
             <p className="text-base font-bold text-violet-900 leading-relaxed dark:text-violet-200">
               {analysis.judgmentText}
             </p>

@@ -7,6 +7,12 @@
       "skillPath": "skills/brandkit/SKILL.md",
       "computedHash": "735007879f5110aeae1e981a53fe74a12afde70347f9773dacd50e4697a091bf"
     },
+    "build-dashboard": {
+      "source": "anthropics/knowledge-work-plugins",
+      "sourceType": "github",
+      "skillPath": "data/skills/build-dashboard/SKILL.md",
+      "computedHash": "c6f7389af8916262ce81073af1f4d960e3b86b696a51bd1916b140401991f6e7"
+    },
     "clean-code-guard": {
       "source": "amElnagdy/guard-skills",
       "sourceType": "github",
@@ -30,6 +36,12 @@
       "sourceType": "github",
       "skillPath": "skills/taste-skill-v1/SKILL.md",
       "computedHash": "0a226c13d69639553cf8a7c40aa5527b026820f8ddaf7a6b263988e32ab44a27"
+    },
+    "explore-data": {
+      "source": "anthropics/knowledge-work-plugins",
+      "sourceType": "github",
+      "skillPath": "data/skills/explore-data/SKILL.md",
+      "computedHash": "806bd7b3668443a7aa7b8d3b1e82b927b6e1e24b3482180104f0a1e6488157af"
     },
     "full-output-enforcement": {
       "source": "Leonxlnx/taste-skill",
@@ -66,6 +78,12 @@
       "sourceType": "github",
       "skillPath": "skills/imagegen-frontend-web/SKILL.md",
       "computedHash": "27255c7c50181e58add156b2aa2bd5325285b85f04027e4c8b73742d98d7be0a"
+    },
+    "impeccable": {
+      "source": "pbakaus/impeccable",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/impeccable/SKILL.md",
+      "computedHash": "8c1c4e67dbb2f3270a30f6583d1063002504203f9e1969326fd5cd3b8703c05f"
     },
     "industrial-brutalist-ui": {
       "source": "Leonxlnx/taste-skill",
