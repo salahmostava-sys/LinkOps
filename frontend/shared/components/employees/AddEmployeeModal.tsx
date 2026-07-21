@@ -24,8 +24,7 @@ import {
   EMPLOYEE_INTL_PHONE_DIGITS,
   EMPLOYEE_NATIONAL_ID_DIGITS,
 } from '@modules/employees/model/employeeFieldValidation';
-
-
+import { getSaudiBankName } from '@shared/lib/banks';
 import {
   AddEmployeeModalProps as Props,
   STEPS,
@@ -307,7 +306,14 @@ const AddEmployeeModal = ({ onClose, onSuccess, editEmployee }: Readonly<Props>)
                 </div>
               </F>
               <F label="رقم الحساب البنكي">
-                <Input value={form.bank_account_number} onChange={e => setField('bank_account_number', e.target.value)} dir="ltr" />
+                <div className="space-y-1.5">
+                  <Input value={form.bank_account_number} onChange={e => setField('bank_account_number', e.target.value)} dir="ltr" />
+                  {form.bank_account_number && getSaudiBankName(form.bank_account_number) && (
+                    <div className="text-[11px] font-medium text-primary">
+                      🏦 {getSaudiBankName(form.bank_account_number)}
+                    </div>
+                  )}
+                </div>
               </F>
               <F label="المدن">
                 <div className="space-y-3">
