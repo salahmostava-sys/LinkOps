@@ -510,7 +510,7 @@ function buildSummaryText(
   // Fleet size
   const delta = summary.totalOrdersDelta;
   parts.push(
-    `الفريق يضم ${summary.activeEmployees} مندوب إجمالاً، منهم ${summary.activeRiders} نشطين`,
+    `الفريق يضم ${summary.activeRiders} مندوب نشط`,
     `بإجمالي ${summary.totalOrders.toLocaleString('en-US')} طلب (${delta.formattedDelta})`,
     `متوسط التقييم: ${summary.avgPerformanceScore}/100`,
   );
