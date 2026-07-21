@@ -45,7 +45,7 @@ const SortIcon = ({ active, dir }: { active: boolean; dir: SortDir }) => {
   return <span className="text-[10px] mr-0.5">{dir === 'asc' ? '↑' : '↓'}</span>;
 };
 
-export const OrdersSummaryTable = React.memo(({
+export const OrdersSummaryTable = ({
   loading,
   apps,
   appColorsList,
@@ -187,6 +187,6 @@ export const OrdersSummaryTable = React.memo(({
       )}
     </table>
   );
-});
+};
 
 OrdersSummaryTable.displayName = 'OrdersSummaryTable';

@@ -16,6 +16,8 @@ import { ordersQueryKeys } from '@modules/orders/hooks/ordersQueryKeys';
 import { useTemporalContext } from '@app/providers/TemporalContext';
 import { getErrorMessage } from '@services/serviceError';
 
+const EMPTY_RAW_DATA: Record<string, number> = {};
+
 export function useMonthSummaryTab() {
   const { enabled, userId } = useAuthQueryGate();
   const uid = authQueryUserId(userId);
@@ -85,7 +87,7 @@ export function useMonthSummaryTab() {
   });
 
   const {
-    data: summaryMonthRawData = {},
+    data: summaryMonthRawData = EMPTY_RAW_DATA,
     error: summaryMonthError,
     isLoading: summaryMonthLoading,
   } = useQuery({

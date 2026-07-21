@@ -41,8 +41,8 @@ export const AppCard = ({
       : t('workTypeOrders');
 
   return (
-    <button
-      type="button"
+    <div
+      role="button"
       onClick={() => isActiveInMonth && onSelect(app)}
       onKeyDown={(event) => {
         if (isActiveInMonth && (event.key === 'Enter' || event.key === ' ')) {
@@ -164,7 +164,7 @@ export const AppCard = ({
           </div>
         )}
       </div>
-    </button>
+    </div>
   );
 };
 
