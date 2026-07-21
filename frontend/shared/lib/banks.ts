@@ -19,7 +19,7 @@ export const SAUDI_BANKS: Record<string, string> = {
   '90': 'بنك الخليج',
   '95': 'بنك الإمارات دبي الوطني',
   '98': 'بنك D360',
-  '99': 'STC Pay',
+  '99': 'بنك إس تي سي (STC Bank)',
   '05': 'يور باي (Urpay)',
 };
 
