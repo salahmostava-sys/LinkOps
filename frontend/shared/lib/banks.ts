@@ -72,12 +72,13 @@ export function getSaudiBankName(iban: string | null | undefined): string | null
  * @returns The Tailwind text color class for the bank, or a default color if unknown.
  */
 export function getSaudiBankColor(iban: string | null | undefined): string {
-  if (!iban) return 'text-muted-foreground';
+  const DEFAULT_BANK_COLOR = 'text-muted-foreground';
+  if (!iban) return DEFAULT_BANK_COLOR;
   const cleanIban = iban.replace(/\s+/g, '').toUpperCase();
-  if (!cleanIban.startsWith('SA') || cleanIban.length < 6) return 'text-muted-foreground';
+  if (!cleanIban.startsWith('SA') || cleanIban.length < 6) return DEFAULT_BANK_COLOR;
   
   const bankCode = cleanIban.substring(4, 6);
-  return SAUDI_BANK_COLORS[bankCode] || 'text-muted-foreground';
+  return SAUDI_BANK_COLORS[bankCode] || DEFAULT_BANK_COLOR;
 }
 
 /**
