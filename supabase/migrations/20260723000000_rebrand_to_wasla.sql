@@ -1,20 +1,25 @@
--- Rebrand the product/display name to «وصلة / Wasla».
+-- Drop the old product branding that was baked into the client-company field.
 -- Supersedes 20260325140000_rename_project_muhimmat_altawseel.sql.
--- The app renders the displayed name from system_settings (DB), so updating the
--- frontend code default is not enough on its own — the stored row and the column
--- defaults must be updated here too, otherwise the old name keeps showing.
+--
+-- IMPORTANT: system_settings.project_name_* is the CLIENT COMPANY name (set per
+-- deployment by an admin from Project Settings) — NOT the software's name.
+-- The software/product name («وصلة / Wasla») lives in the frontend code and is
+-- used as the fallback when the company name is blank. So this migration only
+-- CLEARS the stale company value; it must NOT write the product name here.
 
 ALTER TABLE public.system_settings
-  ALTER COLUMN project_name_ar SET DEFAULT 'وصلة',
-  ALTER COLUMN project_name_en SET DEFAULT 'Wasla';
+  ALTER COLUMN project_name_ar SET DEFAULT '',
+  ALTER COLUMN project_name_en SET DEFAULT '';
 
 UPDATE public.system_settings
 SET
-  project_name_ar = 'وصلة',
-  project_name_en = 'Wasla',
+  project_name_ar = '',
+  project_name_en = '',
   updated_at = now();
 
--- The default salary-slip template still carried the old brand in its header.
+-- The default salary-slip template header carried an old hardcoded brand. The
+-- payslip header represents the issuing company, which is now blank by default,
+-- so strip the stale brand and let the admin set it from the template editor.
 UPDATE public.salary_slip_templates
-SET header_html = REPLACE(header_html, 'Muhimmat Delivery', 'وصلة')
+SET header_html = REPLACE(header_html, 'Muhimmat Delivery', '')
 WHERE header_html LIKE '%Muhimmat Delivery%';
