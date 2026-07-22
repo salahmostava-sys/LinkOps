@@ -18,7 +18,8 @@ import type { VehicleReportRow } from '@services/vehicleReportService';
 import { loadXlsx } from '@modules/orders/utils/xlsx';
 import { useAuthQueryGate } from '@shared/hooks/useAuthQueryGate';
 import { usePermissions } from '@shared/hooks/usePermissions';
-import { useSystemSettings } from '@app/providers/SystemSettingsContext';
+import { useCompanyBranding } from '@shared/hooks/useCompanyBranding';
+import { buildCompanyHeaderHtml, buildCompanyFooterHtml } from '@shared/lib/documentBranding';
 import { PageLoadingState, PageAccessDeniedState } from '@shared/components/PageAccessState';
 
 /* ─────────────── helpers ─────────────── */
@@ -303,7 +304,7 @@ const SORT_OPTIONS: { value: SortKey; label: string }[] = [
 const VehicleReportPage = () => {
   const { authLoading } = useAuthQueryGate();
   const { permissions, loading: permsLoading } = usePermissions('maintenance');
-  const { projectName: companyName } = useSystemSettings();
+  const { branding } = useCompanyBranding();
 
   const {
     fromDate, setFromDate, toDate, setToDate,
@@ -455,11 +456,6 @@ const VehicleReportPage = () => {
 
   const printReport = () => {
     const rowsHtml = sorted.map(generateRowHtml).join('');
-    const companyLabel = companyName
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;');
-
     const totalCost = sorted.reduce((s, v) => s + v.total_maintenance_cost + v.total_fuel_cost, 0);
 
     const headHtml = `
@@ -485,7 +481,7 @@ const VehicleReportPage = () => {
 `;
 
     const bodyHtml = `
-  <div class="company">${companyLabel}</div>
+  ${buildCompanyHeaderHtml(branding)}
   <h1>تقرير المركبات الشامل</h1>
   <div class="meta">
     تاريخ الاستخراج: ${formatStandardDateTime()}
@@ -500,6 +496,7 @@ const VehicleReportPage = () => {
   </div>
   ${rowsHtml}
   <div class="total">إجمالي التكاليف التشغيلية لجميع المركبات: ${formatCurrency(totalCost)}</div>
+  ${buildCompanyFooterHtml(branding)}
 `;
 
     const iframe = document.createElement('iframe');

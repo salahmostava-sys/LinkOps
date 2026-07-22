@@ -8,7 +8,8 @@ import { Button } from '@shared/components/ui/button';
 import { Skeleton } from '@shared/components/ui/skeleton';
 import { QueryErrorRetry } from '@shared/components/QueryErrorRetry';
 import { useMaintenanceLogs } from '@modules/maintenance/hooks/useMaintenanceData';
-import { useSystemSettings } from '@app/providers/SystemSettingsContext';
+import { useCompanyBranding } from '@shared/hooks/useCompanyBranding';
+import { buildCompanyHeaderHtml, buildCompanyFooterHtml } from '@shared/lib/documentBranding';
 import type { MaintenanceLogWithDetails } from '@services/maintenanceService';
 import { loadXlsx } from '@modules/orders/utils/xlsx';
 import { isStringValue, usePersistentState } from '@shared/hooks/usePersistentState';
@@ -277,7 +278,7 @@ function VehicleGroupCard({ group }: Readonly<VehicleGroupCardProps>) {
 
 export function VehicleReportsTab() {
   const logsQ = useMaintenanceLogs();
-  const { projectName: companyName } = useSystemSettings();
+  const { branding } = useCompanyBranding();
   const [search, setSearch] = usePersistentState('report:vehicles:search:v1', '', isStringValue);
   const [fromDate, setFromDate] = usePersistentState('report:vehicles:date-from:v1', '', isStringValue);
   const [toDate, setToDate] = usePersistentState('report:vehicles:date-to:v1', '', isStringValue);
@@ -432,7 +433,7 @@ export function VehicleReportsTab() {
 
         return `
         <div class="page-break">
-          <div class="company-name">${escapeHtml(companyName)}</div>
+          ${buildCompanyHeaderHtml(branding)}
           <h1>تقرير صيانة المركبات والمخزون</h1>
           <div class="header-info">
             <p>تاريخ الاستخراج: ${formatStandardDateTime()}</p>
@@ -481,7 +482,7 @@ export function VehicleReportsTab() {
 
       bodyHtml = `
         <div>
-          <div class="company-name">${escapeHtml(companyName)}</div>
+          ${buildCompanyHeaderHtml(branding)}
           <h1>تقرير صيانة المركبات والمخزون المجمع</h1>
           <div class="header-info">
             <p>تاريخ الاستخراج: ${formatStandardDateTime()}</p>
@@ -546,7 +547,7 @@ export function VehicleReportsTab() {
     doc.documentElement.dir = 'rtl';
     doc.documentElement.lang = 'ar';
     doc.head.innerHTML = headHtml;
-    doc.body.innerHTML = bodyHtml;
+    doc.body.innerHTML = bodyHtml + buildCompanyFooterHtml(branding);
 
     const contentWindow = iframe.contentWindow;
     if (contentWindow) {

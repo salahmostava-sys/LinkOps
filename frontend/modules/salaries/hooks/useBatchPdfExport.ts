@@ -3,6 +3,7 @@ import { loadJsPdf } from '@modules/salaries/lib/salaryPdfLoaders';
 import { months } from '@modules/salaries/lib/salaryMonths';
 import type { SalaryRow } from '@modules/salaries/types/salary.types';
 import type JSZip from 'jszip';
+import { useCompanyBranding } from '@shared/hooks/useCompanyBranding';
 
 // FIX P4: pre-warm the buildBatchSlipHTML module once at module load time.
 // Previously it was dynamic-imported inside the setTimeout on EVERY iteration,
@@ -29,6 +30,7 @@ export function useBatchPdfExport(params: {
     batchQueue, batchIndex, batchZip, selectedMonth, projectName,
     setBatchQueue, setBatchIndex, setBatchZip, toast,
   } = params;
+  const { branding } = useCompanyBranding();
   const batchAbortRef = useRef(false);
   // FIX W8: track the active iframe at hook level so cleanup can remove it on unmount/abort
   const activeIframeRef = useRef<HTMLIFrameElement | null>(null);
@@ -76,7 +78,7 @@ export function useBatchPdfExport(params: {
         const row = batchQueue[batchIndex];
         const { buildBatchSlipHTML } = await buildBatchSlipHTMLPromise;
         const monthLabel = months.find(m => m.v === selectedMonth)?.l || selectedMonth;
-        const html = buildBatchSlipHTML(row, monthLabel, projectName);
+        const html = buildBatchSlipHTML(row, monthLabel, projectName, branding);
 
         const JsPdf = await loadJsPdf();
         const pdf = new JsPdf({ orientation: 'portrait', unit: 'mm', format: 'a4' });
@@ -126,5 +128,5 @@ export function useBatchPdfExport(params: {
         activeIframeRef.current = null;
       }
     };
-  }, [batchIndex, batchQueue, batchZip, selectedMonth, toast, projectName, setBatchQueue, setBatchIndex, setBatchZip]);
+  }, [batchIndex, batchQueue, batchZip, selectedMonth, toast, projectName, branding, setBatchQueue, setBatchIndex, setBatchZip]);
 }

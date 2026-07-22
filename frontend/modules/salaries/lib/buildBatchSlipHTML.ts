@@ -3,8 +3,9 @@ import { buildSalarySlipHTML } from '@modules/salaries/lib/buildSalarySlipHTML';
 import { buildSlipFieldsFromRow, buildSlipEmployeeInfo } from '@modules/salaries/lib/buildSalarySlipFields';
 import { getDisplayedBaseSalary } from '@modules/salaries/model/salaryUtils';
 import type { SalaryRow } from '@modules/salaries/types/salary.types';
+import type { CompanyBranding } from '@shared/lib/documentBranding';
 
-export function buildBatchSlipHTML(row: SalaryRow, batchMonth: string, projectName: string): string {
+export function buildBatchSlipHTML(row: SalaryRow, batchMonth: string, projectName: string, branding?: CompanyBranding): string {
   const t = getSlipTranslations(row.preferredLanguage);
 
   const platformRows = row.registeredApps
@@ -51,5 +52,6 @@ export function buildBatchSlipHTML(row: SalaryRow, batchMonth: string, projectNa
     fields,
     platforms: platformRows,
     projectName,
+    branding,
   });
 }

@@ -6,6 +6,7 @@ import { getSlipTranslations, LANGUAGE_META } from '@shared/lib/salarySlipTransl
 import { logError } from '@shared/lib/logger';
 import { months } from '@modules/salaries/lib/salaryMonths';
 import { buildSalarySlipHTML } from '@modules/salaries/lib/buildSalarySlipHTML';
+import { useCompanyBranding } from '@shared/hooks/useCompanyBranding';
 import { buildSlipFieldsFromRow, buildSlipPlatformRows, buildSlipEmployeeInfo } from '@modules/salaries/lib/buildSalarySlipFields';
 import { getDisplayedBaseSalary } from '@modules/salaries/model/salaryUtils';
 import { previewSlipInIframe, printSlipHTML, exportSlipPDF } from '@modules/salaries/lib/salarySlipActions';
@@ -27,6 +28,7 @@ export function PayslipModal({ row, onClose, onApprove, selectedMonth, companyNa
   const meta = LANGUAGE_META[row.preferredLanguage];
   const dir = meta.dir;
   const previewRef = useRef<HTMLDivElement>(null);
+  const { branding } = useCompanyBranding();
   const [exporting, setExporting] = useState(false);
   const [template, setTemplate] = useState<SalarySlipTemplate | null>(null);
   const [analysis, setAnalysis] = useState<SalaryAnalysisResponse | null>(null);
@@ -115,6 +117,7 @@ export function PayslipModal({ row, onClose, onApprove, selectedMonth, companyNa
     fields,
     platforms,
     projectName: companyName,
+    branding,
     template: template ? { ...template, selected_columns: (template.selected_columns ?? []) } : undefined,
     analysis: analysis || undefined,
   });

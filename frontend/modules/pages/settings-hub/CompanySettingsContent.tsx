@@ -27,6 +27,7 @@ type TradeRegisterWps = {
   employer_iban: string | null;
   employer_bank_code: string | null;
   tax_number: string | null;
+  address: string | null;
 };
 
 const SectionHeader = ({ icon, title, subtitle }: { icon: React.ReactNode; title: string; subtitle?: string }) => (
@@ -64,6 +65,7 @@ export default function CompanySettingsContent() {
   const [taxNumber, setTaxNumber] = useState('');
   const [molNumber, setMolNumber] = useState('');
   const [employerIban, setEmployerIban] = useState('');
+  const [address, setAddress] = useState('');
   const [saving, setSaving] = useState(false);
 
   // Sync form state from query data
@@ -78,6 +80,7 @@ export default function CompanySettingsContent() {
     setTaxNumber(tr.tax_number ?? tr.notes ?? '');
     setMolNumber(tr.mol_establishment_number ?? '');
     setEmployerIban(tr.employer_iban ?? '');
+    setAddress(tr.address ?? '');
   }, [tradeRegister]);
 
   const cleanIban = normalizeIban(employerIban);
@@ -101,6 +104,7 @@ export default function CompanySettingsContent() {
         employer_iban: cleanIban,
         // Derived from the IBAN so it's always consistent with it.
         employer_bank_code: derivedBankCode,
+        address: address.trim(),
       };
       if (recordId) {
         await settingsHubService.updateTradeRegister(recordId, payload);
@@ -167,6 +171,7 @@ export default function CompanySettingsContent() {
           <BaseInput label={t('commercialRegistration')} value={crNumber} onChange={e => setCrNumber(e.target.value)} placeholder="1010101010" dir="ltr" />
           <BaseInput label={t('taxNumber')} value={taxNumber} onChange={e => setTaxNumber(e.target.value)} placeholder="3000524140003" dir="ltr" />
         </div>
+        <BaseInput label={t('companyAddress')} value={address} onChange={e => setAddress(e.target.value)} placeholder={t('companyAddressPlaceholder')} dir={isRTL ? 'rtl' : 'ltr'} />
       </div>
 
       {/* WPS / Wage Protection establishment data */}
@@ -175,7 +180,7 @@ export default function CompanySettingsContent() {
           {t('wpsEstablishmentData')}
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <BaseInput label={t('molEstablishmentNumber')} value={molNumber} onChange={e => setMolNumber(e.target.value)} placeholder="700xxxxxxx" dir="ltr" />
+          <BaseInput label={t('unifiedNumber')} value={molNumber} onChange={e => setMolNumber(e.target.value)} placeholder="700xxxxxxx" dir="ltr" />
           <div>
             <BaseInput
               label={t('employerIban')}

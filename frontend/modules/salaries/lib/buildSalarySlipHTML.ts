@@ -10,6 +10,7 @@ import { formatStandardDateTime } from '@shared/lib/formatters';
 
 import DOMPurify, { type Config } from 'dompurify';
 import { escapeHtml } from '@shared/lib/security';
+import { buildCompanyFooterHtml, buildCompanyHeaderHtml, type CompanyBranding } from '@shared/lib/documentBranding';
 
 // Restrictive allowlist: no inline styles or external URLs (prevents pixel-tracking exfiltration).
 const SANITIZE_CONFIG: Config = {
@@ -61,6 +62,8 @@ export interface BuildSalarySlipOptions {
   platforms: SlipPlatformRow[];
   /** Optional project name for header branding. */
   projectName?: string;
+  /** Company branding (bilingual official header + footer address). */
+  branding?: CompanyBranding;
   /** Template overrides from database. */
   template?: {
     header_html?: string;
@@ -151,12 +154,19 @@ const colorStyle = (color?: string): string => {
 
 // ─── Section Builders ────────────────────────────────────────────────────────
 
-const buildHeader = (employee: SlipEmployeeInfo, projectName?: string, templateHeader?: string): string => {
-  if (templateHeader) return sanitizeTemplateHtml(templateHeader);
-  return `
+const buildHeader = (
+  employee: SlipEmployeeInfo,
+  projectName?: string,
+  templateHeader?: string,
+  branding?: CompanyBranding,
+): string => {
+  // The official bilingual company header (data-driven) always leads the slip.
+  const companyHeader = branding ? buildCompanyHeaderHtml(branding) : '';
+  // Any custom template header is optional and rendered below the official one.
+  if (templateHeader) return companyHeader + sanitizeTemplateHtml(templateHeader);
+  return `${companyHeader}
     <div class="header">
       <div>
-        <div class="header-brand">${escapeHtml(projectName || 'كشف راتب شهري')}</div>
         <div class="header-subtitle">${escapeHtml(employee.month)}</div>
       </div>
       <span class="badge ${STATUS_CLASSES[employee.status] || 'badge-pending'}">${STATUS_LABELS[employee.status] || employee.status}</span>
@@ -272,8 +282,9 @@ const buildMiscTable = (miscTotals: SlipField[]): string => {
     </table>`;
 };
 
-const buildFooter = (templateFooter?: string): string => {
-  if (templateFooter) return sanitizeTemplateHtml(templateFooter);
+const buildFooter = (templateFooter?: string, branding?: CompanyBranding): string => {
+  const addressFooter = branding ? buildCompanyFooterHtml(branding) : '';
+  if (templateFooter) return sanitizeTemplateHtml(templateFooter) + addressFooter;
   return `
     <div class="footer">
       <div class="signature-box">
@@ -285,13 +296,13 @@ const buildFooter = (templateFooter?: string): string => {
         <div>اعتماد الإدارة</div>
       </div>
       <div>التاريخ: ${formatStandardDateTime()}</div>
-    </div>`;
+    </div>${addressFooter}`;
 };
 
 // ─── Builder ─────────────────────────────────────────────────────────────────
 
 export function buildSalarySlipHTML(options: BuildSalarySlipOptions): string {
-  const { employee, fields: allFields, platforms, projectName, template, analysis } = options;
+  const { employee, fields: allFields, platforms, projectName, branding, template, analysis } = options;
 
   // Filter fields based on template selection if provided
   const fields = template?.selected_columns && template.selected_columns.length > 0
@@ -316,7 +327,7 @@ export function buildSalarySlipHTML(options: BuildSalarySlipOptions): string {
 </head>
 <body>
   <div class="slip-container">
-    ${buildHeader(employee, projectName, template?.header_html)}
+    ${buildHeader(employee, projectName, template?.header_html, branding)}
     ${buildRiskBanner(analysis)}
     ${buildInfoGrid(infoFields)}
     ${buildPlatformsTable(platforms)}
@@ -324,7 +335,7 @@ export function buildSalarySlipHTML(options: BuildSalarySlipOptions): string {
     ${buildDeductionsTable(deductionFields, totalFields)}
     ${buildNetTable(netFields)}
     ${buildMiscTable(miscTotals)}
-    ${buildFooter(template?.footer_html)}
+    ${buildFooter(template?.footer_html, branding)}
   </div>
 </body>
 </html>`;
