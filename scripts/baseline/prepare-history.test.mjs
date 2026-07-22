@@ -51,6 +51,11 @@ test('drops get_my_role before changing its historical return type', () => {
   assert.match(repaired, /DROP FUNCTION public\.get_my_role\(\);\nCREATE OR REPLACE/u);
 });
 
+test('skips the generated index for a nonexistent salary template column', () => {
+  const repair = REPLAY_REPAIRS[11];
+  assert.match(applyReplayRepair(repair.before, repair), /skipped index/u);
+});
+
 test('rejects missing or repeated historical repair targets', () => {
   const repair = REPLAY_REPAIRS[0];
   assert.throws(() => applyReplayRepair('unrelated SQL', repair), /found 0/u);

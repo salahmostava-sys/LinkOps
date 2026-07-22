@@ -79,6 +79,12 @@ export const REPLAY_REPAIRS = [
       'CREATE OR REPLACE FUNCTION public.get_my_role()',
     ].join('\n'),
   },
+  {
+    file: '20260606000009_index_foreign_keys.sql',
+    reason: 'salary_slip_templates never defines created_by, so this generated index cannot exist in the final catalog.',
+    before: 'CREATE INDEX IF NOT EXISTS "idx_salary_slip_templates_created_by" ON public."salary_slip_templates" ("created_by");',
+    after: '-- Replay repair: skipped index for nonexistent salary_slip_templates.created_by.',
+  },
 ];
 
 function countOccurrences(source, search) {
