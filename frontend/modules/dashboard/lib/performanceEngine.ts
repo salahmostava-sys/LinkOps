@@ -526,6 +526,35 @@ const ARABIC_DAY_NAMES = [
   'السبت',
 ];
 
+function getWeekIndex(dayNum: number): number {
+  if (dayNum <= 7) return 0;
+  if (dayNum <= 14) return 1;
+  if (dayNum <= 21) return 2;
+  if (dayNum <= 28) return 3;
+  return 4;
+}
+
+function groupOrdersByWeek(dailyTrend: Array<{ date: string; orders: number }>) {
+  const weeksData = [
+    { weekNumber: 1, label: 'الأسبوع الأول', dayRangeLabel: '1 - 7', ordersList: [] as number[] },
+    { weekNumber: 2, label: 'الأسبوع الثاني', dayRangeLabel: '8 - 14', ordersList: [] as number[] },
+    { weekNumber: 3, label: 'الأسبوع الثالث', dayRangeLabel: '15 - 21', ordersList: [] as number[] },
+    { weekNumber: 4, label: 'الأسبوع الرابع', dayRangeLabel: '22 - 28', ordersList: [] as number[] },
+    { weekNumber: 5, label: 'الأسبوع الخامس', dayRangeLabel: '29 - النهاية', ordersList: [] as number[] },
+  ];
+
+  for (const item of dailyTrend) {
+    if (!item.date) continue;
+    const dayNum = Number.parseInt(item.date.split('-')[2] ?? '0', 10);
+    if (dayNum > 0) {
+      const idx = getWeekIndex(dayNum);
+      weeksData[idx].ordersList.push(item.orders || 0);
+    }
+  }
+
+  return weeksData;
+}
+
 /**
  * Compute weekly breakdown (W1-W5) across the month from dailyTrend data.
  */
@@ -535,30 +564,7 @@ export function computeWeeklyBreakdown(
   if (!dailyTrend || dailyTrend.length === 0) return [];
 
   const overallTotal = dailyTrend.reduce((sum, item) => sum + (item.orders || 0), 0);
-
-  // Group days into 5 potential weeks: 1-7, 8-14, 15-21, 22-28, 29-end
-  const weeksData: Array<{
-    weekNumber: number;
-    label: string;
-    dayRangeLabel: string;
-    ordersList: number[];
-  }> = [
-    { weekNumber: 1, label: 'الأسبوع الأول', dayRangeLabel: '1 - 7', ordersList: [] },
-    { weekNumber: 2, label: 'الأسبوع الثاني', dayRangeLabel: '8 - 14', ordersList: [] },
-    { weekNumber: 3, label: 'الأسبوع الثالث', dayRangeLabel: '15 - 21', ordersList: [] },
-    { weekNumber: 4, label: 'الأسبوع الرابع', dayRangeLabel: '22 - 28', ordersList: [] },
-    { weekNumber: 5, label: 'الأسبوع الخامس', dayRangeLabel: '29 - النهاية', ordersList: [] },
-  ];
-
-  for (const item of dailyTrend) {
-    if (!item.date) continue;
-    const dayNum = Number.parseInt(item.date.split('-')[2] ?? '0', 10);
-    if (dayNum >= 1 && dayNum <= 7) weeksData[0].ordersList.push(item.orders || 0);
-    else if (dayNum >= 8 && dayNum <= 14) weeksData[1].ordersList.push(item.orders || 0);
-    else if (dayNum >= 15 && dayNum <= 21) weeksData[2].ordersList.push(item.orders || 0);
-    else if (dayNum >= 22 && dayNum <= 28) weeksData[3].ordersList.push(item.orders || 0);
-    else if (dayNum >= 29) weeksData[4].ordersList.push(item.orders || 0);
-  }
+  const weeksData = groupOrdersByWeek(dailyTrend);
 
   const result: WeeklyBreakdownItem[] = [];
   let prevWeekTotal = 0;
@@ -571,10 +577,10 @@ export function computeWeeklyBreakdown(
     const avgDailyOrders = activeDaysCount > 0 ? Math.round(totalOrders / activeDaysCount) : 0;
     const shareOfTotalPct = overallTotal > 0 ? Math.round((totalOrders / overallTotal) * 100) : 0;
 
-    let growthVsPrevWeekPct: number | null = null;
-    if (prevWeekTotal > 0) {
-      growthVsPrevWeekPct = Math.round(((totalOrders - prevWeekTotal) / prevWeekTotal) * 100);
-    }
+    const growthVsPrevWeekPct =
+      prevWeekTotal > 0
+        ? Math.round(((totalOrders - prevWeekTotal) / prevWeekTotal) * 100)
+        : null;
 
     result.push({
       weekNumber: w.weekNumber,
