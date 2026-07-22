@@ -1,0 +1,81 @@
+name: Supabase Baseline Verification
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-baseline:
+    name: Rebuild and compare baseline
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      SUPABASE_CLI_VERSION: 2.109.1
+      BASELINE_VERSION: '20260722160000'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Prepare artifact directory
+        run: mkdir -p baseline-artifacts
+
+      - name: Audit omitted DML
+        run: node scripts/baseline/audit-dml.mjs --output-dir baseline-artifacts
+
+      - name: Start database from full migration history
+        run: npx --yes supabase@${SUPABASE_CLI_VERSION} start
+
+      - name: Capture historical catalog
+        run: npx --yes supabase@${SUPABASE_CLI_VERSION} db query --local --output-format json --file scripts/baseline/catalog-snapshot.sql > baseline-artifacts/historical-catalog.json
+
+      - name: Capture historical reference data
+        run: |
+          npx --yes supabase@${SUPABASE_CLI_VERSION} db query --local --output-format json --file scripts/baseline/data-snapshot.sql > baseline-artifacts/historical-data.json
+          npx --yes supabase@${SUPABASE_CLI_VERSION} db dump --local --data-only --schema public,private,app_archive --file baseline-artifacts/${BASELINE_VERSION}_full_reference_data.sql
+          printf '\n' >> baseline-artifacts/${BASELINE_VERSION}_full_reference_data.sql
+          cat scripts/baseline/storage-buckets.sql >> baseline-artifacts/${BASELINE_VERSION}_full_reference_data.sql
+
+      - name: Generate official schema-only squash
+        run: |
+          npx --yes supabase@${SUPABASE_CLI_VERSION} migration squash --local --version 20260722153804 --yes
+          cp supabase/migrations/20260722153804_archive_pre_fleet_maintenance_cleanup.sql baseline-artifacts/${BASELINE_VERSION}_full_schema_baseline.sql
+
+      - name: Recreate database from baseline only
+        run: |
+          npx --yes supabase@${SUPABASE_CLI_VERSION} stop --no-backup
+          mkdir -p /tmp/full-migration-history
+          mv supabase/migrations/*.sql /tmp/full-migration-history/
+          cp baseline-artifacts/${BASELINE_VERSION}_full_schema_baseline.sql supabase/migrations/${BASELINE_VERSION}_full_schema_baseline.sql
+          cp baseline-artifacts/${BASELINE_VERSION}_full_reference_data.sql supabase/migrations/20260722160001_full_reference_data.sql
+          npx --yes supabase@${SUPABASE_CLI_VERSION} start
+
+      - name: Capture baseline catalog
+        run: npx --yes supabase@${SUPABASE_CLI_VERSION} db query --local --output-format json --file scripts/baseline/catalog-snapshot.sql > baseline-artifacts/baseline-catalog.json
+
+      - name: Capture baseline reference data
+        run: npx --yes supabase@${SUPABASE_CLI_VERSION} db query --local --output-format json --file scripts/baseline/data-snapshot.sql > baseline-artifacts/baseline-data.json
+
+      - name: Compare catalogs
+        run: node scripts/baseline/compare-catalog.mjs baseline-artifacts/historical-catalog.json baseline-artifacts/baseline-catalog.json baseline-artifacts/catalog-comparison.json
+
+      - name: Compare reference data
+        run: node scripts/baseline/compare-catalog.mjs baseline-artifacts/historical-data.json baseline-artifacts/baseline-data.json baseline-artifacts/data-comparison.json
+
+      - name: Upload baseline evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: supabase-baseline-${{ github.run_id }}
+          path: baseline-artifacts/
+          retention-days: 14
+
+      - name: Stop local Supabase
+        if: always()
+        run: npx --yes supabase@${SUPABASE_CLI_VERSION} stop --no-backup
