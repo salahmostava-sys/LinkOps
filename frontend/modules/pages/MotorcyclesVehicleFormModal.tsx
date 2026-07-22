@@ -330,7 +330,7 @@ export function VehicleFormModal({ open, onClose, onSaved, editVehicle }: Readon
               onCheckedChange={(checked) => setForm((previous) => ({ ...previous, has_fuel_chip: checked }))}
               aria-label="تبديل شريحة البنزين"
             />
-            <span className="text-xs font-semibold ${form.has_fuel_chip ? 'text-primary' : 'text-muted-foreground'}">
+            <span className={`text-xs font-semibold ${form.has_fuel_chip ? 'text-primary' : 'text-muted-foreground'}`}>
               {form.has_fuel_chip ? 'يوجد' : 'لا يوجد'}
             </span>
           </div>

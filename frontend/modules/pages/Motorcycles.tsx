@@ -19,7 +19,13 @@ import { isStringRecord, usePersistentState } from '@shared/hooks/usePersistentS
 import { printHtmlTable } from '@shared/lib/printTable';
 import { MOTORCYCLE_IO_COLUMNS } from '@shared/constants/excelSchemas';
 import { logError } from '@shared/lib/logger';
-import type { Vehicle, VehicleStatus } from '@modules/pages/motorcycles.shared';
+import {
+  ALL_STATUSES,
+  statusLabels,
+  typeLabels,
+  type Vehicle,
+  type VehicleStatus,
+} from '@modules/pages/motorcycles.shared';
 import type { VehicleReportRow } from '@services/vehicleReportService';
 import { getErrorMessage } from '@services/serviceError';
 import { getNextMonthlyRentalDueDate } from '@shared/lib/vehicleRental';
@@ -50,15 +56,6 @@ const prefetchXlsx = () => {
   loadXlsx();
 };
 
-const statusLabels: Record<string, string> = {
-  active: 'نشطة',
-  maintenance: 'صيانة',
-  breakdown: 'خربان',
-  rental: 'إيجار',
-  ended: 'منتهي',
-  inactive: 'غير نشطة',
-};
-
 const VEHICLE_STATUS_BADGE_CLASSES: Record<VehicleStatus, string> = {
   active: 'border-emerald-200 bg-emerald-100 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-200',
   maintenance: 'border-amber-200 bg-amber-100 text-amber-800 dark:border-amber-900 dark:bg-amber-950/50 dark:text-amber-200',
@@ -69,10 +66,6 @@ const VEHICLE_STATUS_BADGE_CLASSES: Record<VehicleStatus, string> = {
 };
 
 const vehicleStatusLabel = (status: VehicleStatus) => status === 'active' ? 'متاح' : statusLabels[status];
-
-const typeLabels: Record<string, string> = { motorcycle: 'دباب', car: 'سيارة' };
-
-const ALL_STATUSES: VehicleStatus[] = ['active', 'maintenance', 'breakdown', 'rental', 'inactive', 'ended'];
 
 type VehicleColumnFilters = {
   plate: string;
