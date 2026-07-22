@@ -29,6 +29,17 @@ export const REPLAY_REPAIRS = [
       'ALTER TABLE IF EXISTS public.account_assignments DROP COLUMN IF EXISTS company_id CASCADE;',
     ].join('\n'),
   },
+  ...[
+    '20260403000001_update_salary_engine_for_shifts.sql',
+    '20260408000000_align_salary_engine_with_sheet_and_admin_titles.sql',
+    '20260706100000_fix_salary_engine_insert_columns.sql',
+    '20260714000000_system_integration_performance.sql',
+  ].map((file) => ({
+    file,
+    reason: 'The legacy two-argument salary function still exists, so PostgreSQL requires the five-argument signature to identify the intended overload.',
+    before: 'COMMENT ON FUNCTION public.calculate_salary_for_employee_month IS',
+    after: 'COMMENT ON FUNCTION public.calculate_salary_for_employee_month(UUID, TEXT, TEXT, NUMERIC, TEXT) IS',
+  })),
 ];
 
 function countOccurrences(source, search) {

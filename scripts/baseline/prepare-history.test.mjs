@@ -20,6 +20,16 @@ test('adds the account assignments cleanup before the historical assertion', () 
   assert.match(repaired, /public\.account_assignments DROP COLUMN IF EXISTS company_id/u);
 });
 
+test('qualifies every ambiguous salary function comment with its five-argument signature', () => {
+  const salaryCommentRepairs = REPLAY_REPAIRS.slice(3);
+  assert.equal(salaryCommentRepairs.length, 4);
+
+  for (const repair of salaryCommentRepairs) {
+    assert.equal(applyReplayRepair(repair.before, repair), repair.after);
+    assert.match(repair.after, /\(UUID, TEXT, TEXT, NUMERIC, TEXT\) IS$/u);
+  }
+});
+
 test('rejects missing or repeated historical repair targets', () => {
   const repair = REPLAY_REPAIRS[0];
   assert.throws(() => applyReplayRepair('unrelated SQL', repair), /found 0/u);

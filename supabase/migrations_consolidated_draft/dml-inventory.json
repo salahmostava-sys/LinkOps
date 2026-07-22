@@ -1,0 +1,589 @@
+{
+  "generatedAt": "2026-07-22T19:45:18.470Z",
+  "migrationCount": 237,
+  "dmlStatementCount": 83,
+  "requiredReviewCount": 30,
+  "entries": [
+    {
+      "file": "20260226083236_a06ac86d-f40a-4105-8231-3099763861e3.sql",
+      "operation": "INSERT INTO",
+      "target": "public.apps",
+      "priority": "review",
+      "excerpt": "INSERT INTO public.apps (name, name_en, is_active) VALUES ('هنقر', 'Hunger Station', true), ('كيتا', 'Keeta', true), ('طبو', 'Tobo', true), ('جاهز', 'Jahiz', true), ('نينجا', 'Ninja', true);"
+    },
+    {
+      "file": "20260305073335_6a77e95f-f6cd-4721-bd47-d67009b898d8.sql",
+      "operation": "INSERT INTO",
+      "target": "storage.buckets",
+      "priority": "required-review",
+      "excerpt": "INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types) VALUES ( 'employee-documents', 'employee-documents', false, 5242880, ARRAY['image/jpeg', 'image/png', 'image/webp', 'application/pdf'] ) ON CONFLICT (id) DO"
+    },
+    {
+      "file": "20260308074955_1cb7258b-936c-4f15-a48f-8bbda5531813.sql",
+      "operation": "INSERT INTO",
+      "target": "storage.buckets",
+      "priority": "required-review",
+      "excerpt": "INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types) VALUES ('avatars', 'avatars', true, 2097152, ARRAY['image/jpeg','image/png','image/webp']) ON CONFLICT (id) DO NOTHING;"
+    },
+    {
+      "file": "20260308075948_985c6682-cdd2-4600-b9e6-5cd61215cebd.sql",
+      "operation": "INSERT INTO",
+      "target": "public.system_settings",
+      "priority": "required-review",
+      "excerpt": "INSERT INTO public.system_settings (project_name_ar, project_name_en, project_subtitle_ar, project_subtitle_en) VALUES ('نظام التوصيل', 'Delivery System', 'إدارة المناديب', 'Rider Management') ON CONFLICT DO NOTHING;"
+    },
+    {
+      "file": "20260309003904_4ac0abf0-9134-4156-9456-1e4dd05dc643.sql",
+      "operation": "UPDATE",
+      "target": "storage.buckets",
+      "priority": "required-review",
+      "excerpt": "UPDATE storage.buckets SET public = FALSE WHERE id = 'employee-documents';"
+    },
+    {
+      "file": "20260320000004_activate_salah_user.sql",
+      "operation": "UPDATE",
+      "target": "auth.users",
+      "priority": "review",
+      "excerpt": "UPDATE auth.users SET encrypted_password = extensions.crypt('sala7372495', extensions.gen_salt('bf')), email_confirmed_at = COALESCE(email_confirmed_at, now()), updated_at = now() WHERE email = 'salahmostava@gmail.com';"
+    },
+    {
+      "file": "20260320000004_activate_salah_user.sql",
+      "operation": "INSERT INTO",
+      "target": "public.profiles",
+      "priority": "review",
+      "excerpt": "INSERT INTO public.profiles (id, email, name, is_active) SELECT id, email, 'Salah', true FROM auth.users WHERE email = 'salahmostava@gmail.com' ON CONFLICT (id) DO UPDATE SET is_active = true, email = EXCLUDED.email, updated_at = now();"
+    },
+    {
+      "file": "20260320000004_activate_salah_user.sql",
+      "operation": "INSERT INTO",
+      "target": "public.user_roles",
+      "priority": "review",
+      "excerpt": "INSERT INTO public.user_roles (user_id, role) SELECT id, 'admin' FROM auth.users WHERE email = 'salahmostava@gmail.com' ON CONFLICT (user_id, role) DO NOTHING;"
+    },
+    {
+      "file": "20260324180000_add_iqama_alert_days_to_system_settings.sql",
+      "operation": "UPDATE",
+      "target": "public.system_settings",
+      "priority": "required-review",
+      "excerpt": "UPDATE public.system_settings SET iqama_alert_days = 90 WHERE iqama_alert_days IS NULL;"
+    },
+    {
+      "file": "20260324193000_erd_foundation_roles_salary_structure.sql",
+      "operation": "INSERT INTO",
+      "target": "public.roles",
+      "priority": "required-review",
+      "excerpt": "INSERT INTO public.roles (title, permissions) VALUES ('admin', '{\"*\": {\"view\": true, \"edit\": true, \"delete\": true}}'::jsonb), ('hr', '{\"employees\": {\"view\": true, \"edit\": true}, \"attendance\": {\"view\": true, \"edit\": true}}'::jsonb), ('accoun"
+    },
+    {
+      "file": "20260324213000_seed_roles_permissions_matrix.sql",
+      "operation": "UPDATE",
+      "target": "public.roles",
+      "priority": "required-review",
+      "excerpt": "UPDATE public.roles SET permissions = jsonb_build_object( '*', jsonb_build_object('view', true, 'write', true, 'delete', true, 'approve', true), 'employees', jsonb_build_object('view', true, 'write', true, 'delete', true), 'orders', jsonb_b"
+    },
+    {
+      "file": "20260324213000_seed_roles_permissions_matrix.sql",
+      "operation": "UPDATE",
+      "target": "public.roles",
+      "priority": "required-review",
+      "excerpt": "UPDATE public.roles SET permissions = jsonb_build_object( 'employees', jsonb_build_object('view', true, 'write', true, 'delete', false), 'orders', jsonb_build_object('view', true, 'write', true, 'delete', false), 'attendance', jsonb_build_o"
+    },
+    {
+      "file": "20260324213000_seed_roles_permissions_matrix.sql",
+      "operation": "UPDATE",
+      "target": "public.roles",
+      "priority": "required-review",
+      "excerpt": "UPDATE public.roles SET permissions = jsonb_build_object( 'employees', jsonb_build_object('view', true, 'write', false, 'delete', false), 'orders', jsonb_build_object('view', true, 'write', false, 'delete', false), 'attendance', jsonb_build"
+    },
+    {
+      "file": "20260324213000_seed_roles_permissions_matrix.sql",
+      "operation": "UPDATE",
+      "target": "public.roles",
+      "priority": "required-review",
+      "excerpt": "UPDATE public.roles SET permissions = jsonb_build_object( 'employees', jsonb_build_object('view', true, 'write', false, 'delete', false), 'orders', jsonb_build_object('view', true, 'write', true, 'delete', false), 'attendance', jsonb_build_"
+    },
+    {
+      "file": "20260324213000_seed_roles_permissions_matrix.sql",
+      "operation": "UPDATE",
+      "target": "public.roles",
+      "priority": "required-review",
+      "excerpt": "UPDATE public.roles SET permissions = jsonb_build_object( 'employees', jsonb_build_object('view', true, 'write', false, 'delete', false), 'orders', jsonb_build_object('view', true, 'write', false, 'delete', false), 'attendance', jsonb_build"
+    },
+    {
+      "file": "20260324220000_roles_upsert_and_permissions_bootstrap.sql",
+      "operation": "INSERT INTO",
+      "target": "public.roles",
+      "priority": "required-review",
+      "excerpt": "INSERT INTO public.roles (title, permissions, is_active) VALUES ('admin', '{}'::jsonb, true), ('hr', '{}'::jsonb, true), ('finance', '{}'::jsonb, true), ('accountant', '{}'::jsonb, true), ('operations', '{}'::jsonb, true), ('viewer', '{}'::"
+    },
+    {
+      "file": "20260324220000_roles_upsert_and_permissions_bootstrap.sql",
+      "operation": "UPDATE",
+      "target": "public.roles",
+      "priority": "required-review",
+      "excerpt": "UPDATE public.roles SET permissions = jsonb_build_object( '*', jsonb_build_object('view', true, 'write', true, 'delete', true, 'approve', true), 'employees', jsonb_build_object('view', true, 'write', true, 'delete', true), 'orders', jsonb_b"
+    },
+    {
+      "file": "20260324220000_roles_upsert_and_permissions_bootstrap.sql",
+      "operation": "UPDATE",
+      "target": "public.roles",
+      "priority": "required-review",
+      "excerpt": "UPDATE public.roles SET permissions = jsonb_build_object( 'employees', jsonb_build_object('view', true, 'write', true, 'delete', false), 'orders', jsonb_build_object('view', true, 'write', true, 'delete', false), 'attendance', jsonb_build_o"
+    },
+    {
+      "file": "20260324220000_roles_upsert_and_permissions_bootstrap.sql",
+      "operation": "UPDATE",
+      "target": "public.roles",
+      "priority": "required-review",
+      "excerpt": "UPDATE public.roles SET permissions = jsonb_build_object( 'employees', jsonb_build_object('view', true, 'write', false, 'delete', false), 'orders', jsonb_build_object('view', true, 'write', false, 'delete', false), 'attendance', jsonb_build"
+    },
+    {
+      "file": "20260324220000_roles_upsert_and_permissions_bootstrap.sql",
+      "operation": "UPDATE",
+      "target": "public.roles",
+      "priority": "required-review",
+      "excerpt": "UPDATE public.roles SET permissions = jsonb_build_object( 'employees', jsonb_build_object('view', true, 'write', false, 'delete', false), 'orders', jsonb_build_object('view', true, 'write', true, 'delete', false), 'attendance', jsonb_build_"
+    },
+    {
+      "file": "20260324220000_roles_upsert_and_permissions_bootstrap.sql",
+      "operation": "UPDATE",
+      "target": "public.roles",
+      "priority": "required-review",
+      "excerpt": "UPDATE public.roles SET permissions = jsonb_build_object( 'employees', jsonb_build_object('view', true, 'write', false, 'delete', false), 'orders', jsonb_build_object('view', true, 'write', false, 'delete', false), 'attendance', jsonb_build"
+    },
+    {
+      "file": "20260324230000_seed_default_pricing_rules_for_active_apps.sql",
+      "operation": "INSERT INTO",
+      "target": "public.pricing_rules",
+      "priority": "review",
+      "excerpt": "INSERT INTO public.pricing_rules ( app_id, min_orders, max_orders, rule_type, rate_per_order, fixed_salary, bonus_target_orders, bonus_amount, is_active, priority ) SELECT a.id AS app_id, 0 AS min_orders, NULL AS max_orders, 'per_order'::te"
+    },
+    {
+      "file": "20260324235500_user_roles_role_id_bridge.sql",
+      "operation": "UPDATE",
+      "target": "public.user_roles",
+      "priority": "review",
+      "excerpt": "UPDATE public.user_roles ur SET role_id = r.id FROM public.roles r WHERE ur.role_id IS NULL AND lower(r.title) = lower(ur.role::text);"
+    },
+    {
+      "file": "20260325140000_rename_project_muhimmat_altawseel.sql",
+      "operation": "UPDATE",
+      "target": "public.system_settings",
+      "priority": "required-review",
+      "excerpt": "UPDATE public.system_settings SET project_name_ar = 'Ù…Ù‡Ù…Ø© Ø§Ù„ØªÙˆØµÙŠÙ„', project_name_en = 'Muhimmat alTawseel', updated_at = now();"
+    },
+    {
+      "file": "20260325154500_unify_company_id_on_employees.sql",
+      "operation": "UPDATE",
+      "target": "public.employees",
+      "priority": "review",
+      "excerpt": "UPDATE public.employees SET company_id = trade_register_id WHERE company_id IS NULL AND trade_register_id IS NOT NULL;"
+    },
+    {
+      "file": "20260325160000_drop_legacy_trade_register_id_on_employees.sql",
+      "operation": "UPDATE",
+      "target": "public.employees",
+      "priority": "review",
+      "excerpt": "UPDATE public.employees SET company_id = trade_register_id WHERE company_id IS NULL AND trade_register_id IS NOT NULL;"
+    },
+    {
+      "file": "20260325163000_tenant_rls_platform_accounts_and_employee_links.sql",
+      "operation": "UPDATE",
+      "target": "public.platform_accounts",
+      "priority": "review",
+      "excerpt": "UPDATE public.platform_accounts pa SET company_id = e.company_id FROM public.employees e WHERE pa.employee_id = e.id AND pa.company_id IS NULL AND e.company_id IS NOT NULL;"
+    },
+    {
+      "file": "20260325163000_tenant_rls_platform_accounts_and_employee_links.sql",
+      "operation": "UPDATE",
+      "target": "public.account_assignments",
+      "priority": "review",
+      "excerpt": "UPDATE public.account_assignments aa SET company_id = e.company_id FROM public.employees e WHERE aa.employee_id = e.id AND aa.company_id IS NULL AND e.company_id IS NOT NULL;"
+    },
+    {
+      "file": "20260325174500_add_company_id_to_operational_tables.sql",
+      "operation": "UPDATE",
+      "target": "public.attendance",
+      "priority": "review",
+      "excerpt": "UPDATE public.attendance a SET company_id = e.company_id FROM public.employees e WHERE a.employee_id = e.id AND a.company_id IS NULL;"
+    },
+    {
+      "file": "20260325174500_add_company_id_to_operational_tables.sql",
+      "operation": "UPDATE",
+      "target": "public.daily_orders",
+      "priority": "review",
+      "excerpt": "UPDATE public.daily_orders d SET company_id = e.company_id FROM public.employees e WHERE d.employee_id = e.id AND d.company_id IS NULL;"
+    },
+    {
+      "file": "20260325174500_add_company_id_to_operational_tables.sql",
+      "operation": "UPDATE",
+      "target": "public.advances",
+      "priority": "review",
+      "excerpt": "UPDATE public.advances a SET company_id = e.company_id FROM public.employees e WHERE a.employee_id = e.id AND a.company_id IS NULL;"
+    },
+    {
+      "file": "20260325174500_add_company_id_to_operational_tables.sql",
+      "operation": "UPDATE",
+      "target": "public.external_deductions",
+      "priority": "review",
+      "excerpt": "UPDATE public.external_deductions x SET company_id = e.company_id FROM public.employees e WHERE x.employee_id = e.id AND x.company_id IS NULL;"
+    },
+    {
+      "file": "20260325174500_add_company_id_to_operational_tables.sql",
+      "operation": "UPDATE",
+      "target": "public.salary_records",
+      "priority": "review",
+      "excerpt": "UPDATE public.salary_records s SET company_id = e.company_id FROM public.employees e WHERE s.employee_id = e.id AND s.company_id IS NULL;"
+    },
+    {
+      "file": "20260325174500_add_company_id_to_operational_tables.sql",
+      "operation": "UPDATE",
+      "target": "public.advance_installments",
+      "priority": "review",
+      "excerpt": "UPDATE public.advance_installments ai SET company_id = a.company_id FROM public.advances a WHERE ai.advance_id = a.id AND ai.company_id IS NULL;"
+    },
+    {
+      "file": "20260325181500_company_id_rollout_remaining_tables.sql",
+      "operation": "UPDATE",
+      "target": "public.user_roles",
+      "priority": "review",
+      "excerpt": "UPDATE public.user_roles ur SET company_id = p.company_id FROM public.profiles p WHERE ur.user_id = p.id AND ur.company_id IS NULL AND p.company_id IS NOT NULL;"
+    },
+    {
+      "file": "20260325181500_company_id_rollout_remaining_tables.sql",
+      "operation": "UPDATE",
+      "target": "public.user_permissions",
+      "priority": "review",
+      "excerpt": "UPDATE public.user_permissions up SET company_id = p.company_id FROM public.profiles p WHERE up.user_id = p.id AND up.company_id IS NULL AND p.company_id IS NOT NULL;"
+    },
+    {
+      "file": "20260325181500_company_id_rollout_remaining_tables.sql",
+      "operation": "UPDATE",
+      "target": "public.employee_scheme",
+      "priority": "review",
+      "excerpt": "UPDATE public.employee_scheme es SET company_id = e.company_id FROM public.employees e WHERE es.employee_id = e.id AND es.company_id IS NULL AND e.company_id IS NOT NULL;"
+    },
+    {
+      "file": "20260325181500_company_id_rollout_remaining_tables.sql",
+      "operation": "UPDATE",
+      "target": "public.employee_apps",
+      "priority": "review",
+      "excerpt": "UPDATE public.employee_apps ea SET company_id = e.company_id FROM public.employees e WHERE ea.employee_id = e.id AND ea.company_id IS NULL AND e.company_id IS NOT NULL;"
+    },
+    {
+      "file": "20260325181500_company_id_rollout_remaining_tables.sql",
+      "operation": "UPDATE",
+      "target": "public.employee_tiers",
+      "priority": "review",
+      "excerpt": "UPDATE public.employee_tiers et SET company_id = e.company_id FROM public.employees e WHERE et.employee_id = e.id AND et.company_id IS NULL AND e.company_id IS NOT NULL;"
+    },
+    {
+      "file": "20260325181500_company_id_rollout_remaining_tables.sql",
+      "operation": "UPDATE",
+      "target": "public.vehicle_assignments",
+      "priority": "review",
+      "excerpt": "UPDATE public.vehicle_assignments va SET company_id = e.company_id FROM public.employees e WHERE va.employee_id = e.id AND va.company_id IS NULL AND e.company_id IS NOT NULL;"
+    },
+    {
+      "file": "20260325181500_company_id_rollout_remaining_tables.sql",
+      "operation": "UPDATE",
+      "target": "public.vehicle_mileage",
+      "priority": "review",
+      "excerpt": "UPDATE public.vehicle_mileage vm SET company_id = e.company_id FROM public.employees e WHERE vm.employee_id = e.id AND vm.company_id IS NULL AND e.company_id IS NOT NULL;"
+    },
+    {
+      "file": "20260325181500_company_id_rollout_remaining_tables.sql",
+      "operation": "UPDATE",
+      "target": "public.vehicle_mileage_daily",
+      "priority": "review",
+      "excerpt": "UPDATE public.vehicle_mileage_daily vmd SET company_id = e.company_id FROM public.employees e WHERE vmd.employee_id = e.id AND vmd.company_id IS NULL AND e.company_id IS NOT NULL;"
+    },
+    {
+      "file": "20260325181500_company_id_rollout_remaining_tables.sql",
+      "operation": "UPDATE",
+      "target": "public.vehicles",
+      "priority": "review",
+      "excerpt": "UPDATE public.vehicles v SET company_id = va.company_id FROM public.vehicle_assignments va WHERE va.vehicle_id = v.id AND v.company_id IS NULL AND va.company_id IS NOT NULL;"
+    },
+    {
+      "file": "20260325181500_company_id_rollout_remaining_tables.sql",
+      "operation": "UPDATE",
+      "target": "public.maintenance_logs",
+      "priority": "review",
+      "excerpt": "UPDATE public.maintenance_logs ml SET company_id = v.company_id FROM public.vehicles v WHERE ml.vehicle_id = v.id AND ml.company_id IS NULL AND v.company_id IS NOT NULL;"
+    },
+    {
+      "file": "20260325181500_company_id_rollout_remaining_tables.sql",
+      "operation": "UPDATE",
+      "target": "public.departments",
+      "priority": "review",
+      "excerpt": "UPDATE public.departments d SET company_id = e.company_id FROM public.employees e WHERE e.department_id = d.id AND d.company_id IS NULL AND e.company_id IS NOT NULL;"
+    },
+    {
+      "file": "20260325181500_company_id_rollout_remaining_tables.sql",
+      "operation": "UPDATE",
+      "target": "public.positions",
+      "priority": "review",
+      "excerpt": "UPDATE public.positions p SET company_id = e.company_id FROM public.employees e WHERE e.position_id = p.id AND p.company_id IS NULL AND e.company_id IS NOT NULL;"
+    },
+    {
+      "file": "20260325181500_company_id_rollout_remaining_tables.sql",
+      "operation": "UPDATE",
+      "target": "public.salary_schemes",
+      "priority": "review",
+      "excerpt": "UPDATE public.salary_schemes ss SET company_id = es.company_id FROM public.employee_scheme es WHERE es.scheme_id = ss.id AND ss.company_id IS NULL AND es.company_id IS NOT NULL;"
+    },
+    {
+      "file": "20260325181500_company_id_rollout_remaining_tables.sql",
+      "operation": "UPDATE",
+      "target": "public.salary_scheme_tiers",
+      "priority": "review",
+      "excerpt": "UPDATE public.salary_scheme_tiers sst SET company_id = ss.company_id FROM public.salary_schemes ss WHERE sst.scheme_id = ss.id AND sst.company_id IS NULL AND ss.company_id IS NOT NULL;"
+    },
+    {
+      "file": "20260325181500_company_id_rollout_remaining_tables.sql",
+      "operation": "UPDATE",
+      "target": "public.scheme_month_snapshots",
+      "priority": "review",
+      "excerpt": "UPDATE public.scheme_month_snapshots sms SET company_id = ss.company_id FROM public.salary_schemes ss WHERE sms.scheme_id = ss.id AND sms.company_id IS NULL AND ss.company_id IS NOT NULL;"
+    },
+    {
+      "file": "20260325181500_company_id_rollout_remaining_tables.sql",
+      "operation": "UPDATE",
+      "target": "public.app_targets",
+      "priority": "review",
+      "excerpt": "UPDATE public.app_targets at SET company_id = d.company_id FROM ( SELECT dorders.app_id, e.company_id FROM public.daily_orders dorders JOIN public.employees e ON e.id = dorders.employee_id GROUP BY dorders.app_id, e.company_id ) AS d WHERE "
+    },
+    {
+      "file": "20260325181500_company_id_rollout_remaining_tables.sql",
+      "operation": "UPDATE",
+      "target": "public.apps",
+      "priority": "review",
+      "excerpt": "UPDATE public.apps a SET company_id = pa.company_id FROM public.platform_accounts pa WHERE pa.app_id = a.id AND a.company_id IS NULL AND pa.company_id IS NOT NULL;"
+    },
+    {
+      "file": "20260325181500_company_id_rollout_remaining_tables.sql",
+      "operation": "UPDATE",
+      "target": "public.pl_records",
+      "priority": "review",
+      "excerpt": "UPDATE public.pl_records pl SET company_id = s.company_id FROM public.salary_records s WHERE s.month_year = pl.month_year AND pl.company_id IS NULL AND s.company_id IS NOT NULL;"
+    },
+    {
+      "file": "20260325181500_company_id_rollout_remaining_tables.sql",
+      "operation": "UPDATE",
+      "target": "public.alerts",
+      "priority": "review",
+      "excerpt": "UPDATE public.alerts al SET company_id = e.company_id FROM public.employees e WHERE al.entity_type = 'employee' AND al.entity_id = e.id AND al.company_id IS NULL AND e.company_id IS NOT NULL;"
+    },
+    {
+      "file": "20260325181500_company_id_rollout_remaining_tables.sql",
+      "operation": "UPDATE",
+      "target": "public.alerts",
+      "priority": "review",
+      "excerpt": "UPDATE public.alerts al SET company_id = p.company_id FROM public.profiles p WHERE al.company_id IS NULL AND al.resolved_by = p.id AND p.company_id IS NOT NULL;"
+    },
+    {
+      "file": "20260325181500_company_id_rollout_remaining_tables.sql",
+      "operation": "UPDATE",
+      "target": "public.locked_months",
+      "priority": "review",
+      "excerpt": "UPDATE public.locked_months lm SET company_id = p.company_id FROM public.profiles p WHERE lm.locked_by = p.id AND lm.company_id IS NULL AND p.company_id IS NOT NULL;"
+    },
+    {
+      "file": "20260325181500_company_id_rollout_remaining_tables.sql",
+      "operation": "UPDATE",
+      "target": "public.audit_log",
+      "priority": "review",
+      "excerpt": "UPDATE public.audit_log al SET company_id = p.company_id FROM public.profiles p WHERE al.user_id = p.id AND al.company_id IS NULL AND p.company_id IS NOT NULL;"
+    },
+    {
+      "file": "20260326013000_supabase_single_backend_phase1_core_rls_audit_rpc.sql",
+      "operation": "INSERT INTO",
+      "target": "public.roles",
+      "priority": "required-review",
+      "excerpt": "INSERT INTO public.roles (title, permissions, is_active) VALUES ('admin' , '{}'::jsonb, true), ('hr' , '{}'::jsonb, true), ('finance' , '{}'::jsonb, true), ('accountant' , '{}'::jsonb, true), ('operations' , '{}'::jsonb, true), ('viewer' , "
+    },
+    {
+      "file": "20260326013000_supabase_single_backend_phase1_core_rls_audit_rpc.sql",
+      "operation": "UPDATE",
+      "target": "public.roles",
+      "priority": "required-review",
+      "excerpt": "UPDATE public.roles SET permissions = jsonb_build_object ( '*', jsonb_build_object ('view' , true, 'write' , true, 'delete', true, 'approve', true), 'employees' , jsonb_build_object ('view' , true, 'write' , true, 'delete', true), 'orders',"
+    },
+    {
+      "file": "20260326013000_supabase_single_backend_phase1_core_rls_audit_rpc.sql",
+      "operation": "UPDATE",
+      "target": "public.roles",
+      "priority": "required-review",
+      "excerpt": "UPDATE public.roles SET permissions = jsonb_build_object ( 'employees' , jsonb_build_object ('view' , true, 'write' , true, 'delete', false), 'orders', jsonb_build_object ('view' , true, 'write' , true, 'delete', false), 'attendance' , json"
+    },
+    {
+      "file": "20260326013000_supabase_single_backend_phase1_core_rls_audit_rpc.sql",
+      "operation": "UPDATE",
+      "target": "public.roles",
+      "priority": "required-review",
+      "excerpt": "UPDATE public.roles SET permissions = jsonb_build_object ( 'employees' , jsonb_build_object ('view' , true, 'write' , false, 'delete', false), 'orders', jsonb_build_object ('view' , true, 'write' , false, 'delete', false), 'attendance' , js"
+    },
+    {
+      "file": "20260326013000_supabase_single_backend_phase1_core_rls_audit_rpc.sql",
+      "operation": "UPDATE",
+      "target": "public.roles",
+      "priority": "required-review",
+      "excerpt": "UPDATE public.roles SET permissions = jsonb_build_object ( 'employees' , jsonb_build_object ('view' , true, 'write' , false, 'delete', false), 'orders', jsonb_build_object ('view' , true, 'write' , true, 'delete', false), 'attendance' , jso"
+    },
+    {
+      "file": "20260326013000_supabase_single_backend_phase1_core_rls_audit_rpc.sql",
+      "operation": "UPDATE",
+      "target": "public.roles",
+      "priority": "required-review",
+      "excerpt": "UPDATE public.roles SET permissions = jsonb_build_object ( 'employees' , jsonb_build_object ('view' , true, 'write' , false, 'delete', false), 'orders', jsonb_build_object ('view' , true, 'write' , false, 'delete', false), 'attendance' , js"
+    },
+    {
+      "file": "20260327120001_avatars_allow_svg_mime.sql",
+      "operation": "UPDATE",
+      "target": "storage.buckets",
+      "priority": "required-review",
+      "excerpt": "UPDATE storage.buckets SET allowed_mime_types = ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml']::text[] WHERE id = 'avatars';"
+    },
+    {
+      "file": "20260330120000_salary_slip_templates.sql",
+      "operation": "INSERT INTO",
+      "target": "public.salary_slip_templates",
+      "priority": "review",
+      "excerpt": "INSERT INTO public.salary_slip_templates (name, header_html, footer_html, selected_columns, is_default) VALUES ( 'Default Enterprise Template', '<div class=\"header\"><div><div class=\"header-brand\">Muhimmat Delivery</div><div class=\"header-su"
+    },
+    {
+      "file": "20260404010000_cleanup_employee_code_and_employee_cities.sql",
+      "operation": "UPDATE",
+      "target": "public.employees",
+      "priority": "review",
+      "excerpt": "UPDATE public.employees SET preferred_language = 'ar' WHERE preferred_language = 'ur';"
+    },
+    {
+      "file": "20260404010000_cleanup_employee_code_and_employee_cities.sql",
+      "operation": "UPDATE",
+      "target": "public.employees",
+      "priority": "review",
+      "excerpt": "UPDATE public.employees SET cities = CASE WHEN cities IS NOT NULL AND array_length(cities, 1) > 0 THEN cities WHEN city IS NULL THEN '{}'::text[] ELSE ARRAY[city] END;"
+    },
+    {
+      "file": "20260404010000_cleanup_employee_code_and_employee_cities.sql",
+      "operation": "UPDATE",
+      "target": "public.employees",
+      "priority": "review",
+      "excerpt": "UPDATE public.employees SET cities = COALESCE( ( SELECT array_agg(DISTINCT normalized_city) FROM ( SELECT NULLIF(trim(value), '') AS normalized_city FROM unnest(COALESCE(cities, '{}'::text[])) AS value ) AS normalized WHERE normalized_city "
+    },
+    {
+      "file": "20260404010000_cleanup_employee_code_and_employee_cities.sql",
+      "operation": "UPDATE",
+      "target": "public.employees",
+      "priority": "review",
+      "excerpt": "UPDATE public.employees SET city = NULLIF(cities[1], '');"
+    },
+    {
+      "file": "20260407110000_employee_commercial_records_and_iqama_docs.sql",
+      "operation": "INSERT INTO",
+      "target": "public.commercial_records",
+      "priority": "review",
+      "excerpt": "INSERT INTO public.commercial_records (name) SELECT DISTINCT btrim(commercial_record) FROM public.employees WHERE NULLIF(btrim(commercial_record), '') IS NOT NULL ON CONFLICT DO NOTHING;"
+    },
+    {
+      "file": "20260407110000_employee_commercial_records_and_iqama_docs.sql",
+      "operation": "UPDATE",
+      "target": "storage.buckets",
+      "priority": "required-review",
+      "excerpt": "UPDATE storage.buckets SET allowed_mime_types = ARRAY['image/jpeg', 'image/png', 'image/webp', 'application/pdf'] WHERE id = 'employee-documents';"
+    },
+    {
+      "file": "20260416000003_unique_default_slip_template.sql",
+      "operation": "UPDATE",
+      "target": "salary_slip_templates",
+      "priority": "review",
+      "excerpt": "DO $$ BEGIN IF (SELECT count(*) FROM salary_slip_templates WHERE is_default = true) > 1 THEN UPDATE salary_slip_templates SET is_default = false WHERE is_default = true AND id != ( SELECT id FROM salary_slip_templates WHERE is_default = tru"
+    },
+    {
+      "file": "20260504000002_fix_logo_upload.sql",
+      "operation": "UPDATE",
+      "target": "storage.buckets",
+      "priority": "required-review",
+      "excerpt": "UPDATE storage.buckets SET allowed_mime_types = ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml', 'image/gif'], file_size_limit = 5242880 WHERE id = 'avatars';"
+    },
+    {
+      "file": "20260605000000_fix_rpc_security_definer.sql",
+      "operation": "DELETE FROM",
+      "target": "public.user_roles",
+      "priority": "review",
+      "excerpt": "WITH ranked AS ( SELECT id, user_id, role, ROW_NUMBER() OVER ( PARTITION BY user_id ORDER BY CASE role WHEN 'admin' THEN 1 WHEN 'finance' THEN 2 WHEN 'hr' THEN 3 WHEN 'operations' THEN 4 WHEN 'viewer' THEN 5 ELSE 99 END ) AS rn FROM public."
+    },
+    {
+      "file": "20260703000000_advances_attachment.sql",
+      "operation": "INSERT INTO",
+      "target": "storage.buckets",
+      "priority": "required-review",
+      "excerpt": "INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types) VALUES ( 'advance-attachments', 'advance-attachments', false, 5242880, ARRAY['image/jpeg', 'image/png', 'application/pdf', 'image/webp'] ) ON CONFLICT (id) "
+    },
+    {
+      "file": "20260703000001_treasury.sql",
+      "operation": "INSERT INTO",
+      "target": "public.treasury_categories",
+      "priority": "review",
+      "excerpt": "INSERT INTO public.treasury_categories (name, type) VALUES ('Ø±ÙˆØ§ØªØ¨', 'expense'), ('ØªØ¬Ø¯ÙŠØ¯ Ø§Ø´ØªØ±Ø§ÙƒØ§Øª', 'expense'), ('Ø¨Ù†Ø²ÙŠÙ†', 'expense'), ('ØµÙŠØ§Ù†Ø© Ø³ÙŠØ§Ø±Ø§Øª', 'expense'), ('Ù…ØµØ±ÙˆÙØ§Øª Ù…ÙƒØªØ¨ÙŠØ©', 'expense'), "
+    },
+    {
+      "file": "20260703000001_treasury.sql",
+      "operation": "INSERT INTO",
+      "target": "public.treasury_accounts",
+      "priority": "review",
+      "excerpt": "INSERT INTO public.treasury_accounts (name, type) VALUES ('Ø¨Ù†Ùƒ Ø§Ù„Ø±Ø§Ø¬ØÙŠ', 'bank'), ('Ø¨Ù†Ùƒ Ø§Ù„Ø±ÙŠØ§Ø¶', 'bank'), ('Ø§Ù„ÙƒØ§Ø´', 'cash'), ('Ø¹Ù‡Ø¯Ø© Ø¹Ø¨Ø¯Ø§Ù„Ù„Ù‡', 'custody'), ('Ø¹Ù‡Ø¯Ø© Ø§Ù„Ù…Ø´Ø±ÙÙŠÙ†', 'custody') ON CONFLICT "
+    },
+    {
+      "file": "20260706120000_fix_apps_text_colors.sql",
+      "operation": "UPDATE",
+      "target": "public.apps",
+      "priority": "review",
+      "excerpt": "UPDATE public.apps SET text_color = '#000000' WHERE (name ILIKE '%hunger%' OR name ILIKE '%Ù‡Ù†Ù‚Ø±%') AND text_color = '#ffffff';"
+    },
+    {
+      "file": "20260706120000_fix_apps_text_colors.sql",
+      "operation": "UPDATE",
+      "target": "public.apps",
+      "priority": "review",
+      "excerpt": "UPDATE public.apps SET text_color = '#000000' WHERE text_color = '#ffffff' AND ( brand_color ILIKE '#ffcc00' OR brand_color ILIKE '#ffff%' OR brand_color ILIKE '#facc15' OR brand_color ILIKE '#fbbf24' OR brand_color ILIKE '#fde047' );"
+    },
+    {
+      "file": "20260707010000_spare_parts_invoice_reference.sql",
+      "operation": "INSERT INTO",
+      "target": "storage.buckets",
+      "priority": "required-review",
+      "excerpt": "INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types) VALUES ( 'invoice-attachments', 'invoice-attachments', false, 8388608, ARRAY['image/jpeg', 'image/png', 'application/pdf', 'image/webp'] ) ON CONFLICT (id) "
+    },
+    {
+      "file": "20260708000000_vehicle_documents.sql",
+      "operation": "INSERT INTO",
+      "target": "storage.buckets",
+      "priority": "required-review",
+      "excerpt": "INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types) VALUES ( 'vehicle-documents', 'vehicle-documents', false, 8388608, ARRAY['image/jpeg', 'image/png', 'application/pdf', 'image/webp'] ) ON CONFLICT (id) DO U"
+    },
+    {
+      "file": "20260712002000_backfill_user_permissions_source_of_truth.sql",
+      "operation": "INSERT INTO",
+      "target": "public.user_permissions",
+      "priority": "review",
+      "excerpt": "WITH role_permissions(role_name, permission_key, can_view, can_edit, can_delete) AS ( VALUES ('admin', 'employees', true, true, true), ('admin', 'attendance', true, true, true), ('admin', 'orders', true, true, true), ('admin', 'ai_analytics"
+    },
+    {
+      "file": "20260714020000_alert_workflow_center.sql",
+      "operation": "UPDATE",
+      "target": "public.alerts",
+      "priority": "review",
+      "excerpt": "UPDATE public.alerts SET status = 'resolved' WHERE is_resolved IS TRUE AND status = 'open';"
+    },
+    {
+      "file": "20260722153804_archive_pre_fleet_maintenance_cleanup.sql",
+      "operation": "INSERT INTO",
+      "target": "app_archive.maintenance_logs_pre_fleet_20260328",
+      "priority": "review",
+      "excerpt": "DO $$ DECLARE source_count bigint; archive_count bigint; BEGIN IF to_regclass('public.maintenance_logs_legacy_pre_fleet') IS NULL THEN RETURN; END IF; DROP TABLE IF EXISTS app_archive.maintenance_logs_pre_fleet_20260328; CREATE TABLE app_ar"
+    }
+  ]
+}
