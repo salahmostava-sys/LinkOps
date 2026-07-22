@@ -11,7 +11,8 @@ function readCatalog(filePath) {
     throw new Error(`No JSON payload found in ${filePath}`);
   }
   const payload = JSON.parse(raw.slice(firstBrace, lastBrace + 1));
-  const catalog = payload.rows?.[0]?.catalog;
+  const firstRow = Array.isArray(payload) ? payload[0] : payload.rows?.[0];
+  const catalog = firstRow?.catalog ?? payload.catalog ?? (payload.data ? payload : null);
   if (!catalog) throw new Error(`No catalog row found in ${filePath}`);
   return catalog;
 }
@@ -49,12 +50,16 @@ export function compareCatalogs(historicalCatalog, baselineCatalog) {
   return { matches: differences.length === 0, differences };
 }
 
+export function compareCatalogFiles(historicalPath, baselinePath) {
+  return compareCatalogs(readCatalog(historicalPath), readCatalog(baselinePath));
+}
+
 function main() {
   const [historicalPath, baselinePath, reportPath] = process.argv.slice(2);
   if (!historicalPath || !baselinePath || !reportPath) {
     throw new Error('Usage: compare-catalog.mjs <historical.json> <baseline.json> <report.json>');
   }
-  const comparison = compareCatalogs(readCatalog(historicalPath), readCatalog(baselinePath));
+  const comparison = compareCatalogFiles(historicalPath, baselinePath);
   writeFileSync(reportPath, `${JSON.stringify(comparison, null, 2)}\n`, 'utf8');
   if (!comparison.matches) {
     process.stderr.write(`Baseline catalog mismatch:\n- ${comparison.differences.join('\n- ')}\n`);

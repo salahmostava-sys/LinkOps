@@ -14,6 +14,7 @@ jobs:
     env:
       SUPABASE_CLI_VERSION: 2.109.1
       BASELINE_VERSION: '20260722160000'
+      SUPABASE_DB_CONTAINER: supabase_db_plxpehtkabmfkdlgjyin
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -40,7 +41,7 @@ jobs:
 
       - name: Capture historical reference data
         run: |
-          npx --yes supabase@${SUPABASE_CLI_VERSION} db query --local --output-format json --file scripts/baseline/data-snapshot.sql > baseline-artifacts/historical-data.json
+          docker exec -i "${SUPABASE_DB_CONTAINER}" psql -X -qAt -U postgres -d postgres < scripts/baseline/data-snapshot.sql > baseline-artifacts/historical-data.json
           npx --yes supabase@${SUPABASE_CLI_VERSION} db dump --local --data-only --schema public,private,app_archive --file baseline-artifacts/${BASELINE_VERSION}_full_reference_data.sql
           printf '\n' >> baseline-artifacts/${BASELINE_VERSION}_full_reference_data.sql
           cat scripts/baseline/storage-buckets.sql >> baseline-artifacts/${BASELINE_VERSION}_full_reference_data.sql
@@ -63,7 +64,7 @@ jobs:
         run: npx --yes supabase@${SUPABASE_CLI_VERSION} db query --local --output-format json --file scripts/baseline/catalog-snapshot.sql > baseline-artifacts/baseline-catalog.json
 
       - name: Capture baseline reference data
-        run: npx --yes supabase@${SUPABASE_CLI_VERSION} db query --local --output-format json --file scripts/baseline/data-snapshot.sql > baseline-artifacts/baseline-data.json
+        run: docker exec -i "${SUPABASE_DB_CONTAINER}" psql -X -qAt -U postgres -d postgres < scripts/baseline/data-snapshot.sql > baseline-artifacts/baseline-data.json
 
       - name: Compare catalogs
         run: node scripts/baseline/compare-catalog.mjs baseline-artifacts/historical-catalog.json baseline-artifacts/baseline-catalog.json baseline-artifacts/catalog-comparison.json
