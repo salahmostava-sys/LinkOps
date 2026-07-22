@@ -20,6 +20,15 @@ export const REPLAY_REPAIRS = [
     before: 'v_allowed boolean :IS FALSE;',
     after: 'v_allowed boolean := FALSE;',
   },
+  {
+    file: '20260327120000_finalize_remove_company_id_single_org.sql',
+    reason: 'The next cleanup migration confirms account_assignments was omitted; production has no remaining company_id columns.',
+    before: 'ALTER TABLE IF EXISTS public.platform_account_assignments DROP COLUMN IF EXISTS company_id CASCADE;',
+    after: [
+      'ALTER TABLE IF EXISTS public.platform_account_assignments DROP COLUMN IF EXISTS company_id CASCADE;',
+      'ALTER TABLE IF EXISTS public.account_assignments DROP COLUMN IF EXISTS company_id CASCADE;',
+    ].join('\n'),
+  },
 ];
 
 function countOccurrences(source, search) {

@@ -14,6 +14,12 @@ test('repairs the malformed PL/pgSQL variable initializer', () => {
   assert.equal(applyReplayRepair(repair.before, repair), repair.after);
 });
 
+test('adds the account assignments cleanup before the historical assertion', () => {
+  const repair = REPLAY_REPAIRS[2];
+  const repaired = applyReplayRepair(repair.before, repair);
+  assert.match(repaired, /public\.account_assignments DROP COLUMN IF EXISTS company_id/u);
+});
+
 test('rejects missing or repeated historical repair targets', () => {
   const repair = REPLAY_REPAIRS[0];
   assert.throws(() => applyReplayRepair('unrelated SQL', repair), /found 0/u);
