@@ -27,6 +27,7 @@ import { AIInsightsPanel } from './AIInsightsPanel';
 import { AIRecommendationsSection } from './AIRecommendationsSection';
 import { PerformanceDetailedTable } from './PerformanceDetailedTable';
 import { DashboardWeeklyBestDaysCard } from './DashboardWeeklyBestDaysCard';
+import { DashboardMiniOperationalStrip } from './DashboardMiniOperationalStrip';
 import { Skeleton } from '@shared/components/ui/skeleton';
 
 function targetTier(pct: number): 'excellent' | 'good' | 'average' {
@@ -132,6 +133,9 @@ export function DashboardPerformanceOverviewTab(props: Readonly<{
 
   return (
     <div className="space-y-6">
+      {/* ── 0. Mini Operational Strip (Single Line Overview) ────────────── */}
+      <DashboardMiniOperationalStrip dashboard={dashboard} />
+
       {/* ── 1. Executive KPIs Row ───────────────────────────────────────── */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
         <EnrichedStatCard
