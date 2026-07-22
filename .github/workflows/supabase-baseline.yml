@@ -67,10 +67,11 @@ jobs:
         run: docker exec -i "${SUPABASE_DB_CONTAINER}" psql -X -qAt -U postgres -d postgres < scripts/baseline/data-snapshot.sql > baseline-artifacts/baseline-data.json
 
       - name: Compare catalogs
-        run: node scripts/baseline/compare-catalog.mjs baseline-artifacts/historical-catalog.json baseline-artifacts/baseline-catalog.json baseline-artifacts/catalog-comparison.json
+        run: node scripts/baseline/compare-catalog.mjs baseline-artifacts/historical-catalog.json baseline-artifacts/baseline-catalog.json baseline-artifacts/catalog-comparison.json "Catalog"
 
       - name: Compare reference data
-        run: node scripts/baseline/compare-catalog.mjs baseline-artifacts/historical-data.json baseline-artifacts/baseline-data.json baseline-artifacts/data-comparison.json
+        if: always()
+        run: node scripts/baseline/compare-catalog.mjs baseline-artifacts/historical-data.json baseline-artifacts/baseline-data.json baseline-artifacts/data-comparison.json "Reference data"
 
       - name: Upload baseline evidence
         if: always()

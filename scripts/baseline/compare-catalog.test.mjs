@@ -5,7 +5,11 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
-import { compareCatalogFiles, compareCatalogs } from './compare-catalog.mjs';
+import {
+  compareCatalogFiles,
+  compareCatalogs,
+  escapeGitHubCommandData,
+} from './compare-catalog.mjs';
 
 test('accepts identical catalog snapshots', () => {
   const catalog = { relations: [{ name: 'employees' }], policies: [] };
@@ -38,4 +42,11 @@ test('reads Supabase CLI and direct psql JSON snapshot formats', () => {
   } finally {
     rmSync(directory, { recursive: true, force: true });
   }
+});
+
+test('escapes untrusted comparison text for GitHub workflow commands', () => {
+  assert.equal(
+    escapeGitHubCommandData('$.definition: 100%\nleft\r\nright'),
+    '$.definition: 100%25%0Aleft%0D%0Aright',
+  );
 });

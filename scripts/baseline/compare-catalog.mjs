@@ -54,14 +54,31 @@ export function compareCatalogFiles(historicalPath, baselinePath) {
   return compareCatalogs(readCatalog(historicalPath), readCatalog(baselinePath));
 }
 
+export function escapeGitHubCommandData(value) {
+  return String(value)
+    .replaceAll('%', '%25')
+    .replaceAll('\r', '%0D')
+    .replaceAll('\n', '%0A');
+}
+
+function reportGitHubAnnotations(differences, label) {
+  if (process.env.GITHUB_ACTIONS !== 'true') return;
+  for (const difference of differences) {
+    const message = escapeGitHubCommandData(difference);
+    process.stdout.write(`::error title=${label} mismatch::${message}\n`);
+  }
+}
+
 function main() {
-  const [historicalPath, baselinePath, reportPath] = process.argv.slice(2);
+  const [historicalPath, baselinePath, reportPath, comparisonLabel = 'Baseline catalog'] =
+    process.argv.slice(2);
   if (!historicalPath || !baselinePath || !reportPath) {
     throw new Error('Usage: compare-catalog.mjs <historical.json> <baseline.json> <report.json>');
   }
   const comparison = compareCatalogFiles(historicalPath, baselinePath);
   writeFileSync(reportPath, `${JSON.stringify(comparison, null, 2)}\n`, 'utf8');
   if (!comparison.matches) {
+    reportGitHubAnnotations(comparison.differences, comparisonLabel);
     process.stderr.write(`Baseline catalog mismatch:\n- ${comparison.differences.join('\n- ')}\n`);
     process.exitCode = 1;
     return;
