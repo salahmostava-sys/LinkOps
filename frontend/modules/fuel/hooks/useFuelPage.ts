@@ -110,45 +110,6 @@ export function useFuelPage() { // NOSONAR: page data layer with many independen
     staleTime: 60_000,
   });
 
-
-  // مجموعة معرّفات المناديب الذين لديهم طلبات في الشهر المحدد
-  const activeEmployeeIdsInMonth = useMemo(() => {
-    const ids = new Set<string>();
-    Object.entries(monthOrdersMap).forEach(([empId, orders]) => {
-      if (orders > 0) ids.add(empId);
-    });
-    return ids;
-  }, [monthOrdersMap]);
-
-  const ridersForTab = useMemo(() => {
-    const byId = new Map<string, Employee>();
-
-    // 1. أضف المناديب النشطين دائماً (باستثناء الوظائف الإدارية — هذه الصفحة خاصة بالمناديب)
-    employees.forEach((e) => {
-      if (isAdministrativeJobTitle(e.job_title)) return;
-      if (!employeeIdsOnPlatform || employeeIdsOnPlatform.has(e.id)) byId.set(e.id, e);
-    });
-
-    // 2. أضف المناديب غير النشطين الذين لديهم طلبات فعلية في هذا الشهر
-    Object.entries(monthOrdersMap).forEach(([empId, orders]) => {
-      if (orders <= 0) return;
-      if (employeeIdsOnPlatform && !employeeIdsOnPlatform.has(empId)) return;
-      const emp = fuelBaseData?.employees.find(e => e.id === empId);
-      if (emp && !isAdministrativeJobTitle(emp.job_title) && !byId.has(empId)) byId.set(empId, emp);
-    });
-
-    // 3. طبّق قاعدة الظهور: اخفِ غير النشطين الذين لا طلبات لهم في الشهر
-    let list = Array.from(byId.values()).filter(e =>
-      isEmployeeVisibleInMonth(e, activeEmployeeIdsInMonth)
-    );
-
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      list = list.filter(e => e.name.toLowerCase().includes(q));
-    }
-    return list.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
-  }, [employees, employeeIdsOnPlatform, monthOrdersMap, activeEmployeeIdsInMonth, search, fuelBaseData]);
-
   useEffect(() => {
     if (!fuelBaseData) return;
     // نُظهر المناديب النشطين دائماً، والمناديب غير النشطين (منتهى/هروب) فقط إذا
@@ -178,6 +139,46 @@ export function useFuelPage() { // NOSONAR: page data layer with many independen
   });
 
   const monthOrdersMap = useMemo(() => buildOrdersMap(dailyOrderRows), [dailyOrderRows]);
+
+  const activeEmployeeIdsInMonth = useMemo(() => {
+    const ids = new Set<string>();
+    Object.entries(monthOrdersMap).forEach(([employeeId, orders]) => {
+      if (orders > 0) ids.add(employeeId);
+    });
+    return ids;
+  }, [monthOrdersMap]);
+
+  const ridersForTab = useMemo(() => {
+    const employeesById = new Map<string, Employee>();
+
+    employees.forEach((employee) => {
+      if (isAdministrativeJobTitle(employee.job_title)) return;
+      if (!employeeIdsOnPlatform || employeeIdsOnPlatform.has(employee.id)) {
+        employeesById.set(employee.id, employee);
+      }
+    });
+
+    Object.entries(monthOrdersMap).forEach(([employeeId, orders]) => {
+      if (orders <= 0) return;
+      if (employeeIdsOnPlatform && !employeeIdsOnPlatform.has(employeeId)) return;
+      const employee = fuelBaseData?.employees.find((candidate) => candidate.id === employeeId);
+      if (employee && !isAdministrativeJobTitle(employee.job_title)) {
+        employeesById.set(employeeId, employee);
+      }
+    });
+
+    let visibleEmployees = Array.from(employeesById.values()).filter((employee) =>
+      isEmployeeVisibleInMonth(employee, activeEmployeeIdsInMonth)
+    );
+
+    if (search.trim()) {
+      const normalizedSearch = search.toLowerCase();
+      visibleEmployees = visibleEmployees.filter((employee) =>
+        employee.name.toLowerCase().includes(normalizedSearch)
+      );
+    }
+    return visibleEmployees.sort((first, second) => first.name.localeCompare(second.name, 'ar'));
+  }, [employees, employeeIdsOnPlatform, monthOrdersMap, activeEmployeeIdsInMonth, search, fuelBaseData]);
 
   useEffect(() => {
     setNewEntry(ne => ({ ...ne, date: defaultEntryDate }));
