@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@shared/components/ui/dialog';
-import type { WpsBuildResult } from '@modules/salaries/lib/wpsExport';
+import { bankRows, mudadRows, type WpsBuildResult } from '@modules/salaries/lib/wpsExport';
 import type { WpsFormat } from '@modules/salaries/hooks/useWpsExport';
 
 interface WpsExportDialogProps {
@@ -39,10 +39,10 @@ export function WpsExportDialog({
   preview,
   onDownload,
 }: Readonly<WpsExportDialogProps>) {
-  const eligible = preview?.included.length ?? 0;
-  const excluded = preview?.excluded ?? [];
+  const mudadCount = preview ? mudadRows(preview).length : 0;
+  const bankCount = preview ? bankRows(preview).length : 0;
+  const bankExcluded = preview?.bankExcluded ?? [];
   const warnings = preview?.warnings ?? [];
-  const hasEligible = eligible > 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -50,7 +50,7 @@ export function WpsExportDialog({
         <DialogHeader>
           <DialogTitle>تصدير حماية الأجور (WPS)</DialogTitle>
           <DialogDescription>
-            راجع الموظفين المؤهلين قبل تصدير ملف مُدد أو الملف البنكي.
+            مُدد يشمل الجميع (بنك ونقدي)؛ الملف البنكي للموظفين اللي عندهم آيبان فقط.
           </DialogDescription>
         </DialogHeader>
 
@@ -60,26 +60,40 @@ export function WpsExportDialog({
           </div>
         ) : (
           <div className="space-y-3">
-            {/* Summary */}
-            <div className="flex items-center gap-2 rounded-lg border border-success/30 bg-success/5 px-3 py-2 text-sm">
-              <CheckCircle2 size={16} className="text-success" />
-              <span className="font-semibold text-success">{eligible}</span>
-              <span className="text-muted-foreground">موظف مؤهل للتصدير</span>
+            {/* Two eligibility counts */}
+            <div className="grid grid-cols-2 gap-2">
+              <div className="rounded-lg border border-success/30 bg-success/5 px-3 py-2 text-sm">
+                <div className="flex items-center gap-1.5">
+                  <CheckCircle2 size={15} className="text-success" />
+                  <span className="font-bold text-success">{mudadCount}</span>
+                </div>
+                <span className="text-xs text-muted-foreground">مؤهل لمُدد (بنك + نقدي)</span>
+              </div>
+              <div className="rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-sm">
+                <div className="flex items-center gap-1.5">
+                  <CheckCircle2 size={15} className="text-primary" />
+                  <span className="font-bold text-primary">{bankCount}</span>
+                </div>
+                <span className="text-xs text-muted-foreground">مؤهل للملف البنكي (بآيبان)</span>
+              </div>
             </div>
 
-            {excluded.length > 0 && (
+            {bankExcluded.length > 0 && (
               <div className="rounded-lg border border-border/60 bg-muted/30 px-3 py-2 text-sm">
                 <div className="flex items-center gap-2 font-medium">
                   <Ban size={15} className="text-muted-foreground" />
-                  مستبعدون ({excluded.length})
+                  خارج الملف البنكي ({bankExcluded.length})
                 </div>
                 <ul className="mt-1 ps-6 text-xs text-muted-foreground list-disc">
-                  {countByReason(excluded).map((r) => (
+                  {countByReason(bankExcluded).map((r) => (
                     <li key={r.reason}>
                       {EXCLUDE_REASON_LABELS[r.reason] ?? r.reason}: {r.count}
                     </li>
                   ))}
                 </ul>
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  دول موجودين في ملف مُدد، وبيدخلوا الملف البنكي بعد إضافة الآيبان من ملف الموظف.
+                </p>
               </div>
             )}
 
@@ -92,13 +106,9 @@ export function WpsExportDialog({
               </div>
             )}
 
-            {!hasEligible && (
-              <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-3 text-xs text-destructive space-y-1">
-                <p className="font-semibold">لا يوجد موظفون مؤهلون.</p>
-                <p className="text-destructive/90">
-                  حماية الأجور تحويل بنكي، فكل موظف لازم يكون له آيبان سعودي صالح وطريقة دفع «بنك».
-                  أضف الآيبان من ملف الموظف، وطريقة الدفع تتحوّل تلقائيًا لبنك.
-                </p>
+            {mudadCount === 0 && (
+              <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-3 text-xs text-destructive">
+                لا يوجد موظفون في القائمة الحالية لتصديرهم.
               </div>
             )}
           </div>
@@ -108,7 +118,7 @@ export function WpsExportDialog({
           <Button
             type="button"
             onClick={() => onDownload('mudad')}
-            disabled={!hasEligible || downloading || loading}
+            disabled={mudadCount === 0 || downloading || loading}
             className="gap-2"
           >
             <FileText size={15} /> مُدد (CSV)
@@ -117,7 +127,7 @@ export function WpsExportDialog({
             type="button"
             variant="outline"
             onClick={() => onDownload('bank')}
-            disabled={!hasEligible || downloading || loading}
+            disabled={bankCount === 0 || downloading || loading}
             className="gap-2"
           >
             <FileSpreadsheet size={15} /> ملف بنكي (Excel)

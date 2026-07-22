@@ -3,7 +3,9 @@ import { employeeService } from '@services/employeeService';
 import { settingsHubService } from '@services/settingsHubService';
 import { loadXlsx } from '@modules/salaries/lib/salaryPdfLoaders';
 import {
+  bankRows,
   buildWpsExport,
+  mudadRows,
   toBankWpsAoa,
   toMudadCsv,
   type WpsBuildResult,
@@ -106,23 +108,23 @@ export function useWpsExport({ filtered, computeRow, selectedMonth, companyName,
 
   const downloadWps = useCallback(
     async (format: WpsFormat) => {
-      if (!preview || preview.included.length === 0) return;
+      if (!preview) return;
+      const rows = format === 'mudad' ? mudadRows(preview) : bankRows(preview);
+      if (rows.length === 0) return;
       setDownloading(true);
       try {
         if (format === 'mudad') {
-          const csv = toMudadCsv(preview.included, selectedMonth);
+          const csv = toMudadCsv(rows, selectedMonth);
           downloadTextFile(csv, `WPS_Mudad_${selectedMonth}.csv`, 'text/csv;charset=utf-8;');
         } else {
           const est = establishment ?? toEstablishment(null, companyName);
           const XLSX = await loadXlsx();
-          const ws = XLSX.utils.aoa_to_sheet(toBankWpsAoa(preview.included, est, selectedMonth));
+          const ws = XLSX.utils.aoa_to_sheet(toBankWpsAoa(rows, est, selectedMonth));
           const wb = XLSX.utils.book_new();
           XLSX.utils.book_append_sheet(wb, ws, 'WPS');
           XLSX.writeFile(wb, `WPS_Bank_${selectedMonth}.xlsx`);
         }
-        toast.success('تم تصدير ملف حماية الأجور', {
-          description: `${preview.included.length} موظف`,
-        });
+        toast.success('تم تصدير ملف حماية الأجور', { description: `${rows.length} موظف` });
         setDialogOpen(false);
       } catch (err: unknown) {
         logError('[WPS] download failed', err);

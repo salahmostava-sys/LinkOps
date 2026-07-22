@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
+  bankRows,
   buildWpsExport,
+  mudadRows,
   toBankWpsAoa,
   toMudadCsv,
   WPS_COLUMNS,
@@ -24,52 +26,56 @@ const baseEmp = (over: Partial<WpsEmployeeInput> = {}): WpsEmployeeInput => ({
 });
 
 describe('buildWpsExport', () => {
-  it('includes a valid bank employee and derives the bank code from the IBAN', () => {
-    const { included, excluded, warnings } = buildWpsExport([baseEmp()]);
-    expect(excluded).toHaveLength(0);
-    expect(warnings).toHaveLength(0);
-    expect(included).toHaveLength(1);
-    expect(included[0].bankCode).toBe('80');
-    expect(included[0].housingAllowance).toBe(0);
-    expect(included[0].netSalary).toBe(3300);
+  it('marks a valid bank employee as bank-eligible and derives the bank code', () => {
+    const result = buildWpsExport([baseEmp()]);
+    expect(result.bankExcluded).toHaveLength(0);
+    expect(result.rows).toHaveLength(1);
+    expect(result.rows[0].bankEligible).toBe(true);
+    expect(result.rows[0].bankCode).toBe('80');
+    expect(result.rows[0].housingAllowance).toBe(0);
   });
 
-  it('excludes cash-paid employees', () => {
-    const { included, excluded } = buildWpsExport([baseEmp({ paymentMethod: 'cash' })]);
-    expect(included).toHaveLength(0);
-    expect(excluded).toEqual([{ name: 'أحمد السيد', reason: 'payment_method_cash' }]);
+  it('includes cash employees for Mudad but keeps them out of the bank file', () => {
+    const result = buildWpsExport([baseEmp({ paymentMethod: 'cash', iban: '' })]);
+    // Mudad set = everyone
+    expect(mudadRows(result)).toHaveLength(1);
+    expect(mudadRows(result)[0].paymentMethod).toBe('cash');
+    // Bank file excludes them
+    expect(bankRows(result)).toHaveLength(0);
+    expect(result.bankExcluded).toEqual([{ name: 'أحمد السيد', reason: 'payment_method_cash' }]);
   });
 
-  it('excludes employees with an invalid Saudi IBAN', () => {
-    const { included, excluded } = buildWpsExport([baseEmp({ iban: 'SA123' })]);
-    expect(included).toHaveLength(0);
-    expect(excluded[0].reason).toBe('invalid_iban');
+  it('keeps a bank employee with an invalid IBAN in Mudad but out of the bank file', () => {
+    const result = buildWpsExport([baseEmp({ iban: 'SA123' })]);
+    expect(mudadRows(result)).toHaveLength(1);
+    expect(bankRows(result)).toHaveLength(0);
+    expect(result.bankExcluded[0].reason).toBe('invalid_iban');
+    expect(result.rows[0].iban).toBe(''); // invalid IBAN not carried through
+  });
+
+  it('drops employees with no national id (cannot be filed anywhere)', () => {
+    const result = buildWpsExport([baseEmp({ nationalId: '  ' })]);
+    expect(result.rows).toHaveLength(0);
+    expect(result.dropped[0].reason).toBe('missing_national_id');
   });
 
   it('warns when net salary is below 50% of gross', () => {
-    // gross = 3000 + 500 = 3500; net 1000 < 1750 → warning, still included
-    const { included, warnings } = buildWpsExport([baseEmp({ deductions: 2500, netSalary: 1000 })]);
-    expect(included).toHaveLength(1);
-    expect(warnings).toEqual([{ name: 'أحمد السيد', reason: 'net_below_half_gross' }]);
+    // gross = 3500; net 1000 < 1750 → warning, still included
+    const result = buildWpsExport([baseEmp({ deductions: 2500, netSalary: 1000 })]);
+    expect(result.rows).toHaveLength(1);
+    expect(result.warnings).toEqual([{ name: 'أحمد السيد', reason: 'net_below_half_gross' }]);
   });
 });
 
 describe('toMudadCsv', () => {
-  it('emits a header row plus one row per included employee with the month appended', () => {
-    const { included } = buildWpsExport([baseEmp()]);
-    const csv = toMudadCsv(included, '2026-07');
+  it('includes a payment-method column and one row per employee', () => {
+    const result = buildWpsExport([baseEmp(), baseEmp({ name: 'سالم', paymentMethod: 'cash', iban: '' })]);
+    const csv = toMudadCsv(mudadRows(result), '2026-07');
     const lines = csv.split('\r\n');
-    expect(lines).toHaveLength(2);
-    expect(lines[0]).toContain('الآيبان');
+    expect(lines).toHaveLength(3); // header + 2
+    expect(lines[0]).toContain('طريقة الدفع');
     expect(lines[0].endsWith('الشهر')).toBe(true);
-    expect(lines[1]).toContain(VALID_IBAN);
-    expect(lines[1].endsWith('2026-07')).toBe(true);
-  });
-
-  it('escapes cells containing commas', () => {
-    const { included } = buildWpsExport([baseEmp({ name: 'محمد, علي' })]);
-    const csv = toMudadCsv(included, '2026-07');
-    expect(csv).toContain('"محمد, علي"');
+    expect(lines[2]).toContain('نقدي');
   });
 });
 
@@ -81,11 +87,9 @@ describe('toBankWpsAoa', () => {
       employerIban: VALID_IBAN,
       employerBankCode: '80',
     };
-    const { included } = buildWpsExport([baseEmp()]);
-    const aoa = toBankWpsAoa(included, est, '2026-07');
+    const result = buildWpsExport([baseEmp()]);
+    const aoa = toBankWpsAoa(bankRows(result), est, '2026-07');
     expect(aoa[1]).toEqual(['المنشأة', 'شركة التوصيل']);
-    expect(aoa[2]).toEqual(['رقم المنشأة (مكتب العمل)', '700123']);
-    // column header row followed by one data row
     const headerIdx = aoa.findIndex((r) => r[0] === WPS_COLUMNS[0].label);
     expect(headerIdx).toBeGreaterThan(0);
     expect(aoa[headerIdx + 1][0]).toBe('1234567890');

@@ -123,7 +123,7 @@ export function buildSalaryTablePrintHtml(params: PrintTableParams): string {
   </head><body>
     <div class="header">
       <div>
-        <div class="company-name">${escapeHtml(projectName || 'وصلة')}</div>
+        <div class="company-name">${escapeHtml(projectName || 'تقرير الرواتب')}</div>
         <div class="report-title">تقرير الرواتب الشهرية</div>
         <div class="report-meta">${monthLabel} • تاريخ الطباعة: ${formatStandardDateTime()} • عدد الموظفين: ${rows.length}</div>
       </div>
