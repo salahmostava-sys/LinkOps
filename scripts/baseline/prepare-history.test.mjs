@@ -21,13 +21,19 @@ test('adds the account assignments cleanup before the historical assertion', () 
 });
 
 test('qualifies every ambiguous salary function comment with its five-argument signature', () => {
-  const salaryCommentRepairs = REPLAY_REPAIRS.slice(3);
+  const salaryCommentRepairs = REPLAY_REPAIRS.slice(3, 7);
   assert.equal(salaryCommentRepairs.length, 4);
 
   for (const repair of salaryCommentRepairs) {
     assert.equal(applyReplayRepair(repair.before, repair), repair.after);
     assert.match(repair.after, /\(UUID, TEXT, TEXT, NUMERIC, TEXT\) IS$/u);
   }
+});
+
+test('skips the unusable session-local constants block during historical replay', () => {
+  const repair = REPLAY_REPAIRS[7];
+  const repaired = applyReplayRepair(repair.before, repair);
+  assert.match(repaired, /DO \$\$ BEGIN\n  RETURN;/u);
 });
 
 test('rejects missing or repeated historical repair targets', () => {

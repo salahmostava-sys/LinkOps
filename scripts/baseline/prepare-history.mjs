@@ -40,6 +40,12 @@ export const REPLAY_REPAIRS = [
     before: 'COMMENT ON FUNCTION public.calculate_salary_for_employee_month IS',
     after: 'COMMENT ON FUNCTION public.calculate_salary_for_employee_month(UUID, TEXT, TEXT, NUMERIC, TEXT) IS',
   })),
+  {
+    file: '20260415000001_constants.sql',
+    reason: 'The opening block calls constants before defining them and only creates unreferenced session-local temp tables; the persistent helper functions below remain unchanged.',
+    before: 'DO $$ BEGIN\n  -- Order statuses',
+    after: 'DO $$ BEGIN\n  RETURN;\n  -- Order statuses',
+  },
 ];
 
 function countOccurrences(source, search) {
@@ -51,7 +57,7 @@ export function applyReplayRepair(source, repair) {
   if (occurrenceCount !== 1) {
     throw new Error(`${repair.file}: expected one malformed statement, found ${occurrenceCount}`);
   }
-  return source.replace(repair.before, repair.after);
+  return source.replace(repair.before, () => repair.after);
 }
 
 function main() {
