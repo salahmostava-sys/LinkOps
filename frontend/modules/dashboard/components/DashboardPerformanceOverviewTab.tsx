@@ -11,7 +11,6 @@ import {
 } from 'lucide-react';
 
 import type {
-  PerformanceAlert,
   PerformanceDashboardResponse,
 } from '@services/performanceService';
 import {
@@ -29,21 +28,6 @@ import { AIRecommendationsSection } from './AIRecommendationsSection';
 import { PerformanceDetailedTable } from './PerformanceDetailedTable';
 import { DashboardWeeklyBestDaysCard } from './DashboardWeeklyBestDaysCard';
 import { Skeleton } from '@shared/components/ui/skeleton';
-
-function alertLabel(alert: PerformanceAlert) {
-  switch (alert.alertType) {
-    case 'declining':
-      return 'انخفاض واضح عن الشهر السابق';
-    case 'inactive_recently':
-      return 'اختفى في آخر 3 أيام';
-    case 'below_target':
-      return 'أقل من الهدف الشهري';
-    case 'low_consistency':
-      return 'أداء غير مستقر';
-    default:
-      return alert.alertType;
-  }
-}
 
 function targetTier(pct: number): 'excellent' | 'good' | 'average' {
   if (pct >= 100) return 'excellent';
@@ -138,7 +122,7 @@ export function DashboardPerformanceOverviewTab(props: Readonly<{
     );
   }
 
-  const { summary, distribution, ordersByApp, ordersByCity, alerts, targets, dailyTrend } = dashboard;
+  const { summary, distribution, ordersByApp, ordersByCity, targets, dailyTrend } = dashboard;
 
   let projectedText = '';
   if (fleetSummary.projectedOrders !== null) {
@@ -250,40 +234,7 @@ export function DashboardPerformanceOverviewTab(props: Readonly<{
       {/* ── 5. AI Recommendations ────────────────────────────────────────── */}
       <AIRecommendationsSection recommendations={aiInsights.recommendations} onRiderClick={onRiderClick} />
 
-      {/* ── 6. Smart Operational Alerts ──────────────────────────────────── */}
-      <div className="bg-card p-5 shadow-card rounded-2xl border border-border/40">
-        <div className="flex items-center justify-between gap-3 mb-4">
-          <div>
-            <h3 className="text-sm font-bold text-foreground">التنبيهات الذكية</h3>
-            <p className="text-[11px] text-muted-foreground mt-1">حالات تحتاج متابعة الآن</p>
-          </div>
-          <span className="text-xs font-semibold text-muted-foreground">{alerts.length} تنبيه</span>
-        </div>
-        {alerts.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-6">لا توجد تنبيهات حالياً ✅</p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-            {alerts.map((alert) => {
-              const isHigh = alert.severity === 'high';
-              const severityClass = isHigh ? 'text-rose-500' : 'text-amber-600 dark:text-amber-400';
-              const severityLabel = isHigh ? 'عالي' : 'متوسط';
-              return (
-                <div key={alert.employeeId} className="rounded-xl border border-border/60 bg-muted/20 px-4 py-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-sm font-bold text-foreground">{alert.employeeName ?? 'فريق التشغيل'}</p>
-                    <span className={`text-[11px] font-bold ${severityClass}`}>
-                      {severityLabel}
-                    </span>
-                  </div>
-                  <p className="text-[12px] text-muted-foreground mt-2">{alertLabel(alert)}</p>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* ── 7. Detailed Rider Performance Table ──────────────────────────── */}
+      {/* ── 6. Detailed Rider Performance Table ──────────────────────────── */}
       {allProfiles.length > 0 && (
         <PerformanceDetailedTable riders={allProfiles} />
       )}

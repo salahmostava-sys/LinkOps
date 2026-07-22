@@ -36,6 +36,21 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Test migration history guard
+        run: npm run test:migrations
+
+      - name: Check migration history
+        env:
+          MIGRATION_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: npm run audit:migrations -- --base "$MIGRATION_BASE"
 
       - name: Validate Supabase audit assets
         run: node scripts/system-audit.mjs --skip-frontend --skip-backend

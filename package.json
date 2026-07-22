@@ -12,6 +12,8 @@
   "scripts": {
     "prepare": "husky || true",
     "audit:bundle": "node scripts/check-frontend-bundle.mjs",
+    "audit:migrations": "node scripts/check-migration-history.mjs",
+    "test:migrations": "node --test scripts/check-migration-history.test.mjs",
     "audit:supabase-usage": "node scripts/audit-supabase-usage.mjs",
     "dev": "concurrently -n api,web -c cyan,green \"npm run dev -w server\" \"npm run dev -w frontend -- --host 0.0.0.0 --port 5173\"",
     "dev:server": "npm run dev -w server",

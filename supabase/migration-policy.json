@@ -1,0 +1,6 @@
+{
+  "immutableThrough": "20260722000000",
+  "migrationsDirectory": "supabase/migrations",
+  "draftDirectory": "supabase/migrations_consolidated_draft",
+  "archiveDirectory": "supabase/migrations_archive"
+}
