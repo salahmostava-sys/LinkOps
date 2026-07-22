@@ -146,6 +146,17 @@ describe('buildAlertsFromResponses', () => {
       expectedDuration: '12 شهر',
     },
     {
+      description: 'monthly renewal overdue by 300 days',
+      employeeId: 'emp-expired-300-days',
+      employeeName: 'موظف منتهي منذ 300 يوم',
+      recordName: 'سجل 300 يوم',
+      expiryDate: '2025-09-18',
+      baseCost: 800,
+      period: 'monthly' as const,
+      expectedCost: 9600,
+      expectedDuration: '12 شهر',
+    },
+    {
       description: 'annual individual-establishment renewal',
       employeeId: 'emp-yearly',
       employeeName: 'موظف مؤسسة فردية',

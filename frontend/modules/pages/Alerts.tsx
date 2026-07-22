@@ -29,10 +29,7 @@ import { QueryErrorRetry } from '@shared/components/QueryErrorRetry';
 import { loadXlsx } from '@modules/orders/utils/xlsx';
 import { useAlerts } from '@shared/hooks/useAlerts';
 import type { Alert } from '@shared/lib/alertsBuilder';
-import {
-  alertsService,
-  type AlertWorkflowTarget,
-} from '@services/alertsService';
+import { alertsService } from '@services/alertsService';
 import { getErrorMessage } from '@services/serviceError';
 import { useAuth } from '@app/providers/AuthContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -43,6 +40,30 @@ import {
   AlertWorkflowDialog,
   type AlertWorkflowForm,
 } from '@modules/alerts/components/AlertWorkflowDialog';
+import {
+  ALERT_TYPE_FILTERS,
+  alertTypeLabels,
+  calculateAlertStats,
+  canOpenAlertEntity,
+  compareAlerts,
+  filterAlerts,
+  formatAlertCost,
+  formatAlertDate,
+  getAlertCost,
+  getAlertDueLabel,
+  getAlertTypeFilterLabel,
+  getCommercialRecords,
+  getWorkflowStatus,
+  getWorkflowTarget,
+  hasActiveAlertFilters,
+  isAlertAttentionFilter,
+  isAlertSeverityFilter,
+  isAlertTypeFilter,
+  isAlertWorkflowFilter,
+  workflowLabels,
+  workflowSummaryLine,
+  type AlertFilters,
+} from '@modules/alerts/alertsViewModel';
 
 function severityColor(severity: string): string {
   if (severity === 'urgent') return 'hsl(var(--destructive))';
@@ -68,41 +89,14 @@ function daysLeftClass(daysLeft: number): string {
   return 'text-muted-foreground';
 }
 
-export const alertTypeLabels: Record<string, string> = {
-  residency: 'إقامة',
-  insurance: 'تأمين',
-  authorization: 'تفويض',
-  probation: 'فترة التجربة',
-  health_insurance: 'تأمين صحي',
-  driving_license: 'رخصة قيادة',
-  platform_account: 'حساب منصة',
-  employee_absconded: 'موظف مسجل هروب',
-  vehicle_rental: 'إيجار مركبة',
-};
-
 const severityStyles: Record<string, string> = { urgent: 'badge-urgent', warning: 'badge-warning', info: 'badge-info' };
 const severityLabels: Record<string, string> = { urgent: 'عاجل', warning: 'تحذير', info: 'معلومات' };
-const ALERT_SEVERITY_ORDER: Record<string, number> = { urgent: 0, warning: 1, info: 2 };
 
 const typeIcons: Record<string, string> = {
   residency: '🪪', insurance: '🛡️', authorization: '📋', probation: '⏳',
   health_insurance: '🏥', driving_license: '🪪', platform_account: '📱', employee_absconded: '⚠️',
   vehicle_rental: '🚙',
 };
-
-function getAlertTypeFilterLabel(type: string): string {
-  if (type === 'all') return 'كل الأنواع';
-  if (type === 'expired_residency_cost') return 'تكلفة الإقامات المنتهية';
-  if (type === 'missing_residency_cost') return 'إقامات بتكلفة غير محددة';
-  return alertTypeLabels[type] || type;
-}
-
-const workflowLabels = {
-  open: 'مفتوح',
-  in_progress: 'قيد التنفيذ',
-  snoozed: 'مؤجل',
-  resolved: 'محسوم',
-} as const;
 
 const workflowStyles = {
   open: 'bg-muted text-foreground',
@@ -111,98 +105,7 @@ const workflowStyles = {
   resolved: 'bg-success/15 text-success',
 } as const;
 
-function getWorkflowStatus(alert: Alert): keyof typeof workflowLabels {
-  if (alert.resolved) return 'resolved';
-  return alert.workflowStatus ?? 'open';
-}
-
-function getWorkflowTarget(alert: Alert): AlertWorkflowTarget {
-  return {
-    persistedId: alert.persistedId,
-    sourceKey: alert.sourceKey ?? alert.id,
-    type: alert.type,
-    entityId: alert.entityId,
-    entityType: alert.entityType,
-    message: alert.entityName,
-    dueDate: alert.dueDate,
-  };
-}
-
-function getAlertCost(alert: Alert): number | null {
-  return alert.residencyRenewalCost ?? alert.estimatedCost ?? null;
-}
-
-function formatAlertCost(cost: number): string {
-  return `${cost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ر.س`;
-}
-
-function getAlertDueLabel(daysLeft: number): string {
-  if (daysLeft < 0) return `منتهي منذ ${Math.abs(daysLeft).toLocaleString('en-US')} يوم`;
-  if (daysLeft === 0) return 'مستحق اليوم';
-  if (daysLeft === 1) return 'متبقي يوم واحد';
-  return `متبقي ${daysLeft.toLocaleString('en-US')} يوم`;
-}
-
-function formatAlertDate(dateValue: string): string {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateValue);
-  return match ? `${match[3]}/${match[2]}/${match[1]}` : dateValue;
-}
-
-function matchesAlertSearch(alert: Alert, search: string): boolean {
-  const query = search.trim().toLocaleLowerCase();
-  if (!query) return true;
-  return [
-    alert.entityName,
-    alert.description,
-    alert.commercialRecordName,
-    alertTypeLabels[alert.type],
-    alert.dueDate,
-  ].some((value) => value?.toLocaleLowerCase().includes(query));
-}
-
-function compareAlerts(a: Alert, b: Alert): number {
-  const severityDifference = (ALERT_SEVERITY_ORDER[a.severity] ?? 3) - (ALERT_SEVERITY_ORDER[b.severity] ?? 3);
-  return severityDifference || a.daysLeft - b.daysLeft || a.entityName.localeCompare(b.entityName, 'ar');
-}
-
-function canOpenAlertEntity(alert: Alert): boolean {
-  return Boolean(alert.entityId && (alert.entityType === 'employee' || alert.entityType === 'vehicle'));
-}
-
-function workflowSummaryLine(alert: Alert): string {
-  const cost = getAlertCost(alert);
-  const details = [
-    workflowLabels[getWorkflowStatus(alert)],
-    `المسؤول: ${alert.assignedName || 'غير مسند'}`,
-    cost === null ? null : `التكلفة: ${formatAlertCost(cost)}`,
-    alert.resolutionNote || null,
-  ].filter(Boolean).join(' | ');
-  return `- ${alertTypeLabels[alert.type] || alert.type}: ${alert.entityName} | ${details}`;
-}
-
-const ALERT_TYPE_FILTERS = [
-  'all',
-  'expired_residency_cost',
-  'missing_residency_cost',
-  'residency',
-  'health_insurance',
-  'driving_license',
-  'probation',
-  'insurance',
-  'authorization',
-  'vehicle_rental',
-  'platform_account',
-  'employee_absconded',
-];
-const ALERT_SEVERITY_FILTERS = ['all', 'urgent', 'warning', 'info'];
-const ALERT_WORKFLOW_FILTERS = ['all', 'open', 'in_progress', 'snoozed'];
-const ALERT_ATTENTION_FILTERS = ['all', 'overdue', 'due_7_days', 'unassigned'];
-const isFilterOption = (options: string[]) =>
-  (value: unknown): value is string => typeof value === 'string' && options.includes(value);
-const isAlertTypeFilter = isFilterOption(ALERT_TYPE_FILTERS);
-const isAlertSeverityFilter = isFilterOption(ALERT_SEVERITY_FILTERS);
-const isAlertWorkflowFilter = isFilterOption(ALERT_WORKFLOW_FILTERS);
-const isAlertAttentionFilter = isFilterOption(ALERT_ATTENTION_FILTERS);
+export { alertTypeLabels };
 
 const Alerts = () => {
   const [typeFilter, setTypeFilter] = usePersistentState('list:alerts:type:v1', 'all', isAlertTypeFilter);
@@ -236,11 +139,7 @@ const Alerts = () => {
   // ── Derived state ─────────────────────────────────────────────────────────
   const activeAlerts = useMemo(() => localAlerts.filter((alert) => !alert.resolved), [localAlerts]);
   const resolved = useMemo(() => localAlerts.filter((alert) => alert.resolved), [localAlerts]);
-  const commercialRecords = useMemo(() => [...new Set(
-    activeAlerts
-      .map((alert) => alert.commercialRecordName)
-      .filter((record): record is string => Boolean(record))
-  )].sort((a, b) => a.localeCompare(b, 'ar')), [activeAlerts]);
+  const commercialRecords = useMemo(() => getCommercialRecords(activeAlerts), [activeAlerts]);
 
   useEffect(() => {
     if (alertsQuery.data && crFilter !== 'all' && !commercialRecords.includes(crFilter)) {
@@ -248,33 +147,25 @@ const Alerts = () => {
     }
   }, [alertsQuery.data, commercialRecords, crFilter, setCrFilter]);
 
-  const filtered = activeAlerts.filter(a => {
-    const matchType =
-      typeFilter === 'all' ||
-      a.type === typeFilter ||
-      (typeFilter === 'expired_residency_cost' && a.type === 'residency' && a.daysLeft < 0 && (a.residencyRenewalCost ?? 0) > 0) ||
-      (typeFilter === 'missing_residency_cost' && a.type === 'residency' && a.residencyRenewalCost === null);
-    const matchSeverity = severityFilter === 'all' || a.severity === severityFilter;
-    const matchWorkflow = workflowFilter === 'all' || getWorkflowStatus(a) === workflowFilter;
-    const matchAttention =
-      attentionFilter === 'all'
-      || (attentionFilter === 'overdue' && a.daysLeft < 0)
-      || (attentionFilter === 'due_7_days' && a.daysLeft >= 0 && a.daysLeft <= 7)
-      || (attentionFilter === 'unassigned' && !a.assignedTo);
-    const matchCr = crFilter === 'all' || a.commercialRecordName === crFilter;
-    return matchType && matchSeverity && matchWorkflow && matchAttention && matchesAlertSearch(a, search) && matchCr;
-  });
-
-  const visibleAlerts = [...filtered].sort(compareAlerts);
-  const activeAlertsCount = activeAlerts.length;
-  const hasActiveFilters = Boolean(
-    search.trim()
-      || typeFilter !== 'all'
-      || severityFilter !== 'all'
-      || workflowFilter !== 'all'
-      || attentionFilter !== 'all'
-      || crFilter !== 'all',
-  );
+  const filters = useMemo<AlertFilters>(() => ({
+    type: typeFilter,
+    severity: severityFilter,
+    workflow: workflowFilter,
+    attention: attentionFilter,
+    commercialRecord: crFilter,
+    search,
+  }), [attentionFilter, crFilter, search, severityFilter, typeFilter, workflowFilter]);
+  const filtered = useMemo(() => filterAlerts(activeAlerts, filters), [activeAlerts, filters]);
+  const visibleAlerts = useMemo(() => [...filtered].sort(compareAlerts), [filtered]);
+  const hasActiveFilters = hasActiveAlertFilters(filters);
+  const {
+    activeCount: activeAlertsCount,
+    overdueCount,
+    dueWithinWeekCount,
+    unassignedCount,
+    expiredResidencyCost,
+    expiredResidencyMissingCostCount: missingResidencyCostCount,
+  } = useMemo(() => calculateAlertStats(activeAlerts), [activeAlerts]);
   const resetFilters = () => {
     setSearch('');
     setTypeFilter('all');
@@ -283,16 +174,6 @@ const Alerts = () => {
     setAttentionFilter('all');
     setCrFilter('all');
   };
-
-  const overdueCount = activeAlerts.filter((alert) => alert.daysLeft < 0).length;
-  const dueWithinWeekCount = activeAlerts.filter((alert) => alert.daysLeft >= 0 && alert.daysLeft <= 7).length;
-  const unassignedCount = activeAlerts.filter((alert) => !alert.assignedTo).length;
-  const expiredResidencyCost = activeAlerts
-    .filter((alert) => alert.type === 'residency' && alert.daysLeft < 0)
-    .reduce((total, alert) => total + (alert.residencyRenewalCost ?? 0), 0);
-  const missingResidencyCostCount = activeAlerts
-    .filter((alert) => alert.type === 'residency' && alert.residencyRenewalCost === null)
-    .length;
 
   // ── Handlers ──────────────────────────────────────────────────────────────
   const handleResolve = async () => {
